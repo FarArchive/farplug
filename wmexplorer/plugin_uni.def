@@ -1,0 +1,19 @@
+LIBRARY wmexplorer BASE=0x7400000
+EXPORTS
+  GetMinFarVersionW
+  SetStartupInfoW
+  GetPluginInfoW
+  OpenPluginW
+  GetOpenPluginInfoW
+  ClosePluginW
+  GetFindDataW
+  FreeFindDataW
+  SetDirectoryW
+  GetFilesW
+  PutFilesW
+  DeleteFilesW
+  MakeDirectoryW
+  ConfigureW
+  ProcessKeyW
+  ExitFARW
+  GetMinFarVersion

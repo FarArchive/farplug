@@ -1,0 +1,221 @@
+diff -Nuar openssl-0.9.8h.orig/build.bat openssl-0.9.8h/build.bat
+--- openssl-0.9.8h.orig/build.bat	Thu Jan  1 02:00:00 1970
++++ openssl-0.9.8h/build.bat	Sun Jun 29 19:46:53 2008
+@@ -0,0 +1,12 @@
++call %VS80COMNTOOLS%\..\..\VC\vcvarsall.bat
++perl Configure VC-WIN32
++call ms\do_ms debug
++nmake -f ms\nt.mak
++call ms\do_masm
++nmake -f ms\nt.mak
++call %VS80COMNTOOLS%\..\..\VC\vcvarsall.bat x86_amd64
++perl Configure VC-WIN64A
++call ms\do_win64a debug
++nmake -f ms\nt.mak
++call ms\do_win64a
++nmake -f ms\nt.mak
+diff -Nuar openssl-0.9.8h.orig/crypto/perlasm/x86ms.pl openssl-0.9.8h/crypto/perlasm/x86ms.pl
+--- openssl-0.9.8h.orig/crypto/perlasm/x86ms.pl	Fri May  2 02:11:32 2008
++++ openssl-0.9.8h/crypto/perlasm/x86ms.pl	Sun Jun 29 19:46:31 2008
+@@ -270,7 +270,6 @@
+ 
+ 	local($tmp)=<<"EOF";
+ PUBLIC	_$func
+-$extra
+ _$func PROC NEAR
+ 	push	ebp
+ 	push	ebx
+diff -Nuar openssl-0.9.8h.orig/ms/do_masm.bat openssl-0.9.8h/ms/do_masm.bat
+--- openssl-0.9.8h.orig/ms/do_masm.bat	Thu Jul 19 20:39:06 2007
++++ openssl-0.9.8h/ms/do_masm.bat	Sun Jun 29 19:46:31 2008
+@@ -70,8 +70,8 @@
+ echo on
+ 
+ perl util\mkfiles.pl >MINFO
+-perl util\mk1mf.pl VC-WIN32 >ms\nt.mak
+-perl util\mk1mf.pl dll VC-WIN32 >ms\ntdll.mak
++perl util\mk1mf.pl %1 %2 %3 VC-WIN32 >ms\nt.mak
++perl util\mk1mf.pl dll %1 %2 %3 VC-WIN32 >ms\ntdll.mak
+ 
+ perl util\mkdef.pl 32 libeay > ms\libeay32.def
+ perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+diff -Nuar openssl-0.9.8h.orig/ms/do_ms.bat openssl-0.9.8h/ms/do_ms.bat
+--- openssl-0.9.8h.orig/ms/do_ms.bat	Tue May 17 03:07:13 2005
++++ openssl-0.9.8h/ms/do_ms.bat	Sun Jun 29 19:46:31 2008
+@@ -1,9 +1,9 @@
+-
+-perl util\mkfiles.pl >MINFO
+-perl util\mk1mf.pl no-asm VC-WIN32 >ms\nt.mak
+-perl util\mk1mf.pl dll no-asm VC-WIN32 >ms\ntdll.mak
+-perl util\mk1mf.pl no-asm VC-CE >ms\ce.mak
+-perl util\mk1mf.pl dll no-asm VC-CE >ms\cedll.mak
+-
+-perl util\mkdef.pl 32 libeay > ms\libeay32.def
+-perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
++
++perl util\mkfiles.pl >MINFO
++perl util\mk1mf.pl no-asm %1 %2 %3 VC-WIN32 >ms\nt.mak
++perl util\mk1mf.pl dll no-asm %1 %2 %3 VC-WIN32 >ms\ntdll.mak
++perl util\mk1mf.pl no-asm %1 %2 %3 VC-CE >ms\ce.mak
++perl util\mk1mf.pl dll no-asm %1 %2 %3 VC-CE >ms\cedll.mak
++
++perl util\mkdef.pl 32 libeay > ms\libeay32.def
++perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+diff -Nuar openssl-0.9.8h.orig/ms/do_nasm.bat openssl-0.9.8h/ms/do_nasm.bat
+--- openssl-0.9.8h.orig/ms/do_nasm.bat	Thu Jul 19 20:39:06 2007
++++ openssl-0.9.8h/ms/do_nasm.bat	Sun Jun 29 19:46:31 2008
+@@ -71,9 +71,9 @@
+ echo on
+ 
+ perl util\mkfiles.pl >MINFO
+-perl util\mk1mf.pl nasm VC-WIN32 >ms\nt.mak
+-perl util\mk1mf.pl dll nasm VC-WIN32 >ms\ntdll.mak
+-perl util\mk1mf.pl nasm BC-NT >ms\bcb.mak
++perl util\mk1mf.pl nasm %1 %2 %3 VC-WIN32 >ms\nt.mak
++perl util\mk1mf.pl dll nasm %1 %2 %3 VC-WIN32 >ms\ntdll.mak
++perl util\mk1mf.pl nasm %1 %2 %3 BC-NT >ms\bcb.mak
+ 
+ perl util\mkdef.pl 32 libeay > ms\libeay32.def
+ perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+diff -Nuar openssl-0.9.8h.orig/ms/do_nt.bat openssl-0.9.8h/ms/do_nt.bat
+--- openssl-0.9.8h.orig/ms/do_nt.bat	Sun May 23 02:24:38 1999
++++ openssl-0.9.8h/ms/do_nt.bat	Sun Jun 29 19:46:31 2008
+@@ -1,7 +1,7 @@
+-
+-perl util\mkfiles.pl >MINFO
+-perl util\mk1mf.pl no-asm VC-NT >ms\nt.mak
+-perl util\mk1mf.pl dll no-asm VC-NT >ms\ntdll.mak
+-
+-perl util\mkdef.pl libeay NT > ms\libeay32.def
+-perl util\mkdef.pl ssleay NT > ms\ssleay32.def
++
++perl util\mkfiles.pl >MINFO
++perl util\mk1mf.pl no-asm %1 %2 %3 VC-NT >ms\nt.mak
++perl util\mk1mf.pl dll no-asm %1 %2 %3 VC-NT >ms\ntdll.mak
++
++perl util\mkdef.pl libeay NT > ms\libeay32.def
++perl util\mkdef.pl ssleay NT > ms\ssleay32.def
+diff -Nuar openssl-0.9.8h.orig/ms/do_win64a.bat openssl-0.9.8h/ms/do_win64a.bat
+--- openssl-0.9.8h.orig/ms/do_win64a.bat	Tue Jul  5 02:24:12 2005
++++ openssl-0.9.8h/ms/do_win64a.bat	Sun Jun 29 19:46:31 2008
+@@ -1,9 +1,9 @@
+-
+-perl util\mkfiles.pl >MINFO
+-perl ms\uplink.pl win64a > ms\uptable.asm
+-ml64 -c -Foms\uptable.obj ms\uptable.asm
+-perl util\mk1mf.pl no-asm VC-WIN64A >ms\nt.mak
+-perl util\mk1mf.pl dll no-asm VC-WIN64A >ms\ntdll.mak
+-
+-perl util\mkdef.pl 32 libeay > ms\libeay32.def
+-perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
++
++perl util\mkfiles.pl >MINFO
++perl ms\uplink.pl win64a > ms\uptable.asm
++ml64 -c -Foms\uptable.obj ms\uptable.asm
++perl util\mk1mf.pl no-asm %1 %2 %3 VC-WIN64A >ms\nt.mak
++perl util\mk1mf.pl dll no-asm %1 %2 %3 VC-WIN64A >ms\ntdll.mak
++
++perl util\mkdef.pl 32 libeay > ms\libeay32.def
++perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+diff -Nuar openssl-0.9.8h.orig/ms/do_win64i.bat openssl-0.9.8h/ms/do_win64i.bat
+--- openssl-0.9.8h.orig/ms/do_win64i.bat	Tue Jul  5 02:24:12 2005
++++ openssl-0.9.8h/ms/do_win64i.bat	Sun Jun 29 19:46:31 2008
+@@ -1,9 +1,9 @@
+-
+-perl util\mkfiles.pl >MINFO
+-perl ms\uplink.pl win64i > ms\uptable.asm
+-ias -o ms\uptable.obj ms\uptable.asm
+-perl util\mk1mf.pl no-asm VC-WIN64I >ms\nt.mak
+-perl util\mk1mf.pl dll no-asm VC-WIN64I >ms\ntdll.mak
+-
+-perl util\mkdef.pl 32 libeay > ms\libeay32.def
+-perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
++
++perl util\mkfiles.pl >MINFO
++perl ms\uplink.pl win64i > ms\uptable.asm
++ias -o ms\uptable.obj ms\uptable.asm
++perl util\mk1mf.pl no-asm %1 %2 %3 VC-WIN64I >ms\nt.mak
++perl util\mk1mf.pl dll no-asm %1 %2 %3 VC-WIN64I >ms\ntdll.mak
++
++perl util\mkdef.pl 32 libeay > ms\libeay32.def
++perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+diff -Nuar openssl-0.9.8h.orig/util/pl/VC-32.pl openssl-0.9.8h/util/pl/VC-32.pl
+--- openssl-0.9.8h.orig/util/pl/VC-32.pl	Fri Jan  4 02:40:00 2008
++++ openssl-0.9.8h/util/pl/VC-32.pl	Sun Jun 29 19:46:31 2008
+@@ -3,9 +3,6 @@
+ # Win64 and WinCE [follow $FLAVOR variable to trace the differences].
+ #
+ 
+-$ssl=	"ssleay32";
+-$crypto="libeay32";
+-
+ $o='\\';
+ $cp='$(PERL) util/copy.pl';
+ $mkdir='$(PERL) util/mkdir-p.pl';
+@@ -28,14 +25,14 @@
+     # per 0.9.8 release remaining warnings were explicitly examined and
+     # considered safe to ignore.
+     # 
+-    $base_cflags=' /W3 /Gs0 /GF /Gy /nologo -DWIN32_LEAN_AND_MEAN -DL_ENDIAN -DDSO_WIN32 -DOPENSSL_SYSNAME_WIN32 -DOPENSSL_SYSNAME_WINNT -DUNICODE -D_UNICODE';
++    $base_cflags=' /Zi /W3 /Gs0 /GF /Gy /nologo -DWIN32_LEAN_AND_MEAN -DL_ENDIAN -DDSO_WIN32 -DOPENSSL_SYSNAME_WIN32 -DOPENSSL_SYSNAME_WINNT -DUNICODE -D_UNICODE';
+     $base_cflags.=' -D_CRT_SECURE_NO_DEPRECATE';	# shut up VC8
+     $base_cflags.=' -D_CRT_NONSTDC_NO_DEPRECATE';	# shut up VC8
+-    my $f = $shlib?' /MD':' /MT';
+     $lib_cflag='/Zl' if (!$shlib);	# remove /DEFAULTLIBs from static lib
+-    $opt_cflags=$f.' /Ox';
+-    $dbg_cflags=$f.'d /Od -DDEBUG -D_DEBUG';
+-    $lflags="/nologo /subsystem:console /opt:ref";
++    $opt_cflags=' /MT /O2 /GL';
++    $dbg_cflags=' /MTd /Od -DDEBUG -D_DEBUG /RTC1 /GS';
++    $lflags="/nologo /subsystem:console /incremental:no";
++    $suffix='64';
+     }
+ elsif ($FLAVOR =~ /CE/)
+     {
+@@ -93,31 +90,36 @@
+     }
+ else	# Win32
+     {
+-    $base_cflags=' /W3 /WX /Gs0 /GF /Gy /nologo -DOPENSSL_SYSNAME_WIN32 -DWIN32_LEAN_AND_MEAN -DL_ENDIAN -DDSO_WIN32';
++    $base_cflags=' /Zi /W3 /WX /Gs0 /GF /Gy /nologo -DOPENSSL_SYSNAME_WIN32 -DWIN32_LEAN_AND_MEAN -DL_ENDIAN -DDSO_WIN32';
+     $base_cflags.=' -D_CRT_SECURE_NO_DEPRECATE';	# shut up VC8
+     $base_cflags.=' -D_CRT_NONSTDC_NO_DEPRECATE';	# shut up VC8
+-    my $f = $shlib?' /MD':' /MT';
+     $lib_cflag='/Zl' if (!$shlib);	# remove /DEFAULTLIBs from static lib
+-    $opt_cflags=$f.' /Ox /O2 /Ob2';
+-    $dbg_cflags=$f.'d /Od -DDEBUG -D_DEBUG';
+-    $lflags="/nologo /subsystem:console /opt:ref";
++    $opt_cflags=' /MT /O2 /GL';
++    $dbg_cflags=' /MTd /Od -DDEBUG -D_DEBUG /RTC1 /GS';
++    $lflags="/nologo /subsystem:console /incremental:no";
++    $suffix='32';
+     }
+ $mlflags='';
+ 
+-$out_def="out32"; $out_def.='_$(TARGETCPU)' if ($FLAVOR =~ /CE/);
+-$tmp_def="tmp32"; $tmp_def.='_$(TARGETCPU)' if ($FLAVOR =~ /CE/);
+-$inc_def="inc32";
+-
+ if ($debug)
+ 	{
+ 	$cflags=$dbg_cflags.$base_cflags;
+-	$lflags.=" /debug";
++	$lflags.=" /debug /fixed:no";
+ 	$mlflags.=' /debug';
++	$suffix=$suffix.'d';
+ 	}
+ else
+ 	{
+ 	$cflags=$opt_cflags.$base_cflags;
++	$lflags.=" /opt:ref /opt:icf /LTCG";
+ 	}
++
++$ssl=	"ssleay$suffix";
++$crypto="libeay$suffix";
++ 
++$out_def="out$suffix"; $out_def.='_$(TARGETCPU)' if ($FLAVOR =~ /CE/);
++$tmp_def="tmp$suffix"; $tmp_def.='_$(TARGETCPU)' if ($FLAVOR =~ /CE/);
++$inc_def="inc32";
+ 
+ $obj='.obj';
+ $ofile="/Fo";

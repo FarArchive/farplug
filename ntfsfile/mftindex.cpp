@@ -1,0 +1,297 @@
+#include <windows.h>
+#include <winioctl.h>
+
+#include <list>
+
+#include "plugin.hpp"
+
+#include "col/AnsiString.h"
+#include "col/UnicodeString.h"
+#include "col/PlainArray.h"
+#include "col/ObjectArray.h"
+using namespace col;
+
+#include "farapi_config.h"
+
+#define _ERROR_WINDOWS
+#include "error.h"
+
+#include "msg.h"
+
+#include "utils.h"
+#include "ntfs.h"
+#include "volume.h"
+#include "ntfs_file.h"
+#include "options.h"
+#include "dlgapi.h"
+#include "file_panel.h"
+
+#define NTFS_FILE_REC_HEADER_SIZE offsetof(NTFS_FILE_RECORD_OUTPUT_BUFFER, FileRecordBuffer)
+
+struct FilePanel::FileRecordCompare {
+  int operator()(const FileRecord& item1, const FileRecord& item2) {
+    if (item1.parent_ref_num > item2.parent_ref_num) return 1;
+    else if (item1.parent_ref_num == item2.parent_ref_num) {
+      return item1.file_name.compare(item2.file_name);
+    }
+    else return -1;
+  }
+};
+
+void FilePanel::mft_load_index(const UnicodeString& volume_name) {
+  std::list<FileRecord> file_list;
+  NtfsVolume volume;
+  volume.open(volume_name);
+
+  class VolumeListProgress: public ProgressMonitor {
+  protected:
+    virtual void do_update_ui() {
+      const unsigned c_client_xs = 60;
+      ObjectArray<UnicodeString> lines;
+      lines += center(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_READ_VOLUME_PROGRESS_MESSAGE).data(), count), c_client_xs);
+      unsigned len1 = static_cast<unsigned>((max_file_index - curr_file_index) * c_client_xs / max_file_index);
+      if (len1 > c_client_xs) len1 = c_client_xs;
+      unsigned len2 = c_client_xs - len1;
+      lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
+      draw_text_box(far_get_msg(MSG_FILE_PANEL_READ_VOLUME_PROGRESS_TITLE), lines, c_client_xs);
+    }
+  public:
+    unsigned count;
+    u64 max_file_index;
+    u64 curr_file_index;
+    VolumeListProgress(): ProgressMonitor(true), count(0) {
+    }
+  };
+  VolumeListProgress progress;
+
+  u64 file_index = volume.mft_size / volume.file_rec_size; // maximum possible file record index plus one
+  progress.max_file_index = file_index;
+  FileInfo file_info;
+  file_info.volume = &volume;
+  do {
+    progress.curr_file_index = file_index;
+    progress.update_ui();
+    file_index--;
+
+    file_info.file_ref_num = file_index;
+    file_index = file_info.load_base_file_rec();
+
+    if (file_info.base_mft_rec()->base_mft_record == 0) {
+      try {
+        file_info.process_base_file_rec();
+      }
+      catch (...) {
+        continue;
+      }
+
+      u64 data_size = 0;
+      u64 nr_disk_size = 0;
+      u64 valid_size = 0;
+      unsigned stream_cnt = 0;
+      unsigned fragment_cnt = 0;
+      unsigned hard_link_cnt = 0;
+      bool fully_resident = true;
+      for (unsigned i = 0; i < file_info.attr_list.size(); i++) {
+        const AttrInfo& attr_info = file_info.attr_list[i];
+        if (!attr_info.resident) {
+          nr_disk_size += attr_info.disk_size;
+          fully_resident = false;
+        }
+        if (attr_info.type == AT_DATA) {
+          data_size += attr_info.data_size;
+          valid_size += attr_info.valid_size;
+          stream_cnt++;
+        }
+        if (attr_info.fragments > 1) fragment_cnt += static_cast<unsigned>(attr_info.fragments - 1);
+      }
+      for (unsigned i = 0; i < file_info.file_name_list.size(); i++) {
+        if (file_info.file_name_list[i].file_name_type != FILE_NAME_DOS) hard_link_cnt++;
+      }
+      DWORD file_attr = file_info.std_info.file_attributes;
+      if (file_info.base_mft_rec()->flags & MFT_RECORD_IS_DIRECTORY) file_attr |= FILE_ATTRIBUTE_DIRECTORY;
+
+      for (unsigned i = 0; i < file_info.file_name_list.size(); i++) {
+        const FileNameAttr& name_attr = file_info.file_name_list[i];
+        if (name_attr.file_name_type != FILE_NAME_DOS) {
+          FileRecord rec;
+          rec.file_ref_num = file_index;
+          rec.parent_ref_num = name_attr.parent_directory;
+          rec.file_name = name_attr.name;
+          rec.file_attr = file_attr;
+          U64_TO_FILETIME(rec.creation_time, file_info.std_info.creation_time);
+          U64_TO_FILETIME(rec.last_access_time, file_info.std_info.last_access_time);
+          U64_TO_FILETIME(rec.last_write_time, file_info.std_info.last_data_change_time);
+          rec.data_size = data_size;
+          rec.disk_size = nr_disk_size;
+          rec.valid_size = valid_size;
+          rec.fragment_cnt = fragment_cnt;
+          rec.stream_cnt = stream_cnt;
+          rec.hard_link_cnt = hard_link_cnt;
+          rec.mft_rec_cnt = file_info.mft_rec_cnt;
+          rec.ntfs_attr = false;
+          rec.resident = fully_resident;
+          file_list.push_back(rec);
+          progress.count++;
+        }
+      }
+
+      if (g_file_panel_mode.show_streams) {
+        unsigned data_or_nr_cnt = 0;
+        bool named_data = false;
+        for (unsigned i = 0; i < file_info.attr_list.size(); i++) {
+          const AttrInfo& attr = file_info.attr_list[i];
+          if (!attr.resident || (attr.type == AT_DATA)) data_or_nr_cnt++;
+          if ((attr.type == AT_DATA) && (attr.name.size() != 0)) named_data = true;
+        }
+        // multiple non-resident/data attributes or at least one named data attribute
+        if ((data_or_nr_cnt > 1) || named_data) {
+          for (unsigned i = 0; i < file_info.attr_list.size(); i++) {
+            const AttrInfo& attr = file_info.attr_list[i];
+            if (attr.resident && (attr.type != AT_DATA)) continue;
+            if (!g_file_panel_mode.show_main_stream && (attr.type == AT_DATA) && (attr.name.size() == 0)) continue;
+
+            for (unsigned i = 0; i < file_info.file_name_list.size(); i++) {
+              const FileNameAttr& name_attr = file_info.file_name_list[i];
+              if (name_attr.file_name_type != FILE_NAME_DOS) {
+
+                unsigned fragment_cnt = (unsigned) attr.fragments;
+                if (fragment_cnt != 0) fragment_cnt--;
+
+                file_attr &= ~FILE_ATTRIBUTE_DIRECTORY & ~FILE_ATTRIBUTE_REPARSE_POINT;
+                if (attr.compressed) file_attr |= FILE_ATTRIBUTE_COMPRESSED;
+                else file_attr &= ~FILE_ATTRIBUTE_COMPRESSED;
+                if (attr.encrypted) file_attr |= FILE_ATTRIBUTE_ENCRYPTED;
+                else file_attr &= ~FILE_ATTRIBUTE_ENCRYPTED;
+                if (attr.sparse) file_attr |= FILE_ATTRIBUTE_SPARSE_FILE;
+                else file_attr &= ~FILE_ATTRIBUTE_SPARSE_FILE;
+
+                FileRecord rec;
+                rec.file_ref_num = file_index;
+                rec.parent_ref_num = name_attr.parent_directory;
+                rec.file_name = name_attr.name + L":" + attr.name + L":$" + attr.type_name();
+                rec.file_attr = file_attr;
+                U64_TO_FILETIME(rec.creation_time, file_info.std_info.creation_time);
+                U64_TO_FILETIME(rec.last_access_time, file_info.std_info.last_access_time);
+                U64_TO_FILETIME(rec.last_write_time, file_info.std_info.last_data_change_time);
+                rec.data_size = attr.data_size;
+                rec.disk_size = attr.disk_size;
+                rec.valid_size = attr.valid_size;
+                rec.fragment_cnt = fragment_cnt;
+                rec.stream_cnt = 0;
+                rec.hard_link_cnt = 0;
+                rec.mft_rec_cnt = 0;
+                rec.ntfs_attr = true;
+                rec.resident = attr.resident;
+                file_list.push_back(rec);
+              }
+            }
+          }
+        }
+      }
+
+    }
+  }
+  while (file_index != 0);
+  mft_index.clear();
+  mft_index.extend(static_cast<unsigned>(file_list.size()));
+  for (std::list<FileRecord>::const_iterator rec = file_list.begin(); rec != file_list.end(); rec++) {
+    mft_index += *rec;
+  }
+  mft_index.sort<FileRecordCompare>();
+  mft_index.compact();
+}
+
+void FilePanel::mft_scan_dir(u64 parent_file_index, const UnicodeString& rel_path, std::list<PanelItemData>& pid_list, FileListProgress& progress) {
+  progress.update_ui();
+  struct ParentFileIndexCompare {
+    int operator()(u64 item1, const FileRecord& item2) {
+      if (item1 > item2.parent_ref_num) return 1;
+      else if (item1 == item2.parent_ref_num) return 0;
+      else return -1;
+    }
+  };
+  unsigned idx = mft_index.bsearch<ParentFileIndexCompare>(parent_file_index);
+  if (idx == -1) return; // empty dir
+  while ((idx != 0) && (mft_index[idx - 1].parent_ref_num == parent_file_index)) idx--; // find first item
+  while ((idx < mft_index.size()) && (mft_index[idx].parent_ref_num == parent_file_index)) {
+    const FileRecord& file_rec = mft_index[idx];
+    PanelItemData pid;
+    if (rel_path.size() != 0) pid.file_name = rel_path + L'\\' + file_rec.file_name;
+    else pid.file_name = file_rec.file_name;
+    pid.alt_file_name.clear();
+    pid.file_attr = file_rec.file_attr;
+    pid.creation_time = file_rec.creation_time;
+    pid.last_access_time = file_rec.last_access_time;
+    pid.last_write_time = file_rec.last_write_time;
+    pid.data_size = file_rec.data_size;
+    pid.disk_size = file_rec.disk_size;
+    pid.valid_size = file_rec.valid_size;
+    pid.fragment_cnt = file_rec.fragment_cnt;
+    pid.stream_cnt = file_rec.stream_cnt;
+    pid.hard_link_cnt = file_rec.hard_link_cnt;
+    pid.mft_rec_cnt = file_rec.mft_rec_cnt;
+    pid.error = false;
+    pid.ntfs_attr = file_rec.ntfs_attr;
+    pid.resident = file_rec.resident;
+    pid_list.push_back(pid);
+
+    progress.count++;
+
+    if (flat_mode && (file_rec.file_attr & FILE_ATTRIBUTE_DIRECTORY) && (file_rec.file_ref_num != root_dir_ref_num)) mft_scan_dir(file_rec.file_ref_num, pid.file_name, pid_list, progress);
+
+    idx++;
+  }
+}
+
+u64 FilePanel::mft_find_root() const {
+  for (unsigned i = 0; i < mft_index.size(); i++) {
+    if (mft_index[i].file_ref_num == mft_index[i].parent_ref_num) return mft_index[i].file_ref_num;
+  }
+  FAIL(SystemError(ERROR_FILE_NOT_FOUND));
+}
+
+u64 FilePanel::mft_find_path(const UnicodeString& path) {
+  ObjectArray<UnicodeString> path_parts = split_str(path, L'\\');
+  if (path_parts.size() == 0) FAIL(SystemError(ERROR_FILE_NOT_FOUND));
+  if (mft_index.size() == 0) {
+    mft_load_index(path_parts[0]);
+    root_dir_ref_num = mft_find_root();
+  }
+  u64 file_ref_num = root_dir_ref_num;
+  for (unsigned i = 1; i < path_parts.size(); i++) {
+    FileRecord fr;
+    fr.parent_ref_num = file_ref_num;
+    fr.file_name = path_parts[i];
+    unsigned idx = mft_index.bsearch<FileRecordCompare>(fr);
+    if (idx == -1) FAIL(SystemError(ERROR_FILE_NOT_FOUND));
+    file_ref_num = mft_index[idx].file_ref_num;
+  }
+  return file_ref_num;
+}
+
+void FilePanel::toggle_mft_mode() {
+  mft_mode = !mft_mode;
+  if (mft_mode) {
+    volume.close();
+    current_dir = get_real_path(current_dir);
+    if (current_dir.equal(current_dir.size() - 1, L':')) current_dir = add_trailing_slash(current_dir);
+#ifdef FARAPI17
+    current_dir_oem = unicode_to_oem(current_dir);
+#endif // FARAPI17
+    mft_find_path(current_dir);
+    SetCurrentDirectoryW(current_dir.data());
+  }
+  else {
+    mft_index.clear();
+    CHECK_SYS(SetCurrentDirectoryW(current_dir.data()));
+    volume.open(extract_path_root(get_real_path(current_dir)));
+  }
+}
+
+void FilePanel::force_update_all() {
+  for (unsigned i = 0; i < g_file_panels.size(); i++) g_file_panels[i]->mft_index.clear();
+}
+
+void FilePanel::force_update() {
+  mft_index.clear();
+}
