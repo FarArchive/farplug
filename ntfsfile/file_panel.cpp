@@ -39,45 +39,55 @@ Array<FilePanel*> FilePanel::g_file_panels;
 PanelState save_state(HANDLE h_panel) {
   PanelState state;
   PanelInfo pi;
-  if (g_far.Control(h_panel, FCTL_GETPANELINFO, &pi)) {
-    Cleaner_PanelInfo _cpi(h_panel, pi);
-    state.directory = FAR_CUR_DIR(pi);
+  if (far_control_ptr(h_panel, FCTL_GETPANELINFO, &pi)) {
+    state.directory = far_get_cur_dir(h_panel, pi);
     if (pi.CurrentItem < pi.ItemsNumber) {
-      state.current_file = CompositeFileName(pi.PanelItems[pi.CurrentItem].FindData);
+      PluginPanelItem* ppi = far_get_panel_item(h_panel, pi.CurrentItem, pi);
+      if (ppi) {
+        state.current_file = CompositeFileName(ppi->FindData);
+      }
     }
     if (pi.TopPanelItem < pi.ItemsNumber) {
-      state.top_panel_file = CompositeFileName(pi.PanelItems[pi.TopPanelItem].FindData);
+      PluginPanelItem* ppi = far_get_panel_item(h_panel, pi.TopPanelItem, pi);
+      if (ppi) {
+        state.top_panel_file = CompositeFileName(ppi->FindData);
+      }
     }
-    for (unsigned i = 0; i < (unsigned) pi.SelectedItemsNumber; i++) {
-      if (FAR_SELECTED_ITEM(pi.SelectedItems[i]).Flags & PPIF_SELECTED) state.selected_files += CompositeFileName(FAR_SELECTED_ITEM(pi.SelectedItems[i]).FindData);
+    for (int i = 0; i < pi.SelectedItemsNumber; i++) {
+      PluginPanelItem* ppi = far_get_selected_panel_item(h_panel, i, pi);
+      if (ppi) {
+        if (ppi->Flags & PPIF_SELECTED) state.selected_files += CompositeFileName(ppi->FindData);
+      }
     }
   }
   return state;
 }
 
-unsigned find_panel_item(const PanelInfo& panel_info, const CompositeFileName& file_name) {
-  for (unsigned i = 0; i < (unsigned) panel_info.ItemsNumber; i++) {
-    if (file_name == panel_info.PanelItems[i].FindData) return i;
-  }
-  return -1;
-}
-
 void restore_state(HANDLE h_panel, const PanelState& state) {
   PanelInfo pi;
-  if (g_far.Control(h_panel, FCTL_GETPANELINFO, &pi)) {
-    Cleaner_PanelInfo _cpi(h_panel, pi);
-    unsigned idx;
-    for (unsigned i = 0; i < state.selected_files.size(); i++) {
-      idx = find_panel_item(pi, state.selected_files[i]);
-      if (idx != -1) pi.PanelItems[idx].Flags |= PPIF_SELECTED;
-    }
-    g_far.Control(INVALID_HANDLE_VALUE, FCTL_SETSELECTION, &pi);
+  if (far_control_ptr(h_panel, FCTL_GETPANELINFO, &pi)) {
     PanelRedrawInfo pri;
-    idx = find_panel_item(pi, state.current_file);
-    pri.CurrentItem = idx != -1 ? idx : 0;
-    idx = find_panel_item(pi, state.top_panel_file);
-    pri.TopPanelItem = idx != -1 ? idx : 0;
-    g_far.Control(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, &pri);
+    for (int i = 0; i < pi.ItemsNumber; i++) {
+      PluginPanelItem* ppi = far_get_panel_item(h_panel, i, pi);
+      if (ppi) {
+        for (unsigned j = 0; j < state.selected_files.size(); j++) {
+          if (state.selected_files[j] == ppi->FindData) {
+#ifdef FARAPI17
+            ppi->Flags |= PPIF_SELECTED;
+#endif
+#ifdef FARAPI18
+            g_far.Control(h_panel, FCTL_SETSELECTION, i, TRUE);
+#endif
+          }
+        }
+        if (state.current_file == ppi->FindData) pri.CurrentItem = i;
+        if (state.top_panel_file == ppi->FindData) pri.TopPanelItem = i;
+      }
+    }
+#ifdef FARAPI17
+    g_far.Control(h_panel, FCTL_SETSELECTION, &pi);
+#endif
+    far_control_ptr(h_panel, FCTL_REDRAWPANEL, &pri);
   }
 }
 
@@ -102,21 +112,28 @@ FilePanel* FilePanel::open() {
 }
 
 void FilePanel::apply_saved_state() {
+#ifdef FARAPI17
   g_far.Control(this, FCTL_SETSORTMODE, &g_file_panel_mode.sort_mode);
   g_far.Control(this, FCTL_SETSORTORDER, &g_file_panel_mode.reverse_sort);
   g_far.Control(this, FCTL_SETNUMERICSORT, &g_file_panel_mode.numeric_sort);
+#endif
+#ifdef FARAPI18
+  far_control_int(this, FCTL_SETSORTMODE, g_file_panel_mode.sort_mode);
+  far_control_int(this, FCTL_SETSORTORDER, g_file_panel_mode.reverse_sort);
+  far_control_int(this, FCTL_SETNUMERICSORT, g_file_panel_mode.numeric_sort);
+#endif
   restore_state(this, saved_state);
 }
 
 void FilePanel::close() {
   PanelState state = save_state(this);
-  g_far.Control(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, const_cast<FarCh*>(state.directory.data()));
+  far_control_ptr(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, state.directory.data());
   restore_state(INVALID_HANDLE_VALUE, state);
 }
 
 void FilePanel::on_close() {
   PanelInfo pi;
-  if (g_far.Control(this, FCTL_GETPANELSHORTINFO, &pi)) {
+  if (far_control_ptr(this, FCTL_GETPANELSHORTINFO, &pi)) {
     g_file_panel_mode.sort_mode = pi.SortMode;
     g_file_panel_mode.reverse_sort = pi.Flags & PFLAGS_REVERSESORTORDER ? 1 : 0;
     g_file_panel_mode.numeric_sort = pi.Flags & PFLAGS_NUMERICSORT ? 1 : 0;
@@ -129,7 +146,7 @@ void FilePanel::on_close() {
 FilePanel* FilePanel::get_active_panel() {
   for (unsigned i = 0; i < g_file_panels.size(); i++) {
     PanelInfo pi;
-    if (g_far.Control(g_file_panels[i], FCTL_GETPANELSHORTINFO, &pi)) {
+    if (far_control_ptr(g_file_panels[i], FCTL_GETPANELSHORTINFO, &pi)) {
       if (pi.Focus) {
         return g_file_panels[i];
       }

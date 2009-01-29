@@ -201,7 +201,7 @@ void WINAPI FAR_EXPORT(GetPluginInfo)(struct PluginInfo *Info) {
   } \
   catch (ComError& e) { \
     if (e.error() == HRESULT_FROM_WIN32(ERROR_NOT_READY)) { \
-      g_far.Control(plugin, FCTL_CLOSEPLUGIN, NULL); \
+      far_control_ptr(plugin, FCTL_CLOSEPLUGIN, NULL); \
       if (show_error) msg_dlg(far_get_msg(MSG_ERR_DEVICE_DISCONNECTED)); \
     } \
     else { \
@@ -233,15 +233,15 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR Item) {
       // test if plugin is already open on active panel
       for (unsigned i = 0; i < g_plugin_objects.size(); i++) {
         PanelInfo pi;
-        if (g_far.Control(g_plugin_objects[i], FCTL_GETPANELSHORTINFO, &pi)) {
+        if (far_control_ptr(g_plugin_objects[i], FCTL_GETPANELSHORTINFO, &pi)) {
           if (pi.Focus) {
             // change current directory of active plugin
             FAR_EXPORT(SetDirectory)(g_plugin_objects[i], (const FarCh*) Item, 0);
-            g_far.Control(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, NULL);
+            far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 0);
             PanelRedrawInfo pri;
             pri.CurrentItem = 0;
             pri.TopPanelItem = 0;
-            g_far.Control(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, &pri);
+            far_control_ptr(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, &pri);
             // do not create new plugin instance
             return INVALID_HANDLE_VALUE;
           }
@@ -389,7 +389,7 @@ int WINAPI FAR_EXPORT(SetDirectory)(HANDLE hPlugin, const FarCh *Dir, int OpMode
     FilePath current_dir(plugin->current_dir);
     bool parent_dir = FAR_STRCMP(Dir, FAR_T("..")) == 0;
     if (current_dir.is_root_path() && (parent_dir || (FAR_STRCMP(Dir, FAR_T("\\")) == 0))) {
-      if (g_plugin_options.exit_on_dot_dot) g_far.Control(plugin, FCTL_CLOSEPLUGIN, NULL);
+      if (g_plugin_options.exit_on_dot_dot) far_control_ptr(plugin, FCTL_CLOSEPLUGIN, NULL);
       return TRUE;
     }
     else if (parent_dir) {
@@ -603,21 +603,21 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
       // set cursor to new file name after rename
       if (dst_is_remote && options.move_files && (src_dir_path == dst_dir_path)) {
         assert(dst_new_name.size() != 0);
-        g_far.Control(plugin, FCTL_UPDATEPANEL, (void*) 1);
+        far_control_int(plugin, FCTL_UPDATEPANEL, 1);
         PanelInfo panel_info;
-        g_far.Control(plugin, FCTL_GETPANELINFO, &panel_info);
-        Cleaner_PanelInfo _cpi(plugin, panel_info);
+        far_control_ptr(plugin, FCTL_GETPANELINFO, &panel_info);
         PanelRedrawInfo redraw_info;
         redraw_info.TopPanelItem = panel_info.TopPanelItem;
         redraw_info.CurrentItem = panel_info.CurrentItem;
         for (int i = 0; i < panel_info.ItemsNumber; i++) {
-          UnicodeString file_name = FAR_DECODE_PATH(FAR_FILE_NAME(panel_info.PanelItems[i].FindData));
+          PluginPanelItem* ppi = far_get_panel_item(plugin, i, panel_info);
+          UnicodeString file_name = FAR_DECODE_PATH(FAR_FILE_NAME(ppi->FindData));
           if (file_name == dst_new_name) {
             redraw_info.CurrentItem = i;
             break;
           }
         }
-        g_far.Control(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, &redraw_info);
+        far_control_ptr(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, &redraw_info);
       }
     }
 
@@ -884,38 +884,53 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
   try {
     if ((Key == g_plugin_options.key_attr.vcode) && (ControlState == g_plugin_options.key_attr.state)) {
       PanelInfo panel_info;
-      if (g_far.Control(hPlugin, FCTL_GETPANELINFO, &panel_info)) {
-        Cleaner_PanelInfo _cpi(hPlugin, panel_info);
+      if (far_control_ptr(hPlugin, FCTL_GETPANELINFO, &panel_info)) {
         if (panel_info.SelectedItemsNumber != 0) {
           FileAttrOptions options;
           options.single_file = panel_info.SelectedItemsNumber == 1;
           options.attr_and = 0xFFFFFFFF;
           options.attr_or = 0;
           for (int i = 0; i < panel_info.SelectedItemsNumber; i++) {
-            options.attr_and &= FAR_SELECTED_ITEM(panel_info.SelectedItems[i]).FindData.dwFileAttributes;
-            options.attr_or |= FAR_SELECTED_ITEM(panel_info.SelectedItems[i]).FindData.dwFileAttributes;
+            PluginPanelItem* ppi = far_get_selected_panel_item(hPlugin, i, panel_info);
+            options.attr_and &= ppi->FindData.dwFileAttributes;
+            options.attr_or |= ppi->FindData.dwFileAttributes;
           }
           if (show_file_attr_dlg(options)) {
             if ((options.attr_and != 0xFFFFFFFF) || (options.attr_or != 0)) {
               UnicodeString file_name;
               UnicodeString path;
               try {
-                bool sel_flag = (FAR_SELECTED_ITEM(panel_info.SelectedItems[0]).Flags & PPIF_SELECTED) != 0;
+                PluginPanelItem* ppi = far_get_selected_panel_item(hPlugin, 0, panel_info);
+                bool sel_flag = (ppi->Flags & PPIF_SELECTED) != 0;
                 for (int i = 0; i < panel_info.ItemsNumber; i++) {
-                  if ((sel_flag && ((panel_info.PanelItems[i].Flags & PPIF_SELECTED) != 0)) || (!sel_flag && (i == panel_info.CurrentItem))) {
-                    file_name = FAR_DECODE_PATH(FAR_FILE_NAME(panel_info.PanelItems[i].FindData));
-                    DWORD attr = panel_info.PanelItems[i].FindData.dwFileAttributes & options.attr_and | options.attr_or;
+                  PluginPanelItem* ppi = far_get_panel_item(hPlugin, i, panel_info);
+                  if ((sel_flag && ((ppi->Flags & PPIF_SELECTED) != 0)) || (!sel_flag && (i == panel_info.CurrentItem))) {
+                    file_name = FAR_DECODE_PATH(FAR_FILE_NAME(ppi->FindData));
+                    DWORD attr = ppi->FindData.dwFileAttributes & options.attr_and | options.attr_or;
                     COMPOSE_PATH2(path, plugin->current_dir, file_name);
                     set_file_attr(path, attr, plugin->session, plugin);
-                    panel_info.PanelItems[i].Flags &= ~PPIF_SELECTED;
+#ifdef FARAPI17
+                    ppi->Flags &= ~PPIF_SELECTED;
+#endif
+#ifdef FARAPI18
+                    g_far.Control(hPlugin, FCTL_SETSELECTION, i, FALSE);
+#endif
                   }
                 }
               }
+#ifdef FARAPI17
               finally (
                 g_far.Control(hPlugin, FCTL_SETSELECTION, &panel_info);
                 g_far.Control(hPlugin, FCTL_UPDATEPANEL, (void*) 1);
                 g_far.Control(hPlugin, FCTL_REDRAWPANEL, NULL);
               );
+#endif
+#ifdef FARAPI18
+              finally (
+                far_control_int(hPlugin, FCTL_UPDATEPANEL, 1);
+                far_control_ptr(hPlugin, FCTL_REDRAWPANEL, NULL);
+              );
+#endif
             }
           }
         }
@@ -924,23 +939,23 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
     }
     if (((Key == VK_F5) || (Key == VK_F6)) && (ControlState == PKF_SHIFT)) {
       PanelInfo panel_info;
-      if (g_far.Control(hPlugin, FCTL_GETPANELINFO, &panel_info)) {
-        Cleaner_PanelInfo _cpi(hPlugin, panel_info);
+      if (far_control_ptr(hPlugin, FCTL_GETPANELINFO, &panel_info)) {
         if (panel_info.SelectedItemsNumber != 0) {
-          UnicodeString file_name = FAR_DECODE_PATH(FAR_FILE_NAME(panel_info.PanelItems[panel_info.CurrentItem].FindData));
-          get_files(hPlugin, panel_info.PanelItems + panel_info.CurrentItem, 1, Key == VK_F6, file_name, 0);
-          g_far.Control(hPlugin, FCTL_UPDATEPANEL, (void*) 1);
-          g_far.Control(hPlugin, FCTL_REDRAWPANEL, NULL);
+          PluginPanelItem* ppi = far_get_panel_item(hPlugin, panel_info.CurrentItem, panel_info);
+          UnicodeString file_name = FAR_DECODE_PATH(FAR_FILE_NAME(ppi->FindData));
+          get_files(hPlugin, ppi, 1, Key == VK_F6, file_name, 0);
+          far_control_int(hPlugin, FCTL_UPDATEPANEL, 1);
+          far_control_ptr(hPlugin, FCTL_REDRAWPANEL, NULL);
         }
       }
       return TRUE;
     }
     if ((Key == g_plugin_options.key_execute.vcode) && (ControlState == g_plugin_options.key_execute.state)) {
       PanelInfo panel_info;
-      if (g_far.Control(hPlugin, FCTL_GETPANELINFO, &panel_info)) {
-        Cleaner_PanelInfo _cpi(hPlugin, panel_info);
+      if (far_control_ptr(hPlugin, FCTL_GETPANELINFO, &panel_info)) {
         if (panel_info.SelectedItemsNumber != 0) {
-          UnicodeString file_name = FAR_DECODE_PATH(FAR_FILE_NAME(panel_info.PanelItems[panel_info.CurrentItem].FindData));
+          PluginPanelItem* ppi = far_get_panel_item(hPlugin, panel_info.CurrentItem, panel_info);
+          UnicodeString file_name = FAR_DECODE_PATH(FAR_FILE_NAME(ppi->FindData));
           UnicodeString cmd_line;
           try {
             cmd_line = get_open_command(plugin->current_dir, file_name, plugin->session);
@@ -975,7 +990,7 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
           plugin->last_object = app_name;
           create_process(app_name, params, plugin->session);
 
-          g_far.Control(hPlugin, FCTL_UPDATEPANEL, (void*) 1);
+          far_control_int(hPlugin, FCTL_UPDATEPANEL, 1);
         }
       }
       return TRUE;
@@ -983,21 +998,21 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
     // toggle 'hide_rom_files' option
     if ((Key == g_plugin_options.key_hide_rom_files.vcode) && (ControlState == g_plugin_options.key_hide_rom_files.state)) {
       g_plugin_options.hide_rom_files = !g_plugin_options.hide_rom_files;
-      g_far.Control(hPlugin, FCTL_UPDATEPANEL, (void*) 1);
-      g_far.Control(hPlugin, FCTL_REDRAWPANEL,  NULL);
+      far_control_int(hPlugin, FCTL_UPDATEPANEL, 1);
+      far_control_ptr(hPlugin, FCTL_REDRAWPANEL, NULL);
       return TRUE;
     }
     // open selected directory in Windows Explorer
     if ((Key == VK_RETURN) && (ControlState == PKF_SHIFT)) {
       PanelInfo panel_info;
-      if (g_far.Control(hPlugin, FCTL_GETPANELINFO, &panel_info)) {
-        Cleaner_PanelInfo _cpi(hPlugin, panel_info);
+      if (far_control_ptr(hPlugin, FCTL_GETPANELINFO, &panel_info)) {
         UnicodeString path;
         if (panel_info.SelectedItemsNumber == 0) {
           path = plugin->current_dir;
         }
         else {
-          const FAR_FIND_DATA& find_data = panel_info.PanelItems[panel_info.CurrentItem].FindData;
+          PluginPanelItem* ppi = far_get_panel_item(hPlugin, panel_info.CurrentItem, panel_info);
+          const FAR_FIND_DATA& find_data = ppi->FindData;
           if ((find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) {
             path = COMPOSE_PATH(plugin->current_dir, FAR_DECODE_PATH(FAR_FILE_NAME(find_data)));
           }

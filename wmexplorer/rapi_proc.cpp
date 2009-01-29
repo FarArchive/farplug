@@ -947,6 +947,15 @@ void delete_files(bool dst_remote, const UnicodeString& dst_dir, const FileList&
       progress.curr_path = dst_path;
       draw_delete_files_progress(progress, stats);
     }
+    // reset READONLY attribute
+    if ((dst_file_list[i].attr & FILE_ATTRIBUTE_READONLY) != 0) {
+      if (dst_remote) {
+        VERIFY(RAPI(CeSetFileAttributes(dst_path.data(), FILE_ATTRIBUTE_NORMAL)) != 0);
+      }
+      else {
+        VERIFY(SetFileAttributesW(long_path(dst_path).data(), FILE_ATTRIBUTE_NORMAL) != 0);
+      }
+    }
     // start directory processing
     if (dst_file_list[i].is_dir()) {
       // include directory into current paths
@@ -960,15 +969,6 @@ void delete_files(bool dst_remote, const UnicodeString& dst_dir, const FileList&
       try {
         // remove source file
         plugin->last_object = dst_path;
-        // reset READONLY attribute
-        if ((dst_file_list[i].attr & FILE_ATTRIBUTE_READONLY) != 0) {
-          if (dst_remote) {
-            VERIFY(RAPI(CeSetFileAttributes(dst_path.data(), FILE_ATTRIBUTE_NORMAL)) != 0);
-          }
-          else {
-            VERIFY(SetFileAttributesW(long_path(dst_path).data(), FILE_ATTRIBUTE_NORMAL) != 0);
-          }
-        }
         BEGIN_RETRY_BLOCK;
         if (dst_remote) {
           CHECK_RAPI(RAPI(CeDeleteFile(dst_path.data())) != 0);

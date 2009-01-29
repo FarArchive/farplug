@@ -390,13 +390,6 @@ void ProgressMonitor::update_ui(bool force) {
   }
 }
 
-Cleaner_PanelInfo::Cleaner_PanelInfo(HANDLE h_plugin, PanelInfo& pi): h_plugin(h_plugin), pi(pi) {
-}
-
-Cleaner_PanelInfo::~Cleaner_PanelInfo() {
-  FAR_FREE_PANEL_INFO(h_plugin, pi);
-}
-
 void Log::show() {
   try {
     // get system directory for temporary files
@@ -441,4 +434,61 @@ void Log::show() {
   }
   catch (...) {
   }
+}
+
+int far_control_int(HANDLE h_panel, int command, int param) {
+#ifdef FARAPI17
+  return g_far.Control(h_panel, command, reinterpret_cast<void*>(param));
+#endif
+#ifdef FARAPI18
+  return g_far.Control(h_panel, command, param, 0);
+#endif
+}
+
+int far_control_ptr(HANDLE h_panel, int command, const void* param) {
+#ifdef FARAPI17
+  return g_far.Control(h_panel, command, const_cast<void*>(param));
+#endif
+#ifdef FARAPI18
+  return g_far.Control(h_panel, command, 0, reinterpret_cast<LONG_PTR>(param));
+#endif
+}
+
+FarStr far_get_cur_dir(HANDLE h_panel, const PanelInfo& pi) {
+  FarStr cur_dir;
+#ifdef FARAPI17
+  return pi.CurDir;
+#endif
+#ifdef FARAPI18
+  unsigned cur_dir_size = g_far.Control(h_panel, FCTL_GETCURRENTDIRECTORY, 0, 0) - 1;
+  g_far.Control(h_panel, FCTL_GETCURRENTDIRECTORY, cur_dir_size + 1, reinterpret_cast<LONG_PTR>(cur_dir.buf(cur_dir_size)));
+  cur_dir.set_size(cur_dir_size);
+#endif
+  return cur_dir;
+}
+
+PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi) {
+#ifdef FARAPI17
+  return pi.PanelItems + index;
+#endif
+#ifdef FARAPI18
+  static PluginPanelItem ppi;
+  static bool ppi_valid = false;
+  if (ppi_valid) g_far.Control(h_panel, FCTL_FREEPANELITEM, 0, reinterpret_cast<LONG_PTR>(&ppi));
+  ppi_valid = g_far.Control(h_panel, FCTL_GETPANELITEM, index, reinterpret_cast<LONG_PTR>(&ppi)) != 0;
+  return ppi_valid ? &ppi : NULL;
+#endif
+}
+
+PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi) {
+#ifdef FARAPI17
+  return pi.SelectedItems + index;
+#endif
+#ifdef FARAPI18
+  static PluginPanelItem ppi;
+  static bool ppi_valid = false;
+  if (ppi_valid) g_far.Control(h_panel, FCTL_FREEPANELITEM, 0, reinterpret_cast<LONG_PTR>(&ppi));
+  ppi_valid = g_far.Control(h_panel, FCTL_GETSELECTEDPANELITEM, index, reinterpret_cast<LONG_PTR>(&ppi)) != 0;
+  return ppi_valid ? &ppi : NULL;
+#endif
 }

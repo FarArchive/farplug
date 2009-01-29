@@ -13,15 +13,12 @@
 #  define FAR_EXPORT(name) name
 #  define FAR_FILE_NAME(find_data) (find_data).cFileName
 #  define FAR_SHORT_FILE_NAME(find_data) (find_data).cAlternateFileName
-#  define FAR_CUR_DIR(panel_info) (panel_info).CurDir
 #  define FAR_DECODE_PATH(file_name) decode_fn(oem_to_unicode(file_name))
 #  define FAR_FILE_SIZE(find_data) ((((unsigned __int64) (find_data).nFileSizeHigh) << 32) + (find_data).nFileSizeLow)
 #  define FAR_STRLEN strlen
 #  define FAR_STRCMP strcmp
 #  define FAR_STRCPY strcpy
 #  define PANEL_PASSIVE INVALID_HANDLE_VALUE
-#  define FAR_SELECTED_ITEM(sel_item) (sel_item)
-#  define FAR_FREE_PANEL_INFO(plugin, panel_info)
 #endif // FARAPI17
 
 #ifdef FARAPI18
@@ -33,7 +30,6 @@
 #  define FAR_EXPORT(name) name##W
 #  define FAR_FILE_NAME(find_data) (find_data).lpwszFileName
 #  define FAR_SHORT_FILE_NAME(find_data) (find_data).lpwszAlternateFileName
-#  define FAR_CUR_DIR(panel_info) (panel_info).lpwszCurDir
 #  define FAR_DECODE_PATH(file_name) (file_name)
 #  define FAR_FILE_SIZE(find_data) ((find_data).nFileSize)
 #  define FAR_STRLEN wcslen
@@ -41,6 +37,5 @@
 #  define FAR_STRCPY wcscpy
 #  define FCTL_UPDATEANOTHERPANEL FCTL_UPDATEPANEL
 #  define FCTL_REDRAWANOTHERPANEL FCTL_REDRAWPANEL
-#  define FAR_SELECTED_ITEM(sel_item) (*(sel_item))
-#  define FAR_FREE_PANEL_INFO(plugin, panel_info) g_far.Control(plugin, FCTL_FREEPANELINFO, &panel_info)
+#  define FCTL_GETPANELSHORTINFO FCTL_GETPANELINFO
 #endif // FARAPI18

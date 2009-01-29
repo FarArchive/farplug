@@ -888,21 +888,22 @@ bool panel_go_to_file(const FarStr& file_name) {
   FarStr file = dir.slice(pos + 1, dir.size() - pos - 1);
   dir.remove(pos, dir.size() - pos);
   if (dir.size() == 2) dir += '\\';
-  if (!g_far.Control(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, (void*) dir.data())) return false;
+  if (!far_control_ptr(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, dir.data())) return false;
   PanelInfo panel_info;
-  if (!g_far.Control(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, (void*) &panel_info)) return false;
-  Cleaner_PanelInfo _cpi(INVALID_HANDLE_VALUE, panel_info);
+  if (!far_control_ptr(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, &panel_info)) return false;
   PanelRedrawInfo panel_ri;
   int i;
   for (i = 0; i < panel_info.ItemsNumber; i++) {
-    if (file == FAR_FILE_NAME(panel_info.PanelItems[i].FindData)) {
+    PluginPanelItem* ppi = far_get_panel_item(INVALID_HANDLE_VALUE, i, panel_info);
+    if (!ppi) return false;
+    if (file == FAR_FILE_NAME(ppi->FindData)) {
       panel_ri.CurrentItem = i;
       panel_ri.TopPanelItem = 0;
       break;
     }
   }
   if (i == panel_info.ItemsNumber) return false;
-  if (!g_far.Control(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, (void*) &panel_ri)) return false;
+  if (!far_control_ptr(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, &panel_ri)) return false;
   return true;
 }
 
@@ -1096,10 +1097,9 @@ UnicodeString get_unicode_file_path(const PluginPanelItem& panel_item, const Uni
 
 // get list of the select files from panel and place it into global file list
 bool file_list_from_panel(ObjectArray<UnicodeString>& file_list, bool own_panel) {
-  if (!g_far.Control(INVALID_HANDLE_VALUE, FCTL_CHECKPANELSEXIST, 0)) return false;
+  if (!far_control_int(INVALID_HANDLE_VALUE, FCTL_CHECKPANELSEXIST, 0)) return false;
   PanelInfo p_info;
-  if (!g_far.Control(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, &p_info)) return false;
-  Cleaner_PanelInfo _cpi(INVALID_HANDLE_VALUE, p_info);
+  if (!far_control_ptr(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, &p_info)) return false;
   bool file_panel = (p_info.PanelType == PTYPE_FILEPANEL) && ((p_info.Flags & PFLAGS_REALNAMES) == PFLAGS_REALNAMES);
   bool tree_panel = (p_info.PanelType == PTYPE_TREEPANEL) && ((p_info.Flags & PFLAGS_REALNAMES) == PFLAGS_REALNAMES);
   if (!file_panel && !tree_panel) return false;
@@ -1107,31 +1107,37 @@ bool file_list_from_panel(ObjectArray<UnicodeString>& file_list, bool own_panel)
   unsigned sel_file_cnt = 0;
   if (file_panel) {
     for (int i = 0; i < p_info.SelectedItemsNumber; i++) {
-      if ((FAR_SELECTED_ITEM(p_info.SelectedItems[i]).Flags & PPIF_SELECTED) == PPIF_SELECTED) sel_file_cnt++;
+      PluginPanelItem* ppi = far_get_selected_panel_item(INVALID_HANDLE_VALUE, i, p_info);
+      if (!ppi) return false;
+      if ((ppi->Flags & PPIF_SELECTED) == PPIF_SELECTED) sel_file_cnt++;
     }
   }
 
   file_list.clear();
-  UnicodeString cur_dir = FARSTR_TO_UNICODE(FAR_CUR_DIR(p_info));
+  UnicodeString cur_dir = FARSTR_TO_UNICODE(far_get_cur_dir(INVALID_HANDLE_VALUE, p_info));
   if (sel_file_cnt != 0) {
     file_list.extend(sel_file_cnt);
-    if ((cur_dir.size() != 0) && (cur_dir.last() != '\\')) cur_dir += '\\';
+    cur_dir = add_trailing_slash(cur_dir);
     for (int i = 0; i < p_info.SelectedItemsNumber; i++) {
-      if ((FAR_SELECTED_ITEM(p_info.SelectedItems[i]).Flags & PPIF_SELECTED) == PPIF_SELECTED) {
-        file_list += get_unicode_file_path(FAR_SELECTED_ITEM(p_info.SelectedItems[i]), cur_dir, own_panel);
+      PluginPanelItem* ppi = far_get_selected_panel_item(INVALID_HANDLE_VALUE, i, p_info);
+      if (!ppi) return false;
+      if ((ppi->Flags & PPIF_SELECTED) == PPIF_SELECTED) {
+        file_list += get_unicode_file_path(*ppi, cur_dir, own_panel);
       }
     }
   }
   else {
     if (file_panel) {
       if ((p_info.CurrentItem < 0) || (p_info.CurrentItem >= p_info.ItemsNumber)) return false;
-      if (FAR_STRCMP(FAR_FILE_NAME(p_info.PanelItems[p_info.CurrentItem].FindData), FAR_T("..")) == 0) { // current directory selected
+      PluginPanelItem* ppi = far_get_panel_item(INVALID_HANDLE_VALUE, p_info.CurrentItem, p_info);
+      if (!ppi) return false;
+      if (FAR_STRCMP(FAR_FILE_NAME(ppi->FindData), FAR_T("..")) == 0) { // current directory selected
         if (cur_dir.size() == 0) return false; // directory is invalid (plugin panel)
         else file_list += cur_dir;
       }
       else {
-        if ((cur_dir.size() != 0) && (cur_dir.last() != '\\')) cur_dir += '\\';
-        file_list += get_unicode_file_path(p_info.PanelItems[p_info.CurrentItem], cur_dir, own_panel);
+        cur_dir = add_trailing_slash(cur_dir);
+        file_list += get_unicode_file_path(*ppi, cur_dir, own_panel);
       }
     }
     else { // Tree panel
@@ -1226,10 +1232,10 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
       if (prefix == L"nfi") plugin_show_metadata();
       else if (prefix == L"defrag") {
         defragment(g_file_list, Log());
-        g_far.Control(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, (void*) 1);
-        g_far.Control(PANEL_PASSIVE, FCTL_UPDATEANOTHERPANEL, (void*) 1);
-        g_far.Control(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, NULL);
-        g_far.Control(PANEL_PASSIVE, FCTL_REDRAWANOTHERPANEL, NULL);
+        far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
+        far_control_int(PANEL_PASSIVE, FCTL_UPDATEANOTHERPANEL, 1);
+        far_control_ptr(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, NULL);
+        far_control_ptr(PANEL_PASSIVE, FCTL_REDRAWANOTHERPANEL, NULL);
       }
     }
   }
@@ -1287,16 +1293,16 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
         if (log.size() != 0) {
           if (far_message(far_get_msg(MSG_PLUGIN_NAME) + L"\n" + word_wrap(far_get_msg(MSG_DEFRAG_ERRORS), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK) + L"\n" + far_get_msg(MSG_LOG_SHOW), 2, FMSG_WARNING) == 1) log.show();
         }
-        g_far.Control(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, (void*) 1);
+        far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
       }
     }
     else if (item_idx == 4) {
       active_panel->flat_mode = !active_panel->flat_mode;
-      g_far.Control(active_panel, FCTL_UPDATEPANEL, (void*) 1);
+      far_control_int(active_panel, FCTL_UPDATEPANEL, 1);
     }
     else if (item_idx == 5) {
       active_panel->toggle_mft_mode();
-      g_far.Control(active_panel, FCTL_UPDATEPANEL, (void*) 1);
+      far_control_int(active_panel, FCTL_UPDATEPANEL, 1);
     }
   }
   END_ERROR_HANDLER(return handle, return INVALID_HANDLE_VALUE);
@@ -1372,15 +1378,16 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
   }
   else if ((Key == VK_F3) && (ControlState == 0)) {
     PanelInfo pi;
-    if (!g_far.Control(panel, FCTL_GETPANELINFO, &pi)) return FALSE;
-    Cleaner_PanelInfo _cpi(panel, pi);
+    if (!far_control_ptr(panel, FCTL_GETPANELINFO, &pi)) return FALSE;
     if ((pi.CurrentItem < 0) || (pi.CurrentItem >= pi.ItemsNumber)) return FALSE;
-    if ((pi.PanelItems[pi.CurrentItem].FindData.dwFileAttributes & FILE_ATTR_DIRECTORY) == 0) return FALSE;
-    if (FAR_STRCMP(FAR_FILE_NAME(pi.PanelItems[pi.CurrentItem].FindData), FAR_T("..")) == 0) { // current directory selected
+    PluginPanelItem* ppi = far_get_panel_item(panel, pi.CurrentItem, pi);
+    if (!ppi) return false;
+    if ((ppi->FindData.dwFileAttributes & FILE_ATTR_DIRECTORY) == 0) return FALSE;
+    if (FAR_STRCMP(FAR_FILE_NAME(ppi->FindData), FAR_T("..")) == 0) { // current directory selected
       g_file_list = panel->get_current_dir();
     }
     else {
-      g_file_list = get_unicode_file_path(pi.PanelItems[pi.CurrentItem], add_trailing_slash(panel->get_current_dir()), true);
+      g_file_list = get_unicode_file_path(*ppi, add_trailing_slash(panel->get_current_dir()), true);
     }
     plugin_show_metadata();
   }

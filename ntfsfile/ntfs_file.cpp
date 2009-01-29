@@ -9,6 +9,8 @@
 #include "col/ObjectArray.h"
 using namespace col;
 
+#include "farapi_config.h"
+
 #define _ERROR_WINDOWS
 #include "error.h"
 

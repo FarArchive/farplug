@@ -19,8 +19,6 @@
 #  define FarBuf char*
 #  define FAR_GET_BUF(buf) oem_to_unicode(buf)
 #  define FAR_SET_BUF(buf, str, store) strcpy((buf), (str).size() >= NM ? unicode_to_oem(str).left(NM - 1).data() : unicode_to_oem(str).data())
-#  define FAR_SELECTED_ITEM(sel_item) (sel_item)
-#  define FAR_FREE_PANEL_INFO(plugin, panel_info)
 #endif // FARAPI17
 
 #ifdef FARAPI18
@@ -38,6 +36,5 @@
 #  define FarBuf const wchar_t**
 #  define FAR_GET_BUF(buf) *(buf)
 #  define FAR_SET_BUF(buf, str, store) *(buf) = ((store) = (str)).data()
-#  define FAR_SELECTED_ITEM(sel_item) (*(sel_item))
-#  define FAR_FREE_PANEL_INFO(plugin, panel_info) g_far.Control(plugin, FCTL_FREEPANELINFO, &panel_info)
+#  define FCTL_GETPANELSHORTINFO FCTL_GETPANELINFO
 #endif // FARAPI18

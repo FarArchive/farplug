@@ -62,14 +62,9 @@ UnicodeString decode_fn(const UnicodeString& src);
 UnicodeString make_temp_file();
 UnicodeString format_file_time(const FILETIME& file_time);
 
-class Cleaner_PanelInfo {
-private:
-  HANDLE h_plugin;
-  PanelInfo& pi;
-  Cleaner_PanelInfo(Cleaner_PanelInfo&);
-public:
-  Cleaner_PanelInfo(HANDLE h_plugin, PanelInfo& pi);
-  ~Cleaner_PanelInfo();
-};
+int far_control_int(HANDLE h_panel, int command, int param);
+int far_control_ptr(HANDLE h_panel, int command, const void* param);
+PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
+PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
 
 #endif // _UTIL_H
