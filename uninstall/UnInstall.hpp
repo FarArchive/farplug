@@ -39,10 +39,8 @@ struct RegKeyPath {
 } UninstKeys[] = {
   { HKEY_CURRENT_USER, _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall") },
   { HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall") },
-#ifdef _WIN64
   { HKEY_CURRENT_USER, _T("SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall") },
   { HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall") },
-#endif
 };
 int nCount, newCount;
 FarList FL;

@@ -1,7 +1,7 @@
 @mkdir .build
 @cd .build
 
-call %VS71COMNTOOLS%\vsvars32.bat
+@call %VS80COMNTOOLS%\..\..\VC\vcvarsall.bat
 @echo on
 
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
@@ -16,7 +16,7 @@ nmake distrib
 @copy *.7z ..
 @rm -r *
 
-call %VS80COMNTOOLS%\..\..\VC\vcvarsall.bat x86_amd64
+@call %VS80COMNTOOLS%\..\..\VC\vcvarsall.bat x86_amd64
 @echo on
 
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
