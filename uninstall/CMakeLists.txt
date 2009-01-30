@@ -15,11 +15,31 @@ ENDIF(DEFINED MSVC)
 
 SET(FARAPI18 FALSE CACHE BOOL "Select target Far API version")
 
+MACRO(get_local_path file_pattern)
+  SET(local_path "")
+  FILE(GLOB_RECURSE file_list ${top}/${file_pattern})
+  FOREACH(file_path ${file_list})
+    GET_FILENAME_COMPONENT(file_dir ${file_path} PATH)
+    LIST(APPEND local_path ${file_dir})
+  ENDFOREACH(file_path)
+ENDMACRO(get_local_path)
+
+# find version info generator
+get_local_path("svnrev.*")
+FIND_PROGRAM(svnrev "svnrev" ${local_path})
+IF(NOT svnrev)
+  MESSAGE(FATAL_ERROR "svnrev.exe not found")
+ENDIF(NOT svnrev)
+FILE(TO_NATIVE_PATH ${svnrev} svnrev)
+
 # FAR SDK include files
+get_local_path("plugin.hpp")
+FIND_PATH(far_inc NAMES plugin.hpp farcolor.hpp farkeys.hpp PATHS ${local_path})
+IF(NOT far_inc)
+  MESSAGE(FATAL_ERROR "plugin.hpp not found")
+ENDIF(NOT far_inc)
 IF(FARAPI18)
-  SET(far_inc ${top}/farsdk/unicode)
-ELSE(FARAPI18)
-  SET(far_inc ${top}/farsdk)
+  SET(far_inc ${far_inc}/unicode)
 ENDIF(FARAPI18)
 
 # figure out library suffix
@@ -41,17 +61,15 @@ ELSE(FARAPI18)
 ENDIF(FARAPI18)
 
 # configure project
-SET(ver_major "1")
-SET(ver_minor "10")
-SET(ver_patch "4")
 ADD_DEFINITIONS(-D_FAR_USE_FARFINDDATA -D_CRT_SECURE_NO_WARNINGS)
 IF(FARAPI18)
-  ADD_DEFINITIONS(-DFARAPI18 -DUNICODE -D_UNICODE -D_WIN32_WINNT=0x0500)
+  ADD_DEFINITIONS(-DFARAPI18 -DUNICODE -D_UNICODE)
 ELSE(FARAPI18)
   ADD_DEFINITIONS(-DFARAPI17)
 ENDIF(FARAPI18)
 INCLUDE_DIRECTORIES(${src} ${far_inc})
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${sources})
+ADD_DEPENDENCIES(${PROJECT_NAME} check_rev)
 
 MACRO(enc_file src dst src_enc)
   IF(FARAPI18)
@@ -61,14 +79,13 @@ MACRO(enc_file src dst src_enc)
   ENDIF(FARAPI18)
 ENDMACRO(enc_file)
 
-SET(m4_def -D __VER_MAJOR__=${ver_major} -D __VER_MINOR__=${ver_minor} -D __VER_PATCH__=${ver_patch})
 IF(FARAPI18)
-  SET(m4_def ${m4_def} -D __FARAPI18__)
+  SET(m4_def -D __FARAPI18__)
 ELSE(FARAPI18)
-  SET(m4_def ${m4_def} -D __FARAPI17__)
+  SET(m4_def -D __FARAPI17__)
 ENDIF(FARAPI18)
 MACRO(m4_process src dst)
-  ADD_CUSTOM_COMMAND(OUTPUT ${dst} COMMAND m4 -P ${m4_def} -I ${bin} ${src} > ${dst} DEPENDS ${src} VERBATIM)
+  ADD_CUSTOM_COMMAND(OUTPUT ${dst} COMMAND m4 -P ${m4_def} -I ${bin} ${src} > ${dst} DEPENDS ${src} ${bin}/version.m4 VERBATIM)
 ENDMACRO(m4_process)
 
 m4_process(${src}/UnInstall.rc.m4 ${bin}/UnInstall.rc)
@@ -84,6 +101,14 @@ enc_file(${src}/ReadMe.Rus.txt ${bin}/ReadMe.Rus.txt cp866)
 enc_file(${src}/WhatsNew.Rus.txt ${bin}/WhatsNew.Rus.txt cp866)
 enc_file(${src}/TechInfo.Rus.reg ${bin}/TechInfo.Rus.reg cp866)
 
+# generate version information
+ADD_CUSTOM_TARGET(check_rev ALL svnversion -cn ${src} > .svnrev COMMAND ${svnrev} ${bin}/revision < .svnrev COMMAND rm .svnrev VERBATIM)
+ADD_CUSTOM_COMMAND(OUTPUT ${bin}/version.m4
+  COMMAND ${svnrev} ${src}/version.m4.tmpl ${bin}/version.m4 ${src}/version ${bin}/revision
+  DEPENDS ${src}/version.m4.tmpl ${src}/version ${bin}/revision
+  VERBATIM)
+m4_process(${src}/version.rc.m4 ${bin}/version.rc)
+
 # copy generated files into test directory
 IF(FARAPI18)
   SET(uni_suffix "_uni")
@@ -96,7 +121,8 @@ IF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 ENDIF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
 # prepare distribution archive
-SET(distrib_package "${bin}/${PROJECT_NAME}_${ver_major}.${ver_minor}.${ver_patch}${uni_suffix}${x64_suffix}${dbg_suffix}.7z")
+FILE(READ ${src}/version version)
+SET(distrib_package "${bin}/${PROJECT_NAME}_${version}${uni_suffix}${x64_suffix}${dbg_suffix}.7z")
 GET_TARGET_PROPERTY(library_path ${PROJECT_NAME} LOCATION)
 SET(distrib_files ${library_path} ${bin}/UnInstall_Eng.hlf ${bin}/UnInstall_Eng.lng ${bin}/UnInstall_Rus.hlf ${bin}/UnInstall_Rus.lng ${bin}/File_ID.diz ${bin}/ReadMe.Rus.txt ${bin}/TechInfo.Rus.reg ${bin}/WhatsNew.Rus.txt ${bin}/${PROJECT_NAME}.map ${bin}/${PROJECT_NAME}.pdb)
 ADD_CUSTOM_TARGET(distrib
