@@ -1,4 +1,4 @@
-m4_changecom()m4_dnl
+m4_include(`version.m4')m4_dnl
 .Language=English,English
 .PluginContents=Uninstall programs
 

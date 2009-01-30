@@ -1,4 +1,4 @@
-m4_changecom()m4_dnl
+m4_include(`version.m4')m4_dnl
 UnInstall __VER_MAJOR__.__VER_MINOR__.__VER_PATCH__. Плагин "Удаление программ"
 Far m4_ifdef(`__FARAPI17__', `1.70.1282', `2.0.680')
 
