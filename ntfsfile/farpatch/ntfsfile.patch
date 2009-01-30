@@ -1,0 +1,60 @@
+diff -Nuar fardev.orig/unicode_far/findfile.cpp fardev/unicode_far/findfile.cpp
+--- fardev.orig/unicode_far/findfile.cpp	Fri Jan 16 22:06:04 2009
++++ fardev/unicode_far/findfile.cpp	Fri Jan 30 11:57:11 2009
+@@ -1633,8 +1633,7 @@
+       string strFileName=FindList[FindExitIndex]->FindData.strFileName;
+       Panel *FindPanel=CtrlObject->Cp()->ActivePanel;
+ 
+-      if ((FindList[FindExitIndex]->ArcIndex != LIST_INDEX_NONE) &&
+-          (!(ArcList[FindList[FindExitIndex]->ArcIndex]->Flags & OPIF_REALNAMES)))
++      if (FindList[FindExitIndex]->ArcIndex != LIST_INDEX_NONE)
+       {
+         HANDLE hPlugin = ArcList[FindList[FindExitIndex]->ArcIndex]->hPlugin;
+         if (hPlugin == INVALID_HANDLE_VALUE)
+@@ -2615,11 +2614,12 @@
+   TRY {
+ 
+     Sleep(200);
+-    strPluginSearchPath=L"";
+     HANDLE hPlugin=ArcList[FindFileArcIndex]->hPlugin;
+     struct OpenPluginInfo Info;
+     CtrlObject->Plugins.GetOpenPluginInfo(hPlugin,&Info);
+     strSaveDir = Info.CurDir;
++    strPluginSearchPath=Info.CurDir;
++    if (!strPluginSearchPath.IsEmpty()) AddEndSlash(strPluginSearchPath);
+     WaitForSingleObject(hPluginMutex,INFINITE);
+     if (SearchMode==FFSEARCH_ROOT ||
+         SearchMode==FFSEARCH_ALL ||
+@@ -2703,15 +2703,9 @@
+       string strFullName;
+       if (StrCmp(strCurName,L".")==0 || TestParentFolderName(strCurName))
+         continue;
+-      if (Flags & OPIF_REALNAMES)
+-      {
+-        strFullName = strCurName;
+-      }
+-      else
+-      {
+-        strFullName = strPluginSearchPath;
+-        strFullName += strCurName;
+-      }
++
++      strFullName = strPluginSearchPath;
++      strFullName += strCurName;
+ 
+       /* $ 30.09.2003 KM
+         Отфильтруем файлы не попадающие в действующий фильтр
+diff -Nuar fardev.orig/unicode_far/flupdate.cpp fardev/unicode_far/flupdate.cpp
+--- fardev.orig/unicode_far/flupdate.cpp	Fri Jan 16 22:06:04 2009
++++ fardev/unicode_far/flupdate.cpp	Sun Jan 18 20:22:50 2009
+@@ -724,10 +724,6 @@
+ 
+     //memset(CurListData,0,sizeof(*CurListData));
+     PluginToFileListItem(CurPanelData,CurListData);
+-    if(Info.Flags & OPIF_REALNAMES)
+-    {
+-        ConvertNameToShort (CurListData->strName, CurListData->strShortName);
+-    }
+     CurListData->Position=I;
+ 
+     if ((Info.Flags & OPIF_USESORTGROUPS)/* && (CurListData->FileAttr & FILE_ATTRIBUTE_DIRECTORY)==0*/)
