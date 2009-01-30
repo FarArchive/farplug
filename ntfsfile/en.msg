@@ -85,7 +85,6 @@ content.result.title = File content analysis
 content.result.processed1 = Processed %S in %S at %S
 content.result.processed2 = Processed %S in %S
 content.result.compression = &Compression ratio: %S / %S = 
-content.result.zeroes = &Zero clusters: %S / %S = 
 content.result.crc32 = CRC&32 checksum:
 content.result.md5 = MD&5 hash:
 content.result.sha1 = SHA&1 hash:
@@ -93,8 +92,11 @@ content.result.ed2k = ED&2K hash:
 content.result.verify = &Verify hash:
 content.result.result = Result:
 content.result.close = Close
+content.result.save_file = &Save to file
 content.result.correct = Correct
 content.result.wrong = Wrong
+content.result.file_exists = File already exists. Overwrite?
+content.result.file_saved = File saved successfully.
 
 # File content analysis progress
 content.progress.title = Processing

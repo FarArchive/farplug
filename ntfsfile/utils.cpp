@@ -492,3 +492,38 @@ PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const Pa
   return ppi_valid ? &ppi : NULL;
 #endif
 }
+
+#ifdef FARAPI17
+#  ifdef _WIN64
+#    define PLUGIN_TYPE L"x64"
+#  else
+#    define PLUGIN_TYPE L""
+#  endif
+#endif
+#ifdef FARAPI18
+#  ifdef _WIN64
+#    define PLUGIN_TYPE L"uni x64"
+#  else
+#    define PLUGIN_TYPE L"uni"
+#  endif
+#endif
+
+ModuleVersion g_version;
+
+void error_dlg(const Error& e) {
+  UnicodeString msg;
+  msg.add(far_get_msg(MSG_PLUGIN_NAME)).add('\n');
+  UnicodeString err_msg = word_wrap(e.message(), get_msg_width());
+  if (err_msg.size() != 0) msg.add(err_msg).add('\n');
+  msg.add_fmt(L"%S:%u r.%u "PLUGIN_TYPE, &extract_file_name(oem_to_unicode(e.file)), e.line, g_version.revision);
+  far_message(msg, 0, FMSG_WARNING | FMSG_MB_OK);
+}
+
+void error_dlg(const std::exception& e) {
+  UnicodeString msg;
+  msg.add(far_get_msg(MSG_PLUGIN_NAME)).add('\n');
+  UnicodeString err_msg = word_wrap(oem_to_unicode(e.what()), get_msg_width());
+  if (err_msg.size() != 0) msg.add(err_msg).add('\n');
+  msg.add_fmt(L"r.%u "PLUGIN_TYPE, g_version.revision);
+  far_message(msg, 0, FMSG_WARNING | FMSG_MB_OK);
+}

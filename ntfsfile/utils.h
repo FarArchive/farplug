@@ -75,3 +75,28 @@ int far_control_ptr(HANDLE h_panel, int command, const void* param);
 FarStr far_get_cur_dir(HANDLE h_panel, const PanelInfo& pi);
 PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
 PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
+
+#define BEGIN_ERROR_HANDLER try {
+#define END_ERROR_HANDLER(success, failure) \
+    success; \
+  } \
+  catch (Break&) { \
+    failure; \
+  } \
+  catch (Error& e) { \
+    error_dlg(e); \
+    failure; \
+  } \
+  catch (std::exception& e) { \
+    error_dlg(e); \
+    failure; \
+  } \
+  catch (...) { \
+    far_message(L"\nFailure!", 0, FMSG_WARNING | FMSG_MB_OK); \
+    failure; \
+  }
+
+extern ModuleVersion g_version;
+
+void error_dlg(const Error& e);
+void error_dlg(const std::exception& e);

@@ -84,40 +84,6 @@ time_t g_update_timer = 0;
 Array<unsigned char> g_colors;
 
 HINSTANCE g_h_module;
-ModuleVersion g_version;
-
-#ifdef FARAPI17
-#  ifdef _WIN64
-#    define PLUGIN_TYPE L"x64"
-#  else
-#    define PLUGIN_TYPE L""
-#  endif
-#endif
-#ifdef FARAPI18
-#  ifdef _WIN64
-#    define PLUGIN_TYPE L"uni x64"
-#  else
-#    define PLUGIN_TYPE L"uni"
-#  endif
-#endif
-
-void error_dlg(const Error& e) {
-  UnicodeString msg;
-  msg.add(far_get_msg(MSG_PLUGIN_NAME)).add('\n');
-  UnicodeString err_msg = word_wrap(e.message(), get_msg_width());
-  if (err_msg.size() != 0) msg.add(err_msg).add('\n');
-  msg.add_fmt(L"%S:%u r.%u "PLUGIN_TYPE, &extract_file_name(oem_to_unicode(e.file)), e.line, g_version.revision);
-  far_message(msg, 0, FMSG_WARNING | FMSG_MB_OK);
-}
-
-void error_dlg(const std::exception& e) {
-  UnicodeString msg;
-  msg.add(far_get_msg(MSG_PLUGIN_NAME)).add('\n');
-  UnicodeString err_msg = word_wrap(oem_to_unicode(e.what()), get_msg_width());
-  if (err_msg.size() != 0) msg.add(err_msg).add('\n');
-  msg.add_fmt(L"r.%u "PLUGIN_TYPE, g_version.revision);
-  far_message(msg, 0, FMSG_WARNING | FMSG_MB_OK);
-}
 
 Array<CHAR_INFO> str_to_char_info(const FarStr& str) {
   Array<CHAR_INFO> out;
@@ -976,6 +942,7 @@ unsigned __stdcall th_proc(void*) {
 }
 
 LONG_PTR WINAPI dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
+  BEGIN_ERROR_HANDLER;
   const MOUSE_EVENT_RECORD* mouse_evt = (const MOUSE_EVENT_RECORD*) param2;
   /* do we need background processing? */
   bool bg_proc = (g_file_info.directory && !g_file_info.reparse) || (g_file_list.size() > 1);
@@ -1029,6 +996,8 @@ LONG_PTR WINAPI dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
     return TRUE;
   }
   else return g_far.DefDlgProc(h_dlg, msg, param1, param2);
+  END_ERROR_HANDLER(;,;);
+  return g_far.DefDlgProc(h_dlg, msg, param1, param2);
 }
 
 // get file name from command line (when plugin prefix is used)
@@ -1194,26 +1163,6 @@ void plugin_show_metadata() {
   finally (g_file_list.clear());
 }
 
-#define BEGIN_ERROR_HANDLER try {
-#define END_ERROR_HANDLER(success, failure) \
-    success; \
-  } \
-  catch (Break&) { \
-    failure; \
-  } \
-  catch (Error& e) { \
-    error_dlg(e); \
-    failure; \
-  } \
-  catch (std::exception& e) { \
-    error_dlg(e); \
-    failure; \
-  } \
-  catch (...) { \
-    far_message(L"\nFailure!", 0, FMSG_WARNING | FMSG_MB_OK); \
-    failure; \
-  }
-
 HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
   HANDLE handle = INVALID_HANDLE_VALUE;
   BEGIN_ERROR_HANDLER;
@@ -1267,7 +1216,7 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
           if (single_file) {
             ContentInfo content_info;
             process_file_content(file_list[0], g_content_options, content_info);
-            show_result_dialog(g_content_options, content_info);
+            show_result_dialog(file_list[0], g_content_options, content_info);
           }
           else {
             CompressionStats stats;

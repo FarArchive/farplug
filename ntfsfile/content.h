@@ -24,7 +24,7 @@ struct CompressionStats {
 
 bool show_options_dialog(ContentOptions& options, bool single_file);
 void process_file_content(const UnicodeString& file_name, const ContentOptions& options, ContentInfo& result);
-void show_result_dialog(const ContentOptions& options, const ContentInfo& info);
+void show_result_dialog(const UnicodeString& file_name, const ContentOptions& options, const ContentInfo& info);
 void compress_files(const ObjectArray<UnicodeString>& file_list, CompressionStats& result);
 void show_result_dialog(const CompressionStats& stats);
 

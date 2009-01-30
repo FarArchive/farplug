@@ -73,6 +73,7 @@ struct OptionsDlgData {
 };
 
 LONG_PTR WINAPI options_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
+  BEGIN_ERROR_HANDLER;
   FarDialog* dlg = FarDialog::get_dlg(h_dlg);
   const OptionsDlgData* dlg_data = (const OptionsDlgData*) dlg->get_dlg_data(0);
   ContentOptions* options = (ContentOptions*) dlg->get_dlg_data(1);
@@ -114,6 +115,7 @@ LONG_PTR WINAPI options_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR par
       return FALSE;
     }
   }
+  END_ERROR_HANDLER(;,;);
   return g_far.DefDlgProc(h_dlg, msg, param1, param2);
 }
 
@@ -172,18 +174,49 @@ UnicodeString ed2k_extract_hash_from_url(const UnicodeString& url) {
   return UnicodeString(url.data() + p, p_end - p);
 }
 
+void save_hashes_to_file(const UnicodeString& file_name, const ContentOptions& options, const ContentInfo& info) {
+  UnicodeString hashes_file_name = file_name + L".hashes";
+  if (GetFileAttributesW(hashes_file_name.data()) != INVALID_FILE_ATTRIBUTES) { // file already exists
+    if (far_message(far_get_msg(MSG_CONTENT_RESULT_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_CONTENT_RESULT_FILE_EXISTS), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK) + L"\n" + far_get_msg(MSG_BUTTON_CANCEL), 2) != 0) return;
+  }
+  HANDLE h_file = CreateFileW(hashes_file_name.data(), FILE_WRITE_DATA, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
+  CLEAN(HANDLE, h_file, CloseHandle(h_file));
+  DWORD bw;
+  if (options.crc32) {
+    AnsiString line = "CRC32: " + unicode_to_oem(format_hex_array(info.crc32)) + "\n";
+    CHECK_SYS(WriteFile(h_file, line.data(), line.size(), &bw, NULL));
+  }
+  if (options.md5) {
+    AnsiString line = "MD5: " + unicode_to_oem(format_hex_array(info.md5)) + "\n";
+    CHECK_SYS(WriteFile(h_file, line.data(), line.size(), &bw, NULL));
+  }
+  if (options.sha1) {
+    AnsiString line = "SHA1: " + unicode_to_oem(format_hex_array(info.sha1)) + "\n";
+    CHECK_SYS(WriteFile(h_file, line.data(), line.size(), &bw, NULL));
+  }
+  if (options.ed2k) {
+    AnsiString line = "ED2K: " + unicode_to_oem(format_hex_array(info.ed2k)) + "\n";
+    CHECK_SYS(WriteFile(h_file, line.data(), line.size(), &bw, NULL));
+  }
+  far_message(far_get_msg(MSG_CONTENT_RESULT_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_CONTENT_RESULT_FILE_SAVED), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK), 1);
+}
+
 const unsigned c_verify_box_size = 20 * 2 + 1;
 
 struct ResultDlgData {
   int verify_edit_ctrl_id;
   int result_label_ctrl_id;
+  int save_file_ctrl_id;
 };
 
 LONG_PTR WINAPI result_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
+  BEGIN_ERROR_HANDLER;
   FarDialog* dlg = FarDialog::get_dlg(h_dlg);
   const ResultDlgData* dlg_data = (const ResultDlgData*) dlg->get_dlg_data(0);
-  const ContentOptions* options = (const ContentOptions*) dlg->get_dlg_data(1);
-  const ContentInfo* info = (const ContentInfo*) dlg->get_dlg_data(2);
+  const UnicodeString* file_name = (const UnicodeString*) dlg->get_dlg_data(1);
+  const ContentOptions* options = (const ContentOptions*) dlg->get_dlg_data(2);
+  const ContentInfo* info = (const ContentInfo*) dlg->get_dlg_data(3);
   if (msg == DN_EDITCHANGE) {
     if (param1 == dlg_data->verify_edit_ctrl_id) {
       UnicodeString user_hash = dlg->get_text(dlg_data->verify_edit_ctrl_id);
@@ -210,14 +243,22 @@ LONG_PTR WINAPI result_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR para
       dlg->set_text(dlg_data->result_label_ctrl_id, result_text);
     }
   }
+  else if (msg == DN_BTNCLICK) {
+    if (param1 == dlg_data->save_file_ctrl_id) {
+      save_hashes_to_file(*file_name, *options, *info);
+      dlg->set_focus(dlg_data->verify_edit_ctrl_id);
+    }
+  }
+  END_ERROR_HANDLER(;,;);
   return g_far.DefDlgProc(h_dlg, msg, param1, param2);
 }
 
 // show content analysis result dialog
-void show_result_dialog(const ContentOptions& options, const ContentInfo& info) {
+void show_result_dialog(const UnicodeString& file_name, const ContentOptions& options, const ContentInfo& info) {
   ResultDlgData dlg_data;
   FarDialog dlg(far_get_msg(MSG_CONTENT_RESULT_TITLE), 30);
   dlg.add_dlg_data(&dlg_data);
+  dlg.add_dlg_data((void*) &file_name);
   dlg.add_dlg_data((void*) &options);
   dlg.add_dlg_data((void*) &info);
 
@@ -297,6 +338,7 @@ void show_result_dialog(const ContentOptions& options, const ContentInfo& info) 
   dlg.separator();
   dlg.new_line();
   dlg.def_button(far_get_msg(MSG_CONTENT_RESULT_CLOSE), DIF_CENTERGROUP);
+  dlg_data.save_file_ctrl_id = hash_opt ? dlg.button(far_get_msg(MSG_CONTENT_RESULT_SAVE_FILE), DIF_CENTERGROUP | DIF_BTNNOCLOSE) : -1;
   dlg.new_line();
 
   dlg.show(result_dlg_proc);

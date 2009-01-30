@@ -644,6 +644,7 @@ private:
   int cancel_ctrl_id;
 
   static LONG_PTR WINAPI dialog_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
+    BEGIN_ERROR_HANDLER;
     FilePanelModeDialog* dlg = (FilePanelModeDialog*) FarDialog::get_dlg(h_dlg);
     if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != dlg->cancel_ctrl_id)) {
       dlg->mode.col_types = dlg->get_text(dlg->col_types_ctrl_id);
@@ -659,6 +660,7 @@ private:
     else if ((msg == DN_BTNCLICK) && (param1 == dlg->show_streams_ctrl_id)) {
       dlg->enable(dlg->show_main_stream_ctrl_id, param2 != 0);
     }
+    END_ERROR_HANDLER(;,;);
     return g_far.DefDlgProc(h_dlg, msg, param1, param2);
   }
 
