@@ -1,5 +1,5 @@
 m4_include(`version.m4')m4_dnl
-#include <winres.h>
+#include <winresrc.h>
 1 VERSIONINFO
 FILEVERSION __VER_MAJOR__,__VER_MINOR__,__VER_PATCH__,__WCREV__
 PRODUCTVERSION __VER_MAJOR__,__VER_MINOR__,__VER_PATCH__,__WCREV__
