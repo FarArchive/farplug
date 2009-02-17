@@ -291,7 +291,7 @@ void FilePanel::scan_dir(const UnicodeString& root_path, const UnicodeString& re
   UnicodeString path = add_trailing_slash(root_path) + rel_path;
   bool more = true;
   WIN32_FIND_DATAW find_data;
-  HANDLE h_find = FindFirstFileW((long_path(add_trailing_slash(path)) + L"*").data(), &find_data);
+  HANDLE h_find = FindFirstFileW(long_path(add_trailing_slash(path) + L"*").data(), &find_data);
   try {
     if (h_find == INVALID_HANDLE_VALUE) {
       // special case: symlink that denies access to directory, try real path
@@ -299,7 +299,7 @@ void FilePanel::scan_dir(const UnicodeString& root_path, const UnicodeString& re
         DWORD attr = GetFileAttributesW(long_path(path).data());
         CHECK_SYS(attr != INVALID_FILE_ATTRIBUTES);
         if (attr & FILE_ATTRIBUTE_REPARSE_POINT) {
-          h_find = FindFirstFileW((long_path(add_trailing_slash(get_real_path(path))) + L"*").data(), &find_data);
+          h_find = FindFirstFileW(long_path(add_trailing_slash(get_real_path(path)) + L"*").data(), &find_data);
         }
         else CHECK_SYS(false);
       }
@@ -569,14 +569,12 @@ void FilePanel::change_directory(const UnicodeString& target_dir, bool search_mo
     if (!search_mode) SetCurrentDirectoryW(new_cur_dir.data());
   }
   else {
-    CHECK_SYS(SetCurrentDirectoryW(new_cur_dir.data()));
-    try {
-      volume.open(extract_path_root(get_real_path(new_cur_dir)));
-    }
-    catch (...) {
-      SetCurrentDirectoryW(current_dir.data());
-      throw;
-    }
+    WIN32_FIND_DATAW find_data;
+    HANDLE h_find = FindFirstFileW(long_path(add_trailing_slash(new_cur_dir) + L"*").data(), &find_data);
+    CHECK_SYS(h_find != INVALID_HANDLE_VALUE);
+    FindClose(h_find);
+    volume.open(extract_path_root(get_real_path(new_cur_dir)));
+    SetCurrentDirectoryW(new_cur_dir.data());
   }
   current_dir = new_cur_dir;
 #ifdef FARAPI17

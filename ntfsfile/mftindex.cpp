@@ -279,19 +279,17 @@ void FilePanel::toggle_mft_mode() {
     current_dir_oem = unicode_to_oem(current_dir);
 #endif // FARAPI17
     mft_find_path(current_dir);
-    SetCurrentDirectoryW(current_dir.data());
   }
   else {
-    mft_index.clear();
-    CHECK_SYS(SetCurrentDirectoryW(current_dir.data()));
+    mft_index.clear().compact();
     volume.open(extract_path_root(get_real_path(current_dir)));
   }
 }
 
 void FilePanel::force_update_all() {
-  for (unsigned i = 0; i < g_file_panels.size(); i++) g_file_panels[i]->mft_index.clear();
+  for (unsigned i = 0; i < g_file_panels.size(); i++) g_file_panels[i]->mft_index.clear().compact();
 }
 
 void FilePanel::force_update() {
-  mft_index.clear();
+  mft_index.clear().compact();
 }
