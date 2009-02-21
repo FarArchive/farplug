@@ -60,6 +60,7 @@ file_panel.mode.sort.hard_links = Hard Links
 file_panel.mode.sort.mft_records = MFT Records
 file_panel.mode.sort.fragm_level = Fragm. Level
 file_panel.mode.sort.valid_size = Valid Size
+file_panel.mode.sort.name_len = Path Length
 file_panel.mode.col_title.data_size = Data Sz
 file_panel.mode.col_title.disk_size = Disk Sz
 file_panel.mode.col_title.fragments = Fragm

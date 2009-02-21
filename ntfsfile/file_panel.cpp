@@ -525,6 +525,14 @@ void FilePanel::sort_file_list(std::list<PanelItemData>& pid_list) {
     };
     pid_list.sort(ValidSizeCmp());
     break;
+  case 9:
+    struct NameLenCmp {
+      bool operator()(const PanelItemData& item1, const PanelItemData& item2) const {
+        return item1.file_name.size() < item2.file_name.size();
+      }
+    };
+    pid_list.sort(NameLenCmp());
+    break;
   }
 }
 
@@ -711,6 +719,7 @@ public:
     items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_MFT_RECORDS);
     items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_FRAGM_LEVEL);
     items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_VALID_SIZE);
+    items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_NAME_LEN);
     unsigned max_size = 0;
     for (unsigned i = 0; i < items.size(); i++) {
       max_size = max(max_size, items[i].size());
