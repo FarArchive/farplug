@@ -3,7 +3,7 @@ WM Explorer __VER_MAJOR__.__VER_MINOR__.__VER_PATCH__
 FAR Manager Plugin
 
 System requirements:
-- Far m4_ifdef(`__FARAPI17__', `1.70.2087', `2.0.756')
+- Far m4_ifdef(`__FARAPI17__', `1.70.2087', `2.0.789')
 - Windows 2000+
 - ActiveSync 4.x / WMDC 6.1
 

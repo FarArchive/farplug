@@ -408,7 +408,7 @@ void list_add_dir(const UnicodeString& src_dir, WIN32_FIND_DATAW& src_find_data,
     HANDLE h_find;
     plugin->last_object = src_path;
     BEGIN_RETRY_BLOCK;
-    h_find = FindFirstFileW(COMPOSE_PATH(long_path(src_path), L"*").data(), &find_data);
+    h_find = FindFirstFileW(long_path(COMPOSE_PATH(src_path, L"*")).data(), &find_data);
     if (h_find == INVALID_HANDLE_VALUE) {
       CHECK_API(GetLastError() == ERROR_NO_MORE_FILES);
       more = false;

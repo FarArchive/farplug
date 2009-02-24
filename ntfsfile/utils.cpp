@@ -472,11 +472,12 @@ PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& 
   return pi.PanelItems + index;
 #endif
 #ifdef FARAPI18
-  static PluginPanelItem ppi;
-  static bool ppi_valid = false;
-  if (ppi_valid) g_far.Control(h_panel, FCTL_FREEPANELITEM, 0, reinterpret_cast<LONG_PTR>(&ppi));
-  ppi_valid = g_far.Control(h_panel, FCTL_GETPANELITEM, index, reinterpret_cast<LONG_PTR>(&ppi)) != 0;
-  return ppi_valid ? &ppi : NULL;
+  static Array<unsigned char> ppi;
+  size_t size = g_far.Control(h_panel, FCTL_GETPANELITEM, index, NULL);
+  ppi.extend(size);
+  g_far.Control(h_panel, FCTL_GETPANELITEM, index, reinterpret_cast<LONG_PTR>(ppi.buf()));
+  ppi.set_size(size);
+  return reinterpret_cast<PluginPanelItem*>(ppi.buf());
 #endif
 }
 
@@ -485,11 +486,12 @@ PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const Pa
   return pi.SelectedItems + index;
 #endif
 #ifdef FARAPI18
-  static PluginPanelItem ppi;
-  static bool ppi_valid = false;
-  if (ppi_valid) g_far.Control(h_panel, FCTL_FREEPANELITEM, 0, reinterpret_cast<LONG_PTR>(&ppi));
-  ppi_valid = g_far.Control(h_panel, FCTL_GETSELECTEDPANELITEM, index, reinterpret_cast<LONG_PTR>(&ppi)) != 0;
-  return ppi_valid ? &ppi : NULL;
+  static Array<unsigned char> ppi;
+  size_t size = g_far.Control(h_panel, FCTL_GETSELECTEDPANELITEM, index, NULL);
+  ppi.extend(size);
+  g_far.Control(h_panel, FCTL_GETSELECTEDPANELITEM, index, reinterpret_cast<LONG_PTR>(ppi.buf()));
+  ppi.set_size(size);
+  return reinterpret_cast<PluginPanelItem*>(ppi.buf());
 #endif
 }
 
