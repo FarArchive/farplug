@@ -34,6 +34,7 @@ ADD_LIBRARY(${PROJECT_NAME} SHARED ${sources})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} lzo2_${suffix} libeay${suffix} mpr version)
 ADD_CUSTOM_TARGET(lng_hlf DEPENDS ${bin}/en.hlf ${bin}/ru.hlf ${bin}/en.lng VERBATIM)
 ADD_DEPENDENCIES(${PROJECT_NAME} lng_hlf)
+ADD_DEPENDENCIES(lng_hlf check_rev)
 
 # generate language files
 ADD_CUSTOM_COMMAND(

@@ -39,6 +39,7 @@ ADD_LIBRARY(${PROJECT_NAME} SHARED ${sources})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} version)
 ADD_CUSTOM_TARGET(lng_hlf DEPENDS ${bin}/${PROJECT_NAME}_en.lng ${bin}/${PROJECT_NAME}_ru.lng ${bin}/${PROJECT_NAME}_en.hlf ${bin}/${PROJECT_NAME}_ru.hlf VERBATIM)
 ADD_DEPENDENCIES(${PROJECT_NAME} lng_hlf)
+ADD_DEPENDENCIES(lng_hlf check_rev)
 
 # generate language files
 ADD_CUSTOM_COMMAND(

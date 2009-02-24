@@ -34,6 +34,7 @@ INCLUDE_DIRECTORIES(${src} ${far_inc})
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${sources})
 ADD_CUSTOM_TARGET(lng_hlf DEPENDS ${bin}/UnInstall_Eng.hlf ${bin}/UnInstall_Eng.lng ${bin}/UnInstall_Rus.hlf ${bin}/UnInstall_Rus.lng VERBATIM)
 ADD_DEPENDENCIES(${PROJECT_NAME} lng_hlf)
+ADD_DEPENDENCIES(lng_hlf check_rev)
 
 m4_process(${src}/UnInstall.rc.m4 ${bin}/UnInstall.rc)
 enc_file(${src}/UnInstall_Eng.lng ${bin}/UnInstall_Eng.lng us-ascii)
