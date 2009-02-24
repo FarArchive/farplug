@@ -305,7 +305,7 @@ PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& 
 #endif
 #ifdef FARAPI18
   static Array<unsigned char> ppi;
-  size_t size = g_far.Control(h_panel, FCTL_GETPANELITEM, index, NULL);
+  unsigned size = g_far.Control(h_panel, FCTL_GETPANELITEM, index, NULL);
   ppi.extend(size);
   g_far.Control(h_panel, FCTL_GETPANELITEM, index, reinterpret_cast<LONG_PTR>(ppi.buf()));
   ppi.set_size(size);
@@ -319,7 +319,7 @@ PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const Pa
 #endif
 #ifdef FARAPI18
   static Array<unsigned char> ppi;
-  size_t size = g_far.Control(h_panel, FCTL_GETSELECTEDPANELITEM, index, NULL);
+  unsigned size = g_far.Control(h_panel, FCTL_GETSELECTEDPANELITEM, index, NULL);
   ppi.extend(size);
   g_far.Control(h_panel, FCTL_GETSELECTEDPANELITEM, index, reinterpret_cast<LONG_PTR>(ppi.buf()));
   ppi.set_size(size);
