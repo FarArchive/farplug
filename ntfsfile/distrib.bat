@@ -1,7 +1,7 @@
 @mkdir .build
 @cd .build
 
-@call %VS80COMNTOOLS%\..\..\VC\vcvarsall.bat
+@call setenv /x86
 
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
 nmake -nologo distrib
@@ -15,7 +15,7 @@ nmake -nologo distrib
 @copy *.7z ..
 @rm -r *
 
-@call %VS80COMNTOOLS%\..\..\VC\vcvarsall.bat x86_amd64
+@call setenv /x64
 
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
 nmake -nologo distrib
