@@ -54,6 +54,7 @@ void FilePanel::mft_load_index(const UnicodeString& volume_name) {
       unsigned len2 = c_client_xs - len1;
       lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
       draw_text_box(far_get_msg(MSG_FILE_PANEL_READ_VOLUME_PROGRESS_TITLE), lines, c_client_xs);
+      SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_READ_VOLUME_PROGRESS_CONSOLE_TITLE).data(), (max_file_index - curr_file_index) * 100 / max_file_index).data());
     }
   public:
     unsigned count;
