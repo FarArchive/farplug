@@ -598,7 +598,7 @@ void display_file_info(bool partial = false) {
       str.add_fmt(far_get_msg(MSG_METADATA_TOTALS_RP_DIRS).data(), totals.dir_rp_cnt);
     }
     if (totals.err_cnt != 0) {
-      str.add(L" ").add_fmt(far_get_msg(MSG_METADATA_TOTALS_ERRORS).data(), L'\1', g_colors[COL_DIALOGHIGHLIGHTTEXT], totals.err_cnt, L'\1', g_colors[COL_DIALOGTEXT]);
+      str.add(L" ").add_fmt(far_get_msg(MSG_METADATA_TOTALS_ERRORS).data(), L'\1', CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), totals.err_cnt, L'\1', g_colors[COL_DIALOGTEXT]);
     }
     ADD_STR_LINE(str);
 

@@ -895,14 +895,10 @@ void draw_progress(const CompressionState& st) {
   if ((st.file_cnt != 0) || (st.dir_cnt != 0) || (st.reparse_cnt != 0) || (st.err_cnt != 0)) {
     lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
   }
-  if (st.file_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_FILES).data(),
-    st.file_cnt, st.est_file_cnt);
-  if (st.dir_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_DIRS).data(),
-    st.dir_cnt, st.est_dir_cnt);
-  if (st.reparse_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_REPARSE).data(),
-    st.reparse_cnt);
-  if (st.err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_ERRORS).data(),
-    st.err_cnt);
+  if (st.file_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_FILES).data(), st.file_cnt, st.est_file_cnt);
+  if (st.dir_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_DIRS).data(), st.dir_cnt, st.est_dir_cnt);
+  if (st.reparse_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_REPARSE).data(), st.reparse_cnt);
+  if (st.err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_ERRORS).data(), &UnicodeString::format(L"\1%c%u\2", CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), st.err_cnt));
   draw_text_box(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_TITLE), lines, c_client_xs);
 }
 
@@ -916,7 +912,7 @@ void draw_estimation_progress(const CompressionState& st) {
   if (st.est_file_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_FILES).data(), st.est_file_cnt);
   if (st.est_dir_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_DIRS).data(), st.est_dir_cnt);
   if (st.est_reparse_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_REPARSE).data(), st.est_reparse_cnt);
-  if (st.est_err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_ERRORS).data(), st.est_err_cnt);
+  if (st.est_err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_ERRORS).data(), &UnicodeString::format(L"\1%c%u\2", CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), st.est_err_cnt));
   draw_text_box(far_get_msg(MSG_ESTIMATE_PROGRESS_TITLE), lines, c_client_xs);
 }
 

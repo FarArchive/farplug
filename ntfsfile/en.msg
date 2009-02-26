@@ -105,7 +105,6 @@ content.progress.processed1 = Processed %8S from %8S [%3u%%] at %10S
 content.progress.processed2 = Processed %8S from %8S [%3u%%]
 content.progress.elapsed = Elapsed: %8S  Left: %8S  Total: %8S
 content.progress.compression = Compression ratio: %8S / %8S = %3u%%
-content.progress.zeroes = Zero clusters: %8S / %8S = %3u%%
 content.progress.console.title = {%u%%} Processing...
 
 # Multiple file content analysis result
@@ -128,7 +127,7 @@ content.multi.progress.elapsed = Elapsed: %S  Left: %S  Total: %S
 content.multi.progress.files = Files processed: %u from %u
 content.multi.progress.dirs = Directories processed: %u from %u
 content.multi.progress.reparse = Reparse points skipped: %u
-content.multi.progress.errors = Errors (objects skipped): %u
+content.multi.progress.errors = Errors (objects skipped): %S
 content.multi.progress.console.title = {%u%%} Processing...
 
 # Estimate total size progress
@@ -137,7 +136,7 @@ estimate.progress.size = Total size: %S
 estimate.progress.files = Files: %u
 estimate.progress.dirs = Directories: %u
 estimate.progress.reparse = Reparse points: %u
-estimate.progress.errors = Errors: %u
+estimate.progress.errors = Errors: %S
 
 # Defragmentator
 defrag.progress.title = Defragmenting
