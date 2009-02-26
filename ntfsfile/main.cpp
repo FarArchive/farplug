@@ -894,7 +894,7 @@ void WINAPI FAR_EXPORT(SetStartupInfo)(const struct PluginStartupInfo* info) {
   g_version = get_module_version(g_h_module);
 }
 
-const FarCh* c_command_prefix = FAR_T("nfi:defrag");
+const FarCh* c_command_prefix = FAR_T("nfi:nfc:defrag");
 void WINAPI FAR_EXPORT(GetPluginInfo)(struct PluginInfo *pi) {
   static const FarCh* plugin_menu[1];
 
@@ -1126,6 +1126,7 @@ enum FileType {
 
 FileType get_file_type(const UnicodeString& file_name) {
   DWORD attr = GetFileAttributesW(file_name.data());
+  if (attr == INVALID_FILE_ATTRIBUTES) return ftFile;
   if ((attr & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT) return ftReparse;
   else if ((attr & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) return ftDirectory;
   else return ftFile;
@@ -1163,6 +1164,23 @@ void plugin_show_metadata() {
   finally (g_file_list.clear());
 }
 
+void plugin_process_contents(const ObjectArray<UnicodeString>& file_list) {
+  bool single_file = (file_list.size() == 1) && (get_file_type(file_list[0]) == ftFile);
+  if (show_options_dialog(g_content_options, single_file)) {
+    store_plugin_options();
+    if (single_file) {
+      ContentInfo content_info;
+      process_file_content(file_list[0], g_content_options, content_info);
+      show_result_dialog(file_list[0], g_content_options, content_info);
+    }
+    else {
+      CompressionStats stats;
+      compress_files(file_list, stats);
+      show_result_dialog(stats);
+    }
+  }
+}
+
 HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
   HANDLE handle = INVALID_HANDLE_VALUE;
   BEGIN_ERROR_HANDLER;
@@ -1179,6 +1197,7 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
     UnicodeString prefix;
     if (file_list_from_cmdline(FARSTR_TO_UNICODE((const FarCh*) item), g_file_list, prefix)) {
       if (prefix == L"nfi") plugin_show_metadata();
+      else if (prefix == L"nfc") plugin_process_contents(g_file_list);
       else if (prefix == L"defrag") {
         defragment(g_file_list, Log());
         far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
@@ -1210,20 +1229,7 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
     else if (item_idx == 1) {
       ObjectArray<UnicodeString> file_list;
       if (file_list_from_panel(file_list, active_panel != NULL)) {
-        bool single_file = (file_list.size() == 1) && (get_file_type(file_list[0]) == ftFile);
-        if (show_options_dialog(g_content_options, single_file)) {
-          store_plugin_options();
-          if (single_file) {
-            ContentInfo content_info;
-            process_file_content(file_list[0], g_content_options, content_info);
-            show_result_dialog(file_list[0], g_content_options, content_info);
-          }
-          else {
-            CompressionStats stats;
-            compress_files(file_list, stats);
-            show_result_dialog(stats);
-          }
-        }
+        plugin_process_contents(file_list);
       }
     }
     else if (item_idx == 2) {
