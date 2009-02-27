@@ -29,8 +29,8 @@ using namespace col;
 #include "options.h"
 #include "content.h"
 #include "dlgapi.h"
-#include "file_panel.h"
 #include "ntfs_file.h"
+#include "file_panel.h"
 #include "log.h"
 #include "defragment.h"
 
@@ -1200,6 +1200,7 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
       else if (prefix == L"nfc") plugin_process_contents(g_file_list);
       else if (prefix == L"defrag") {
         defragment(g_file_list, Log());
+        FilePanel::force_update_all();
         far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
         far_control_int(PANEL_PASSIVE, FCTL_UPDATEANOTHERPANEL, 1);
         far_control_ptr(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, NULL);
@@ -1248,6 +1249,7 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
         if (log.size() != 0) {
           if (far_message(far_get_msg(MSG_PLUGIN_NAME) + L"\n" + word_wrap(far_get_msg(MSG_DEFRAG_ERRORS), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK) + L"\n" + far_get_msg(MSG_LOG_SHOW), 2, FMSG_WARNING) == 1) log.show();
         }
+        FilePanel::force_update_all();
         far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
       }
     }
@@ -1315,11 +1317,10 @@ int WINAPI FAR_EXPORT(Configure)(int ItemNumber) {
   load_plugin_options();
   FilePanelMode file_panel_mode = g_file_panel_mode;
   if (show_file_panel_mode_dialog(file_panel_mode)) {
-    if ((file_panel_mode.show_streams != g_file_panel_mode.show_streams) || (file_panel_mode.show_main_stream != g_file_panel_mode.show_main_stream)) {
-      FilePanel::force_update_all();
-    }
+    bool update = (file_panel_mode.show_streams != g_file_panel_mode.show_streams) || (file_panel_mode.show_main_stream != g_file_panel_mode.show_main_stream);
     g_file_panel_mode = file_panel_mode;
     store_plugin_options();
+    if (update) FilePanel::force_update_all();
   }
   else return FALSE;
   END_ERROR_HANDLER(return TRUE, return FALSE);
@@ -1345,10 +1346,6 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
       g_file_list = get_unicode_file_path(*ppi, add_trailing_slash(panel->get_current_dir()), true);
     }
     plugin_show_metadata();
-  }
-  else if ((Key == 'R') && (ControlState == PKF_CONTROL)) {
-    panel->force_update();
-    return FALSE;
   }
   else return FALSE;
   END_ERROR_HANDLER(return TRUE, return TRUE);

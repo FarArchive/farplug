@@ -107,8 +107,13 @@ private:
   };
   struct FileRecordCompare;
   ObjectArray<FileRecord> mft_index;
+  DWORDLONG usn_journal_id;
+  USN next_usn;
   u64 root_dir_ref_num;
-  void mft_load_index(const UnicodeString& volume_name);
+  void add_file_records(const FileInfo& file_info);
+  void prepare_usn_journal();
+  void mft_load_index();
+  void mft_update_index();
   void mft_scan_dir(u64 parent_file_index, const UnicodeString& rel_path, std::list<PanelItemData>& pid_list, FileListProgress& progress);
   u64 mft_find_root() const;
   u64 mft_find_path(const UnicodeString& path);
@@ -129,7 +134,6 @@ public:
   void change_directory(const UnicodeString& target_dir, bool search_mode);
   void fill_plugin_info(OpenPluginInfo* info);
   void toggle_mft_mode();
-  void force_update();
   static void force_update_all();
 };
 

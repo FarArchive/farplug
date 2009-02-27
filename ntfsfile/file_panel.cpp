@@ -453,6 +453,14 @@ void FilePanel::scan_dir(const UnicodeString& root_path, const UnicodeString& re
 
 void FilePanel::sort_file_list(std::list<PanelItemData>& pid_list) {
   switch (g_file_panel_mode.custom_sort_mode) {
+  case 0:
+    struct NameCmp {
+      bool operator()(const PanelItemData& item1, const PanelItemData& item2) const {
+        return item1.file_name < item2.file_name;
+      }
+    };
+    pid_list.sort(NameCmp());
+    break;
   case 1:
     struct DataSizeCmp {
       bool operator()(const PanelItemData& item1, const PanelItemData& item2) const {
@@ -539,7 +547,10 @@ void FilePanel::sort_file_list(std::list<PanelItemData>& pid_list) {
 void FilePanel::new_file_list(PluginPanelItem*& panel_items, int& item_num, bool search_mode) {
   FileListProgress progress;
   std::list<PanelItemData> pid_list;
-  if (mft_mode) mft_scan_dir(mft_find_path(current_dir), L"", pid_list, progress);
+  if (mft_mode) {
+    if (!search_mode) mft_update_index();
+    mft_scan_dir(mft_find_path(current_dir), L"", pid_list, progress);
+  }
   else scan_dir(current_dir, L"", pid_list, progress);
   if (!search_mode) sort_file_list(pid_list);
   file_lists += create_panel_items(pid_list, search_mode);
@@ -573,6 +584,7 @@ void FilePanel::change_directory(const UnicodeString& target_dir, bool search_mo
   }
   if (new_cur_dir.equal(new_cur_dir.size() - 1, L':')) new_cur_dir = add_trailing_slash(new_cur_dir);
   if (mft_mode) {
+    if (!search_mode) mft_update_index();
     mft_find_path(new_cur_dir);
     if (!search_mode) SetCurrentDirectoryW(new_cur_dir.data());
   }
@@ -710,7 +722,7 @@ public:
     label(far_get_msg(MSG_FILE_PANEL_MODE_SORT));
     spacer(1);
     ObjectArray<UnicodeString> items;
-    items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_NOTHING);
+    items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_NAME);
     items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_DATA_SIZE);
     items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_DISK_SIZE);
     items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_FRAGMENTS);
