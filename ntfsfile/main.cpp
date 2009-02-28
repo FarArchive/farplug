@@ -1349,6 +1349,7 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
   }
   else if ((Key == 'R') && (ControlState == PKF_CONTROL)) {
     if (!g_file_panel_mode.use_usn_journal) panel->force_update();
+    return FALSE;
   }
   else return FALSE;
   END_ERROR_HANDLER(return TRUE, return TRUE);
