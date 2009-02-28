@@ -278,7 +278,7 @@ void FilePanel::mft_update_index() {
     }
     else i++;
   }
-  mft_index.extend(mft_index.size() + upd_file_refs.size());
+  mft_index.extend(static_cast<unsigned>(mft_index.size() + upd_file_refs.size()));
 
   FileInfo file_info;
   file_info.volume = &volume;
