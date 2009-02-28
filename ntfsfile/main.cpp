@@ -1200,7 +1200,7 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
       else if (prefix == L"nfc") plugin_process_contents(g_file_list);
       else if (prefix == L"defrag") {
         defragment(g_file_list, Log());
-        FilePanel::force_update_all();
+        FilePanel::reload_mft_all();
         far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
         far_control_int(PANEL_PASSIVE, FCTL_UPDATEANOTHERPANEL, 1);
         far_control_ptr(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, NULL);
@@ -1249,8 +1249,9 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
         if (log.size() != 0) {
           if (far_message(far_get_msg(MSG_PLUGIN_NAME) + L"\n" + word_wrap(far_get_msg(MSG_DEFRAG_ERRORS), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK) + L"\n" + far_get_msg(MSG_LOG_SHOW), 2, FMSG_WARNING) == 1) log.show();
         }
-        FilePanel::force_update_all();
+        FilePanel::reload_mft_all();
         far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
+        far_control_int(PANEL_PASSIVE, FCTL_UPDATEANOTHERPANEL, 1);
       }
     }
     else if (item_idx == 4) {
@@ -1317,10 +1318,10 @@ int WINAPI FAR_EXPORT(Configure)(int ItemNumber) {
   load_plugin_options();
   FilePanelMode file_panel_mode = g_file_panel_mode;
   if (show_file_panel_mode_dialog(file_panel_mode)) {
-    bool update = (file_panel_mode.show_streams != g_file_panel_mode.show_streams) || (file_panel_mode.show_main_stream != g_file_panel_mode.show_main_stream);
+    bool need_reload = (file_panel_mode.show_streams != g_file_panel_mode.show_streams) || (file_panel_mode.show_main_stream != g_file_panel_mode.show_main_stream);
     g_file_panel_mode = file_panel_mode;
     store_plugin_options();
-    if (update) FilePanel::force_update_all();
+    if (need_reload) FilePanel::reload_mft_all();
   }
   else return FALSE;
   END_ERROR_HANDLER(return TRUE, return FALSE);
@@ -1348,7 +1349,7 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
     plugin_show_metadata();
   }
   else if ((Key == 'R') && (ControlState == PKF_CONTROL)) {
-    if (!g_file_panel_mode.use_usn_journal) panel->force_update();
+    if (!g_file_panel_mode.use_usn_journal) panel->reload_mft();
     return FALSE;
   }
   else return FALSE;

@@ -135,8 +135,8 @@ public:
   void change_directory(const UnicodeString& target_dir, bool search_mode);
   void fill_plugin_info(OpenPluginInfo* info);
   void toggle_mft_mode();
-  void force_update();
-  static void force_update_all();
+  void reload_mft();
+  static void reload_mft_all();
 };
 
 bool show_file_panel_mode_dialog(FilePanelMode& mode);

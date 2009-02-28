@@ -382,10 +382,10 @@ void FilePanel::toggle_mft_mode() {
   }
 }
 
-void FilePanel::force_update() {
+void FilePanel::reload_mft() {
   if (mft_mode) mft_load_index();
 }
 
-void FilePanel::force_update_all() {
-  for (unsigned i = 0; i < g_file_panels.size(); i++) if (g_file_panels[i]->mft_mode) g_file_panels[i]->mft_load_index();
+void FilePanel::reload_mft_all() {
+  for (unsigned i = 0; i < g_file_panels.size(); i++) g_file_panels[i]->reload_mft();
 }
