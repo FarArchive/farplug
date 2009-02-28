@@ -372,6 +372,7 @@ void ProgressMonitor::update_ui(bool force) {
   QueryPerformanceCounter((PLARGE_INTEGER) &t_curr);
   if ((t_curr >= t_next) || force) {
     if (h_scr == NULL) {
+      g_far.Text(0, 0, 0, NULL); // flush buffer hack
       h_scr = g_far.SaveScreen(0, 0, -1, -1);
       unsigned c_max_size = 10000;
       con_title.set_size(GetConsoleTitleW(con_title.buf(c_max_size), c_max_size)).compact();
