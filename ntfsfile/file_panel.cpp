@@ -453,14 +453,6 @@ void FilePanel::scan_dir(const UnicodeString& root_path, const UnicodeString& re
 
 void FilePanel::sort_file_list(std::list<PanelItemData>& pid_list) {
   switch (g_file_panel_mode.custom_sort_mode) {
-  case 0:
-    struct NameCmp {
-      bool operator()(const PanelItemData& item1, const PanelItemData& item2) const {
-        return item1.file_name < item2.file_name;
-      }
-    };
-    pid_list.sort(NameCmp());
-    break;
   case 1:
     struct DataSizeCmp {
       bool operator()(const PanelItemData& item1, const PanelItemData& item2) const {
@@ -722,7 +714,7 @@ public:
     label(far_get_msg(MSG_FILE_PANEL_MODE_SORT));
     spacer(1);
     ObjectArray<UnicodeString> items;
-    items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_NAME);
+    items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_NOTHING);
     items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_DATA_SIZE);
     items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_DISK_SIZE);
     items += far_get_msg(MSG_FILE_PANEL_MODE_SORT_FRAGMENTS);

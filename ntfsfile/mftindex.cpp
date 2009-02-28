@@ -33,7 +33,9 @@ using namespace col;
 struct FilePanel::FileRecordCompare {
   int operator()(const FileRecord& item1, const FileRecord& item2) {
     if (item1.parent_ref_num > item2.parent_ref_num) return 1;
-    else if (item1.parent_ref_num == item2.parent_ref_num) return 0;
+    else if (item1.parent_ref_num == item2.parent_ref_num) {
+      return item1.file_name.compare(item2.file_name);
+    }
     else return -1;
   }
 };
