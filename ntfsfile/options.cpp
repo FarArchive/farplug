@@ -154,6 +154,8 @@ void load_plugin_options() {
   g_file_panel_mode.show_streams = get_bool_option(L"FilePanelShowStreams", false);
   g_file_panel_mode.show_main_stream = get_bool_option(L"FilePanelShowMainStream", false);
   g_file_panel_mode.use_highlighting = get_bool_option(L"FilePanelUseHighlighting", true);
+  g_file_panel_mode.use_usn_journal = get_bool_option(L"FilePanelUseUsnJournal", true);
+  g_file_panel_mode.delete_usn_journal = get_bool_option(L"FilePanelDeleteUsnJournal", true);
 };
 
 void store_plugin_options() {
@@ -174,4 +176,6 @@ void store_plugin_options() {
   set_bool_option(L"FilePanelShowStreams", g_file_panel_mode.show_streams);
   set_bool_option(L"FilePanelShowMainStream", g_file_panel_mode.show_main_stream);
   set_bool_option(L"FilePanelUseHighlighting", g_file_panel_mode.use_highlighting);
+  set_bool_option(L"FilePanelUseUsnJournal", g_file_panel_mode.use_usn_journal);
+  set_bool_option(L"FilePanelDeleteUsnJournal", g_file_panel_mode.delete_usn_journal);
 }

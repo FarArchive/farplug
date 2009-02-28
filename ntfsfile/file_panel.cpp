@@ -96,6 +96,7 @@ FilePanel* FilePanel::open() {
   try {
     panel->flat_mode = false;
     panel->mft_mode = false;
+    panel->usn_journal_id = 0;
     panel->saved_state = save_state(INVALID_HANDLE_VALUE);
     panel->change_directory(FARSTR_TO_UNICODE(panel->saved_state.directory), false);
     // signal to restore selection & current item after panel is created
@@ -132,6 +133,7 @@ void FilePanel::close() {
 }
 
 void FilePanel::on_close() {
+  delete_usn_journal();
   PanelInfo pi;
   if (far_control_ptr(this, FCTL_GETPANELSHORTINFO, &pi)) {
     g_file_panel_mode.sort_mode = pi.SortMode;
@@ -650,6 +652,8 @@ private:
   int sort_mode_ctrl_id;
   int use_mft_index_ctrl_id;
   int use_highlighting_ctrl_id;
+  int use_usn_journal_ctrl_id;
+  int delete_usn_journal_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -666,9 +670,14 @@ private:
       dlg->mode.show_streams = dlg->get_check(dlg->show_streams_ctrl_id);
       dlg->mode.show_main_stream = dlg->get_check(dlg->show_main_stream_ctrl_id);
       dlg->mode.use_highlighting = dlg->get_check(dlg->use_highlighting_ctrl_id);
+      dlg->mode.use_usn_journal = dlg->get_check(dlg->use_usn_journal_ctrl_id);
+      dlg->mode.delete_usn_journal = dlg->get_check(dlg->delete_usn_journal_ctrl_id);
     }
     else if ((msg == DN_BTNCLICK) && (param1 == dlg->show_streams_ctrl_id)) {
       dlg->enable(dlg->show_main_stream_ctrl_id, param2 != 0);
+    }
+    else if ((msg == DN_BTNCLICK) && (param1 == dlg->use_usn_journal_ctrl_id)) {
+      dlg->enable(dlg->delete_usn_journal_ctrl_id, param2 != 0);
     }
     END_ERROR_HANDLER(;,;);
     return g_far.DefDlgProc(h_dlg, msg, param1, param2);
@@ -731,6 +740,12 @@ public:
     sort_mode_ctrl_id = combo_box(items, mode.custom_sort_mode, 30, max_size + 1, DIF_DROPDOWNLIST);
     new_line();
     use_highlighting_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_HIGHLIGHTING), mode.use_highlighting);
+    new_line();
+    separator();
+    new_line();
+    use_usn_journal_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_USN_JOURNAL), mode.use_usn_journal);
+    spacer(2);
+    delete_usn_journal_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_DELETE_USN_JOURNAL), mode.delete_usn_journal, mode.use_usn_journal ? 0 : DIF_DISABLE);
     new_line();
     separator();
     new_line();

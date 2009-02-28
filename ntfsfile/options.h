@@ -23,6 +23,8 @@ struct FilePanelMode {
   bool show_streams;
   bool show_main_stream;
   bool use_highlighting;
+  bool use_usn_journal;
+  bool delete_usn_journal;
 };
 
 /* plugin options */

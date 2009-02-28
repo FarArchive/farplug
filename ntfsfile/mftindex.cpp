@@ -147,10 +147,17 @@ void FilePanel::add_file_records(const FileInfo& file_info) {
 }
 
 void FilePanel::prepare_usn_journal() {
+  if (!g_file_panel_mode.use_usn_journal) return;
   DWORD bytes_ret;
   USN_JOURNAL_DATA journal_data;
   if (!DeviceIoControl(volume.handle, FSCTL_QUERY_USN_JOURNAL, NULL, 0, &journal_data, sizeof(journal_data), &bytes_ret, NULL)) {
-    if (GetLastError() == ERROR_JOURNAL_NOT_ACTIVE) {
+    if ((GetLastError() == ERROR_JOURNAL_NOT_ACTIVE) || (GetLastError() == ERROR_JOURNAL_DELETE_IN_PROGRESS)) {
+      if (GetLastError() == ERROR_JOURNAL_DELETE_IN_PROGRESS) {
+        DELETE_USN_JOURNAL_DATA delete_journal_data;
+        delete_journal_data.UsnJournalID = 0;
+        delete_journal_data.DeleteFlags = USN_DELETE_FLAG_NOTIFY;
+        CHECK_SYS(DeviceIoControl(volume.handle, FSCTL_DELETE_USN_JOURNAL, &delete_journal_data, sizeof(delete_journal_data), NULL, 0, &bytes_ret, NULL));
+      }
       CREATE_USN_JOURNAL_DATA create_journal_data;
       memset(&create_journal_data, 0, sizeof(create_journal_data));
       CHECK_SYS(DeviceIoControl(volume.handle, FSCTL_CREATE_USN_JOURNAL, &create_journal_data, sizeof(create_journal_data), NULL, 0, &bytes_ret, NULL));
@@ -160,6 +167,18 @@ void FilePanel::prepare_usn_journal() {
   }
   usn_journal_id = journal_data.UsnJournalID;
   next_usn = journal_data.NextUsn;
+}
+
+void FilePanel::delete_usn_journal() {
+  if (!g_file_panel_mode.use_usn_journal || !g_file_panel_mode.delete_usn_journal) return;
+  if (usn_journal_id) {
+    DELETE_USN_JOURNAL_DATA delete_journal_data;
+    delete_journal_data.UsnJournalID = usn_journal_id;
+    delete_journal_data.DeleteFlags = USN_DELETE_FLAG_DELETE;
+    DWORD bytes_ret;
+    DeviceIoControl(volume.handle, FSCTL_DELETE_USN_JOURNAL, &delete_journal_data, sizeof(delete_journal_data), NULL, 0, &bytes_ret, NULL);
+    usn_journal_id = 0;
+  }
 }
 
 void FilePanel::mft_load_index() {
@@ -218,6 +237,8 @@ void FilePanel::mft_load_index() {
 }
 
 void FilePanel::mft_update_index() {
+  if (!g_file_panel_mode.use_usn_journal) return;
+
   READ_USN_JOURNAL_DATA read_usn_data;
   read_usn_data.StartUsn = next_usn;
   read_usn_data.ReasonMask = 0xFFFFFFFF;
@@ -232,11 +253,8 @@ void FilePanel::mft_update_index() {
   while(true) {
     DWORD bytes_ret;
     if (!DeviceIoControl(volume.handle, FSCTL_READ_USN_JOURNAL, &read_usn_data, sizeof(read_usn_data), usn_buffer.buf(c_usn_buffer_size), c_usn_buffer_size, &bytes_ret, NULL)) {
-      if (GetLastError() == ERROR_JOURNAL_ENTRY_DELETED) {
-        mft_load_index();
-        return;
-      }
-      else CHECK_SYS(false);
+      mft_load_index();
+      return;
     }
     usn_buffer.set_size(bytes_ret);
     if (usn_buffer.size() < sizeof(USN)) break;
@@ -362,6 +380,10 @@ void FilePanel::toggle_mft_mode() {
     mft_index.clear().compact();
     volume.open(extract_path_root(get_real_path(current_dir)));
   }
+}
+
+void FilePanel::force_update() {
+  if (mft_mode) mft_load_index();
 }
 
 void FilePanel::force_update_all() {

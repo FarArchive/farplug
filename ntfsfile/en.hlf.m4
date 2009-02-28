@@ -20,6 +20,8 @@ This plugin provides various information about files on NTFS file system. Featur
   - estimate if compression of file data is possible (using very FAST LZO algorithm)
   - calculate most useful file hashes: crc32, md5, sha1, ed2k (eMule variation).
 
+5. Perform fast file search over entire volume using MFT index mode.
+
 @metadata
 $ #File information#
     Displays NTFS file attribute (file component) table.
@@ -62,9 +64,10 @@ Custom columns:
     #VSZ# - valid size of DATA attribute(s). For attributes - attribute valid size.
 
     Sorting option #Sort by:# is applyed when 'Unsorted' mode (Ctrl+F7) is selected in FAR.
-    #Access volume contents via MFT# - enables alternative way of getting file lists. All information is read
-from MFT instead of using traditional directory listing methods.
+    #Show streams# - alternate file streams will be shown on file panel.
     #Use highlighting# - enables file highlighting. Disable to speed up processing of large file lists.
+    #Use USN journal# - enables fast panel updates when using MFT Index mode. File list will not be updated
+when this option is disabled unless Ctrl+R is pressed.
 
 @plugin_menu
 $ #Plugin menu#
