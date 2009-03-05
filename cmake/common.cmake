@@ -97,7 +97,10 @@ MACRO(gen_distrib)
   ENDIF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
   SET(distrib_package "${bin}/${PROJECT_NAME}_${distr_suffix}.7z")
   GET_TARGET_PROPERTY(library_path ${PROJECT_NAME} LOCATION)
-  SET(distrib_files ${library_path} ${ARGV})
+  SET(distrib_files ${library_path} ${bin}/${PROJECT_NAME}.map ${ARGV})
+  IF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    SET(distrib_files ${distrib_files} ${bin}/${PROJECT_NAME}.pdb)
+  ENDIF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
   ADD_CUSTOM_TARGET(distrib
     COMMAND ${CMAKE_COMMAND} -E remove ${distrib_package}
     COMMAND ${arc} a -mx=9 ${distrib_package} ${distrib_files}

@@ -65,4 +65,4 @@ enc_file(${bin}/file_id.diz.1 ${bin}/file_id.diz cp866)
 gen_ver()
 m4_process(${src}/version.rc.m4 ${bin}/version.rc)
 
-gen_distrib(${bin}/${PROJECT_NAME}_en.lng ${bin}/${PROJECT_NAME}_ru.lng ${bin}/${PROJECT_NAME}_en.hlf ${bin}/${PROJECT_NAME}_ru.hlf ${bin}/history_en.txt ${bin}/history_ru.txt ${bin}/file_id.diz ${bin}/${PROJECT_NAME}.pdb ${bin}/${PROJECT_NAME}.map)
+gen_distrib(${bin}/${PROJECT_NAME}_en.lng ${bin}/${PROJECT_NAME}_ru.lng ${bin}/${PROJECT_NAME}_en.hlf ${bin}/${PROJECT_NAME}_ru.hlf ${bin}/history_en.txt ${bin}/history_ru.txt ${bin}/file_id.diz)

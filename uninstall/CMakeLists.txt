@@ -52,4 +52,4 @@ enc_file(${src}/TechInfo.Rus.reg ${bin}/TechInfo.Rus.reg cp866)
 gen_ver()
 m4_process(${src}/version.rc.m4 ${bin}/version.rc)
 
-gen_distrib(${bin}/UnInstall_Eng.hlf ${bin}/UnInstall_Eng.lng ${bin}/UnInstall_Rus.hlf ${bin}/UnInstall_Rus.lng ${bin}/File_ID.diz ${bin}/ReadMe.Rus.txt ${bin}/TechInfo.Rus.reg ${bin}/WhatsNew.Rus.txt ${bin}/${PROJECT_NAME}.map ${bin}/${PROJECT_NAME}.pdb)
+gen_distrib(${bin}/UnInstall_Eng.hlf ${bin}/UnInstall_Eng.lng ${bin}/UnInstall_Rus.hlf ${bin}/UnInstall_Rus.lng ${bin}/File_ID.diz ${bin}/ReadMe.Rus.txt ${bin}/TechInfo.Rus.reg ${bin}/WhatsNew.Rus.txt)
