@@ -1,22 +1,33 @@
-diff -Nuar openssl-0.9.8h.orig/build.bat openssl-0.9.8h/build.bat
---- openssl-0.9.8h.orig/build.bat	Thu Jan  1 02:00:00 1970
-+++ openssl-0.9.8h/build.bat	Sun Jun 29 19:46:53 2008
-@@ -0,0 +1,12 @@
-+call %VS80COMNTOOLS%\..\..\VC\vcvarsall.bat
+diff -ruN openssl-0.9.8h/build.bat openssl-0.9.8h-patched/build.bat
+--- openssl-0.9.8h/build.bat	Thu Jan  1 02:00:00 1970
++++ openssl-0.9.8h-patched/build.bat	Thu Mar  5 14:24:48 2009
+@@ -0,0 +1,23 @@
++call setenv /x86
 +perl Configure VC-WIN32
 +call ms\do_ms debug
 +nmake -f ms\nt.mak
++@if errorlevel 1 goto end
 +call ms\do_masm
 +nmake -f ms\nt.mak
-+call %VS80COMNTOOLS%\..\..\VC\vcvarsall.bat x86_amd64
++@if errorlevel 1 goto end
++call setenv /x64
 +perl Configure VC-WIN64A
 +call ms\do_win64a debug
 +nmake -f ms\nt.mak
++@if errorlevel 1 goto end
 +call ms\do_win64a
 +nmake -f ms\nt.mak
-diff -Nuar openssl-0.9.8h.orig/crypto/perlasm/x86ms.pl openssl-0.9.8h/crypto/perlasm/x86ms.pl
---- openssl-0.9.8h.orig/crypto/perlasm/x86ms.pl	Fri May  2 02:11:32 2008
-+++ openssl-0.9.8h/crypto/perlasm/x86ms.pl	Sun Jun 29 19:46:31 2008
++@if errorlevel 1 goto end
++copy /y out32\*.lib ..\lib
++copy /y out32d\*.lib ..\lib
++copy /y out64\*.lib ..\lib
++copy /y out64d\*.lib ..\lib
++copy /y *.pdb ..\lib
++xcopy /e /i /y inc32\*.h ..\include
++:end
+diff -ruN openssl-0.9.8h/crypto/perlasm/x86ms.pl openssl-0.9.8h-patched/crypto/perlasm/x86ms.pl
+--- openssl-0.9.8h/crypto/perlasm/x86ms.pl	Fri May  2 02:11:32 2008
++++ openssl-0.9.8h-patched/crypto/perlasm/x86ms.pl	Thu Mar  5 14:47:52 2009
 @@ -270,7 +270,6 @@
  
  	local($tmp)=<<"EOF";
@@ -25,9 +36,9 @@ diff -Nuar openssl-0.9.8h.orig/crypto/perlasm/x86ms.pl openssl-0.9.8h/crypto/per
  _$func PROC NEAR
  	push	ebp
  	push	ebx
-diff -Nuar openssl-0.9.8h.orig/ms/do_masm.bat openssl-0.9.8h/ms/do_masm.bat
---- openssl-0.9.8h.orig/ms/do_masm.bat	Thu Jul 19 20:39:06 2007
-+++ openssl-0.9.8h/ms/do_masm.bat	Sun Jun 29 19:46:31 2008
+diff -ruN openssl-0.9.8h/ms/do_masm.bat openssl-0.9.8h-patched/ms/do_masm.bat
+--- openssl-0.9.8h/ms/do_masm.bat	Thu Jul 19 20:39:06 2007
++++ openssl-0.9.8h-patched/ms/do_masm.bat	Thu Mar  5 14:51:24 2009
 @@ -70,8 +70,8 @@
  echo on
  
@@ -39,31 +50,26 @@ diff -Nuar openssl-0.9.8h.orig/ms/do_masm.bat openssl-0.9.8h/ms/do_masm.bat
  
  perl util\mkdef.pl 32 libeay > ms\libeay32.def
  perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
-diff -Nuar openssl-0.9.8h.orig/ms/do_ms.bat openssl-0.9.8h/ms/do_ms.bat
---- openssl-0.9.8h.orig/ms/do_ms.bat	Tue May 17 03:07:13 2005
-+++ openssl-0.9.8h/ms/do_ms.bat	Sun Jun 29 19:46:31 2008
+diff -ruN openssl-0.9.8h/ms/do_ms.bat openssl-0.9.8h-patched/ms/do_ms.bat
+--- openssl-0.9.8h/ms/do_ms.bat	Tue May 17 03:07:14 2005
++++ openssl-0.9.8h-patched/ms/do_ms.bat	Thu Mar  5 01:59:05 2009
 @@ -1,9 +1,9 @@
--
--perl util\mkfiles.pl >MINFO
+ 
+ perl util\mkfiles.pl >MINFO
 -perl util\mk1mf.pl no-asm VC-WIN32 >ms\nt.mak
 -perl util\mk1mf.pl dll no-asm VC-WIN32 >ms\ntdll.mak
 -perl util\mk1mf.pl no-asm VC-CE >ms\ce.mak
 -perl util\mk1mf.pl dll no-asm VC-CE >ms\cedll.mak
--
--perl util\mkdef.pl 32 libeay > ms\libeay32.def
--perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
-+
-+perl util\mkfiles.pl >MINFO
 +perl util\mk1mf.pl no-asm %1 %2 %3 VC-WIN32 >ms\nt.mak
 +perl util\mk1mf.pl dll no-asm %1 %2 %3 VC-WIN32 >ms\ntdll.mak
 +perl util\mk1mf.pl no-asm %1 %2 %3 VC-CE >ms\ce.mak
 +perl util\mk1mf.pl dll no-asm %1 %2 %3 VC-CE >ms\cedll.mak
-+
-+perl util\mkdef.pl 32 libeay > ms\libeay32.def
-+perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
-diff -Nuar openssl-0.9.8h.orig/ms/do_nasm.bat openssl-0.9.8h/ms/do_nasm.bat
---- openssl-0.9.8h.orig/ms/do_nasm.bat	Thu Jul 19 20:39:06 2007
-+++ openssl-0.9.8h/ms/do_nasm.bat	Sun Jun 29 19:46:31 2008
+ 
+ perl util\mkdef.pl 32 libeay > ms\libeay32.def
+ perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+diff -ruN openssl-0.9.8h/ms/do_nasm.bat openssl-0.9.8h-patched/ms/do_nasm.bat
+--- openssl-0.9.8h/ms/do_nasm.bat	Thu Jul 19 20:39:06 2007
++++ openssl-0.9.8h-patched/ms/do_nasm.bat	Thu Mar  5 14:51:24 2009
 @@ -71,9 +71,9 @@
  echo on
  
@@ -77,71 +83,64 @@ diff -Nuar openssl-0.9.8h.orig/ms/do_nasm.bat openssl-0.9.8h/ms/do_nasm.bat
  
  perl util\mkdef.pl 32 libeay > ms\libeay32.def
  perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
-diff -Nuar openssl-0.9.8h.orig/ms/do_nt.bat openssl-0.9.8h/ms/do_nt.bat
---- openssl-0.9.8h.orig/ms/do_nt.bat	Sun May 23 02:24:38 1999
-+++ openssl-0.9.8h/ms/do_nt.bat	Sun Jun 29 19:46:31 2008
+diff -ruN openssl-0.9.8h/ms/do_nt.bat openssl-0.9.8h-patched/ms/do_nt.bat
+--- openssl-0.9.8h/ms/do_nt.bat	Sun May 23 02:24:38 1999
++++ openssl-0.9.8h-patched/ms/do_nt.bat	Thu Mar  5 01:59:05 2009
 @@ -1,7 +1,7 @@
--
--perl util\mkfiles.pl >MINFO
+ 
+ perl util\mkfiles.pl >MINFO
 -perl util\mk1mf.pl no-asm VC-NT >ms\nt.mak
 -perl util\mk1mf.pl dll no-asm VC-NT >ms\ntdll.mak
--
--perl util\mkdef.pl libeay NT > ms\libeay32.def
--perl util\mkdef.pl ssleay NT > ms\ssleay32.def
-+
-+perl util\mkfiles.pl >MINFO
 +perl util\mk1mf.pl no-asm %1 %2 %3 VC-NT >ms\nt.mak
 +perl util\mk1mf.pl dll no-asm %1 %2 %3 VC-NT >ms\ntdll.mak
-+
-+perl util\mkdef.pl libeay NT > ms\libeay32.def
-+perl util\mkdef.pl ssleay NT > ms\ssleay32.def
-diff -Nuar openssl-0.9.8h.orig/ms/do_win64a.bat openssl-0.9.8h/ms/do_win64a.bat
---- openssl-0.9.8h.orig/ms/do_win64a.bat	Tue Jul  5 02:24:12 2005
-+++ openssl-0.9.8h/ms/do_win64a.bat	Sun Jun 29 19:46:31 2008
-@@ -1,9 +1,9 @@
--
--perl util\mkfiles.pl >MINFO
--perl ms\uplink.pl win64a > ms\uptable.asm
--ml64 -c -Foms\uptable.obj ms\uptable.asm
+ 
+ perl util\mkdef.pl libeay NT > ms\libeay32.def
+ perl util\mkdef.pl ssleay NT > ms\ssleay32.def
+diff -ruN openssl-0.9.8h/ms/do_win64a.bat openssl-0.9.8h-patched/ms/do_win64a.bat
+--- openssl-0.9.8h/ms/do_win64a.bat	Tue Jul  5 02:24:12 2005
++++ openssl-0.9.8h-patched/ms/do_win64a.bat	Thu Mar  5 01:59:05 2009
+@@ -2,8 +2,8 @@
+ perl util\mkfiles.pl >MINFO
+ perl ms\uplink.pl win64a > ms\uptable.asm
+ ml64 -c -Foms\uptable.obj ms\uptable.asm
 -perl util\mk1mf.pl no-asm VC-WIN64A >ms\nt.mak
 -perl util\mk1mf.pl dll no-asm VC-WIN64A >ms\ntdll.mak
--
--perl util\mkdef.pl 32 libeay > ms\libeay32.def
--perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
-+
-+perl util\mkfiles.pl >MINFO
-+perl ms\uplink.pl win64a > ms\uptable.asm
-+ml64 -c -Foms\uptable.obj ms\uptable.asm
 +perl util\mk1mf.pl no-asm %1 %2 %3 VC-WIN64A >ms\nt.mak
 +perl util\mk1mf.pl dll no-asm %1 %2 %3 VC-WIN64A >ms\ntdll.mak
-+
-+perl util\mkdef.pl 32 libeay > ms\libeay32.def
-+perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
-diff -Nuar openssl-0.9.8h.orig/ms/do_win64i.bat openssl-0.9.8h/ms/do_win64i.bat
---- openssl-0.9.8h.orig/ms/do_win64i.bat	Tue Jul  5 02:24:12 2005
-+++ openssl-0.9.8h/ms/do_win64i.bat	Sun Jun 29 19:46:31 2008
-@@ -1,9 +1,9 @@
--
--perl util\mkfiles.pl >MINFO
--perl ms\uplink.pl win64i > ms\uptable.asm
--ias -o ms\uptable.obj ms\uptable.asm
+ 
+ perl util\mkdef.pl 32 libeay > ms\libeay32.def
+ perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+diff -ruN openssl-0.9.8h/ms/do_win64i.bat openssl-0.9.8h-patched/ms/do_win64i.bat
+--- openssl-0.9.8h/ms/do_win64i.bat	Tue Jul  5 02:24:12 2005
++++ openssl-0.9.8h-patched/ms/do_win64i.bat	Thu Mar  5 01:59:05 2009
+@@ -2,8 +2,8 @@
+ perl util\mkfiles.pl >MINFO
+ perl ms\uplink.pl win64i > ms\uptable.asm
+ ias -o ms\uptable.obj ms\uptable.asm
 -perl util\mk1mf.pl no-asm VC-WIN64I >ms\nt.mak
 -perl util\mk1mf.pl dll no-asm VC-WIN64I >ms\ntdll.mak
--
--perl util\mkdef.pl 32 libeay > ms\libeay32.def
--perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
-+
-+perl util\mkfiles.pl >MINFO
-+perl ms\uplink.pl win64i > ms\uptable.asm
-+ias -o ms\uptable.obj ms\uptable.asm
 +perl util\mk1mf.pl no-asm %1 %2 %3 VC-WIN64I >ms\nt.mak
 +perl util\mk1mf.pl dll no-asm %1 %2 %3 VC-WIN64I >ms\ntdll.mak
-+
-+perl util\mkdef.pl 32 libeay > ms\libeay32.def
-+perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
-diff -Nuar openssl-0.9.8h.orig/util/pl/VC-32.pl openssl-0.9.8h/util/pl/VC-32.pl
---- openssl-0.9.8h.orig/util/pl/VC-32.pl	Fri Jan  4 02:40:00 2008
-+++ openssl-0.9.8h/util/pl/VC-32.pl	Sun Jun 29 19:46:31 2008
+ 
+ perl util\mkdef.pl 32 libeay > ms\libeay32.def
+ perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+diff -ruN openssl-0.9.8h/util/mk1mf.pl openssl-0.9.8h-patched/util/mk1mf.pl
+--- openssl-0.9.8h/util/mk1mf.pl	Tue May 20 14:50:14 2008
++++ openssl-0.9.8h-patched/util/mk1mf.pl	Thu Mar  5 14:54:21 2009
+@@ -188,8 +188,8 @@
+ 	$cflags.=' -DTERMIO';
+ 	}
+ 
+-$out_dir=(defined($VARS{'OUT'}))?$VARS{'OUT'}:$out_def.($debug?".dbg":"");
+-$tmp_dir=(defined($VARS{'TMP'}))?$VARS{'TMP'}:$tmp_def.($debug?".dbg":"");
++$out_dir=(defined($VARS{'OUT'}))?$VARS{'OUT'}:$out_def;
++$tmp_dir=(defined($VARS{'TMP'}))?$VARS{'TMP'}:$tmp_def;
+ $inc_dir=(defined($VARS{'INC'}))?$VARS{'INC'}:$inc_def;
+ 
+ $bin_dir=$bin_dir.$o unless ((substr($bin_dir,-1,1) eq $o) || ($bin_dir eq ''));
+diff -ruN openssl-0.9.8h/util/pl/VC-32.pl openssl-0.9.8h-patched/util/pl/VC-32.pl
+--- openssl-0.9.8h/util/pl/VC-32.pl	Fri Jan  4 02:40:00 2008
++++ openssl-0.9.8h-patched/util/pl/VC-32.pl	Thu Mar  5 14:51:54 2009
 @@ -3,9 +3,6 @@
  # Win64 and WinCE [follow $FLAVOR variable to trace the differences].
  #
@@ -172,7 +171,7 @@ diff -Nuar openssl-0.9.8h.orig/util/pl/VC-32.pl openssl-0.9.8h/util/pl/VC-32.pl
      }
  elsif ($FLAVOR =~ /CE/)
      {
-@@ -93,31 +90,36 @@
+@@ -93,32 +90,37 @@
      }
  else	# Win32
      {
@@ -209,13 +208,47 @@ diff -Nuar openssl-0.9.8h.orig/util/pl/VC-32.pl openssl-0.9.8h/util/pl/VC-32.pl
  	$cflags=$opt_cflags.$base_cflags;
 +	$lflags.=" /opt:ref /opt:icf /LTCG";
  	}
-+
+ 
 +$ssl=	"ssleay$suffix";
 +$crypto="libeay$suffix";
 + 
 +$out_def="out$suffix"; $out_def.='_$(TARGETCPU)' if ($FLAVOR =~ /CE/);
 +$tmp_def="tmp$suffix"; $tmp_def.='_$(TARGETCPU)' if ($FLAVOR =~ /CE/);
 +$inc_def="inc32";
- 
++
  $obj='.obj';
  $ofile="/Fo";
+ 
+@@ -139,7 +141,6 @@
+ else
+ 	{
+ 	$ex_libs.=' gdi32.lib advapi32.lib user32.lib';
+-	$ex_libs.=' bufferoverflowu.lib' if ($FLAVOR =~ /WIN64/);
+ 	}
+ 
+ # As native NT API is pure UNICODE, our WIN-NT build defaults to UNICODE,
+@@ -166,7 +167,7 @@
+ 	$asm=($ver gt $vew?"nasm":"nasmw")." -f win32";
+ 	$afile='-o ';
+ } else {
+-	$asm='ml /Cp /coff /c /Cx';
++	$asm='ml /Cp /coff /c /Cx /safeseh';
+ 	$asm.=" /Zi" if $debug;
+ 	$afile='/Fo';
+ }
+@@ -273,7 +274,6 @@
+ 		local($ex)=($target =~ /O_CRYPTO/)?'':' $(L_CRYPTO)';
+ 		if ($name eq "")
+ 			{
+-			$ex.=' bufferoverflowu.lib' if ($FLAVOR =~ /WIN64/);
+ 			}
+ 		elsif ($FLAVOR =~ /CE/)
+ 			{
+@@ -283,7 +283,6 @@
+ 			{
+ 			$ex.=' unicows.lib' if ($FLAVOR =~ /NT/);
+ 			$ex.=' wsock32.lib gdi32.lib advapi32.lib user32.lib';
+-			$ex.=' bufferoverflowu.lib' if ($FLAVOR =~ /WIN64/);
+ 			}
+ 		$ex.=" $zlib_lib" if $zlib_opt == 1 && $target =~ /O_CRYPTO/;
+ 		$ret.="\t\$(LINK) \$(MLFLAGS) $efile$target $name @<<\n  \$(SHLIB_EX_OBJ) $objs $ex\n<<\n";

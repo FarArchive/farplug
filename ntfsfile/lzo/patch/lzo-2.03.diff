@@ -1,60 +1,15 @@
-diff -Nuar lzo-2.03.orig/B/win32/vc.bat lzo-2.03/B/win32/vc.bat
---- lzo-2.03.orig/B/win32/vc.bat	Wed Apr 30 15:51:49 2008
-+++ lzo-2.03/B/win32/vc.bat	Sun Jun 29 20:15:11 2008
-@@ -1,42 +1,60 @@
--@echo // Copyright (C) 1996-2008 Markus F.X.J. Oberhumer
--@echo //
--@echo //   Windows 32-bit
--@echo //   Microsoft Visual C/C++
--@echo //
--@call b\prepare.bat
--@if "%BECHO%"=="n" echo off
--
--
+diff -ruN lzo-2.03/B/win32/vc.bat lzo-2.03-patched/B/win32/vc.bat
+--- lzo-2.03/B/win32/vc.bat	Wed Apr 30 15:51:50 2008
++++ lzo-2.03-patched/B/win32/vc.bat	Thu Mar  5 15:15:13 2009
+@@ -7,13 +7,31 @@
+ @if "%BECHO%"=="n" echo off
+ 
+ 
 -set CC=cl -nologo -MD
 -set CF=-O2 -GF -W3 %CFI% %CFASM%
 -set LF=%BLIB%
--
--%CC% %CF% -c @b\src.rsp
--@if errorlevel 1 goto error
--link -lib -nologo -out:%BLIB% @b\win32\vc.rsp
--@if errorlevel 1 goto error
--
--%CC% %CF% examples\dict.c %LF%
--@if errorlevel 1 goto error
--%CC% %CF% examples\lzopack.c %LF%
--@if errorlevel 1 goto error
--%CC% %CF% examples\precomp.c %LF%
--@if errorlevel 1 goto error
--%CC% %CF% examples\precomp2.c %LF%
--@if errorlevel 1 goto error
--%CC% %CF% examples\simple.c %LF%
--@if errorlevel 1 goto error
--
--%CC% %CF% lzotest\lzotest.c %LF%
--@if errorlevel 1 goto error
--
--%CC% %CF% -Iinclude\lzo minilzo\testmini.c minilzo\minilzo.c
--@if errorlevel 1 goto error
--
--
--@call b\done.bat
--@goto end
--:error
--@echo ERROR during build!
--:end
--@call b\unset.bat
-+@echo // Copyright (C) 1996-2008 Markus F.X.J. Oberhumer
-+@echo //
-+@echo //   Windows 32-bit
-+@echo //   Microsoft Visual C/C++
-+@echo //
-+@call b\prepare.bat
-+@if "%BECHO%"=="n" echo off
-+
-+
 +set CC=cl 
-+set CF=-nologo -Zi -W3 -Gy -GF %CFI% %CFASM%
++set CF=-nologo -Zi -W3 -Gy -GF -MP %CFI% %CFASM%
 +set LF=-link -subsystem:console -incremental:no
 +@if "%1"=="debug" goto debug
 +
@@ -66,7 +21,7 @@ diff -Nuar lzo-2.03.orig/B/win32/vc.bat lzo-2.03/B/win32/vc.bat
 +goto build
 +
 +:debug
-+set CF=%CF% -MTd -Od -RTC1 -GS
++set CF=%CF% -MTd -Od -RTC1
 +set LF=%LF% -debug -fixed:no
 +set suffix=_32d
 +
@@ -74,93 +29,35 @@ diff -Nuar lzo-2.03.orig/B/win32/vc.bat lzo-2.03/B/win32/vc.bat
 +set BLIB=%BNAME%%suffix%
 +set CF=%CF% -Fd%BLIB%.pdb
 +set LF=%LF% %BLIB%.lib
-+
-+%CC% %CF% -c @b\src.rsp
-+@if errorlevel 1 goto error
+ 
+ %CC% %CF% -c @b\src.rsp
+ @if errorlevel 1 goto error
+-link -lib -nologo -out:%BLIB% @b\win32\vc.rsp
 +link -lib -nologo -out:%BLIB%.lib @b\win32\vc.rsp
-+@if errorlevel 1 goto error
-+
-+%CC% %CF% examples\dict.c %LF%
-+@if errorlevel 1 goto error
-+%CC% %CF% examples\lzopack.c %LF%
-+@if errorlevel 1 goto error
-+%CC% %CF% examples\precomp.c %LF%
-+@if errorlevel 1 goto error
-+%CC% %CF% examples\precomp2.c %LF%
-+@if errorlevel 1 goto error
-+%CC% %CF% examples\simple.c %LF%
-+@if errorlevel 1 goto error
-+
-+%CC% %CF% lzotest\lzotest.c %LF%
-+@if errorlevel 1 goto error
-+
+ @if errorlevel 1 goto error
+ 
+ %CC% %CF% examples\dict.c %LF%
+@@ -30,7 +48,7 @@
+ %CC% %CF% lzotest\lzotest.c %LF%
+ @if errorlevel 1 goto error
+ 
+-%CC% %CF% -Iinclude\lzo minilzo\testmini.c minilzo\minilzo.c
 +%CC% %CF% -Iinclude\lzo minilzo\testmini.c minilzo\minilzo.c %LF%
-+@if errorlevel 1 goto error
-+
-+
-+@call b\done.bat
-+@goto end
-+:error
-+@echo ERROR during build!
-+:end
-+@call b\unset.bat
-diff -Nuar lzo-2.03.orig/B/win64/vc.bat lzo-2.03/B/win64/vc.bat
---- lzo-2.03.orig/B/win64/vc.bat	Wed Apr 30 15:51:49 2008
-+++ lzo-2.03/B/win64/vc.bat	Sun Jun 29 20:15:11 2008
-@@ -1,42 +1,60 @@
--@echo // Copyright (C) 1996-2008 Markus F.X.J. Oberhumer
--@echo //
--@echo //   Windows 64-bit (AMD64 or Itanium)
--@echo //   Microsoft Visual C/C++
--@echo //
--@call b\prepare.bat
--@if "%BECHO%"=="n" echo off
--
--
+ @if errorlevel 1 goto error
+ 
+ 
+diff -ruN lzo-2.03/B/win64/vc.bat lzo-2.03-patched/B/win64/vc.bat
+--- lzo-2.03/B/win64/vc.bat	Wed Apr 30 15:51:50 2008
++++ lzo-2.03-patched/B/win64/vc.bat	Thu Mar  5 15:15:13 2009
+@@ -7,13 +7,31 @@
+ @if "%BECHO%"=="n" echo off
+ 
+ 
 -set CC=cl -nologo -MD
 -set CF=-O2 -GF -W3 -Wp64 %CFI%
 -set LF=%BLIB%
--
--%CC% %CF% -c @b\src.rsp
--@if errorlevel 1 goto error
--link -lib -nologo -out:%BLIB% @b\win64\vc.rsp
--@if errorlevel 1 goto error
--
--%CC% %CF% examples\dict.c %LF%
--@if errorlevel 1 goto error
--%CC% %CF% examples\lzopack.c %LF%
--@if errorlevel 1 goto error
--%CC% %CF% examples\precomp.c %LF%
--@if errorlevel 1 goto error
--%CC% %CF% examples\precomp2.c %LF%
--@if errorlevel 1 goto error
--%CC% %CF% examples\simple.c %LF%
--@if errorlevel 1 goto error
--
--%CC% %CF% lzotest\lzotest.c %LF%
--@if errorlevel 1 goto error
--
--%CC% %CF% -Iinclude\lzo minilzo\testmini.c minilzo\minilzo.c
--@if errorlevel 1 goto error
--
--
--@call b\done.bat
--@goto end
--:error
--@echo ERROR during build!
--:end
--@call b\unset.bat
-+@echo // Copyright (C) 1996-2008 Markus F.X.J. Oberhumer
-+@echo //
-+@echo //   Windows 64-bit (AMD64 or Itanium)
-+@echo //   Microsoft Visual C/C++
-+@echo //
-+@call b\prepare.bat
-+@if "%BECHO%"=="n" echo off
-+
-+
 +set CC=cl 
-+set CF=-nologo -Zi -W3 -Gy -GF -Wp64 %CFI%
++set CF=-nologo -Zi -W3 -Gy -GF -MP %CFI%
 +set LF=-link -subsystem:console -incremental:no
 +@if "%1"=="debug" goto debug
 +
@@ -172,7 +69,7 @@ diff -Nuar lzo-2.03.orig/B/win64/vc.bat lzo-2.03/B/win64/vc.bat
 +goto build
 +
 +:debug
-+set CF=%CF% -MTd -Od -RTC1 -GS
++set CF=%CF% -MTd -Od -RTC1
 +set LF=%LF% -debug -fixed:no
 +set suffix=_64d
 +
@@ -180,43 +77,33 @@ diff -Nuar lzo-2.03.orig/B/win64/vc.bat lzo-2.03/B/win64/vc.bat
 +set BLIB=%BNAME%%suffix%
 +set CF=%CF% -Fd%BLIB%.pdb
 +set LF=%LF% %BLIB%.lib
-+
-+%CC% %CF% -c @b\src.rsp
-+@if errorlevel 1 goto error
+ 
+ %CC% %CF% -c @b\src.rsp
+ @if errorlevel 1 goto error
+-link -lib -nologo -out:%BLIB% @b\win64\vc.rsp
 +link -lib -nologo -out:%BLIB%.lib @b\win64\vc.rsp
-+@if errorlevel 1 goto error
-+
-+%CC% %CF% examples\dict.c %LF%
-+@if errorlevel 1 goto error
-+%CC% %CF% examples\lzopack.c %LF%
-+@if errorlevel 1 goto error
-+%CC% %CF% examples\precomp.c %LF%
-+@if errorlevel 1 goto error
-+%CC% %CF% examples\precomp2.c %LF%
-+@if errorlevel 1 goto error
-+%CC% %CF% examples\simple.c %LF%
-+@if errorlevel 1 goto error
-+
-+%CC% %CF% lzotest\lzotest.c %LF%
-+@if errorlevel 1 goto error
-+
+ @if errorlevel 1 goto error
+ 
+ %CC% %CF% examples\dict.c %LF%
+@@ -30,7 +48,7 @@
+ %CC% %CF% lzotest\lzotest.c %LF%
+ @if errorlevel 1 goto error
+ 
+-%CC% %CF% -Iinclude\lzo minilzo\testmini.c minilzo\minilzo.c
 +%CC% %CF% -Iinclude\lzo minilzo\testmini.c minilzo\minilzo.c %LF%
-+@if errorlevel 1 goto error
-+
-+
-+@call b\done.bat
-+@goto end
-+:error
-+@echo ERROR during build!
-+:end
-+@call b\unset.bat
-diff -Nuar lzo-2.03.orig/build.bat lzo-2.03/build.bat
---- lzo-2.03.orig/build.bat	Thu Jan  1 02:00:00 1970
-+++ lzo-2.03/build.bat	Sun Jun 29 20:16:45 2008
-@@ -0,0 +1,6 @@
-+call %VS80COMNTOOLS%\..\..\VC\vcvarsall.bat
+ @if errorlevel 1 goto error
+ 
+ 
+diff -ruN lzo-2.03/build.bat lzo-2.03-patched/build.bat
+--- lzo-2.03/build.bat	Thu Jan  1 02:00:00 1970
++++ lzo-2.03-patched/build.bat	Thu Mar  5 15:15:13 2009
+@@ -0,0 +1,9 @@
++call setenv /x86
 +call B\win32\vc.bat debug
 +call B\win32\vc.bat
-+call %VS80COMNTOOLS%\..\..\VC\vcvarsall.bat x86_amd64
++call setenv /x64
 +call B\win64\vc.bat debug
 +call B\win64\vc.bat
++copy /y lzo2_*.lib ..\lib
++copy /y lzo2_*.pdb ..\lib
++xcopy /e /i /y include\*.h ..\include
