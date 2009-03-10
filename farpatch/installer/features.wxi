@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include>
+  <Feature Id="Complete" Level="1" Title="FAR Manager" Display="expand" Absent="disallow" AllowAdvertise="no" ConfigurableDirectory="INSTALLDIR">
+    <Feature Id="Far" Level="1" Title="Base Files" Absent="disallow" AllowAdvertise="no">
+      <ComponentRef Id="InstallDir" />
+      <ComponentRef Id="FExceptReg" />
+      <ComponentRef Id="changelog_1" />
+      <ComponentRef Id="ClearPluginsCache.bat" />
+      <ComponentRef Id="demangle.dll" />
+      <ComponentRef Id="ExcDump.dll" />
+      <ComponentRef Id="Far.exe" />
+      <ComponentRef Id="far.map" />
+      <ComponentRef Id="FarCze.lng" />
+      <ComponentRef Id="FarEng.hlf" />
+      <ComponentRef Id="FarEng.lng" />
+      <ComponentRef Id="FarGer.lng" />
+      <ComponentRef Id="FarHun.lng" />
+      <ComponentRef Id="FarRus.hlf" />
+      <ComponentRef Id="FarRus.lng" />
+      <ComponentRef Id="FExcept.dll" />
+      <ComponentRef Id="File_id.diz" />
+      <ComponentRef Id="LICENSE" />
+      <ComponentRef Id="README_EN" />
+      <ComponentRef Id="README_RU" />
+      <ComponentRef Id="RestoreSettings.bat" />
+      <ComponentRef Id="SaveSettings.bat" />
+      <ComponentRef Id="Arc.Support.txt_1" />
+      <ComponentRef Id="Bug.Report.txt_1" />
+      <ComponentRef Id="Descript.ion_1" />
+      <ComponentRef Id="Far.FAQ.txt_1" />
+      <ComponentRef Id="Plugins.Install.txt_1" />
+      <ComponentRef Id="Plugins.Review.txt_1" />
+      <ComponentRef Id="TechInfo.txt_1" />
+      <ComponentRef Id="WhatsNew.Api.txt_1" />
+      <ComponentRef Id="WhatsNew.Macros.txt_1" />
+      <ComponentRef Id="WhatsNew.Plugins.txt_1" />
+      <ComponentRef Id="WhatsNew.txt_1" />
+      <ComponentRef Id="changelog_2" />
+      <ComponentRef Id="Readme.txt" />
+      <ComponentRef Id="SetFarExceptionHandlerW.reg" />
+      <ComponentRef Id="Arc.Support.txt_2" />
+      <ComponentRef Id="Bug.Report.txt_2" />
+      <ComponentRef Id="Descript.ion_2" />
+      <ComponentRef Id="Far.FAQ.txt_2" />
+      <ComponentRef Id="Plugins.Install.txt_2" />
+      <ComponentRef Id="Plugins.Review.txt_2" />
+      <ComponentRef Id="TechInfo.txt_2" />
+      <ComponentRef Id="WhatsNew.Api.txt_2" />
+      <ComponentRef Id="WhatsNew.Macros.txt_2" />
+      <ComponentRef Id="WhatsNew.Plugins.txt_2" />
+      <ComponentRef Id="WhatsNew.txt_2" />
+    </Feature>
+    <Feature Id="Plugins" Level="1" Display="expand" Title="Plugins">
+      <Feature Id="Editor" Level="1" Title="Editor">
+        <Feature Id="Align" Level="1" Title="Align">
+          <ComponentRef Id="Align.dll" />
+          <ComponentRef Id="Align.map" />
+          <ComponentRef Id="AlignEng.lng" />
+          <ComponentRef Id="AlignRus.lng" />
+          <ComponentRef Id="changelog_3" />
+        </Feature>
+        <Feature Id="AutoWrap" Level="1" Title="AutoWrap">
+          <ComponentRef Id="AutoWrap.dll" />
+          <ComponentRef Id="AutoWrap.map" />
+          <ComponentRef Id="changelog_4" />
+          <ComponentRef Id="WrapEng.lng" />
+          <ComponentRef Id="WrapRus.lng" />
+        </Feature>
+        <Feature Id="Brackets" Level="1" Title="Brackets">
+          <ComponentRef Id="BrackDel.reg" />
+          <ComponentRef Id="BrackEng.hlf" />
+          <ComponentRef Id="BrackEng.lng" />
+          <ComponentRef Id="BrackEng.reg" />
+          <ComponentRef Id="Brackets.dll" />
+          <ComponentRef Id="Brackets.map" />
+          <ComponentRef Id="BrackRus.hlf" />
+          <ComponentRef Id="BrackRus.lng" />
+          <ComponentRef Id="BrackRus.reg" />
+          <ComponentRef Id="changelog_5" />
+        </Feature>
+        <Feature Id="DrawLine" Level="1" Title="DrawLine">
+          <ComponentRef Id="changelog_7" />
+          <ComponentRef Id="DrawEng.hlf" />
+          <ComponentRef Id="DrawEng.lng" />
+          <ComponentRef Id="DrawLine.dll" />
+          <ComponentRef Id="DrawLine.map" />
+          <ComponentRef Id="DrawRus.hlf" />
+          <ComponentRef Id="DrawRus.lng" />
+        </Feature>
+        <Feature Id="EditCase" Level="1" Title="EditCase">
+          <ComponentRef Id="changelog_8" />
+          <ComponentRef Id="ECaseEng.hlf" />
+          <ComponentRef Id="ECaseEng.lng" />
+          <ComponentRef Id="ECaseRus.hlf" />
+          <ComponentRef Id="ECaseRus.lng" />
+          <ComponentRef Id="EditCase.dll" />
+          <ComponentRef Id="EditCase.map" />
+        </Feature>
+      </Feature>
+      <Feature Id="Compare" Level="1" Title="Compare">
+        <ComponentRef Id="changelog_6" />
+        <ComponentRef Id="CmpEng.hlf" />
+        <ComponentRef Id="CmpRus.hlf" />
+        <ComponentRef Id="Compare.dll" />
+        <ComponentRef Id="Compare.map" />
+        <ComponentRef Id="CompEng.lng" />
+        <ComponentRef Id="CompRus.lng" />
+      </Feature>
+      <Feature Id="EMenu" Level="1" Title="EMenu">
+        <ComponentRef Id="changelog_9" />
+        <ComponentRef Id="EMenu.dll" />
+        <ComponentRef Id="EMenu.map" />
+        <ComponentRef Id="EMenuDel.reg" />
+        <ComponentRef Id="EMenuEng.hlf" />
+        <ComponentRef Id="EMenuEng.lng" />
+        <ComponentRef Id="EMenuRus.hlf" />
+        <ComponentRef Id="EMenuRus.lng" />
+        <ComponentRef Id="Hotkey.reg" />
+        <ComponentRef Id="HotkeyClipboard.reg" />
+        <ComponentRef Id="HotkeyProperties.reg" />
+      </Feature>
+      <Feature Id="FARCmds" Level="1" Title="FARCmds">
+        <ComponentRef Id="changelog_10" />
+        <ComponentRef Id="FARCmds.dll" />
+        <ComponentRef Id="FARCmds.map" />
+        <ComponentRef Id="FARCmdsEng.hlf" />
+        <ComponentRef Id="FARCmdsEng.lng" />
+        <ComponentRef Id="FARCmdsRus.hlf" />
+        <ComponentRef Id="FARCmdsRus.lng" />
+      </Feature>
+      <Feature Id="FileCase" Level="1" Title="FileCase">
+        <ComponentRef Id="CaseEng.hlf" />
+        <ComponentRef Id="CaseEng.lng" />
+        <ComponentRef Id="CaseRus.hlf" />
+        <ComponentRef Id="CaseRus.lng" />
+        <ComponentRef Id="changelog_11" />
+        <ComponentRef Id="FileCase.dll" />
+        <ComponentRef Id="FileCase.map" />
+      </Feature>
+      <Feature Id="FarFtp" Level="1" Title="FarFtp">
+        <ComponentRef Id="changelog_12" />
+        <ComponentRef Id="FarFtp.dll" />
+        <ComponentRef Id="FarFtp.map" />
+        <ComponentRef Id="FtpCmds.txt" />
+        <ComponentRef Id="FtpCmds_rus.txt" />
+        <ComponentRef Id="FtpEng.hlf" />
+        <ComponentRef Id="FtpEng.lng" />
+        <ComponentRef Id="FtpRus.hlf" />
+        <ComponentRef Id="FtpRus.lng" />
+        <ComponentRef Id="Notes.txt" />
+        <ComponentRef Id="Notes_rus.txt" />
+        <ComponentRef Id="TechInfo.reg" />
+        <ComponentRef Id="TechInfo_rus.reg" />
+        <ComponentRef Id="Progress_FarCopy.reg" />
+        <ComponentRef Id="Progress_JM.reg" />
+        <ComponentRef Id="Progress_Wesha.reg" />
+        <ComponentRef Id="Progress_ZeMA.reg" />
+        <Feature Id="ftpDirList" Level="1" Title="DirList">
+          <ComponentRef Id="ftpDirList.fll" />
+          <ComponentRef Id="ftpDirList.map" />
+        </Feature>
+        <Feature Id="ftpNotify" Level="1" Title="Notify">
+          <ComponentRef Id="ftpNotify.fll" />
+          <ComponentRef Id="ftpNotify.map" />
+          <ComponentRef Id="notify.log" />
+        </Feature>
+        <Feature Id="ftpProgress" Level="1" Title="Progress">
+          <ComponentRef Id="ftpProgress.fll" />
+          <ComponentRef Id="ftpProgress.map" />
+        </Feature>
+      </Feature>
+      <Feature Id="HlfViewer" Level="1" Title="HlfViewer">
+        <ComponentRef Id="changelog_13" />
+        <ComponentRef Id="HlfViewer.dll" />
+        <ComponentRef Id="HlfViewer.map" />
+        <ComponentRef Id="HlfViewerEng.hlf" />
+        <ComponentRef Id="HlfViewerEng.lng" />
+        <ComponentRef Id="HlfViewerRus.hlf" />
+        <ComponentRef Id="HlfViewerRus.lng" />
+      </Feature>
+      <Feature Id="MacroView" Level="1" Title="MacroView">
+        <ComponentRef Id="changelog_14" />
+        <ComponentRef Id="MacroEng.hlf" />
+        <ComponentRef Id="MacroEng.lng" />
+        <ComponentRef Id="MacroRus.hlf" />
+        <ComponentRef Id="MacroRus.lng" />
+        <ComponentRef Id="MacroView.dll" />
+        <ComponentRef Id="MacroView.map" />
+      </Feature>
+      <Feature Id="MultiArc" Level="1" Title="MultiArc">
+        <ComponentRef Id="arceng.hlf" />
+        <ComponentRef Id="arceng.lng" />
+        <ComponentRef Id="arcrus.hlf" />
+        <ComponentRef Id="arcrus.lng" />
+        <ComponentRef Id="changelog_15" />
+        <ComponentRef Id="MultiArc.dll" />
+        <ComponentRef Id="MultiArc.map" />
+        <Feature Id="Ace" Level="1" Title="Ace">
+          <ComponentRef Id="Ace.fmt" />
+          <ComponentRef Id="Ace.map" />
+        </Feature>
+        <Feature Id="Arc" Level="1" Title="Arc">
+          <ComponentRef Id="Arc.fmt" />
+          <ComponentRef Id="Arc.map" />
+        </Feature>
+        <Feature Id="Arj" Level="1" Title="Arj">
+          <ComponentRef Id="Arj.fmt" />
+          <ComponentRef Id="Arj.map" />
+        </Feature>
+        <Feature Id="Cab" Level="1" Title="Cab">
+          <ComponentRef Id="Cab.fmt" />
+          <ComponentRef Id="Cab.map" />
+        </Feature>
+        <Feature Id="Custom" Level="1" Title="Custom">
+          <ComponentRef Id="Custom.fmt" />
+          <ComponentRef Id="custom.ini" />
+          <ComponentRef Id="Custom.map" />
+        </Feature>
+        <Feature Id="Ha" Level="1" Title="Ha">
+          <ComponentRef Id="Ha.fmt" />
+          <ComponentRef Id="Ha.map" />
+        </Feature>
+        <Feature Id="Lzh" Level="1" Title="Lzh">
+          <ComponentRef Id="Lzh.fmt" />
+          <ComponentRef Id="Lzh.map" />
+        </Feature>
+        <Feature Id="Rar" Level="1" Title="Rar">
+          <ComponentRef Id="Rar.fmt" />
+          <ComponentRef Id="Rar.map" />
+        </Feature>
+        <Feature Id="TarGz" Level="1" Title="TarGz">
+          <ComponentRef Id="TarGz.fmt" />
+          <ComponentRef Id="TarGz.map" />
+        </Feature>
+        <Feature Id="Zip" Level="1" Title="Zip">
+          <ComponentRef Id="Zip.fmt" />
+          <ComponentRef Id="Zip.map" />
+        </Feature>
+      </Feature>
+      <Feature Id="Network" Level="1" Title="Network">
+        <ComponentRef Id="changelog_16" />
+        <ComponentRef Id="NetEng.hlf" />
+        <ComponentRef Id="NetEng.lng" />
+        <ComponentRef Id="NetRus.hlf" />
+        <ComponentRef Id="NetRus.lng" />
+        <ComponentRef Id="Network.dll" />
+        <ComponentRef Id="Network.map" />
+      </Feature>
+      <Feature Id="Proclist" Level="1" Title="Proclist">
+        <ComponentRef Id="changelog_17" />
+        <ComponentRef Id="ProcEng.hlf" />
+        <ComponentRef Id="ProcEng.lng" />
+        <ComponentRef Id="Proclist.dll" />
+        <ComponentRef Id="Proclist.map" />
+        <ComponentRef Id="ProcRus.hlf" />
+        <ComponentRef Id="ProcRus.lng" />
+      </Feature>
+      <Feature Id="TmpPanel" Level="1" Title="TmpPanel">
+        <ComponentRef Id="changelog_18" />
+        <ComponentRef Id="disks.eng.temp" />
+        <ComponentRef Id="disks.rus.temp" />
+        <ComponentRef Id="shortcuts.eng.reg" />
+        <ComponentRef Id="shortcuts.eng.temp" />
+        <ComponentRef Id="shortcuts.rus.reg" />
+        <ComponentRef Id="shortcuts.rus.temp" />
+        <ComponentRef Id="TmpEng.hlf" />
+        <ComponentRef Id="TmpEng.lng" />
+        <ComponentRef Id="TmpPanel.dll" />
+        <ComponentRef Id="TmpPanel.map" />
+        <ComponentRef Id="TmpRus.hlf" />
+        <ComponentRef Id="TmpRus.lng" />
+      </Feature>
+    </Feature>
+  </Feature>
+</Include>
