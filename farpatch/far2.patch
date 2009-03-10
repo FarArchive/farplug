@@ -1,6 +1,6 @@
 diff -ruN fardev/build.bat fardev-patched/build.bat
 --- fardev/build.bat	Thu Jan  1 02:00:00 1970
-+++ fardev-patched/build.bat	Fri Mar  6 17:36:10 2009
++++ fardev-patched/build.bat	Tue Mar 10 11:42:58 2009
 @@ -0,0 +1,6 @@
 +call setenv /x86
 +nmake -f build.mak
@@ -10,8 +10,8 @@ diff -ruN fardev/build.bat fardev-patched/build.bat
 +:end
 diff -ruN fardev/build.mak fardev-patched/build.mak
 --- fardev/build.mak	Thu Jan  1 02:00:00 1970
-+++ fardev-patched/build.mak	Fri Mar  6 17:40:56 2009
-@@ -0,0 +1,77 @@
++++ fardev-patched/build.mak	Tue Mar 10 11:53:51 2009
+@@ -0,0 +1,92 @@
 +!if "$(CPU)"=="AMD64" 
 +suffix=64
 +distrsuffix=_x64
@@ -42,25 +42,40 @@ diff -ruN fardev/build.mak fardev-patched/build.mak
 +	xcopy unicode_far\changelog bin$(suffix) /y
 +	xcopy misc\fexcept\final.$(suffix)W.vc\*.dll bin$(suffix) /i /y
 +	xcopy plugins\align\final.$(suffix)W.vc\* bin$(suffix)\plugins\align /e /i /y /exclude:.exclude
++	xcopy plugins\align\changelog bin$(suffix)\plugins\align /y
 +	xcopy plugins\autowrap\final.$(suffix)W.vc\* bin$(suffix)\plugins\autowrap /e /i /y /exclude:.exclude
++	xcopy plugins\autowrap\changelog bin$(suffix)\plugins\autowrap /y
 +	xcopy plugins\brackets\final.$(suffix)W.vc\* bin$(suffix)\plugins\brackets /e /i /y /exclude:.exclude
++	xcopy plugins\brackets\changelog bin$(suffix)\plugins\brackets /y
 +	xcopy plugins\compare\final.$(suffix)W.vc\* bin$(suffix)\plugins\compare /e /i /y /exclude:.exclude
++	xcopy plugins\compare\changelog bin$(suffix)\plugins\compare /y
 +	xcopy plugins\drawline\final.$(suffix)W.vc\* bin$(suffix)\plugins\drawline /e /i /y /exclude:.exclude
++	xcopy plugins\drawline\changelog bin$(suffix)\plugins\drawline /y
 +	xcopy plugins\editcase\final.$(suffix)W.vc\* bin$(suffix)\plugins\editcase /e /i /y /exclude:.exclude
++	xcopy plugins\editcase\changelog bin$(suffix)\plugins\editcase /y
 +	xcopy plugins\emenu\final.$(suffix)W.vc\* bin$(suffix)\plugins\emenu /e /i /y /exclude:.exclude
++	xcopy plugins\emenu\changelog bin$(suffix)\plugins\emenu /y
 +	xcopy plugins\farcmds\final.$(suffix)W.vc\* bin$(suffix)\plugins\farcmds /e /i /y /exclude:.exclude
++	xcopy plugins\farcmds\changelog bin$(suffix)\plugins\farcmds /y
 +	xcopy plugins\filecase\final.$(suffix)W.vc\* bin$(suffix)\plugins\filecase /e /i /y /exclude:.exclude
++	xcopy plugins\filecase\changelog bin$(suffix)\plugins\filecase /y
 +	xcopy plugins\ftp\final.$(suffix).vc\* bin$(suffix)\plugins\ftp /e /i /y /exclude:.exclude
++	xcopy plugins\ftp\changelog bin$(suffix)\plugins\ftp /y
 +	xcopy plugins\hlfviewer\final.$(suffix)W.vc\* bin$(suffix)\plugins\hlfviewer /e /i /y /exclude:.exclude
++	xcopy plugins\hlfviewer\changelog bin$(suffix)\plugins\hlfviewer /y
 +	xcopy plugins\macroview\final.$(suffix)W.vc\* bin$(suffix)\plugins\macroview /e /i /y /exclude:.exclude
++	xcopy plugins\macroview\changelog bin$(suffix)\plugins\macroview /y
 +	xcopy plugins\multiarc\final.$(suffix).vc\* bin$(suffix)\plugins\multiarc /e /i /y /exclude:.exclude
++	xcopy plugins\multiarc\changelog bin$(suffix)\plugins\multiarc /y
 +	xcopy plugins\network\final.$(suffix)W.vc\* bin$(suffix)\plugins\network /e /i /y /exclude:.exclude
++	xcopy plugins\network\changelog bin$(suffix)\plugins\network /y
 +	xcopy plugins\proclist\final.$(suffix)W.vc\* bin$(suffix)\plugins\proclist /e /i /y /exclude:.exclude
++	xcopy plugins\proclist\changelog bin$(suffix)\plugins\proclist /y
 +	xcopy plugins\tmppanel\final.$(suffix)W.vc\* bin$(suffix)\plugins\tmppanel /e /i /y /exclude:.exclude
++	xcopy plugins\tmppanel\changelog bin$(suffix)\plugins\tmppanel /y
 +	xcopy docs\*.bat bin$(suffix) /i /y
 +	xcopy docs\ENG\* bin$(suffix)\docs\eng /e /i /y
 +	xcopy docs\RUS\* bin$(suffix)\docs\rus /e /i /y
-+	xcopy plugins\changelog* bin$(suffix)\plugins /s /i /y
 +	xcopy misc\fexcept\changelog* bin$(suffix)\docs\fexcept /i /y
 +	xcopy misc\fexcept\Readme.txt bin$(suffix)\docs\fexcept /y
 +	xcopy misc\fexcept\SetFarExceptionHandlerW.reg bin$(suffix)\docs\fexcept /y
@@ -91,7 +106,7 @@ diff -ruN fardev/build.mak fardev-patched/build.mak
 +	del /s /q plugins\tmppanel\final.$(suffix)W.vc
 diff -ruN fardev/docs/ClearPluginsCache.bat fardev-patched/docs/ClearPluginsCache.bat
 --- fardev/docs/ClearPluginsCache.bat	Sat Oct 27 17:22:24 2007
-+++ fardev-patched/docs/ClearPluginsCache.bat	Fri Mar  6 17:36:10 2009
++++ fardev-patched/docs/ClearPluginsCache.bat	Tue Mar 10 11:42:58 2009
 @@ -1,7 +1,4 @@
  @echo off
  rem This batch file cleared the Plugin Cache
@@ -103,7 +118,7 @@ diff -ruN fardev/docs/ClearPluginsCache.bat fardev-patched/docs/ClearPluginsCach
 +reg delete HKCU\Software\Far2\PluginsCache /f
 diff -ruN fardev/docs/RestoreSettings.bat fardev-patched/docs/RestoreSettings.bat
 --- fardev/docs/RestoreSettings.bat	Sat Oct 27 17:22:24 2007
-+++ fardev-patched/docs/RestoreSettings.bat	Fri Mar  6 17:36:10 2009
++++ fardev-patched/docs/RestoreSettings.bat	Tue Mar 10 11:42:58 2009
 @@ -2,17 +2,13 @@
  rem    This batch file restores Far settings from previously saved
  rem    files FarSave1.reg and FarSave2.reg to the registry
@@ -131,7 +146,7 @@ diff -ruN fardev/docs/RestoreSettings.bat fardev-patched/docs/RestoreSettings.ba
 +:end
 diff -ruN fardev/docs/SaveSettings.bat fardev-patched/docs/SaveSettings.bat
 --- fardev/docs/SaveSettings.bat	Sat Oct 27 17:22:24 2007
-+++ fardev-patched/docs/SaveSettings.bat	Fri Mar  6 17:36:10 2009
++++ fardev-patched/docs/SaveSettings.bat	Tue Mar 10 11:42:58 2009
 @@ -2,5 +2,5 @@
  rem    This batch file saves Far settings from the registry
  rem    to files FarSave1.reg and FarSave2.reg
@@ -142,7 +157,7 @@ diff -ruN fardev/docs/SaveSettings.bat fardev-patched/docs/SaveSettings.bat
 +reg export HKLM\Software\Far2 FarSave2.reg
 diff -ruN fardev/plugins/makefile_vc_def_inc fardev-patched/plugins/makefile_vc_def_inc
 --- fardev/plugins/makefile_vc_def_inc	Mon Jan 12 16:40:23 2009
-+++ fardev-patched/plugins/makefile_vc_def_inc	Fri Mar  6 17:36:10 2009
++++ fardev-patched/plugins/makefile_vc_def_inc	Tue Mar 10 11:42:58 2009
 @@ -127,27 +127,27 @@
  NOWIN98=/OPT:NOWIN98
  !endif
@@ -195,7 +210,7 @@ diff -ruN fardev/plugins/makefile_vc_def_inc fardev-patched/plugins/makefile_vc_
  CPP_DEBUG=/Z7
 diff -ruN fardev/plugins/tmppanel/TmpClass.cpp fardev-patched/plugins/tmppanel/TmpClass.cpp
 --- fardev/plugins/tmppanel/TmpClass.cpp	Tue Feb 24 01:24:39 2009
-+++ fardev-patched/plugins/tmppanel/TmpClass.cpp	Fri Mar  6 17:36:10 2009
++++ fardev-patched/plugins/tmppanel/TmpClass.cpp	Tue Mar 10 11:42:58 2009
 @@ -153,6 +153,17 @@
  #undef _NAME
  }
@@ -237,7 +252,7 @@ diff -ruN fardev/plugins/tmppanel/TmpClass.cpp fardev-patched/plugins/tmppanel/T
  #endif
 diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cpp
 --- fardev/unicode_far/findfile.cpp	Thu Mar  5 10:30:45 2009
-+++ fardev-patched/unicode_far/findfile.cpp	Fri Mar  6 17:36:10 2009
++++ fardev-patched/unicode_far/findfile.cpp	Tue Mar 10 11:42:58 2009
 @@ -958,8 +958,8 @@
    wchar_t *lpFileName = xf_wcsdup (PanelItem->FindData.lpwszFileName);
    wchar_t *lpFileNameShort = xf_wcsdup (PanelItem->FindData.lpwszAlternateFileName);
@@ -439,7 +454,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
  }
 diff -ruN fardev/unicode_far/findfile.hpp fardev-patched/unicode_far/findfile.hpp
 --- fardev/unicode_far/findfile.hpp	Sat Dec 27 17:00:42 2008
-+++ fardev-patched/unicode_far/findfile.hpp	Fri Mar  6 17:36:10 2009
++++ fardev-patched/unicode_far/findfile.hpp	Tue Mar 10 11:42:58 2009
 @@ -96,8 +96,6 @@
      static int GetPluginFile(DWORD ArcIndex, struct PluginPanelItem *PanelItem,
                               const wchar_t *DestPath, string &strResultName);
@@ -451,7 +466,7 @@ diff -ruN fardev/unicode_far/findfile.hpp fardev-patched/unicode_far/findfile.hp
  
 diff -ruN fardev/unicode_far/flupdate.cpp fardev-patched/unicode_far/flupdate.cpp
 --- fardev/unicode_far/flupdate.cpp	Sun Feb 15 19:41:27 2009
-+++ fardev-patched/unicode_far/flupdate.cpp	Fri Mar  6 17:36:10 2009
++++ fardev-patched/unicode_far/flupdate.cpp	Tue Mar 10 11:42:58 2009
 @@ -724,10 +724,6 @@
  
      //memset(CurListData,0,sizeof(*CurListData));
@@ -464,8 +479,8 @@ diff -ruN fardev/unicode_far/flupdate.cpp fardev-patched/unicode_far/flupdate.cp
  
      if ((Info.Flags & OPIF_USESORTGROUPS)/* && (CurListData->FileAttr & FILE_ATTRIBUTE_DIRECTORY)==0*/)
 diff -ruN fardev/unicode_far/makefile_vc fardev-patched/unicode_far/makefile_vc
---- fardev/unicode_far/makefile_vc	Sun Mar  1 14:19:55 2009
-+++ fardev-patched/unicode_far/makefile_vc	Fri Mar  6 17:36:10 2009
+--- fardev/unicode_far/makefile_vc	Sun Mar  8 19:42:40 2009
++++ fardev-patched/unicode_far/makefile_vc	Tue Mar 10 11:42:58 2009
 @@ -281,25 +281,25 @@
  	/D "_CRT_NONSTDC_NO_DEPRECATE"\
  	/D "_CRT_NON_CONFORMING_SWPRINTFS"
