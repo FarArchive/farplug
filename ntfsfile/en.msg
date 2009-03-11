@@ -53,6 +53,8 @@ file_panel.show.main.stream = Show &unnamed DATA streams
 file_panel.use.highlighting = Use high&lighting
 file_panel.use.usn.journal = Use USN &journal
 file_panel.delete.usn.journal = &Delete USN journal after use
+file_panel.use.cache = Use MFT index &cache
+file_panel.default.mft.mode = Use &MFT index mode by default
 file_panel.mode.sort = &Sort by:
 file_panel.mode.sort.nothing = Nothing
 file_panel.mode.sort.data_size = Data Size
@@ -72,6 +74,10 @@ file_panel.mode.col_title.hard_links = Lnk
 file_panel.mode.col_title.mft_records = MFT
 file_panel.mode.col_title.valid_size = ValidSz
 file_panel.error_marker = ERROR
+file_panel.write_cache.progress.title = Storing MFT index cache...
+file_panel.write_cache.progress.console.title = {%u%%} Storing MFT index cache...
+file_panel.read_cache.progress.title = Loading MFT index cache...
+file_panel.read_cache.progress.console.title = {%u%%} Loading MFT index cache...
 
 # File content analysis settings
 content.settings.title = File content analysis

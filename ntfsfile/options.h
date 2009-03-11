@@ -1,5 +1,4 @@
-#ifndef _OPTIONS_H
-#define _OPTIONS_H
+#pragma once
 
 /* content analysis options structure */
 struct ContentOptions {
@@ -25,6 +24,8 @@ struct FilePanelMode {
   bool use_highlighting;
   bool use_usn_journal;
   bool delete_usn_journal;
+  bool use_cache;
+  bool default_mft_mode;
 };
 
 /* plugin options */
@@ -34,5 +35,3 @@ extern FilePanelMode g_file_panel_mode;
 
 void load_plugin_options();
 void store_plugin_options();
-
-#endif /* _OPTIONS_H */

@@ -335,10 +335,13 @@ void NtfsVolume::open(const UnicodeString& volume_name) {
   }
 }
 
-UnicodeString get_volume_id(const UnicodeString& volume_name) {
+UnicodeString get_volume_guid(const UnicodeString& volume_name) {
   UnicodeString volume_id;
   const unsigned c_max_volume_id_size = 50;
   CHECK_SYS(GetVolumeNameForVolumeMountPointW(add_trailing_slash(volume_name).data(), volume_id.buf(c_max_volume_id_size), c_max_volume_id_size));
   volume_id.set_size();
-  return del_trailing_slash(volume_id);
+  unsigned b_idx = volume_id.search(L'{');
+  unsigned e_idx = volume_id.search(b_idx, L'}');
+  if ((b_idx == -1) || (e_idx == -1)) FAIL(MsgError(L"Unexpected volume name"))
+  return volume_id.slice(b_idx + 1, e_idx - b_idx - 1);
 }

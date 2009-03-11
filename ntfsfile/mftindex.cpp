@@ -184,7 +184,7 @@ void FilePanel::delete_usn_journal() {
   }
 }
 
-void FilePanel::mft_load_index() {
+void FilePanel::create_mft_index() {
   prepare_usn_journal();
 
   class VolumeListProgress: public ProgressMonitor {
@@ -239,7 +239,7 @@ void FilePanel::mft_load_index() {
   mft_index.compact();
 }
 
-void FilePanel::mft_update_index() {
+void FilePanel::update_mft_index_from_usn() {
   if (!g_file_panel_mode.use_usn_journal) return;
 
   READ_USN_JOURNAL_DATA read_usn_data;
@@ -256,7 +256,7 @@ void FilePanel::mft_update_index() {
   while(true) {
     DWORD bytes_ret;
     if (!DeviceIoControl(volume.handle, FSCTL_READ_USN_JOURNAL, &read_usn_data, sizeof(read_usn_data), usn_buffer.buf(c_usn_buffer_size), c_usn_buffer_size, &bytes_ret, NULL)) {
-      mft_load_index();
+      create_mft_index();
       return;
     }
     usn_buffer.set_size(bytes_ret);
@@ -375,25 +375,60 @@ void FilePanel::toggle_mft_mode() {
     current_dir_oem = unicode_to_oem(current_dir);
 #endif // FARAPI17
     volume.open(extract_path_root(current_dir));
-    mft_load_index();
+    if (g_file_panel_mode.use_usn_journal && g_file_panel_mode.use_cache) {
+      try {
+        load_mft_index();
+        update_mft_index_from_usn();
+      }
+      catch (...) {
+        mft_index.clear().compact();
+      }
+    }
+    if (mft_index.size() == 0) create_mft_index();
     root_dir_ref_num = mft_find_root();
     mft_find_path(current_dir);
   }
   else {
+    if (g_file_panel_mode.use_usn_journal && g_file_panel_mode.use_cache) {
+      try {
+        store_mft_index();
+      }
+      catch (...) {
+      }
+    }
     mft_index.clear().compact();
     volume.open(extract_path_root(get_real_path(current_dir)));
   }
 }
 
 void FilePanel::reload_mft() {
-  if (mft_mode) mft_load_index();
+  if (mft_mode) create_mft_index();
 }
 
 void FilePanel::reload_mft_all() {
   for (unsigned i = 0; i < g_file_panels.size(); i++) g_file_panels[i]->reload_mft();
 }
 
-void FilePanel::store_mft_index(const UnicodeString& store_file_name) {
+void FilePanel::store_mft_index() {
+  class Progress: public ProgressMonitor {
+  protected:
+    virtual void do_update_ui() {
+      const unsigned c_client_xs = 60;
+      ObjectArray<UnicodeString> lines;
+      unsigned len1 = static_cast<unsigned>(percent * c_client_xs / 100);
+      if (len1 > c_client_xs) len1 = c_client_xs;
+      unsigned len2 = c_client_xs - len1;
+      lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
+      draw_text_box(far_get_msg(MSG_FILE_PANEL_WRITE_CACHE_PROGRESS_TITLE), lines, c_client_xs);
+      SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_WRITE_CACHE_PROGRESS_CONSOLE_TITLE).data(), percent).data());
+    }
+  public:
+    unsigned percent;
+    Progress(): ProgressMonitor(true), percent(0) {
+    }
+  };
+  Progress progress;
+
   lzo_uint buffer_size = sizeof(usn_journal_id) + sizeof(next_usn) + sizeof(unsigned);
   unsigned file_record_size = sizeof(mft_index[0].file_ref_num) + sizeof(mft_index[0].parent_ref_num) + sizeof(mft_index[0].file_attr) + sizeof(mft_index[0].creation_time) + sizeof(mft_index[0].last_access_time) + sizeof(mft_index[0].last_write_time) + sizeof(mft_index[0].data_size) + sizeof(mft_index[0].disk_size) + sizeof(mft_index[0].valid_size) + sizeof(mft_index[0].fragment_cnt) + sizeof(mft_index[0].stream_cnt) + sizeof(mft_index[0].hard_link_cnt) + sizeof(mft_index[0].mft_rec_cnt) + sizeof(mft_index[0].ntfs_attr) + sizeof(mft_index[0].resident);
   buffer_size += file_record_size * mft_index.size();
@@ -408,6 +443,9 @@ void FilePanel::store_mft_index(const UnicodeString& store_file_name) {
   unsigned count = mft_index.size();
   ENCODE(count);
   for (unsigned i = 0; i < mft_index.size(); i++) {
+    progress.percent = i * 30 / count;
+    progress.update_ui();
+
     ENCODE(mft_index[i].file_ref_num);
     ENCODE(mft_index[i].parent_ref_num);
     unsigned file_name_size = mft_index[i].file_name.size();
@@ -437,24 +475,52 @@ void FilePanel::store_mft_index(const UnicodeString& store_file_name) {
   if (lzo1x_1_compress(buffer.buf(), buffer.size(), comp_buffer.buf(), &comp_buffer_size, comp_work_buffer.buf()) != LZO_E_OK) FAIL(MsgError(L"Compressor failure"));
   comp_buffer.set_size(comp_buffer_size);
 
+  progress.percent = 70;
+  progress.update_ui();
+
   lzo_uint32 header_checksum = lzo_crc32(0, reinterpret_cast<const lzo_bytep>(&buffer_size), sizeof(buffer_size));
   header_checksum = lzo_crc32(header_checksum, reinterpret_cast<const lzo_bytep>(&comp_buffer_size), sizeof(comp_buffer_size));
   lzo_uint32 comp_buffer_checksum = lzo_crc32(0, comp_buffer.data(), comp_buffer.size());
 
-  HANDLE h_file = CreateFileW(store_file_name.data(), FILE_WRITE_DATA, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  HANDLE h_file = CreateFileW(get_mft_index_cache_name().data(), GENERIC_WRITE | GENERIC_READ, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
   CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   CLEAN(HANDLE, h_file, CloseHandle(h_file));
+  CHECK_SYS(SetFilePointer(h_file, sizeof(header_checksum) + sizeof(buffer_size) + sizeof(comp_buffer_size) + sizeof(comp_buffer_checksum) + comp_buffer.size(), NULL, FILE_BEGIN) != INVALID_SET_FILE_POINTER);
+  CHECK_SYS(SetEndOfFile(h_file));
+  CHECK_SYS(SetFilePointer(h_file, 0, NULL, FILE_BEGIN) != INVALID_SET_FILE_POINTER);
   DWORD bw;
   CHECK_SYS(WriteFile(h_file, &header_checksum, sizeof(header_checksum), &bw, NULL));
   CHECK_SYS(WriteFile(h_file, &buffer_size, sizeof(buffer_size), &bw, NULL));
   CHECK_SYS(WriteFile(h_file, &comp_buffer_size, sizeof(comp_buffer_size), &bw, NULL));
   CHECK_SYS(WriteFile(h_file, &comp_buffer_checksum, sizeof(comp_buffer_checksum), &bw, NULL));
   CHECK_SYS(WriteFile(h_file, comp_buffer.data(), comp_buffer.size(), &bw, NULL));
+
+  progress.percent = 100;
+  progress.update_ui();
 }
 
-void FilePanel::load_mft_index(const UnicodeString& store_file_name) {
+void FilePanel::load_mft_index() {
+  class Progress: public ProgressMonitor {
+  protected:
+    virtual void do_update_ui() {
+      const unsigned c_client_xs = 60;
+      ObjectArray<UnicodeString> lines;
+      unsigned len1 = static_cast<unsigned>(percent * c_client_xs / 100);
+      if (len1 > c_client_xs) len1 = c_client_xs;
+      unsigned len2 = c_client_xs - len1;
+      lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
+      draw_text_box(far_get_msg(MSG_FILE_PANEL_READ_CACHE_PROGRESS_TITLE), lines, c_client_xs);
+      SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_READ_CACHE_PROGRESS_CONSOLE_TITLE).data(), percent).data());
+    }
+  public:
+    unsigned percent;
+    Progress(): ProgressMonitor(true), percent(0) {
+    }
+  };
+  Progress progress;
+
   const wchar_t* c_corrupted_msg = L"Corrupted cache file";
-  HANDLE h_file = CreateFileW(store_file_name.data(), FILE_READ_DATA, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  HANDLE h_file = CreateFileW(get_mft_index_cache_name().data(), FILE_READ_DATA, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   CLEAN(HANDLE, h_file, CloseHandle(h_file));
 
@@ -484,10 +550,16 @@ void FilePanel::load_mft_index(const UnicodeString& store_file_name) {
   lzo_uint32 comp_buffer_checksum = lzo_crc32(0, comp_buffer.data(), comp_buffer.size());
   if (comp_buffer_checksum != saved_comp_buffer_checksum) FAIL(MsgError(c_corrupted_msg));
 
+  progress.percent = 30;
+  progress.update_ui();
+
   Array<unsigned char> buffer;
   buffer.extend(buffer_size + 3);
   if (lzo1x_decompress_asm_fast(comp_buffer.data(), comp_buffer_size, buffer.buf(), &buffer_size, NULL) != LZO_E_OK) FAIL(MsgError(c_corrupted_msg));
   buffer.set_size(buffer_size);
+
+  progress.percent = 70;
+  progress.update_ui();
 
   #define DECODE(var) memcpy(&var, buffer.data() + pos, sizeof(var)); pos += sizeof(var);
   unsigned pos = 0;
@@ -499,6 +571,9 @@ void FilePanel::load_mft_index(const UnicodeString& store_file_name) {
   FileRecord rec;
   unsigned file_name_size;
   for (unsigned i = 0; i < count; i++) {
+    progress.percent = 70 + i * 30 / count;
+    progress.update_ui();
+
     DECODE(rec.file_ref_num);
     DECODE(rec.parent_ref_num);
     DECODE(file_name_size);
@@ -520,4 +595,8 @@ void FilePanel::load_mft_index(const UnicodeString& store_file_name) {
     mft_index += rec;
   }
   assert(pos == buffer_size);
+}
+
+UnicodeString FilePanel::get_mft_index_cache_name() {
+  return add_trailing_slash(get_temp_path()) + get_volume_guid(volume.name) + L".ntfsinfo";
 }

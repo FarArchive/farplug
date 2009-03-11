@@ -113,13 +113,14 @@ private:
   void add_file_records(const FileInfo& file_info);
   void prepare_usn_journal();
   void delete_usn_journal();
-  void mft_load_index();
-  void mft_update_index();
+  void create_mft_index();
+  void update_mft_index_from_usn();
   void mft_scan_dir(u64 parent_file_index, const UnicodeString& rel_path, std::list<PanelItemData>& pid_list, FileListProgress& progress);
   u64 mft_find_root() const;
   u64 mft_find_path(const UnicodeString& path);
-  void store_mft_index(const UnicodeString& store_file_name);
-  void load_mft_index(const UnicodeString& store_file_name);
+  void store_mft_index();
+  void load_mft_index();
+  UnicodeString get_mft_index_cache_name();
   FilePanel(){}
 public:
   bool flat_mode;

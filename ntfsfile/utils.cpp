@@ -393,19 +393,9 @@ void ProgressMonitor::update_ui(bool force) {
 
 void Log::show() {
   try {
-    // get system directory for temporary files
-    UnicodeString temp_path;
-    DWORD temp_path_size = MAX_PATH;
-    DWORD len = GetTempPathW(temp_path_size, temp_path.buf(temp_path_size));
-    if (len > temp_path_size) {
-      temp_path_size = len;
-      len = GetTempPathW(temp_path_size, temp_path.buf(temp_path_size));
-    }
-    CHECK_SYS(len != 0);
-    temp_path.set_size(len);
     // create file name for temporary file
     UnicodeString temp_file_path;
-    CHECK_SYS(GetTempFileNameW(temp_path.data(), L"log", 0, temp_file_path.buf(MAX_PATH)));
+    CHECK_SYS(GetTempFileNameW(get_temp_path().data(), L"log", 0, temp_file_path.buf(MAX_PATH)));
     temp_file_path.set_size();
 
     // schedule file deletion
@@ -529,4 +519,18 @@ void error_dlg(const std::exception& e) {
   if (err_msg.size() != 0) msg.add(err_msg).add('\n');
   msg.add_fmt(L"r.%u "PLUGIN_TYPE, g_version.revision);
   far_message(msg, 0, FMSG_WARNING | FMSG_MB_OK);
+}
+
+// get system directory for temporary files
+UnicodeString get_temp_path() {
+  UnicodeString temp_path;
+  DWORD temp_path_size = MAX_PATH;
+  DWORD len = GetTempPathW(temp_path_size, temp_path.buf(temp_path_size));
+  if (len > temp_path_size) {
+    temp_path_size = len;
+    len = GetTempPathW(temp_path_size, temp_path.buf(temp_path_size));
+  }
+  CHECK_SYS(len != 0);
+  temp_path.set_size(len);
+  return temp_path;
 }

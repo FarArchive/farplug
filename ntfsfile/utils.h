@@ -100,3 +100,5 @@ extern ModuleVersion g_version;
 
 void error_dlg(const Error& e);
 void error_dlg(const std::exception& e);
+
+UnicodeString get_temp_path();

@@ -30,4 +30,4 @@ struct NtfsVolume {
 };
 
 UnicodeString get_real_path(const UnicodeString& fp);
-UnicodeString get_volume_id(const UnicodeString& volume_name);
+UnicodeString get_volume_guid(const UnicodeString& volume_name);
