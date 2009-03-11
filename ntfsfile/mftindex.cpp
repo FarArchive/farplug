@@ -5,6 +5,9 @@
 #include <set>
 #include <algorithm>
 
+#include "lzo/lzo1x.h"
+#include "lzo/lzo_asm.h"
+
 #include "plugin.hpp"
 
 #include "col/AnsiString.h"
@@ -388,4 +391,133 @@ void FilePanel::reload_mft() {
 
 void FilePanel::reload_mft_all() {
   for (unsigned i = 0; i < g_file_panels.size(); i++) g_file_panels[i]->reload_mft();
+}
+
+void FilePanel::store_mft_index(const UnicodeString& store_file_name) {
+  lzo_uint buffer_size = sizeof(usn_journal_id) + sizeof(next_usn) + sizeof(unsigned);
+  unsigned file_record_size = sizeof(mft_index[0].file_ref_num) + sizeof(mft_index[0].parent_ref_num) + sizeof(mft_index[0].file_attr) + sizeof(mft_index[0].creation_time) + sizeof(mft_index[0].last_access_time) + sizeof(mft_index[0].last_write_time) + sizeof(mft_index[0].data_size) + sizeof(mft_index[0].disk_size) + sizeof(mft_index[0].valid_size) + sizeof(mft_index[0].fragment_cnt) + sizeof(mft_index[0].stream_cnt) + sizeof(mft_index[0].hard_link_cnt) + sizeof(mft_index[0].mft_rec_cnt) + sizeof(mft_index[0].ntfs_attr) + sizeof(mft_index[0].resident);
+  buffer_size += file_record_size * mft_index.size();
+  for (unsigned i = 0; i < mft_index.size(); i++) {
+    buffer_size += sizeof(unsigned) + mft_index[i].file_name.size() * sizeof(mft_index[i].file_name[0]);
+  }
+  Array<unsigned char> buffer;
+  buffer.extend(buffer_size);
+  #define ENCODE(var) buffer.add(reinterpret_cast<const unsigned char*>(&var), sizeof(var));
+  ENCODE(usn_journal_id);
+  ENCODE(next_usn);
+  unsigned count = mft_index.size();
+  ENCODE(count);
+  for (unsigned i = 0; i < mft_index.size(); i++) {
+    ENCODE(mft_index[i].file_ref_num);
+    ENCODE(mft_index[i].parent_ref_num);
+    unsigned file_name_size = mft_index[i].file_name.size();
+    ENCODE(file_name_size);
+    buffer.add(reinterpret_cast<const unsigned char*>(mft_index[i].file_name.data()), mft_index[i].file_name.size() * sizeof(mft_index[i].file_name[0]));
+    ENCODE(mft_index[i].file_attr);
+    ENCODE(mft_index[i].creation_time);
+    ENCODE(mft_index[i].last_access_time);
+    ENCODE(mft_index[i].last_write_time);
+    ENCODE(mft_index[i].data_size);
+    ENCODE(mft_index[i].disk_size);
+    ENCODE(mft_index[i].valid_size);
+    ENCODE(mft_index[i].fragment_cnt);
+    ENCODE(mft_index[i].stream_cnt);
+    ENCODE(mft_index[i].hard_link_cnt);
+    ENCODE(mft_index[i].mft_rec_cnt);
+    ENCODE(mft_index[i].ntfs_attr);
+    ENCODE(mft_index[i].resident);
+  }
+  assert(buffer.size() == buffer_size);
+
+  Array<unsigned char> comp_buffer;
+  lzo_uint comp_buffer_size = buffer.size() + buffer.size() / 16 + 64 + 3;
+  comp_buffer.extend(comp_buffer_size);
+  Array<unsigned char> comp_work_buffer;
+  comp_work_buffer.extend(LZO1X_1_MEM_COMPRESS);
+  if (lzo1x_1_compress(buffer.buf(), buffer.size(), comp_buffer.buf(), &comp_buffer_size, comp_work_buffer.buf()) != LZO_E_OK) FAIL(MsgError(L"Compressor failure"));
+  comp_buffer.set_size(comp_buffer_size);
+
+  lzo_uint32 header_checksum = lzo_crc32(0, reinterpret_cast<const lzo_bytep>(&buffer_size), sizeof(buffer_size));
+  header_checksum = lzo_crc32(header_checksum, reinterpret_cast<const lzo_bytep>(&comp_buffer_size), sizeof(comp_buffer_size));
+  lzo_uint32 comp_buffer_checksum = lzo_crc32(0, comp_buffer.data(), comp_buffer.size());
+
+  HANDLE h_file = CreateFileW(store_file_name.data(), FILE_WRITE_DATA, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
+  CLEAN(HANDLE, h_file, CloseHandle(h_file));
+  DWORD bw;
+  CHECK_SYS(WriteFile(h_file, &header_checksum, sizeof(header_checksum), &bw, NULL));
+  CHECK_SYS(WriteFile(h_file, &buffer_size, sizeof(buffer_size), &bw, NULL));
+  CHECK_SYS(WriteFile(h_file, &comp_buffer_size, sizeof(comp_buffer_size), &bw, NULL));
+  CHECK_SYS(WriteFile(h_file, &comp_buffer_checksum, sizeof(comp_buffer_checksum), &bw, NULL));
+  CHECK_SYS(WriteFile(h_file, comp_buffer.data(), comp_buffer.size(), &bw, NULL));
+}
+
+void FilePanel::load_mft_index(const UnicodeString& store_file_name) {
+  const wchar_t* c_corrupted_msg = L"Corrupted cache file";
+  HANDLE h_file = CreateFileW(store_file_name.data(), FILE_READ_DATA, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
+  CLEAN(HANDLE, h_file, CloseHandle(h_file));
+
+  lzo_uint buffer_size;
+  lzo_uint comp_buffer_size;
+  lzo_uint32 saved_header_checksum, saved_comp_buffer_checksum;
+  DWORD br;
+  CHECK_SYS(ReadFile(h_file, &saved_header_checksum, sizeof(saved_header_checksum), &br, NULL));
+  if (br != sizeof(saved_header_checksum)) FAIL(MsgError(c_corrupted_msg));
+  CHECK_SYS(ReadFile(h_file, &buffer_size, sizeof(buffer_size), &br, NULL));
+  if (br != sizeof(buffer_size)) FAIL(MsgError(c_corrupted_msg));
+  CHECK_SYS(ReadFile(h_file, &comp_buffer_size, sizeof(comp_buffer_size), &br, NULL));
+  if (br != sizeof(comp_buffer_size)) FAIL(MsgError(c_corrupted_msg));
+
+  lzo_uint32 header_checksum = lzo_crc32(0, reinterpret_cast<const lzo_bytep>(&buffer_size), sizeof(buffer_size));
+  header_checksum = lzo_crc32(header_checksum, reinterpret_cast<const lzo_bytep>(&comp_buffer_size), sizeof(comp_buffer_size));
+  if (header_checksum != saved_header_checksum) FAIL(MsgError(c_corrupted_msg));
+
+  CHECK_SYS(ReadFile(h_file, &saved_comp_buffer_checksum, sizeof(saved_comp_buffer_checksum), &br, NULL));
+  if (br != sizeof(saved_comp_buffer_checksum)) FAIL(MsgError(c_corrupted_msg));
+  Array<unsigned char> comp_buffer;
+  comp_buffer.extend(comp_buffer_size);
+  CHECK_SYS(ReadFile(h_file, comp_buffer.buf(), comp_buffer_size, &br, NULL));
+  if (br != comp_buffer_size) FAIL(MsgError(c_corrupted_msg));
+  comp_buffer.set_size(comp_buffer_size);
+
+  lzo_uint32 comp_buffer_checksum = lzo_crc32(0, comp_buffer.data(), comp_buffer.size());
+  if (comp_buffer_checksum != saved_comp_buffer_checksum) FAIL(MsgError(c_corrupted_msg));
+
+  Array<unsigned char> buffer;
+  buffer.extend(buffer_size + 3);
+  if (lzo1x_decompress_asm_fast(comp_buffer.data(), comp_buffer_size, buffer.buf(), &buffer_size, NULL) != LZO_E_OK) FAIL(MsgError(c_corrupted_msg));
+  buffer.set_size(buffer_size);
+
+  #define DECODE(var) memcpy(&var, buffer.data() + pos, sizeof(var)); pos += sizeof(var);
+  unsigned pos = 0;
+  DECODE(usn_journal_id);
+  DECODE(next_usn);
+  unsigned count;
+  DECODE(count);
+  mft_index.clear().compact().extend(count);
+  FileRecord rec;
+  unsigned file_name_size;
+  for (unsigned i = 0; i < count; i++) {
+    DECODE(rec.file_ref_num);
+    DECODE(rec.parent_ref_num);
+    DECODE(file_name_size);
+    rec.file_name = UnicodeString(reinterpret_cast<const wchar_t*>(buffer.data() + pos), file_name_size);
+    pos += file_name_size * sizeof(wchar_t);
+    DECODE(rec.file_attr);
+    DECODE(rec.creation_time);
+    DECODE(rec.last_access_time);
+    DECODE(rec.last_write_time);
+    DECODE(rec.data_size);
+    DECODE(rec.disk_size);
+    DECODE(rec.valid_size);
+    DECODE(rec.fragment_cnt);
+    DECODE(rec.stream_cnt);
+    DECODE(rec.hard_link_cnt);
+    DECODE(rec.mft_rec_cnt);
+    DECODE(rec.ntfs_attr);
+    DECODE(rec.resident);
+    mft_index += rec;
+  }
+  assert(pos == buffer_size);
 }

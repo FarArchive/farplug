@@ -118,6 +118,8 @@ private:
   void mft_scan_dir(u64 parent_file_index, const UnicodeString& rel_path, std::list<PanelItemData>& pid_list, FileListProgress& progress);
   u64 mft_find_root() const;
   u64 mft_find_path(const UnicodeString& path);
+  void store_mft_index(const UnicodeString& store_file_name);
+  void load_mft_index(const UnicodeString& store_file_name);
   FilePanel(){}
 public:
   bool flat_mode;
