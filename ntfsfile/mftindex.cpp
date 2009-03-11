@@ -429,7 +429,7 @@ void FilePanel::store_mft_index() {
   };
   Progress progress;
 
-  lzo_uint buffer_size = sizeof(usn_journal_id) + sizeof(next_usn) + sizeof(unsigned);
+  unsigned buffer_size = sizeof(usn_journal_id) + sizeof(next_usn) + sizeof(unsigned);
   unsigned file_record_size = sizeof(mft_index[0].file_ref_num) + sizeof(mft_index[0].parent_ref_num) + sizeof(mft_index[0].file_attr) + sizeof(mft_index[0].creation_time) + sizeof(mft_index[0].last_access_time) + sizeof(mft_index[0].last_write_time) + sizeof(mft_index[0].data_size) + sizeof(mft_index[0].disk_size) + sizeof(mft_index[0].valid_size) + sizeof(mft_index[0].fragment_cnt) + sizeof(mft_index[0].stream_cnt) + sizeof(mft_index[0].hard_link_cnt) + sizeof(mft_index[0].mft_rec_cnt) + sizeof(mft_index[0].ntfs_attr) + sizeof(mft_index[0].resident);
   buffer_size += file_record_size * mft_index.size();
   for (unsigned i = 0; i < mft_index.size(); i++) {
@@ -468,11 +468,13 @@ void FilePanel::store_mft_index() {
   assert(buffer.size() == buffer_size);
 
   Array<unsigned char> comp_buffer;
-  lzo_uint comp_buffer_size = buffer.size() + buffer.size() / 16 + 64 + 3;
+  unsigned comp_buffer_size = buffer.size() + buffer.size() / 16 + 64 + 3;
   comp_buffer.extend(comp_buffer_size);
   Array<unsigned char> comp_work_buffer;
   comp_work_buffer.extend(LZO1X_1_MEM_COMPRESS);
-  if (lzo1x_1_compress(buffer.buf(), buffer.size(), comp_buffer.buf(), &comp_buffer_size, comp_work_buffer.buf()) != LZO_E_OK) FAIL(MsgError(L"Compressor failure"));
+  lzo_uint sz = comp_buffer_size;
+  if (lzo1x_1_compress(buffer.buf(), buffer.size(), comp_buffer.buf(), &sz, comp_work_buffer.buf()) != LZO_E_OK) FAIL(MsgError(L"Compressor failure"));
+  comp_buffer_size = static_cast<unsigned>(sz);
   comp_buffer.set_size(comp_buffer_size);
 
   progress.percent = 70;
@@ -524,8 +526,8 @@ void FilePanel::load_mft_index() {
   CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   CLEAN(HANDLE, h_file, CloseHandle(h_file));
 
-  lzo_uint buffer_size;
-  lzo_uint comp_buffer_size;
+  unsigned buffer_size;
+  unsigned comp_buffer_size;
   lzo_uint32 saved_header_checksum, saved_comp_buffer_checksum;
   DWORD br;
   CHECK_SYS(ReadFile(h_file, &saved_header_checksum, sizeof(saved_header_checksum), &br, NULL));
@@ -555,7 +557,14 @@ void FilePanel::load_mft_index() {
 
   Array<unsigned char> buffer;
   buffer.extend(buffer_size + 3);
-  if (lzo1x_decompress_asm_fast(comp_buffer.data(), comp_buffer_size, buffer.buf(), &buffer_size, NULL) != LZO_E_OK) FAIL(MsgError(c_corrupted_msg));
+#ifdef WIN64
+#  define decompress lzo1x_decompress
+#else
+#  define decompress lzo1x_decompress_asm_fast
+#endif
+  lzo_uint sz = buffer_size;
+  if (decompress(comp_buffer.data(), comp_buffer_size, buffer.buf(), &sz, NULL) != LZO_E_OK) FAIL(MsgError(c_corrupted_msg));
+  assert(sz == buffer_size);
   buffer.set_size(buffer_size);
 
   progress.percent = 70;
