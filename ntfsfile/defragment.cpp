@@ -208,6 +208,13 @@ void defragment(const ObjectArray<UnicodeString>& file_list, Log& log) {
         cluster_chains.sort<ClusterChain_CompareCnt>();
         unsigned total_chains = get_chain_count(cluster_chains, 0, extent_clusters);
         if ((total_chains != 0) && (total_chains < total_extents)) {
+          // mark file change in the USN
+          CLEAN(HANDLE, h_file,
+            USN usn;
+            DWORD bytes_ret;
+            DeviceIoControl(h_file, FSCTL_WRITE_USN_CLOSE_RECORD, NULL, 0, &usn, sizeof(usn), &bytes_ret, NULL);
+          );
+          // find smallest cluster chains
           unsigned first_chain;
           for (first_chain = 1; first_chain < cluster_chains.size(); first_chain++) {
             if (get_chain_count(cluster_chains, first_chain, extent_clusters) != total_chains) break;

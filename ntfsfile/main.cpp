@@ -1200,7 +1200,6 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
       else if (prefix == L"nfc") plugin_process_contents(g_file_list);
       else if (prefix == L"defrag") {
         defragment(g_file_list, Log());
-        FilePanel::reload_mft_all();
         far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
         far_control_int(PANEL_PASSIVE, FCTL_UPDATEANOTHERPANEL, 1);
         far_control_ptr(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, NULL);
@@ -1249,7 +1248,6 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
         if (log.size() != 0) {
           if (far_message(far_get_msg(MSG_PLUGIN_NAME) + L"\n" + word_wrap(far_get_msg(MSG_DEFRAG_ERRORS), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK) + L"\n" + far_get_msg(MSG_LOG_SHOW), 2, FMSG_WARNING) == 1) log.show();
         }
-        FilePanel::reload_mft_all();
         far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
         far_control_int(PANEL_PASSIVE, FCTL_UPDATEANOTHERPANEL, 1);
       }
