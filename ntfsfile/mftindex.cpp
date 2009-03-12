@@ -631,5 +631,13 @@ void FilePanel::load_mft_index() {
 }
 
 UnicodeString FilePanel::get_mft_index_cache_name() {
-  return add_trailing_slash(get_temp_path()) + get_volume_guid(volume.name) + L".ntfsinfo";
+  UnicodeString cache_dir;
+  unsigned cache_dir_size = MAX_PATH;
+  cache_dir_size = ExpandEnvironmentStringsW(g_file_panel_mode.cache_dir.data(), cache_dir.buf(cache_dir_size), cache_dir_size);
+  if (cache_dir_size > MAX_PATH) {
+    cache_dir_size = ExpandEnvironmentStringsW(g_file_panel_mode.cache_dir.data(), cache_dir.buf(cache_dir_size), cache_dir_size);
+  }
+  CHECK_SYS(cache_dir_size != 0);
+  cache_dir.set_size(cache_dir_size - 1);
+  return add_trailing_slash(cache_dir) + get_volume_guid(volume.name) + L".ntfsfile";
 }

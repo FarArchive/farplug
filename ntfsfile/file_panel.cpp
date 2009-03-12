@@ -668,6 +668,8 @@ private:
   int use_cache_ctrl_id;
   int default_mft_mode_ctrl_id;
   int backward_mft_scan_ctrl_id;
+  int cache_dir_lbl_id;
+  int cache_dir_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -689,6 +691,7 @@ private:
       dlg->mode.use_cache = dlg->get_check(dlg->use_cache_ctrl_id);
       dlg->mode.default_mft_mode = dlg->get_check(dlg->default_mft_mode_ctrl_id);
       dlg->mode.backward_mft_scan = dlg->get_check(dlg->backward_mft_scan_ctrl_id);
+      dlg->mode.cache_dir = dlg->get_text(dlg->cache_dir_ctrl_id);
     }
     else if ((msg == DN_BTNCLICK) && (param1 == dlg->show_streams_ctrl_id)) {
       dlg->enable(dlg->show_main_stream_ctrl_id, param2 != 0);
@@ -696,6 +699,8 @@ private:
     else if ((msg == DN_BTNCLICK) && (param1 == dlg->use_usn_journal_ctrl_id)) {
       dlg->enable(dlg->delete_usn_journal_ctrl_id, param2 != 0);
       dlg->enable(dlg->use_cache_ctrl_id, param2 != 0);
+      dlg->enable(dlg->cache_dir_lbl_id, param2 != 0);
+      dlg->enable(dlg->cache_dir_ctrl_id, param2 != 0);
     }
     END_ERROR_HANDLER(;,;);
     return g_far.DefDlgProc(h_dlg, msg, param1, param2);
@@ -770,6 +775,10 @@ public:
     delete_usn_journal_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_DELETE_USN_JOURNAL), mode.delete_usn_journal, mode.use_usn_journal ? 0 : DIF_DISABLE);
     new_line();
     use_cache_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_CACHE), mode.use_cache, mode.use_usn_journal ? 0 : DIF_DISABLE);
+    spacer(2);
+    cache_dir_lbl_id = label(far_get_msg(MSG_FILE_PANEL_CACHE_DIR), AUTO_SIZE, mode.use_usn_journal ? 0 : DIF_DISABLE);
+    spacer(1);
+    cache_dir_ctrl_id = var_edit_box(mode.cache_dir, MAX_PATH, AUTO_SIZE, mode.use_usn_journal ? 0 : DIF_DISABLE);
     new_line();
     separator();
     new_line();

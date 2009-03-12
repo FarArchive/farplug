@@ -391,7 +391,7 @@ unsigned FarDialog::separator() {
   return new_item(di);
 }
 
-unsigned FarDialog::label(const UnicodeString& text, unsigned boxsize) {
+unsigned FarDialog::label(const UnicodeString& text, unsigned boxsize, DWORD flags) {
   FarDialogItem di;
   memset(&di, 0, sizeof(di));
   di.Type = DI_TEXT;
@@ -402,6 +402,7 @@ unsigned FarDialog::label(const UnicodeString& text, unsigned boxsize) {
   if (x - c_x_frame > client_xs) client_xs = x - c_x_frame;
   di.X2 = x - 1;
   di.Y2 = y;
+  di.Flags = flags;
   set_text(di, text);
   return new_item(di);
 }

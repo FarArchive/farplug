@@ -159,6 +159,7 @@ void load_plugin_options() {
   g_file_panel_mode.use_cache = get_bool_option(L"FilePanelUseCache", true);
   g_file_panel_mode.default_mft_mode = get_bool_option(L"FilePanelDefaultMftMode", true);
   g_file_panel_mode.backward_mft_scan = get_bool_option(L"FilePanelBackwardMftScan", true);
+  g_file_panel_mode.cache_dir = get_str_option(L"FilePanelCacheDir", L"%TEMP%");
 };
 
 void store_plugin_options() {
@@ -184,4 +185,5 @@ void store_plugin_options() {
   set_bool_option(L"FilePanelUseCache", g_file_panel_mode.use_cache);
   set_bool_option(L"FilePanelDefaultMftMode", g_file_panel_mode.default_mft_mode);
   set_bool_option(L"FilePanelBackwardMftScan", g_file_panel_mode.backward_mft_scan);
+  set_str_option(L"FilePanelCacheDir", g_file_panel_mode.cache_dir);
 }

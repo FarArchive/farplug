@@ -74,6 +74,7 @@ when this option is disabled unless Ctrl+R is pressed. USN journal parameters ca
     #Use MFT index cache# - when enabled MFT index will be saved into file to speed its load next time.
 USN journal must be enabled for cache to work. Note that file defragmentation applications do not write change records
 into USN journal thus cache can contain incorrect information after using such utilities (built-in defragmenter will work properly). 
+    #Cache directory# - directory to store cache files in. Environment variables are expanded.
 
 @plugin_menu
 $ #Plugin menu#
