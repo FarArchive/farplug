@@ -27,8 +27,6 @@ protected:
   virtual void do_update_ui() {
     const unsigned c_client_xs = 60;
     ObjectArray<UnicodeString> lines;
-    unsigned __int64 curr_time;
-    QueryPerformanceCounter((PLARGE_INTEGER) &curr_time);
 
     UnicodeString file_name_label(far_get_msg(MSG_DEFRAG_PROGRESS_FILE_NAME));
     lines += file_name_label + ' ' + fit_str(file_name, c_client_xs - file_name_label.size() - 1);
