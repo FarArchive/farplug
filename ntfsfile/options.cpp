@@ -158,7 +158,7 @@ void load_plugin_options() {
   g_file_panel_mode.delete_usn_journal = get_bool_option(L"FilePanelDeleteUsnJournal", false);
   g_file_panel_mode.use_cache = get_bool_option(L"FilePanelUseCache", true);
   g_file_panel_mode.default_mft_mode = get_bool_option(L"FilePanelDefaultMftMode", true);
-
+  g_file_panel_mode.backward_mft_scan = get_bool_option(L"FilePanelBackwardMftScan", true);
 };
 
 void store_plugin_options() {
@@ -183,4 +183,5 @@ void store_plugin_options() {
   set_bool_option(L"FilePanelDeleteUsnJournal", g_file_panel_mode.delete_usn_journal);
   set_bool_option(L"FilePanelUseCache", g_file_panel_mode.use_cache);
   set_bool_option(L"FilePanelDefaultMftMode", g_file_panel_mode.default_mft_mode);
+  set_bool_option(L"FilePanelBackwardMftScan", g_file_panel_mode.backward_mft_scan);
 }

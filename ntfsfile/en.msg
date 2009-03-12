@@ -55,6 +55,7 @@ file_panel.use.usn.journal = Use USN &journal
 file_panel.delete.usn.journal = &Delete USN journal after use
 file_panel.use.cache = Use MFT index &cache
 file_panel.default.mft.mode = Use &MFT index mode by default
+file_panel.backward.mft.scan = &Backward MFT scan
 file_panel.mode.sort = &Sort by:
 file_panel.mode.sort.nothing = Nothing
 file_panel.mode.sort.data_size = Data Size

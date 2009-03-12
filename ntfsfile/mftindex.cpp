@@ -193,12 +193,12 @@ void FilePanel::create_mft_index() {
       const unsigned c_client_xs = 60;
       ObjectArray<UnicodeString> lines;
       lines += center(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_READ_VOLUME_PROGRESS_MESSAGE).data(), count), c_client_xs);
-      unsigned len1 = static_cast<unsigned>((max_file_index - curr_file_index) * c_client_xs / max_file_index);
+      unsigned len1 = static_cast<unsigned>(curr_file_index * c_client_xs / max_file_index);
       if (len1 > c_client_xs) len1 = c_client_xs;
       unsigned len2 = c_client_xs - len1;
       lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
       draw_text_box(far_get_msg(MSG_FILE_PANEL_READ_VOLUME_PROGRESS_TITLE), lines, c_client_xs);
-      SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_READ_VOLUME_PROGRESS_CONSOLE_TITLE).data(), (max_file_index - curr_file_index) * 100 / max_file_index).data());
+      SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_READ_VOLUME_PROGRESS_CONSOLE_TITLE).data(), curr_file_index * 100 / max_file_index).data());
     }
   public:
     unsigned count;
@@ -209,31 +209,55 @@ void FilePanel::create_mft_index() {
   };
   VolumeListProgress progress;
 
-  u64 file_index = volume.mft_size / volume.file_rec_size; // maximum possible file record index plus one
-  mft_index.clear().extend(static_cast<unsigned>(file_index));
-  progress.max_file_index = file_index;
   FileInfo file_info;
   file_info.volume = &volume;
-  do {
-    progress.curr_file_index = file_index;
-    progress.update_ui();
-    file_index--;
+  file_info.file_ref_num = volume.mft_size / volume.file_rec_size - 1;
+  u64 max_file_index = file_info.load_base_file_rec();
+  mft_index.clear().extend(static_cast<unsigned>(max_file_index + 1));
+  progress.max_file_index = max_file_index;
 
-    file_info.file_ref_num = file_index;
-    file_index = file_info.load_base_file_rec();
+  if (g_file_panel_mode.backward_mft_scan) {
+    u64 file_index = max_file_index + 1;
+    do {
+      file_index--;
 
-    if (file_info.base_mft_rec()->base_mft_record == 0) {
-      try {
-        file_info.process_base_file_rec();
+      progress.curr_file_index = max_file_index - file_index;
+      progress.update_ui();
+
+      file_info.file_ref_num = file_index;
+      file_index = file_info.load_base_file_rec();
+
+      if (file_info.base_mft_rec()->base_mft_record == 0) {
+        try {
+          file_info.process_base_file_rec();
+        }
+        catch (...) {
+          continue;
+        }
+        add_file_records(file_info);
+        progress.count++;
       }
-      catch (...) {
-        continue;
+    }
+    while (file_index != 0);
+  }
+  else {
+    for (u64 file_index = 0; file_index <= max_file_index; file_index++) {
+      progress.curr_file_index = file_index;
+      progress.update_ui();
+
+      file_info.file_ref_num = file_index;
+      if ((file_index == file_info.load_base_file_rec()) && (file_info.base_mft_rec()->base_mft_record == 0)) {
+        try {
+          file_info.process_base_file_rec();
+        }
+        catch (...) {
+          continue;
+        }
+        add_file_records(file_info);
+        progress.count++;
       }
-      add_file_records(file_info);
-      progress.count++;
     }
   }
-  while (file_index != 0);
 
   mft_index.sort<FileRecordCompare>();
   mft_index.compact();

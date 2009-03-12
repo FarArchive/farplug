@@ -667,6 +667,7 @@ private:
   int delete_usn_journal_ctrl_id;
   int use_cache_ctrl_id;
   int default_mft_mode_ctrl_id;
+  int backward_mft_scan_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -687,6 +688,7 @@ private:
       dlg->mode.delete_usn_journal = dlg->get_check(dlg->delete_usn_journal_ctrl_id);
       dlg->mode.use_cache = dlg->get_check(dlg->use_cache_ctrl_id);
       dlg->mode.default_mft_mode = dlg->get_check(dlg->default_mft_mode_ctrl_id);
+      dlg->mode.backward_mft_scan = dlg->get_check(dlg->backward_mft_scan_ctrl_id);
     }
     else if ((msg == DN_BTNCLICK) && (param1 == dlg->show_streams_ctrl_id)) {
       dlg->enable(dlg->show_main_stream_ctrl_id, param2 != 0);
@@ -756,8 +758,10 @@ public:
     sort_mode_ctrl_id = combo_box(items, mode.custom_sort_mode, 30, max_size + 1, DIF_DROPDOWNLIST);
     new_line();
     use_highlighting_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_HIGHLIGHTING), mode.use_highlighting);
-    spacer(2);
+    new_line();
     default_mft_mode_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_DEFAULT_MFT_MODE), mode.default_mft_mode);
+    spacer(2);
+    backward_mft_scan_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_BACKWARD_MFT_SCAN), mode.backward_mft_scan);
     new_line();
     separator();
     new_line();
