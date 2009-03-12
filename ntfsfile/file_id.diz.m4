@@ -14,6 +14,7 @@ FAR Manager Plugin
   - оценка сжимаемости данных для группы файлов/каталогов (производится сжатие данных с помощью быстрого алгоритма LZO, полезно чтобы определить - стоит ли сжимать файлы средствами NTFS или архиватором).
   - расчёт наиболее полезных хешей для выбранного файла: crc32, md5, sha1, ed2k (вариант eMule).
 5. Быстрый поиск файлов по всему тому в режиме MFT index.
+6. Управление альтернативными потоками данных.
 
 Системные требования:
   - Far m4_ifdef(`__FARAPI17__', `1.71.2411', `2.0.789')
@@ -36,6 +37,7 @@ This plugin provides various information about files on NTFS file system. Featur
   - estimate if compression of file data is possible (using very FAST LZO algorithm)
   - calculate most useful file hashes: crc32, md5, sha1, ed2k (eMule variation).
 5. Perform fast file search over entire volume using MFT index mode.
+6. Manage alternate data streams.
 
 System requirements:
   - Far m4_ifdef(`__FARAPI17__', `1.71.2411', `2.0.789')

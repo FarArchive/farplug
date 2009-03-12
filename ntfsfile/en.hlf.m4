@@ -22,6 +22,8 @@ This plugin provides various information about files on NTFS file system. Featur
 
 5. Perform fast file search over entire volume using MFT index mode.
 
+6. Manage alternate data streams.
+
 @metadata
 $ #File information#
     Displays NTFS file attribute (file component) table.
@@ -66,8 +68,12 @@ Custom columns:
     Sorting option #Sort by:# is applyed when 'Unsorted' mode (Ctrl+F7) is selected in FAR.
     #Show streams# - alternate file streams will be shown on file panel.
     #Use highlighting# - enables file highlighting. Disable to speed up processing of large file lists.
+    #Backward MFT scan# - MFT scan mode. Select value that provides best performance on your system.
     #Use USN journal# - enables fast panel updates when using MFT Index mode. File list will not be updated
-when this option is disabled unless Ctrl+R is pressed.
+when this option is disabled unless Ctrl+R is pressed. USN journal parameters can be changed using system utility #fsutil#.
+    #Use MFT index cache# - when enabled MFT index will be saved into file to speed its load next time.
+USN journal must be enabled for cache to work. Note that file defragmentation applications do not write change records
+into USN journal thus cache can contain incorrect information after using such utilities (built-in defragmenter will work properly). 
 
 @plugin_menu
 $ #Plugin menu#
