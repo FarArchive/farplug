@@ -14,6 +14,7 @@
       <ComponentRef Id="FarEng.hlf" />
       <ComponentRef Id="FarEng.lng" />
       <ComponentRef Id="FarGer.lng" />
+      <ComponentRef Id="FarHun.hlf" />
       <ComponentRef Id="FarHun.lng" />
       <ComponentRef Id="FarRus.hlf" />
       <ComponentRef Id="FarRus.lng" />

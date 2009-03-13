@@ -30,6 +30,9 @@
   <Component Id="FarGer.lng" Guid="{DD4F036E-135B-451A-9513-80611C1BA029}">
     <File Id="FarGer.lng" Name="FarGer.lng" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarGer.lng" />
   </Component>
+  <Component Id="FarHun.hlf" Guid="{9F23912A-F6B2-438C-AD31-C3CDDFE4B802}">
+    <File Id="FarHun.hlf" Name="FarHun.hlf" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarHun.hlf" />
+  </Component>
   <Component Id="FarHun.lng" Guid="{75B1C70E-82B9-4CAB-890A-05DD9F67C235}">
     <File Id="FarHun.lng" Name="FarHun.lng" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarHun.lng" />
   </Component>
