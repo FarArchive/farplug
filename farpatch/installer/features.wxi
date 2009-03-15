@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Include>
   <Feature Id="Complete" Level="1" Title="FAR Manager" Display="expand" Absent="disallow" AllowAdvertise="no" ConfigurableDirectory="INSTALLDIR">
-    <Feature Id="Far" Level="1" Title="Base Files" Absent="disallow" AllowAdvertise="no">
+    <Feature Id="Far" Level="1" Title="Base Files" Absent="disallow" AllowAdvertise="no" Description="FAR Manager executable, English help and language file">
       <ComponentRef Id="InstallDir" />
       <ComponentRef Id="ClearPluginsCache.bat" />
       <ComponentRef Id="Far.exe" />
@@ -13,7 +13,7 @@
       <ComponentRef Id="RestoreSettings.bat" />
       <ComponentRef Id="SaveSettings.bat" />
     </Feature>
-    <Feature Id="Docs" Level="1" Title="Documentation" AllowAdvertise="no">
+    <Feature Id="Docs" Level="1" Title="Documentation" AllowAdvertise="no" Description="Tech info, FAQ, What's new, etc.">
       <ComponentRef Id="Arc.Support.txt_1" />
       <ComponentRef Id="Bug.Report.txt_1" />
       <ComponentRef Id="Descript.ion_1" />
@@ -26,7 +26,7 @@
       <ComponentRef Id="WhatsNew.Plugins.txt_1" />
       <ComponentRef Id="WhatsNew.txt_1" />
     </Feature>
-    <Feature Id="Changelogs" Level="2" Title="Changelogs" AllowAdvertise="no">
+    <Feature Id="Changelogs" Level="2" Title="Changelogs" AllowAdvertise="no" Description="Development changelogs">
       <ComponentRef Id="changelog_1" />
     </Feature>
     <Feature Id="DocsRussian" Level="1" Display="hidden" AllowAdvertise="no">
@@ -42,7 +42,7 @@
       <ComponentRef Id="WhatsNew.Plugins.txt_2" />
       <ComponentRef Id="WhatsNew.txt_2" />
     </Feature>
-    <Feature Id="FExcept" Level="1" Title="FExcept" AllowAdvertise="no">
+    <Feature Id="FExcept" Level="1" Title="FExcept" AllowAdvertise="no" Description="Exception handler saves detailed exception information on crash (FStd_trap.log)">
       <ComponentRef Id="FExceptReg" />
       <ComponentRef Id="demangle.dll" />
       <ComponentRef Id="ExcDump.dll" />
@@ -57,7 +57,7 @@
     <Feature Id="ChangelogsFExcept" Level="1" Display="hidden" AllowAdvertise="no">
       <ComponentRef Id="changelog_2" />
     </Feature>
-    <Feature Id="Languages" Level="2" Display="expand" Title="Languages" AllowAdvertise="no">
+    <Feature Id="Languages" Level="2" Display="expand" Title="Languages" AllowAdvertise="no" Description="Support for additional languages">
       <Feature Id="Russian" Level="2" Title="Russian" AllowAdvertise="no">
         <ComponentRef Id="FarRus.hlf" />
         <ComponentRef Id="FarRus.lng" />
@@ -74,9 +74,9 @@
         <ComponentRef Id="FarHun.lng" />
       </Feature>
     </Feature>
-    <Feature Id="Plugins" Level="1" Display="expand" Title="Plugins" AllowAdvertise="no">
-      <Feature Id="Editor" Level="1" Display="expand" Title="Editor" AllowAdvertise="no">
-        <Feature Id="Align" Level="1" Title="Align" AllowAdvertise="no">
+    <Feature Id="Plugins" Level="1" Display="expand" Title="Plugins" AllowAdvertise="no" Description="Standard plugins">
+      <Feature Id="Editor" Level="1" Display="expand" Title="Editor" AllowAdvertise="no" Description="Editor plugins">
+        <Feature Id="Align" Level="1" Title="Align" AllowAdvertise="no" Description="Text block formatter">
           <ComponentRef Id="Align.dll" />
           <ComponentRef Id="AlignEng.lng" />
         </Feature>
@@ -89,7 +89,7 @@
         <Feature Id="AlignChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="changelog_3" />
         </Feature>
-        <Feature Id="AutoWrap" Level="1" Title="AutoWrap" AllowAdvertise="no">
+        <Feature Id="AutoWrap" Level="1" Title="AutoWrap" AllowAdvertise="no" Description="Automatic line wrap">
           <ComponentRef Id="AutoWrap.dll" />
           <ComponentRef Id="WrapEng.lng" />
         </Feature>
@@ -102,7 +102,7 @@
         <Feature Id="AutoWrapChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="changelog_4" />
         </Feature>
-        <Feature Id="Brackets" Level="1" Title="Brackets" AllowAdvertise="no">
+        <Feature Id="Brackets" Level="1" Title="Brackets" AllowAdvertise="no" Description="Brackets matching">
           <ComponentRef Id="BrackDel.reg" />
           <ComponentRef Id="BrackEng.hlf" />
           <ComponentRef Id="BrackEng.lng" />
@@ -120,7 +120,7 @@
         <Feature Id="BracketsChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="changelog_5" />
         </Feature>
-        <Feature Id="DrawLine" Level="1" Title="DrawLine" AllowAdvertise="no">
+        <Feature Id="DrawLine" Level="1" Title="DrawLine" AllowAdvertise="no" Description="Pseudo-graphic lines drawing">
           <ComponentRef Id="DrawEng.hlf" />
           <ComponentRef Id="DrawEng.lng" />
           <ComponentRef Id="DrawLine.dll" />
@@ -135,7 +135,7 @@
         <Feature Id="DrawLineChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="changelog_7" />
         </Feature>
-        <Feature Id="EditCase" Level="1" Title="EditCase" AllowAdvertise="no">
+        <Feature Id="EditCase" Level="1" Title="EditCase" AllowAdvertise="no" Description="Text case conversion">
           <ComponentRef Id="ECaseEng.hlf" />
           <ComponentRef Id="ECaseEng.lng" />
           <ComponentRef Id="EditCase.dll" />
@@ -151,7 +151,7 @@
           <ComponentRef Id="changelog_8" />
         </Feature>
       </Feature>
-      <Feature Id="Compare" Level="1" Title="Compare" AllowAdvertise="no">
+      <Feature Id="Compare" Level="1" Title="Compare" AllowAdvertise="no" Description="Advanced compare">
         <ComponentRef Id="CmpEng.hlf" />
         <ComponentRef Id="Compare.dll" />
         <ComponentRef Id="CompEng.lng" />
@@ -166,7 +166,7 @@
       <Feature Id="CompareChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="changelog_6" />
       </Feature>
-      <Feature Id="EMenu" Level="1" Title="EMenu" AllowAdvertise="no">
+      <Feature Id="EMenu" Level="1" Title="EMenu" AllowAdvertise="no" Description="Explorer context menu">
         <ComponentRef Id="EMenu.dll" />
         <ComponentRef Id="EMenuDel.reg" />
         <ComponentRef Id="EMenuEng.hlf" />
@@ -185,7 +185,7 @@
       <Feature Id="EMenuChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="changelog_9" />
       </Feature>
-      <Feature Id="FARCmds" Level="1" Title="FARCmds" AllowAdvertise="no">
+      <Feature Id="FARCmds" Level="1" Title="FARCmds" AllowAdvertise="no" Description="Advanced commands">
         <ComponentRef Id="FARCmds.dll" />
         <ComponentRef Id="FARCmdsEng.hlf" />
         <ComponentRef Id="FARCmdsEng.lng" />
@@ -200,7 +200,7 @@
       <Feature Id="FARCmdsChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="changelog_10" />
       </Feature>
-      <Feature Id="FileCase" Level="1" Title="FileCase" AllowAdvertise="no">
+      <Feature Id="FileCase" Level="1" Title="FileCase" AllowAdvertise="no" Description="File name case conversion">
         <ComponentRef Id="CaseEng.hlf" />
         <ComponentRef Id="CaseEng.lng" />
         <ComponentRef Id="FileCase.dll" />
@@ -215,7 +215,7 @@
       <Feature Id="FileCaseChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="changelog_11" />
       </Feature>
-      <Feature Id="FarFtp" Level="1" Title="FarFtp" AllowAdvertise="no">
+      <Feature Id="FarFtp" Level="1" Title="FarFtp" AllowAdvertise="no" Description="FTP client">
         <ComponentRef Id="FarFtp.dll" />
         <ComponentRef Id="FtpCmds.txt" />
         <ComponentRef Id="FtpEng.hlf" />
@@ -226,14 +226,14 @@
         <ComponentRef Id="Progress_JM.reg" />
         <ComponentRef Id="Progress_Wesha.reg" />
         <ComponentRef Id="Progress_ZeMA.reg" />
-        <Feature Id="ftpDirList" Level="1" Title="DirList" AllowAdvertise="no">
+        <Feature Id="ftpDirList" Level="1" Title="DirList" AllowAdvertise="no" Description="Directory listing parser">
           <ComponentRef Id="ftpDirList.fll" />
         </Feature>
-        <Feature Id="ftpNotify" Level="1" Title="Notify" AllowAdvertise="no">
+        <Feature Id="ftpNotify" Level="1" Title="Notify" AllowAdvertise="no" Description="File transfer notifications (notify.log)">
           <ComponentRef Id="ftpNotify.fll" />
           <ComponentRef Id="notify.log" />
         </Feature>
-        <Feature Id="ftpProgress" Level="1" Title="Progress" AllowAdvertise="no">
+        <Feature Id="ftpProgress" Level="1" Title="Progress" AllowAdvertise="no" Description="Copy progress dialog">
           <ComponentRef Id="ftpProgress.fll" />
         </Feature>
       </Feature>
@@ -253,7 +253,7 @@
       <Feature Id="FarFtpChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="changelog_12" />
       </Feature>
-      <Feature Id="HlfViewer" Level="1" Title="HlfViewer" AllowAdvertise="no">
+      <Feature Id="HlfViewer" Level="1" Title="HlfViewer" AllowAdvertise="no" Description="Help files (*.hlf) viewer">
         <ComponentRef Id="HlfViewer.dll" />
         <ComponentRef Id="HlfViewerEng.hlf" />
         <ComponentRef Id="HlfViewerEng.lng" />
@@ -268,7 +268,7 @@
       <Feature Id="HlfViewerChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="changelog_13" />
       </Feature>
-      <Feature Id="MacroView" Level="1" Title="MacroView" AllowAdvertise="no">
+      <Feature Id="MacroView" Level="1" Title="MacroView" AllowAdvertise="no" Description="Macro browser and editor">
         <ComponentRef Id="MacroEng.hlf" />
         <ComponentRef Id="MacroEng.lng" />
         <ComponentRef Id="MacroView.dll" />
@@ -283,7 +283,7 @@
       <Feature Id="MacroViewChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="changelog_14" />
       </Feature>
-      <Feature Id="MultiArc" Level="1" Title="MultiArc" AllowAdvertise="no">
+      <Feature Id="MultiArc" Level="1" Title="MultiArc" AllowAdvertise="no" Description="Multiformat archive support">
         <ComponentRef Id="arceng.hlf" />
         <ComponentRef Id="arceng.lng" />
         <ComponentRef Id="MultiArc.dll" />
@@ -339,7 +339,7 @@
       <Feature Id="MultiArcChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="changelog_15" />
       </Feature>
-      <Feature Id="Network" Level="1" Title="Network" AllowAdvertise="no">
+      <Feature Id="Network" Level="1" Title="Network" AllowAdvertise="no" Description="Network browser">
         <ComponentRef Id="NetEng.hlf" />
         <ComponentRef Id="NetEng.lng" />
         <ComponentRef Id="Network.dll" />
@@ -354,7 +354,7 @@
       <Feature Id="NetworkChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="changelog_16" />
       </Feature>
-      <Feature Id="Proclist" Level="1" Title="Proclist" AllowAdvertise="no">
+      <Feature Id="Proclist" Level="1" Title="Proclist" AllowAdvertise="no" Description="Windows process management">
         <ComponentRef Id="ProcEng.hlf" />
         <ComponentRef Id="ProcEng.lng" />
         <ComponentRef Id="Proclist.dll" />
@@ -369,7 +369,7 @@
       <Feature Id="ProclistChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="changelog_17" />
       </Feature>
-      <Feature Id="TmpPanel" Level="1" Title="TmpPanel" AllowAdvertise="no">
+      <Feature Id="TmpPanel" Level="1" Title="TmpPanel" AllowAdvertise="no" Description="Temporary panel">
         <ComponentRef Id="disks.eng.temp" />
         <ComponentRef Id="shortcuts.eng.reg" />
         <ComponentRef Id="shortcuts.eng.temp" />
