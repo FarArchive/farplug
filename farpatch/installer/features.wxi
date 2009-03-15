@@ -3,28 +3,17 @@
   <Feature Id="Complete" Level="1" Title="FAR Manager" Display="expand" Absent="disallow" AllowAdvertise="no" ConfigurableDirectory="INSTALLDIR">
     <Feature Id="Far" Level="1" Title="Base Files" Absent="disallow" AllowAdvertise="no">
       <ComponentRef Id="InstallDir" />
-      <ComponentRef Id="FExceptReg" />
-      <ComponentRef Id="changelog_1" />
       <ComponentRef Id="ClearPluginsCache.bat" />
-      <ComponentRef Id="demangle.dll" />
-      <ComponentRef Id="ExcDump.dll" />
       <ComponentRef Id="Far.exe" />
-      <ComponentRef Id="far.map" />
-      <ComponentRef Id="FarCze.lng" />
       <ComponentRef Id="FarEng.hlf" />
       <ComponentRef Id="FarEng.lng" />
-      <ComponentRef Id="FarGer.lng" />
-      <ComponentRef Id="FarHun.hlf" />
-      <ComponentRef Id="FarHun.lng" />
-      <ComponentRef Id="FarRus.hlf" />
-      <ComponentRef Id="FarRus.lng" />
-      <ComponentRef Id="FExcept.dll" />
       <ComponentRef Id="File_id.diz" />
       <ComponentRef Id="LICENSE" />
       <ComponentRef Id="README_EN" />
-      <ComponentRef Id="README_RU" />
       <ComponentRef Id="RestoreSettings.bat" />
       <ComponentRef Id="SaveSettings.bat" />
+    </Feature>
+    <Feature Id="Docs" Level="1" Title="Documentation" AllowAdvertise="no">
       <ComponentRef Id="Arc.Support.txt_1" />
       <ComponentRef Id="Bug.Report.txt_1" />
       <ComponentRef Id="Descript.ion_1" />
@@ -36,9 +25,11 @@
       <ComponentRef Id="WhatsNew.Macros.txt_1" />
       <ComponentRef Id="WhatsNew.Plugins.txt_1" />
       <ComponentRef Id="WhatsNew.txt_1" />
-      <ComponentRef Id="changelog_2" />
-      <ComponentRef Id="Readme.txt" />
-      <ComponentRef Id="SetFarExceptionHandlerW.reg" />
+    </Feature>
+    <Feature Id="Changelogs" Level="2" Title="Changelogs" AllowAdvertise="no">
+      <ComponentRef Id="changelog_1" />
+    </Feature>
+    <Feature Id="DocsRussian" Level="1" Display="hidden" AllowAdvertise="no">
       <ComponentRef Id="Arc.Support.txt_2" />
       <ComponentRef Id="Bug.Report.txt_2" />
       <ComponentRef Id="Descript.ion_2" />
@@ -51,225 +42,353 @@
       <ComponentRef Id="WhatsNew.Plugins.txt_2" />
       <ComponentRef Id="WhatsNew.txt_2" />
     </Feature>
-    <Feature Id="Plugins" Level="1" Display="expand" Title="Plugins">
-      <Feature Id="Editor" Level="1" Title="Editor">
-        <Feature Id="Align" Level="1" Title="Align">
+    <Feature Id="FExcept" Level="1" Title="FExcept" AllowAdvertise="no">
+      <ComponentRef Id="FExceptReg" />
+      <ComponentRef Id="demangle.dll" />
+      <ComponentRef Id="ExcDump.dll" />
+      <ComponentRef Id="far.map" />
+      <ComponentRef Id="FExcept.dll" />
+      <ComponentRef Id="FStd_trap.log" />
+    </Feature>
+    <Feature Id="DocsFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+      <ComponentRef Id="Readme.txt" />
+      <ComponentRef Id="SetFarExceptionHandlerW.reg" />
+    </Feature>
+    <Feature Id="ChangelogsFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+      <ComponentRef Id="changelog_2" />
+    </Feature>
+    <Feature Id="Languages" Level="2" Display="expand" Title="Languages" AllowAdvertise="no">
+      <Feature Id="Russian" Level="2" Title="Russian" AllowAdvertise="no">
+        <ComponentRef Id="FarRus.hlf" />
+        <ComponentRef Id="FarRus.lng" />
+        <ComponentRef Id="README_RU" />
+      </Feature>
+      <Feature Id="German" Level="2" Title="German" AllowAdvertise="no">
+        <ComponentRef Id="FarGer.lng" />
+      </Feature>
+      <Feature Id="Czech" Level="2" Title="Czech" AllowAdvertise="no">
+        <ComponentRef Id="FarCze.lng" />
+      </Feature>
+      <Feature Id="Hungarian" Level="2" Title="Hungarian" AllowAdvertise="no">
+        <ComponentRef Id="FarHun.hlf" />
+        <ComponentRef Id="FarHun.lng" />
+      </Feature>
+    </Feature>
+    <Feature Id="Plugins" Level="1" Display="expand" Title="Plugins" AllowAdvertise="no">
+      <Feature Id="Editor" Level="1" Display="expand" Title="Editor" AllowAdvertise="no">
+        <Feature Id="Align" Level="1" Title="Align" AllowAdvertise="no">
           <ComponentRef Id="Align.dll" />
-          <ComponentRef Id="Align.map" />
           <ComponentRef Id="AlignEng.lng" />
+        </Feature>
+        <Feature Id="AlignRussian" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="AlignRus.lng" />
+        </Feature>
+        <Feature Id="AlignFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="Align.map" />
+        </Feature>
+        <Feature Id="AlignChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="changelog_3" />
         </Feature>
-        <Feature Id="AutoWrap" Level="1" Title="AutoWrap">
+        <Feature Id="AutoWrap" Level="1" Title="AutoWrap" AllowAdvertise="no">
           <ComponentRef Id="AutoWrap.dll" />
-          <ComponentRef Id="AutoWrap.map" />
-          <ComponentRef Id="changelog_4" />
           <ComponentRef Id="WrapEng.lng" />
+        </Feature>
+        <Feature Id="AutoWrapRussian" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="WrapRus.lng" />
         </Feature>
-        <Feature Id="Brackets" Level="1" Title="Brackets">
+        <Feature Id="AutoWrapFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="AutoWrap.map" />
+        </Feature>
+        <Feature Id="AutoWrapChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_4" />
+        </Feature>
+        <Feature Id="Brackets" Level="1" Title="Brackets" AllowAdvertise="no">
           <ComponentRef Id="BrackDel.reg" />
           <ComponentRef Id="BrackEng.hlf" />
           <ComponentRef Id="BrackEng.lng" />
           <ComponentRef Id="BrackEng.reg" />
           <ComponentRef Id="Brackets.dll" />
-          <ComponentRef Id="Brackets.map" />
+        </Feature>
+        <Feature Id="BracketsRussian" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="BrackRus.hlf" />
           <ComponentRef Id="BrackRus.lng" />
           <ComponentRef Id="BrackRus.reg" />
+        </Feature>
+        <Feature Id="BracketsFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="Brackets.map" />
+        </Feature>
+        <Feature Id="BracketsChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="changelog_5" />
         </Feature>
-        <Feature Id="DrawLine" Level="1" Title="DrawLine">
-          <ComponentRef Id="changelog_7" />
+        <Feature Id="DrawLine" Level="1" Title="DrawLine" AllowAdvertise="no">
           <ComponentRef Id="DrawEng.hlf" />
           <ComponentRef Id="DrawEng.lng" />
           <ComponentRef Id="DrawLine.dll" />
-          <ComponentRef Id="DrawLine.map" />
+        </Feature>
+        <Feature Id="DrawLineRussian" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="DrawRus.hlf" />
           <ComponentRef Id="DrawRus.lng" />
         </Feature>
-        <Feature Id="EditCase" Level="1" Title="EditCase">
-          <ComponentRef Id="changelog_8" />
+        <Feature Id="DrawLineFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="DrawLine.map" />
+        </Feature>
+        <Feature Id="DrawLineChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_7" />
+        </Feature>
+        <Feature Id="EditCase" Level="1" Title="EditCase" AllowAdvertise="no">
           <ComponentRef Id="ECaseEng.hlf" />
           <ComponentRef Id="ECaseEng.lng" />
+          <ComponentRef Id="EditCase.dll" />
+        </Feature>
+        <Feature Id="EditCaseRussian" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="ECaseRus.hlf" />
           <ComponentRef Id="ECaseRus.lng" />
-          <ComponentRef Id="EditCase.dll" />
+        </Feature>
+        <Feature Id="EditCaseFExcept" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="EditCase.map" />
         </Feature>
+        <Feature Id="EditCaseChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_8" />
+        </Feature>
       </Feature>
-      <Feature Id="Compare" Level="1" Title="Compare">
-        <ComponentRef Id="changelog_6" />
+      <Feature Id="Compare" Level="1" Title="Compare" AllowAdvertise="no">
         <ComponentRef Id="CmpEng.hlf" />
-        <ComponentRef Id="CmpRus.hlf" />
         <ComponentRef Id="Compare.dll" />
-        <ComponentRef Id="Compare.map" />
         <ComponentRef Id="CompEng.lng" />
+      </Feature>
+      <Feature Id="CompareRussian" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="CmpRus.hlf" />
         <ComponentRef Id="CompRus.lng" />
       </Feature>
-      <Feature Id="EMenu" Level="1" Title="EMenu">
-        <ComponentRef Id="changelog_9" />
+      <Feature Id="CompareFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="Compare.map" />
+      </Feature>
+      <Feature Id="CompareChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="changelog_6" />
+      </Feature>
+      <Feature Id="EMenu" Level="1" Title="EMenu" AllowAdvertise="no">
         <ComponentRef Id="EMenu.dll" />
-        <ComponentRef Id="EMenu.map" />
         <ComponentRef Id="EMenuDel.reg" />
         <ComponentRef Id="EMenuEng.hlf" />
         <ComponentRef Id="EMenuEng.lng" />
-        <ComponentRef Id="EMenuRus.hlf" />
-        <ComponentRef Id="EMenuRus.lng" />
         <ComponentRef Id="Hotkey.reg" />
         <ComponentRef Id="HotkeyClipboard.reg" />
         <ComponentRef Id="HotkeyProperties.reg" />
       </Feature>
-      <Feature Id="FARCmds" Level="1" Title="FARCmds">
-        <ComponentRef Id="changelog_10" />
+      <Feature Id="EMenuRussian" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="EMenuRus.hlf" />
+        <ComponentRef Id="EMenuRus.lng" />
+      </Feature>
+      <Feature Id="EMenuFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="EMenu.map" />
+      </Feature>
+      <Feature Id="EMenuChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="changelog_9" />
+      </Feature>
+      <Feature Id="FARCmds" Level="1" Title="FARCmds" AllowAdvertise="no">
         <ComponentRef Id="FARCmds.dll" />
-        <ComponentRef Id="FARCmds.map" />
         <ComponentRef Id="FARCmdsEng.hlf" />
         <ComponentRef Id="FARCmdsEng.lng" />
+      </Feature>
+      <Feature Id="FARCmdsRussian" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="FARCmdsRus.hlf" />
         <ComponentRef Id="FARCmdsRus.lng" />
       </Feature>
-      <Feature Id="FileCase" Level="1" Title="FileCase">
+      <Feature Id="FARCmdsFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="FARCmds.map" />
+      </Feature>
+      <Feature Id="FARCmdsChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="changelog_10" />
+      </Feature>
+      <Feature Id="FileCase" Level="1" Title="FileCase" AllowAdvertise="no">
         <ComponentRef Id="CaseEng.hlf" />
         <ComponentRef Id="CaseEng.lng" />
+        <ComponentRef Id="FileCase.dll" />
+      </Feature>
+      <Feature Id="FileCaseRussian" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="CaseRus.hlf" />
         <ComponentRef Id="CaseRus.lng" />
-        <ComponentRef Id="changelog_11" />
-        <ComponentRef Id="FileCase.dll" />
+      </Feature>
+      <Feature Id="FileCaseFExcept" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="FileCase.map" />
       </Feature>
-      <Feature Id="FarFtp" Level="1" Title="FarFtp">
-        <ComponentRef Id="changelog_12" />
+      <Feature Id="FileCaseChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="changelog_11" />
+      </Feature>
+      <Feature Id="FarFtp" Level="1" Title="FarFtp" AllowAdvertise="no">
         <ComponentRef Id="FarFtp.dll" />
-        <ComponentRef Id="FarFtp.map" />
         <ComponentRef Id="FtpCmds.txt" />
-        <ComponentRef Id="FtpCmds_rus.txt" />
         <ComponentRef Id="FtpEng.hlf" />
         <ComponentRef Id="FtpEng.lng" />
-        <ComponentRef Id="FtpRus.hlf" />
-        <ComponentRef Id="FtpRus.lng" />
         <ComponentRef Id="Notes.txt" />
-        <ComponentRef Id="Notes_rus.txt" />
         <ComponentRef Id="TechInfo.reg" />
-        <ComponentRef Id="TechInfo_rus.reg" />
         <ComponentRef Id="Progress_FarCopy.reg" />
         <ComponentRef Id="Progress_JM.reg" />
         <ComponentRef Id="Progress_Wesha.reg" />
         <ComponentRef Id="Progress_ZeMA.reg" />
-        <Feature Id="ftpDirList" Level="1" Title="DirList">
+        <Feature Id="ftpDirList" Level="1" Title="DirList" AllowAdvertise="no">
           <ComponentRef Id="ftpDirList.fll" />
-          <ComponentRef Id="ftpDirList.map" />
         </Feature>
-        <Feature Id="ftpNotify" Level="1" Title="Notify">
+        <Feature Id="ftpNotify" Level="1" Title="Notify" AllowAdvertise="no">
           <ComponentRef Id="ftpNotify.fll" />
-          <ComponentRef Id="ftpNotify.map" />
           <ComponentRef Id="notify.log" />
         </Feature>
-        <Feature Id="ftpProgress" Level="1" Title="Progress">
+        <Feature Id="ftpProgress" Level="1" Title="Progress" AllowAdvertise="no">
           <ComponentRef Id="ftpProgress.fll" />
-          <ComponentRef Id="ftpProgress.map" />
         </Feature>
       </Feature>
-      <Feature Id="HlfViewer" Level="1" Title="HlfViewer">
-        <ComponentRef Id="changelog_13" />
+      <Feature Id="FarFtpRussian" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="FtpCmds_rus.txt" />
+        <ComponentRef Id="FtpRus.hlf" />
+        <ComponentRef Id="FtpRus.lng" />
+        <ComponentRef Id="Notes_rus.txt" />
+        <ComponentRef Id="TechInfo_rus.reg" />
+      </Feature>
+      <Feature Id="FarFtpFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="FarFtp.map" />
+        <ComponentRef Id="ftpDirList.map" />
+        <ComponentRef Id="ftpNotify.map" />
+        <ComponentRef Id="ftpProgress.map" />
+      </Feature>
+      <Feature Id="FarFtpChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="changelog_12" />
+      </Feature>
+      <Feature Id="HlfViewer" Level="1" Title="HlfViewer" AllowAdvertise="no">
         <ComponentRef Id="HlfViewer.dll" />
-        <ComponentRef Id="HlfViewer.map" />
         <ComponentRef Id="HlfViewerEng.hlf" />
         <ComponentRef Id="HlfViewerEng.lng" />
+      </Feature>
+      <Feature Id="HlfViewerRussian" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="HlfViewerRus.hlf" />
         <ComponentRef Id="HlfViewerRus.lng" />
       </Feature>
-      <Feature Id="MacroView" Level="1" Title="MacroView">
-        <ComponentRef Id="changelog_14" />
+      <Feature Id="HlfViewerFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="HlfViewer.map" />
+      </Feature>
+      <Feature Id="HlfViewerChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="changelog_13" />
+      </Feature>
+      <Feature Id="MacroView" Level="1" Title="MacroView" AllowAdvertise="no">
         <ComponentRef Id="MacroEng.hlf" />
         <ComponentRef Id="MacroEng.lng" />
+        <ComponentRef Id="MacroView.dll" />
+      </Feature>
+      <Feature Id="MacroViewRussian" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="MacroRus.hlf" />
         <ComponentRef Id="MacroRus.lng" />
-        <ComponentRef Id="MacroView.dll" />
+      </Feature>
+      <Feature Id="MacroViewFExcept" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="MacroView.map" />
       </Feature>
-      <Feature Id="MultiArc" Level="1" Title="MultiArc">
+      <Feature Id="MacroViewChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="changelog_14" />
+      </Feature>
+      <Feature Id="MultiArc" Level="1" Title="MultiArc" AllowAdvertise="no">
         <ComponentRef Id="arceng.hlf" />
         <ComponentRef Id="arceng.lng" />
-        <ComponentRef Id="arcrus.hlf" />
-        <ComponentRef Id="arcrus.lng" />
-        <ComponentRef Id="changelog_15" />
         <ComponentRef Id="MultiArc.dll" />
-        <ComponentRef Id="MultiArc.map" />
-        <Feature Id="Ace" Level="1" Title="Ace">
+        <Feature Id="Ace" Level="1" Title="Ace" AllowAdvertise="no">
           <ComponentRef Id="Ace.fmt" />
-          <ComponentRef Id="Ace.map" />
         </Feature>
-        <Feature Id="Arc" Level="1" Title="Arc">
+        <Feature Id="Arc" Level="1" Title="Arc" AllowAdvertise="no">
           <ComponentRef Id="Arc.fmt" />
-          <ComponentRef Id="Arc.map" />
         </Feature>
-        <Feature Id="Arj" Level="1" Title="Arj">
+        <Feature Id="Arj" Level="1" Title="Arj" AllowAdvertise="no">
           <ComponentRef Id="Arj.fmt" />
-          <ComponentRef Id="Arj.map" />
         </Feature>
-        <Feature Id="Cab" Level="1" Title="Cab">
+        <Feature Id="Cab" Level="1" Title="Cab" AllowAdvertise="no">
           <ComponentRef Id="Cab.fmt" />
-          <ComponentRef Id="Cab.map" />
         </Feature>
-        <Feature Id="Custom" Level="1" Title="Custom">
+        <Feature Id="Custom" Level="1" Title="Custom" AllowAdvertise="no">
           <ComponentRef Id="Custom.fmt" />
           <ComponentRef Id="custom.ini" />
-          <ComponentRef Id="Custom.map" />
         </Feature>
-        <Feature Id="Ha" Level="1" Title="Ha">
+        <Feature Id="Ha" Level="1" Title="Ha" AllowAdvertise="no">
           <ComponentRef Id="Ha.fmt" />
-          <ComponentRef Id="Ha.map" />
         </Feature>
-        <Feature Id="Lzh" Level="1" Title="Lzh">
+        <Feature Id="Lzh" Level="1" Title="Lzh" AllowAdvertise="no">
           <ComponentRef Id="Lzh.fmt" />
-          <ComponentRef Id="Lzh.map" />
         </Feature>
-        <Feature Id="Rar" Level="1" Title="Rar">
+        <Feature Id="Rar" Level="1" Title="Rar" AllowAdvertise="no">
           <ComponentRef Id="Rar.fmt" />
-          <ComponentRef Id="Rar.map" />
         </Feature>
-        <Feature Id="TarGz" Level="1" Title="TarGz">
+        <Feature Id="TarGz" Level="1" Title="TarGz" AllowAdvertise="no">
           <ComponentRef Id="TarGz.fmt" />
-          <ComponentRef Id="TarGz.map" />
         </Feature>
-        <Feature Id="Zip" Level="1" Title="Zip">
+        <Feature Id="Zip" Level="1" Title="Zip" AllowAdvertise="no">
           <ComponentRef Id="Zip.fmt" />
-          <ComponentRef Id="Zip.map" />
         </Feature>
       </Feature>
-      <Feature Id="Network" Level="1" Title="Network">
-        <ComponentRef Id="changelog_16" />
+      <Feature Id="MultiArcRussian" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="arcrus.hlf" />
+        <ComponentRef Id="arcrus.lng" />
+      </Feature>
+      <Feature Id="MultiArcFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="MultiArc.map" />
+        <ComponentRef Id="Ace.map" />
+        <ComponentRef Id="Arc.map" />
+        <ComponentRef Id="Arj.map" />
+        <ComponentRef Id="Cab.map" />
+        <ComponentRef Id="Custom.map" />
+        <ComponentRef Id="Ha.map" />
+        <ComponentRef Id="Lzh.map" />
+        <ComponentRef Id="Rar.map" />
+        <ComponentRef Id="TarGz.map" />
+        <ComponentRef Id="Zip.map" />
+      </Feature>
+      <Feature Id="MultiArcChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="changelog_15" />
+      </Feature>
+      <Feature Id="Network" Level="1" Title="Network" AllowAdvertise="no">
         <ComponentRef Id="NetEng.hlf" />
         <ComponentRef Id="NetEng.lng" />
+        <ComponentRef Id="Network.dll" />
+      </Feature>
+      <Feature Id="NetworkRussian" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="NetRus.hlf" />
         <ComponentRef Id="NetRus.lng" />
-        <ComponentRef Id="Network.dll" />
+      </Feature>
+      <Feature Id="NetworkFExcept" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="Network.map" />
       </Feature>
-      <Feature Id="Proclist" Level="1" Title="Proclist">
-        <ComponentRef Id="changelog_17" />
+      <Feature Id="NetworkChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="changelog_16" />
+      </Feature>
+      <Feature Id="Proclist" Level="1" Title="Proclist" AllowAdvertise="no">
         <ComponentRef Id="ProcEng.hlf" />
         <ComponentRef Id="ProcEng.lng" />
         <ComponentRef Id="Proclist.dll" />
-        <ComponentRef Id="Proclist.map" />
+      </Feature>
+      <Feature Id="ProclistRussian" Level="1" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="ProcRus.hlf" />
         <ComponentRef Id="ProcRus.lng" />
       </Feature>
-      <Feature Id="TmpPanel" Level="1" Title="TmpPanel">
-        <ComponentRef Id="changelog_18" />
+      <Feature Id="ProclistFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="Proclist.map" />
+      </Feature>
+      <Feature Id="ProclistChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="changelog_17" />
+      </Feature>
+      <Feature Id="TmpPanel" Level="1" Title="TmpPanel" AllowAdvertise="no">
         <ComponentRef Id="disks.eng.temp" />
-        <ComponentRef Id="disks.rus.temp" />
         <ComponentRef Id="shortcuts.eng.reg" />
         <ComponentRef Id="shortcuts.eng.temp" />
-        <ComponentRef Id="shortcuts.rus.reg" />
-        <ComponentRef Id="shortcuts.rus.temp" />
         <ComponentRef Id="TmpEng.hlf" />
         <ComponentRef Id="TmpEng.lng" />
         <ComponentRef Id="TmpPanel.dll" />
-        <ComponentRef Id="TmpPanel.map" />
+      </Feature>
+      <Feature Id="TmpPanelRussian" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="disks.rus.temp" />
+        <ComponentRef Id="shortcuts.rus.reg" />
+        <ComponentRef Id="shortcuts.rus.temp" />
         <ComponentRef Id="TmpRus.hlf" />
         <ComponentRef Id="TmpRus.lng" />
+      </Feature>
+      <Feature Id="TmpPanelFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="TmpPanel.map" />
+      </Feature>
+      <Feature Id="TmpPanelChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="changelog_18" />
       </Feature>
     </Feature>
   </Feature>
