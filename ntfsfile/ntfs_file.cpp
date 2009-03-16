@@ -51,9 +51,8 @@ void FileInfo::find_full_paths() {
       u64 parent_dir_ref = file_name_list[fn_idx].parent_directory;
       while (true) {
         FileInfo file_info;
-        file_info.file_ref_num = parent_dir_ref;
         file_info.volume = volume;
-        file_info.process_file();
+        file_info.process_file(parent_dir_ref);
         unsigned posix_name_idx = -1;
         unsigned win32_name_idx = -1;
         for (unsigned i = 0; i < file_info.file_name_list.size(); i++) {
@@ -101,14 +100,14 @@ u64 FileInfo::load_mft_record(u64 mft_rec_num, Array<u8>& ntfs_file_rec_buf) {
   CHECK_FMT(ntfs_file_rec_buf.size() == NTFS_FILE_REC_HEADER_SIZE + ntfs_file_rec_out->FileRecordLength);
   CHECK_FMT(ntfs_file_rec_out->FileRecordLength >= sizeof(MFT_RECORD));
 
-  file_ref_num = FILE_REF(ntfs_file_rec_out->FileReferenceNumber.QuadPart);
+  mft_rec_num = FILE_REF(ntfs_file_rec_out->FileReferenceNumber.QuadPart);
 
   ntfs_file_rec_buf.remove(0, NTFS_FILE_REC_HEADER_SIZE);
 
   const MFT_RECORD* mft_rec = reinterpret_cast<const MFT_RECORD*>(ntfs_file_rec_buf.data());
   CHECK_FMT(mft_rec->magic == magic_FILE);
 
-  return file_ref_num;
+  return mft_rec_num;
 }
 
 unsigned FileInfo::find_attribute(const Array<u8>& ntfs_file_rec_buf, u32 type, u16 instance) {
@@ -295,7 +294,7 @@ void FileInfo::process_attribute(const Array<u8>& ntfs_file_rec_buf, unsigned at
 }
 
 void FileInfo::process_attr_list_entry(const ATTR_LIST_ENTRY* attr_list_entry, Array<u64>& ext_rec_list) {
-  if (attr_list_entry->mft_reference == file_ref_num) {
+  if (attr_list_entry->mft_reference == base_file_rec_num) {
     unsigned attr_off = find_attribute(base_file_rec_buf, attr_list_entry->type, attr_list_entry->instance);
     CHECK_FMT(attr_off != -1);
     process_attribute(base_file_rec_buf, attr_off);

@@ -36,6 +36,7 @@ struct StdInfo {
 
 class FileInfo {
 private:
+  u64 base_file_rec_num;
   struct DataRun {
     u64 lcn;
     u64 len;
@@ -54,7 +55,6 @@ private:
 public:
   // filled by external code
   const NtfsVolume* volume;
-  u64 file_ref_num;
   UnicodeString file_name;
   unsigned hard_link_cnt;
   bool directory;
@@ -66,21 +66,24 @@ public:
   ObjectArray<FileNameAttr> file_name_list;
 public:
   bool operator==(const FileInfo& file_info) const {
-    return file_ref_num == file_info.file_ref_num;
+    return base_file_rec_num == file_info.base_file_rec_num;
   }
   bool operator>(const FileInfo& file_info) const {
-    return file_ref_num > file_info.file_ref_num;
+    return base_file_rec_num > file_info.base_file_rec_num;
   }
 public:
-  u64 load_base_file_rec() {
-    return load_mft_record(file_ref_num, base_file_rec_buf);
+  u64 load_base_file_rec(u64 file_ref_num) {
+    return base_file_rec_num = load_mft_record(file_ref_num, base_file_rec_buf);
+  }
+  u64 file_ref_num() const {
+    return base_file_rec_num;
   }
   const MFT_RECORD* base_mft_rec() const {
     return reinterpret_cast<const MFT_RECORD*>(base_file_rec_buf.data());
   }
   void process_base_file_rec();
-  void process_file() {
-    load_base_file_rec();
+  void process_file(u64 file_ref_num) {
+    load_base_file_rec(file_ref_num);
     process_base_file_rec();
   }
   void find_full_paths();

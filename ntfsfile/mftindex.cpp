@@ -74,7 +74,7 @@ void FilePanel::add_file_records(const FileInfo& file_info) {
     const FileNameAttr& name_attr = file_info.file_name_list[i];
     if (name_attr.file_name_type != FILE_NAME_DOS) {
       FileRecord rec;
-      rec.file_ref_num = file_info.file_ref_num;
+      rec.file_ref_num = file_info.file_ref_num();
       rec.parent_ref_num = name_attr.parent_directory;
       rec.file_name = name_attr.name;
       rec.file_attr = file_attr;
@@ -125,7 +125,7 @@ void FilePanel::add_file_records(const FileInfo& file_info) {
             else file_attr &= ~FILE_ATTRIBUTE_SPARSE_FILE;
 
             FileRecord rec;
-            rec.file_ref_num = file_info.file_ref_num;
+            rec.file_ref_num = file_info.file_ref_num();
             rec.parent_ref_num = name_attr.parent_directory;
             rec.file_name = name_attr.name + L":" + attr.name + L":$" + attr.type_name();
             rec.file_attr = file_attr;
@@ -211,8 +211,7 @@ void FilePanel::create_mft_index() {
 
   FileInfo file_info;
   file_info.volume = &volume;
-  file_info.file_ref_num = volume.mft_size / volume.file_rec_size - 1;
-  u64 max_file_index = file_info.load_base_file_rec();
+  u64 max_file_index = file_info.load_base_file_rec(volume.mft_size / volume.file_rec_size - 1);
   mft_index.clear().extend(static_cast<unsigned>(max_file_index + 1));
   progress.max_file_index = max_file_index;
 
@@ -224,8 +223,7 @@ void FilePanel::create_mft_index() {
       progress.curr_file_index = max_file_index - file_index;
       progress.update_ui();
 
-      file_info.file_ref_num = file_index;
-      file_index = file_info.load_base_file_rec();
+      file_index = file_info.load_base_file_rec(file_index);
 
       if (file_info.base_mft_rec()->base_mft_record == 0) {
         try {
@@ -245,8 +243,7 @@ void FilePanel::create_mft_index() {
       progress.curr_file_index = file_index;
       progress.update_ui();
 
-      file_info.file_ref_num = file_index;
-      if ((file_index == file_info.load_base_file_rec()) && (file_info.base_mft_rec()->base_mft_record == 0)) {
+      if ((file_index == file_info.load_base_file_rec(file_index)) && (file_info.base_mft_rec()->base_mft_record == 0)) {
         try {
           file_info.process_base_file_rec();
         }
@@ -311,15 +308,14 @@ void FilePanel::update_mft_index_from_usn() {
   file_info.volume = &volume;
   for (std::set<u64>::const_iterator file_index = upd_file_refs.begin(); file_index != upd_file_refs.end(); file_index++) {
     DBG_LOG(UnicodeString::format(L"mft_update_index(): %Lx", *file_index));
-    file_info.file_ref_num = *file_index;
-    if ((*file_index == file_info.load_base_file_rec()) && (file_info.base_mft_rec()->base_mft_record == 0)) {
+    if ((*file_index == file_info.load_base_file_rec(*file_index)) && (file_info.base_mft_rec()->base_mft_record == 0)) {
       try {
         file_info.process_base_file_rec();
+        add_file_records(file_info);
       }
       catch (...) {
         continue;
       }
-      add_file_records(file_info);
     }
   }
   mft_index.sort<FileRecordCompare>();

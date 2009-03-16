@@ -350,9 +350,9 @@ void FilePanel::scan_dir(const UnicodeString& root_path, const UnicodeString& re
         CHECK_SYS(GetFileInformationByHandle(h_file, &h_file_info));
         FREE_RSRC(CloseHandle(h_file));
 
-        file_info.file_ref_num = ((u64) h_file_info.nFileIndexHigh << 32) + h_file_info.nFileIndexLow;
+        u64 file_ref_num = ((u64) h_file_info.nFileIndexHigh << 32) + h_file_info.nFileIndexLow;
         file_info.volume = &volume;
-        file_info.process_file();
+        file_info.process_file(file_ref_num);
 
         hard_link_cnt = h_file_info.nNumberOfLinks;
         mft_rec_cnt = file_info.mft_rec_cnt;

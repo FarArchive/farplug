@@ -771,7 +771,7 @@ void process_file(FileInfo& file_info, bool full_info) {
   }
   finally (CloseHandle(h_file));
 
-  file_info.file_ref_num = ((u64) h_file_info.nFileIndexHigh << 32) + h_file_info.nFileIndexLow;
+  u64 file_ref_num = ((u64) h_file_info.nFileIndexHigh << 32) + h_file_info.nFileIndexLow;
   file_info.hard_link_cnt = h_file_info.nNumberOfLinks;
   file_info.reparse = (h_file_info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT;
   file_info.directory = (h_file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
@@ -786,7 +786,7 @@ void process_file(FileInfo& file_info, bool full_info) {
       update_totals(g_hard_links[idx], true);
     }
     else {
-      file_info.process_file();
+      file_info.process_file(file_ref_num);
       if (full_info) file_info.find_full_paths();
       update_totals(file_info, false);
       g_hard_links += file_info;
@@ -794,7 +794,7 @@ void process_file(FileInfo& file_info, bool full_info) {
     }
   }
   else {
-    file_info.process_file();
+    file_info.process_file(file_ref_num);
     if (full_info) file_info.find_full_paths();
     update_totals(file_info, false);
   }
