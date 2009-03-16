@@ -1,9 +1,14 @@
 #include <windows.h>
 #include <msiquery.h>
+#include <imagehlp.h>
+
+#include <list>
+#include <string>
+using namespace std;
 
 bool is_inst(MSIHANDLE h_install, const char* name) {
   INSTALLSTATE st_inst, st_action;
-  MsiGetFeatureState(h_install, name, &st_inst, &st_action);
+  if (MsiGetFeatureState(h_install, name, &st_inst, &st_action) != ERROR_SUCCESS) return false;
   INSTALLSTATE st = st_action;
   if (st <= 0) st = st_inst;
   if (st <= 0) return false;
@@ -65,5 +70,61 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("Network", "Changelogs");
   UPDATE_FEATURE("Proclist", "Changelogs");
   UPDATE_FEATURE("TmpPanel", "Changelogs");
+  return ERROR_SUCCESS;
+}
+
+
+bool check_dll(const string& file_name) {
+  LOADED_IMAGE* image = ImageLoad(file_name.c_str(), "");
+  bool res = (image != NULL) && (image->Characteristics & IMAGE_FILE_DLL);
+  if (image) ImageUnload(image);
+  return res;
+}
+
+void gen_dll_list(const string& path, list<string>& dll_list) {
+  WIN32_FIND_DATA find_data;
+  HANDLE h_find = FindFirstFile((path + "\\*").c_str(), &find_data);
+  if (h_find == INVALID_HANDLE_VALUE) return;
+  while (true) {
+    if ((strcmp(find_data.cFileName, ".") != 0) && (strcmp(find_data.cFileName, "..") != 0)) {
+      string file_name = path + '\\' + find_data.cFileName;
+      if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        gen_dll_list(file_name, dll_list);
+      }
+      else {
+        if (check_dll(file_name)) dll_list.push_back(file_name);
+      }
+    }
+    if (!FindNextFile(h_find, &find_data)) break;
+  }
+  FindClose(h_find);
+}
+
+const ULONG64 c_start_base = 0x20000000;
+
+UINT __stdcall Optimize(MSIHANDLE h_install) {
+  if (!is_inst(h_install, "Far")) return ERROR_SUCCESS;
+
+  char install_dir[MAX_PATH];
+  DWORD install_dir_size = MAX_PATH;
+  if (MsiGetProperty(h_install, "INSTALLDIR", install_dir, &install_dir_size) != ERROR_SUCCESS) return ERROR_INSTALL_FAILURE;
+  string plugin_dir(install_dir);
+  if (plugin_dir[plugin_dir.size() - 1] != '\\') plugin_dir += '\\';
+  plugin_dir += "plugins";
+
+  list<string> dll_list;
+  gen_dll_list(install_dir, dll_list);
+  ULONG64 curr_base = c_start_base;
+  for (list<string>::const_iterator file_name = dll_list.begin(); file_name != dll_list.end(); file_name++) {
+    ULONG64 old_base, new_base = curr_base;
+    ULONG old_size, new_size;
+    if (ReBaseImage64(file_name->c_str(), "", TRUE, FALSE, FALSE, 0, &old_size, &old_base, &new_size, &new_base, 0)) {
+      curr_base = new_base;
+    }
+  }
+  for (list<string>::const_iterator file_name = dll_list.begin(); file_name != dll_list.end(); file_name++) {
+    BindImage(file_name->c_str(), "", "");
+  }
+
   return ERROR_SUCCESS;
 }

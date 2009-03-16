@@ -12,6 +12,7 @@
     <Media Id="1" Cabinet="far.cab" EmbedCab="yes"/>
     <Binary Id="CustomActions.dll" SourceFile="CustomActions.dll"/>
     <CustomAction Id="UpdateFeatureState" BinaryKey="CustomActions.dll" DllEntry="UpdateFeatureState"/>
+    <CustomAction Id="Optimize" BinaryKey="CustomActions.dll" DllEntry="Optimize" />
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder">
         <Directory Id="INSTALLDIR" Name="Far">
@@ -39,6 +40,7 @@
     <InstallExecuteSequence>
       <RemoveExistingProducts After="InstallFinalize"/>
       <Custom Action="UpdateFeatureState" After="CostFinalize"/>
+      <Custom Action="Optimize" After="InstallFinalize"/>
     </InstallExecuteSequence>
     <UIRef Id="MyWixUI_FeatureTree"/>
     <UIRef Id="WixUI_ErrorProgressText"/>

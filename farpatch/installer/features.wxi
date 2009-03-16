@@ -57,7 +57,7 @@
     <Feature Id="ChangelogsFExcept" Level="1" Display="hidden" AllowAdvertise="no">
       <ComponentRef Id="changelog_2" />
     </Feature>
-    <Feature Id="Languages" Level="2" Display="expand" Title="Languages" AllowAdvertise="no" Description="Support for additional languages">
+    <Feature Id="Languages" Level="2" Title="Languages" AllowAdvertise="no" Description="Support for additional languages">
       <Feature Id="Russian" Level="2" Title="Russian" AllowAdvertise="no">
         <ComponentRef Id="FarRus.hlf" />
         <ComponentRef Id="FarRus.lng" />
@@ -75,7 +75,7 @@
       </Feature>
     </Feature>
     <Feature Id="Plugins" Level="1" Display="expand" Title="Plugins" AllowAdvertise="no" Description="Standard plugins">
-      <Feature Id="Editor" Level="1" Display="expand" Title="Editor" AllowAdvertise="no" Description="Editor plugins">
+      <Feature Id="Editor" Level="1" Title="Editor" AllowAdvertise="no" Description="Editor plugins">
         <Feature Id="Align" Level="1" Title="Align" AllowAdvertise="no" Description="Text block formatter">
           <ComponentRef Id="Align.dll" />
           <ComponentRef Id="AlignEng.lng" />
