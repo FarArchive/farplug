@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--?include defines.wxi ?-->
+<?define Product="FAR Manager $(var.Version)" ?>
+<?define Manufacturer="Eugene Roshal & FAR Group" ?>
+<?define UpgradeCode="45ab8d55-86a1-44f1-8e0a-1890fa69ba2b" ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Language="1033" Name="$(var.Product)" Version="$(var.Version)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
+    <Package Id="*" Platform="$(var.Platform)" Compressed="yes" Manufacturer="$(var.Manufacturer)" Description="$(var.Product)" InstallerVersion="150"/>
+    <Property Id="INSTALLDIR">
+      <RegistrySearch Id="InstallDir" Root="HKLM" Key="Software\Far2" Name="InstallDir" Type="raw"/>
+    </Property>
+    <Media Id="1" Cabinet="far.cab" EmbedCab="yes"/>
+    <Binary Id="CustomActions.dll" SourceFile="CustomActions.dll"/>
+    <CustomAction Id="UpdateFeatureState" BinaryKey="CustomActions.dll" DllEntry="UpdateFeatureState"/>
+    <CustomAction Id="Optimize" BinaryKey="CustomActions.dll" DllEntry="Optimize" />
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLDIR" Name="Far">
+          <?include files.wxi ?>
+          <Component Id="InstallDir" Guid="d10b019e-4215-49c2-9b3d-9e042daca034">
+            <RegistryValue Root="HKLM" Key="Software\Far2" Name="InstallDir" Value="[INSTALLDIR]" Type="string"/>
+          </Component>
+          <Component Id="FExceptReg" Guid="956d5b46-dded-40fa-8cfe-1c76f5d489fb">
+            <RegistryValue Root="HKCU" Key="Software\Far2\System\Exception" Name="Used" Value="1" Type="integer"/>
+            <RegistryValue Root="HKCU" Key="Software\Far2\System\Exception" Name="FarEvent.svc" Value="fexcept.dll" Type="string"/>
+          </Component>
+          <Component Id="notify.log" Guid="7801c2b3-055a-4f9a-9c4b-60d215f380e0">
+            <RemoveFile Id="notify.log" Name="notify.log" On="uninstall"/>
+          </Component>
+          <Component Id="FStd_trap.log" Guid="4b82fe4f-1cc0-4a5c-b9ec-bd11449b6b8a">
+            <RemoveFile Id="FStd_trap.log" Name="FStd_trap.log" On="uninstall"/>
+          </Component>
+        </Directory>
+      </Directory>
+    </Directory>
+    <?include features.wxi ?>
+    <Upgrade Id="$(var.UpgradeCode)">
+      <UpgradeVersion Property="PREVIOUSVERSIONSINSTALLED" MigrateFeatures="yes" Minimum="0.0.0"/>
+    </Upgrade>
+    <InstallExecuteSequence>
+      <Custom Action="UpdateFeatureState" After="CostFinalize"/>
+      <Custom Action="Optimize" After="InstallFinalize"/>
+      <RemoveExistingProducts After="Optimize"/>
+    </InstallExecuteSequence>
+    <UIRef Id="MyWixUI_FeatureTree"/>
+    <UIRef Id="WixUI_ErrorProgressText"/>
+  </Product>
+</Wix>

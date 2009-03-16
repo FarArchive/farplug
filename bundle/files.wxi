@@ -1,0 +1,661 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Include>
+  <Component Id="changelog_1" Guid="{ADF29786-9420-4C48-8AF7-BF859575E2F1}">
+    <File Id="changelog_1" Name="changelog" KeyPath="yes" Source="unicode_far\changelog" />
+  </Component>
+  <Component Id="ClearPluginsCache.bat" Guid="{3B8C9811-B7BB-4A1F-919B-5B108D5F104E}">
+    <File Id="ClearPluginsCache.bat" Name="ClearPluginsCache.bat" KeyPath="yes" Source="docs\ClearPluginsCache.bat" />
+  </Component>
+  <Component Id="demangle.dll" Guid="{1190DBF4-4F0A-4BC6-832C-6E51A798D052}">
+    <File Id="demangle$(var.Suffix).dll" Name="demangle$(var.Suffix).dll" KeyPath="yes" Source="misc\fexcept\final.$(var.Suffix)W.vc\demangle$(var.Suffix).dll" />
+  </Component>
+  <Component Id="ExcDump.dll" Guid="{7C2048DB-4C8E-4EC8-8E62-97E6BCBD5C19}">
+    <File Id="ExcDump.dll" Name="ExcDump.dll" KeyPath="yes" Source="misc\fexcept\final.$(var.Suffix)W.vc\ExcDump.dll" />
+  </Component>
+  <Component Id="Far.exe" Guid="{E17565A6-43A5-44FB-9F85-C469722FBD48}">
+    <File Id="Far.exe" Name="Far.exe" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\Far.exe" />
+  </Component>
+  <Component Id="far.map" Guid="{66CB8A1C-3A66-4CAE-AAA3-788D6E1DF59B}">
+    <File Id="far.map" Name="far.map" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\far.map" />
+  </Component>
+  <Component Id="FarCze.lng" Guid="{EFFFF6EB-D4D1-4A61-A179-5B3CA4054939}">
+    <File Id="FarCze.lng" Name="FarCze.lng" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarCze.lng" />
+  </Component>
+  <Component Id="FarEng.hlf" Guid="{E44F8BD2-6789-40E9-B0F3-C063BF12B3C7}">
+    <File Id="FarEng.hlf" Name="FarEng.hlf" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarEng.hlf" />
+  </Component>
+  <Component Id="FarEng.lng" Guid="{80FD2E08-8C4E-4960-BF5F-D3497D4DBC6A}">
+    <File Id="FarEng.lng" Name="FarEng.lng" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarEng.lng" />
+  </Component>
+  <Component Id="FarGer.lng" Guid="{DD4F036E-135B-451A-9513-80611C1BA029}">
+    <File Id="FarGer.lng" Name="FarGer.lng" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarGer.lng" />
+  </Component>
+  <Component Id="FarHun.hlf" Guid="{9F23912A-F6B2-438C-AD31-C3CDDFE4B802}">
+    <File Id="FarHun.hlf" Name="FarHun.hlf" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarHun.hlf" />
+  </Component>
+  <Component Id="FarHun.lng" Guid="{75B1C70E-82B9-4CAB-890A-05DD9F67C235}">
+    <File Id="FarHun.lng" Name="FarHun.lng" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarHun.lng" />
+  </Component>
+  <Component Id="FarRus.hlf" Guid="{52BE3AC4-4585-45DE-A067-D72E1B7D12F6}">
+    <File Id="FarRus.hlf" Name="FarRus.hlf" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarRus.hlf" />
+  </Component>
+  <Component Id="FarRus.lng" Guid="{B1A1A308-10FF-4E0C-85AC-17812B6CDCD5}">
+    <File Id="FarRus.lng" Name="FarRus.lng" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarRus.lng" />
+  </Component>
+  <Component Id="FExcept.dll" Guid="{DDCE3CB9-979A-49E8-BDFD-31EB3796EE55}">
+    <File Id="FExcept.dll" Name="FExcept.dll" KeyPath="yes" Source="misc\fexcept\final.$(var.Suffix)W.vc\FExcept.dll" />
+  </Component>
+  <Component Id="File_id.diz" Guid="{5526C8FF-CE48-41FA-B972-5DCB8D9152DA}">
+    <File Id="File_id.diz" Name="File_id.diz" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\File_id.diz" />
+  </Component>
+  <Component Id="LICENSE" Guid="{3FE48D85-9D0F-4267-9DA0-DB060B4D40AF}">
+    <File Id="LICENSE" Name="LICENSE" KeyPath="yes" Source="unicode_far\LICENSE" />
+  </Component>
+  <Component Id="README_EN" Guid="{26B2C46F-E1C0-4522-9678-973DEA870E3E}">
+    <File Id="README_EN" Name="README-EN" KeyPath="yes" Source="unicode_far\README-EN" />
+  </Component>
+  <Component Id="README_RU" Guid="{D1DCD1E9-E12A-4CCC-B2DA-561D7FFFE6CF}">
+    <File Id="README_RU" Name="README-RU" KeyPath="yes" Source="unicode_far\README-RU" />
+  </Component>
+  <Component Id="RestoreSettings.bat" Guid="{619248C3-0E3A-4DA8-A12C-931A48A19560}">
+    <File Id="RestoreSettings.bat" Name="RestoreSettings.bat" KeyPath="yes" Source="docs\RestoreSettings.bat" />
+  </Component>
+  <Component Id="SaveSettings.bat" Guid="{5E825C9F-ADDA-4B51-AF00-5AF2350711A3}">
+    <File Id="SaveSettings.bat" Name="SaveSettings.bat" KeyPath="yes" Source="docs\SaveSettings.bat" />
+  </Component>
+  <Directory Id="docs" Name="docs">
+    <Directory Id="eng" Name="eng">
+      <Component Id="Arc.Support.txt_1" Guid="{7EDCFDD7-2B04-4218-B231-5B52218B88DB}">
+        <File Id="Arc.Support.txt_1" Name="Arc.Support.txt" KeyPath="yes" Source="docs\ENG\Arc.Support.txt" />
+      </Component>
+      <Component Id="Bug.Report.txt_1" Guid="{E17AAD10-ACAB-4A4B-99BF-F5BB585785B9}">
+        <File Id="Bug.Report.txt_1" Name="Bug.Report.txt" KeyPath="yes" Source="docs\ENG\Bug.Report.txt" />
+      </Component>
+      <Component Id="Descript.ion_1" Guid="{FA74B36C-6223-4D8F-B355-007767C208AF}">
+        <File Id="Descript.ion_1" Name="Descript.ion" KeyPath="yes" Source="docs\ENG\Descript.ion" />
+      </Component>
+      <Component Id="Far.FAQ.txt_1" Guid="{B8535463-6A2F-486E-9172-80D12BBEE733}">
+        <File Id="Far.FAQ.txt_1" Name="Far.FAQ.txt" KeyPath="yes" Source="docs\ENG\Far.FAQ.txt" />
+      </Component>
+      <Component Id="Plugins.Install.txt_1" Guid="{4D203213-0E5A-4DF2-B0CA-2AA646112076}">
+        <File Id="Plugins.Install.txt_1" Name="Plugins.Install.txt" KeyPath="yes" Source="docs\ENG\Plugins.Install.txt" />
+      </Component>
+      <Component Id="Plugins.Review.txt_1" Guid="{C4E1F9EF-82BB-4D85-9212-39985C28DFEB}">
+        <File Id="Plugins.Review.txt_1" Name="Plugins.Review.txt" KeyPath="yes" Source="docs\ENG\Plugins.Review.txt" />
+      </Component>
+      <Component Id="TechInfo.txt_1" Guid="{1960B383-75AC-43BB-ACF6-AB08B8A18D02}">
+        <File Id="TechInfo.txt_1" Name="TechInfo.txt" KeyPath="yes" Source="docs\ENG\TechInfo.txt" />
+      </Component>
+      <Component Id="WhatsNew.Api.txt_1" Guid="{FA984377-C289-4274-8B05-A9D956089C22}">
+        <File Id="WhatsNew.Api.txt_1" Name="WhatsNew.Api.txt" KeyPath="yes" Source="docs\ENG\WhatsNew.Api.txt" />
+      </Component>
+      <Component Id="WhatsNew.Macros.txt_1" Guid="{4DDFE75B-1B48-49E6-926F-2C07F82E080D}">
+        <File Id="WhatsNew.Macros.txt_1" Name="WhatsNew.Macros.txt" KeyPath="yes" Source="docs\ENG\WhatsNew.Macros.txt" />
+      </Component>
+      <Component Id="WhatsNew.Plugins.txt_1" Guid="{B63E7C08-A148-4DBB-B3D1-2E5428A77DE7}">
+        <File Id="WhatsNew.Plugins.txt_1" Name="WhatsNew.Plugins.txt" KeyPath="yes" Source="docs\ENG\WhatsNew.Plugins.txt" />
+      </Component>
+      <Component Id="WhatsNew.txt_1" Guid="{7B3FDF52-18C4-4DFE-98A0-A433D1452E83}">
+        <File Id="WhatsNew.txt_1" Name="WhatsNew.txt" KeyPath="yes" Source="docs\ENG\WhatsNew.txt" />
+      </Component>
+    </Directory>
+    <Directory Id="fexcept" Name="fexcept">
+      <Component Id="changelog_2" Guid="{A9A26E90-5046-4066-AB31-E6BDAC5DCB53}">
+        <File Id="changelog_2" Name="changelog" KeyPath="yes" Source="misc\fexcept\changelog" />
+      </Component>
+      <Component Id="Readme.txt" Guid="{672C2ADF-5A38-420D-8E32-82E2D7E6125E}">
+        <File Id="Readme.txt" Name="Readme.txt" KeyPath="yes" Source="misc\fexcept\Readme.txt" />
+      </Component>
+      <Component Id="SetFarExceptionHandlerW.reg" Guid="{F434E8DF-F397-4592-AE6D-865DDFA375CB}">
+        <File Id="SetFarExceptionHandlerW.reg" Name="SetFarExceptionHandlerW.reg" KeyPath="yes" Source="misc\fexcept\SetFarExceptionHandlerW.reg" />
+      </Component>
+    </Directory>
+    <Directory Id="rus" Name="rus">
+      <Component Id="Arc.Support.txt_2" Guid="{C6FF5D0E-ED9F-4BD7-A78D-4A086D731857}">
+        <File Id="Arc.Support.txt_2" Name="Arc.Support.txt" KeyPath="yes" Source="docs\RUS\Arc.Support.txt" />
+      </Component>
+      <Component Id="Bug.Report.txt_2" Guid="{6A118DFC-82BC-4D4E-BCC8-0A1E7135A4AC}">
+        <File Id="Bug.Report.txt_2" Name="Bug.Report.txt" KeyPath="yes" Source="docs\RUS\Bug.Report.txt" />
+      </Component>
+      <Component Id="Descript.ion_2" Guid="{812B25E2-976F-4F4A-A3F4-375CBE662E4A}">
+        <File Id="Descript.ion_2" Name="Descript.ion" KeyPath="yes" Source="docs\RUS\Descript.ion" />
+      </Component>
+      <Component Id="Far.FAQ.txt_2" Guid="{B76AFC7E-34E9-4E6C-8D4A-F9031FC00350}">
+        <File Id="Far.FAQ.txt_2" Name="Far.FAQ.txt" KeyPath="yes" Source="docs\RUS\Far.FAQ.txt" />
+      </Component>
+      <Component Id="Plugins.Install.txt_2" Guid="{808948EA-B3EF-4F6B-8795-EFBA840D030F}">
+        <File Id="Plugins.Install.txt_2" Name="Plugins.Install.txt" KeyPath="yes" Source="docs\RUS\Plugins.Install.txt" />
+      </Component>
+      <Component Id="Plugins.Review.txt_2" Guid="{66F30143-E9CC-4383-B241-6ACD104643A7}">
+        <File Id="Plugins.Review.txt_2" Name="Plugins.Review.txt" KeyPath="yes" Source="docs\RUS\Plugins.Review.txt" />
+      </Component>
+      <Component Id="TechInfo.txt_2" Guid="{CCCF9368-9F20-4F14-AA88-2B9BF5853C2E}">
+        <File Id="TechInfo.txt_2" Name="TechInfo.txt" KeyPath="yes" Source="docs\RUS\TechInfo.txt" />
+      </Component>
+      <Component Id="WhatsNew.Api.txt_2" Guid="{1BDA1BB3-1C94-46F6-84E2-0898674D7269}">
+        <File Id="WhatsNew.Api.txt_2" Name="WhatsNew.Api.txt" KeyPath="yes" Source="docs\RUS\WhatsNew.Api.txt" />
+      </Component>
+      <Component Id="WhatsNew.Macros.txt_2" Guid="{EA3CB727-C0CE-474F-9526-8FD348169705}">
+        <File Id="WhatsNew.Macros.txt_2" Name="WhatsNew.Macros.txt" KeyPath="yes" Source="docs\RUS\WhatsNew.Macros.txt" />
+      </Component>
+      <Component Id="WhatsNew.Plugins.txt_2" Guid="{EB72C2E9-61C7-404E-AED1-1EBB10EB0288}">
+        <File Id="WhatsNew.Plugins.txt_2" Name="WhatsNew.Plugins.txt" KeyPath="yes" Source="docs\RUS\WhatsNew.Plugins.txt" />
+      </Component>
+      <Component Id="WhatsNew.txt_2" Guid="{22C4DF08-86F3-49AB-AACD-31BAA2389EB8}">
+        <File Id="WhatsNew.txt_2" Name="WhatsNew.txt" KeyPath="yes" Source="docs\RUS\WhatsNew.txt" />
+      </Component>
+    </Directory>
+  </Directory>
+  <Directory Id="plugins" Name="plugins">
+    <Directory Id="align" Name="align">
+      <Component Id="Align.dll" Guid="{A669EA64-3010-44F1-9205-8FF925D8D733}">
+        <File Id="Align.dll" Name="Align.dll" KeyPath="yes" Source="plugins\align\final.$(var.Suffix)W.vc\Align.dll" />
+      </Component>
+      <Component Id="Align.map" Guid="{81259D79-8A06-4E47-B5DD-6268F68116A4}">
+        <File Id="Align.map" Name="Align.map" KeyPath="yes" Source="plugins\align\final.$(var.Suffix)W.vc\Align.map" />
+      </Component>
+      <Component Id="AlignEng.lng" Guid="{F2CBF999-B292-4BD4-96F5-59B0103ECA35}">
+        <File Id="AlignEng.lng" Name="AlignEng.lng" KeyPath="yes" Source="plugins\align\final.$(var.Suffix)W.vc\AlignEng.lng" />
+      </Component>
+      <Component Id="AlignRus.lng" Guid="{071571F6-C7B3-4EC8-859B-3A0D5634EA77}">
+        <File Id="AlignRus.lng" Name="AlignRus.lng" KeyPath="yes" Source="plugins\align\final.$(var.Suffix)W.vc\AlignRus.lng" />
+      </Component>
+      <Component Id="changelog_3" Guid="{294D8AA8-8E7B-49D3-AF69-AA948A9E16BE}">
+        <File Id="changelog_3" Name="changelog" KeyPath="yes" Source="plugins\align\changelog" />
+      </Component>
+    </Directory>
+    <Directory Id="autowrap" Name="autowrap">
+      <Component Id="AutoWrap.dll" Guid="{A0D81B9D-11BB-4344-83E2-2F900399956B}">
+        <File Id="AutoWrap.dll" Name="AutoWrap.dll" KeyPath="yes" Source="plugins\autowrap\final.$(var.Suffix)W.vc\AutoWrap.dll" />
+      </Component>
+      <Component Id="AutoWrap.map" Guid="{6E0A2A80-BC2A-481F-8FEC-71A5093C5312}">
+        <File Id="AutoWrap.map" Name="AutoWrap.map" KeyPath="yes" Source="plugins\autowrap\final.$(var.Suffix)W.vc\AutoWrap.map" />
+      </Component>
+      <Component Id="changelog_4" Guid="{65CCDFFC-3465-4A72-81D5-31519B45A9DA}">
+        <File Id="changelog_4" Name="changelog" KeyPath="yes" Source="plugins\autowrap\changelog" />
+      </Component>
+      <Component Id="WrapEng.lng" Guid="{C41AA9F6-8850-49CC-A8B6-A544DC014130}">
+        <File Id="WrapEng.lng" Name="WrapEng.lng" KeyPath="yes" Source="plugins\autowrap\final.$(var.Suffix)W.vc\WrapEng.lng" />
+      </Component>
+      <Component Id="WrapRus.lng" Guid="{587A42E2-E724-41E7-BB89-AADFFA77CD44}">
+        <File Id="WrapRus.lng" Name="WrapRus.lng" KeyPath="yes" Source="plugins\autowrap\final.$(var.Suffix)W.vc\WrapRus.lng" />
+      </Component>
+    </Directory>
+    <Directory Id="brackets" Name="brackets">
+      <Component Id="BrackDel.reg" Guid="{0B55A821-171B-41C7-9218-859B78AE25BC}">
+        <File Id="BrackDel.reg" Name="BrackDel.reg" KeyPath="yes" Source="plugins\brackets\final.$(var.Suffix)W.vc\BrackDel.reg" />
+      </Component>
+      <Component Id="BrackEng.hlf" Guid="{F69DD136-FD5F-4067-B8D6-566DE645AA8E}">
+        <File Id="BrackEng.hlf" Name="BrackEng.hlf" KeyPath="yes" Source="plugins\brackets\final.$(var.Suffix)W.vc\BrackEng.hlf" />
+      </Component>
+      <Component Id="BrackEng.lng" Guid="{20CEFEE3-87CD-4C5A-8C86-3E441B5DDCB4}">
+        <File Id="BrackEng.lng" Name="BrackEng.lng" KeyPath="yes" Source="plugins\brackets\final.$(var.Suffix)W.vc\BrackEng.lng" />
+      </Component>
+      <Component Id="BrackEng.reg" Guid="{6C41507E-BA64-40F5-84D8-49291F0E9315}">
+        <File Id="BrackEng.reg" Name="BrackEng.reg" KeyPath="yes" Source="plugins\brackets\final.$(var.Suffix)W.vc\BrackEng.reg" />
+      </Component>
+      <Component Id="Brackets.dll" Guid="{B2EC795A-D913-4155-B5A4-48C2A8BE7E7D}">
+        <File Id="Brackets.dll" Name="Brackets.dll" KeyPath="yes" Source="plugins\brackets\final.$(var.Suffix)W.vc\Brackets.dll" />
+      </Component>
+      <Component Id="Brackets.map" Guid="{FA1FA202-7DA8-4EB4-A9BE-9164527C5507}">
+        <File Id="Brackets.map" Name="Brackets.map" KeyPath="yes" Source="plugins\brackets\final.$(var.Suffix)W.vc\Brackets.map" />
+      </Component>
+      <Component Id="BrackRus.hlf" Guid="{E43CD2A1-B567-4A8C-AD1C-A4BA5F29DEEF}">
+        <File Id="BrackRus.hlf" Name="BrackRus.hlf" KeyPath="yes" Source="plugins\brackets\final.$(var.Suffix)W.vc\BrackRus.hlf" />
+      </Component>
+      <Component Id="BrackRus.lng" Guid="{D19C639C-8E40-4C00-935A-D70FE9478B29}">
+        <File Id="BrackRus.lng" Name="BrackRus.lng" KeyPath="yes" Source="plugins\brackets\final.$(var.Suffix)W.vc\BrackRus.lng" />
+      </Component>
+      <Component Id="BrackRus.reg" Guid="{ECEC2AEC-0C27-4903-B181-1C1357DA6478}">
+        <File Id="BrackRus.reg" Name="BrackRus.reg" KeyPath="yes" Source="plugins\brackets\final.$(var.Suffix)W.vc\BrackRus.reg" />
+      </Component>
+      <Component Id="changelog_5" Guid="{DE000D48-B8E2-4E56-898D-5BC914515955}">
+        <File Id="changelog_5" Name="changelog" KeyPath="yes" Source="plugins\brackets\changelog" />
+      </Component>
+    </Directory>
+    <Directory Id="compare" Name="compare">
+      <Component Id="changelog_6" Guid="{118B82C4-D9B9-4B51-B587-55E42795F2D7}">
+        <File Id="changelog_6" Name="changelog" KeyPath="yes" Source="plugins\compare\changelog" />
+      </Component>
+      <Component Id="CmpEng.hlf" Guid="{709F3279-5C75-4E43-91C7-0B5863F679FB}">
+        <File Id="CmpEng.hlf" Name="CmpEng.hlf" KeyPath="yes" Source="plugins\compare\final.$(var.Suffix)W.vc\CmpEng.hlf" />
+      </Component>
+      <Component Id="CmpRus.hlf" Guid="{1D10791A-5DB1-45DF-9E8A-827E5431D814}">
+        <File Id="CmpRus.hlf" Name="CmpRus.hlf" KeyPath="yes" Source="plugins\compare\final.$(var.Suffix)W.vc\CmpRus.hlf" />
+      </Component>
+      <Component Id="Compare.dll" Guid="{69EBB3B0-BC65-4A32-9945-AB73FA0877D4}">
+        <File Id="Compare.dll" Name="Compare.dll" KeyPath="yes" Source="plugins\compare\final.$(var.Suffix)W.vc\Compare.dll" />
+      </Component>
+      <Component Id="Compare.map" Guid="{FB20FCFA-19E0-4BFB-9A21-3AFE52BBF5FC}">
+        <File Id="Compare.map" Name="Compare.map" KeyPath="yes" Source="plugins\compare\final.$(var.Suffix)W.vc\Compare.map" />
+      </Component>
+      <Component Id="CompEng.lng" Guid="{B0620A39-B8EA-4C10-B0E3-3CFC60BF4DAE}">
+        <File Id="CompEng.lng" Name="CompEng.lng" KeyPath="yes" Source="plugins\compare\final.$(var.Suffix)W.vc\CompEng.lng" />
+      </Component>
+      <Component Id="CompRus.lng" Guid="{EF161F4D-16C4-4A22-9A0D-543A586FDCAD}">
+        <File Id="CompRus.lng" Name="CompRus.lng" KeyPath="yes" Source="plugins\compare\final.$(var.Suffix)W.vc\CompRus.lng" />
+      </Component>
+    </Directory>
+    <Directory Id="drawline" Name="drawline">
+      <Component Id="changelog_7" Guid="{1C17D384-6699-4A7C-AE13-C3290161259B}">
+        <File Id="changelog_7" Name="changelog" KeyPath="yes" Source="plugins\drawline\changelog" />
+      </Component>
+      <Component Id="DrawEng.hlf" Guid="{2984C36E-D6A0-4E4D-B089-F8B100E388EB}">
+        <File Id="DrawEng.hlf" Name="DrawEng.hlf" KeyPath="yes" Source="plugins\drawline\final.$(var.Suffix)W.vc\DrawEng.hlf" />
+      </Component>
+      <Component Id="DrawEng.lng" Guid="{A7030F8E-8FA8-4126-A6CE-CC5EED60C39C}">
+        <File Id="DrawEng.lng" Name="DrawEng.lng" KeyPath="yes" Source="plugins\drawline\final.$(var.Suffix)W.vc\DrawEng.lng" />
+      </Component>
+      <Component Id="DrawLine.dll" Guid="{911050D3-78A8-4B83-88C6-93F0E5AED9B7}">
+        <File Id="DrawLine.dll" Name="DrawLine.dll" KeyPath="yes" Source="plugins\drawline\final.$(var.Suffix)W.vc\DrawLine.dll" />
+      </Component>
+      <Component Id="DrawLine.map" Guid="{31E7FC5F-E06F-4681-9DB0-474CE49362C5}">
+        <File Id="DrawLine.map" Name="DrawLine.map" KeyPath="yes" Source="plugins\drawline\final.$(var.Suffix)W.vc\DrawLine.map" />
+      </Component>
+      <Component Id="DrawRus.hlf" Guid="{5F00B7C2-0D82-4D94-9698-0456E8EBD3B7}">
+        <File Id="DrawRus.hlf" Name="DrawRus.hlf" KeyPath="yes" Source="plugins\drawline\final.$(var.Suffix)W.vc\DrawRus.hlf" />
+      </Component>
+      <Component Id="DrawRus.lng" Guid="{EF181567-6D86-4A24-AA44-25A45DB52981}">
+        <File Id="DrawRus.lng" Name="DrawRus.lng" KeyPath="yes" Source="plugins\drawline\final.$(var.Suffix)W.vc\DrawRus.lng" />
+      </Component>
+    </Directory>
+    <Directory Id="editcase" Name="editcase">
+      <Component Id="changelog_8" Guid="{D87AFF07-0652-4F33-A830-8FFCC350893E}">
+        <File Id="changelog_8" Name="changelog" KeyPath="yes" Source="plugins\editcase\changelog" />
+      </Component>
+      <Component Id="ECaseEng.hlf" Guid="{A617858B-593E-4B01-A7E3-C354A31C7F5B}">
+        <File Id="ECaseEng.hlf" Name="ECaseEng.hlf" KeyPath="yes" Source="plugins\editcase\final.$(var.Suffix)W.vc\ECaseEng.hlf" />
+      </Component>
+      <Component Id="ECaseEng.lng" Guid="{F5411432-1F86-4E79-AAA8-06FB2F2FBCFA}">
+        <File Id="ECaseEng.lng" Name="ECaseEng.lng" KeyPath="yes" Source="plugins\editcase\final.$(var.Suffix)W.vc\ECaseEng.lng" />
+      </Component>
+      <Component Id="ECaseRus.hlf" Guid="{F7BB4CF1-3B39-4D94-BD55-A4ADCCF05894}">
+        <File Id="ECaseRus.hlf" Name="ECaseRus.hlf" KeyPath="yes" Source="plugins\editcase\final.$(var.Suffix)W.vc\ECaseRus.hlf" />
+      </Component>
+      <Component Id="ECaseRus.lng" Guid="{8DEB7E0A-2073-4D55-8133-F73A91E2784D}">
+        <File Id="ECaseRus.lng" Name="ECaseRus.lng" KeyPath="yes" Source="plugins\editcase\final.$(var.Suffix)W.vc\ECaseRus.lng" />
+      </Component>
+      <Component Id="EditCase.dll" Guid="{295093BD-D41D-46A7-ACF6-BAC5881291B8}">
+        <File Id="EditCase.dll" Name="EditCase.dll" KeyPath="yes" Source="plugins\editcase\final.$(var.Suffix)W.vc\EditCase.dll" />
+      </Component>
+      <Component Id="EditCase.map" Guid="{B3F5D897-F238-42D7-8BDA-C806E9EC9351}">
+        <File Id="EditCase.map" Name="EditCase.map" KeyPath="yes" Source="plugins\editcase\final.$(var.Suffix)W.vc\EditCase.map" />
+      </Component>
+    </Directory>
+    <Directory Id="emenu" Name="emenu">
+      <Component Id="changelog_9" Guid="{90E68396-513F-46E4-9D1A-81D144EF6716}">
+        <File Id="changelog_9" Name="changelog" KeyPath="yes" Source="plugins\emenu\changelog" />
+      </Component>
+      <Component Id="EMenu.dll" Guid="{1854F87D-CDC9-4CB9-ABEE-98C034F3384D}">
+        <File Id="EMenu.dll" Name="EMenu.dll" KeyPath="yes" Source="plugins\emenu\final.$(var.Suffix)W.vc\EMenu.dll" />
+      </Component>
+      <Component Id="EMenu.map" Guid="{A6EFB212-20F0-4826-95A0-A1DCC3BF5865}">
+        <File Id="EMenu.map" Name="EMenu.map" KeyPath="yes" Source="plugins\emenu\final.$(var.Suffix)W.vc\EMenu.map" />
+      </Component>
+      <Component Id="EMenuDel.reg" Guid="{04CC0391-605F-4323-989B-EF4B644593F2}">
+        <File Id="EMenuDel.reg" Name="EMenuDel.reg" KeyPath="yes" Source="plugins\emenu\final.$(var.Suffix)W.vc\EMenuDel.reg" />
+      </Component>
+      <Component Id="EMenuEng.hlf" Guid="{EE0D347E-DC78-454F-A526-01C632613588}">
+        <File Id="EMenuEng.hlf" Name="EMenuEng.hlf" KeyPath="yes" Source="plugins\emenu\final.$(var.Suffix)W.vc\EMenuEng.hlf" />
+      </Component>
+      <Component Id="EMenuEng.lng" Guid="{47DF022D-C4FB-497A-BB3C-8E793F2F34D2}">
+        <File Id="EMenuEng.lng" Name="EMenuEng.lng" KeyPath="yes" Source="plugins\emenu\final.$(var.Suffix)W.vc\EMenuEng.lng" />
+      </Component>
+      <Component Id="EMenuRus.hlf" Guid="{962F0EAD-FF19-425C-ABD8-449C6EE5147A}">
+        <File Id="EMenuRus.hlf" Name="EMenuRus.hlf" KeyPath="yes" Source="plugins\emenu\final.$(var.Suffix)W.vc\EMenuRus.hlf" />
+      </Component>
+      <Component Id="EMenuRus.lng" Guid="{DA19DF55-2982-4C92-838C-B8696CE4542A}">
+        <File Id="EMenuRus.lng" Name="EMenuRus.lng" KeyPath="yes" Source="plugins\emenu\final.$(var.Suffix)W.vc\EMenuRus.lng" />
+      </Component>
+      <Component Id="Hotkey.reg" Guid="{072BD4BC-9022-4374-994D-61EE34C23B58}">
+        <File Id="Hotkey.reg" Name="Hotkey.reg" KeyPath="yes" Source="plugins\emenu\final.$(var.Suffix)W.vc\Hotkey.reg" />
+      </Component>
+      <Component Id="HotkeyClipboard.reg" Guid="{CB7E1AFA-3825-4F96-9CFA-215F9C94ADFE}">
+        <File Id="HotkeyClipboard.reg" Name="HotkeyClipboard.reg" KeyPath="yes" Source="plugins\emenu\final.$(var.Suffix)W.vc\HotkeyClipboard.reg" />
+      </Component>
+      <Component Id="HotkeyProperties.reg" Guid="{4E9BD096-BD59-4E16-8E88-FF983A339FD4}">
+        <File Id="HotkeyProperties.reg" Name="HotkeyProperties.reg" KeyPath="yes" Source="plugins\emenu\final.$(var.Suffix)W.vc\HotkeyProperties.reg" />
+      </Component>
+    </Directory>
+    <Directory Id="farcmds" Name="farcmds">
+      <Component Id="changelog_10" Guid="{080CDD78-18C6-4409-9350-C661E6D8BBF3}">
+        <File Id="changelog_10" Name="changelog" KeyPath="yes" Source="plugins\farcmds\changelog" />
+      </Component>
+      <Component Id="FARCmds.dll" Guid="{3088539D-9FF4-460A-843A-21F3C907C513}">
+        <File Id="FARCmds.dll" Name="FARCmds.dll" KeyPath="yes" Source="plugins\farcmds\final.$(var.Suffix)W.vc\FARCmds.dll" />
+      </Component>
+      <Component Id="FARCmds.map" Guid="{481E9DEB-6E37-4CCC-826E-C62F4D894DAB}">
+        <File Id="FARCmds.map" Name="FARCmds.map" KeyPath="yes" Source="plugins\farcmds\final.$(var.Suffix)W.vc\FARCmds.map" />
+      </Component>
+      <Component Id="FARCmdsEng.hlf" Guid="{4AAFF76D-25BF-47EE-A959-3891FA72485D}">
+        <File Id="FARCmdsEng.hlf" Name="FARCmdsEng.hlf" KeyPath="yes" Source="plugins\farcmds\final.$(var.Suffix)W.vc\FARCmdsEng.hlf" />
+      </Component>
+      <Component Id="FARCmdsEng.lng" Guid="{02AAF0A4-AABE-4814-9DAF-3DC00B6EE639}">
+        <File Id="FARCmdsEng.lng" Name="FARCmdsEng.lng" KeyPath="yes" Source="plugins\farcmds\final.$(var.Suffix)W.vc\FARCmdsEng.lng" />
+      </Component>
+      <Component Id="FARCmdsRus.hlf" Guid="{CB21966C-DA4A-418B-886E-2F2C9627AF51}">
+        <File Id="FARCmdsRus.hlf" Name="FARCmdsRus.hlf" KeyPath="yes" Source="plugins\farcmds\final.$(var.Suffix)W.vc\FARCmdsRus.hlf" />
+      </Component>
+      <Component Id="FARCmdsRus.lng" Guid="{369E5DBE-1133-4C1E-83A7-F915CB545EBA}">
+        <File Id="FARCmdsRus.lng" Name="FARCmdsRus.lng" KeyPath="yes" Source="plugins\farcmds\final.$(var.Suffix)W.vc\FARCmdsRus.lng" />
+      </Component>
+    </Directory>
+    <Directory Id="filecase" Name="filecase">
+      <Component Id="CaseEng.hlf" Guid="{E02CF566-01CC-4D12-AC5D-C4EB4272402B}">
+        <File Id="CaseEng.hlf" Name="CaseEng.hlf" KeyPath="yes" Source="plugins\filecase\final.$(var.Suffix)W.vc\CaseEng.hlf" />
+      </Component>
+      <Component Id="CaseEng.lng" Guid="{307A3E68-66AF-46CD-86CB-7EFFCC1FE65D}">
+        <File Id="CaseEng.lng" Name="CaseEng.lng" KeyPath="yes" Source="plugins\filecase\final.$(var.Suffix)W.vc\CaseEng.lng" />
+      </Component>
+      <Component Id="CaseRus.hlf" Guid="{4CFBFEA0-6B95-49B3-8E83-A8A8A86260B8}">
+        <File Id="CaseRus.hlf" Name="CaseRus.hlf" KeyPath="yes" Source="plugins\filecase\final.$(var.Suffix)W.vc\CaseRus.hlf" />
+      </Component>
+      <Component Id="CaseRus.lng" Guid="{5086956E-BDCE-45D2-AF05-EB317C10ED80}">
+        <File Id="CaseRus.lng" Name="CaseRus.lng" KeyPath="yes" Source="plugins\filecase\final.$(var.Suffix)W.vc\CaseRus.lng" />
+      </Component>
+      <Component Id="changelog_11" Guid="{C8830953-646A-4AAA-8472-2A62D272D175}">
+        <File Id="changelog_11" Name="changelog" KeyPath="yes" Source="plugins\filecase\changelog" />
+      </Component>
+      <Component Id="FileCase.dll" Guid="{57E3F57C-355E-4654-9BE7-DE969E90F880}">
+        <File Id="FileCase.dll" Name="FileCase.dll" KeyPath="yes" Source="plugins\filecase\final.$(var.Suffix)W.vc\FileCase.dll" />
+      </Component>
+      <Component Id="FileCase.map" Guid="{E471D0FF-9D3C-4D8A-B4BB-4389425BACA3}">
+        <File Id="FileCase.map" Name="FileCase.map" KeyPath="yes" Source="plugins\filecase\final.$(var.Suffix)W.vc\FileCase.map" />
+      </Component>
+    </Directory>
+    <Directory Id="ftp" Name="ftp">
+      <Component Id="changelog_12" Guid="{15C0F97E-2CD0-4049-A45A-327D32773EBF}">
+        <File Id="changelog_12" Name="changelog" KeyPath="yes" Source="plugins\ftp\changelog" />
+      </Component>
+      <Component Id="FarFtp.dll" Guid="{2158167F-0B1D-4707-A6AF-06D9A091690F}">
+        <File Id="FarFtp.dll" Name="FarFtp.dll" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\FarFtp.dll" />
+      </Component>
+      <Component Id="FarFtp.map" Guid="{DFB291CD-9B17-4B2B-A911-8E5D8872C381}">
+        <File Id="FarFtp.map" Name="FarFtp.map" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\FarFtp.map" />
+      </Component>
+      <Component Id="FtpCmds.txt" Guid="{E5315F14-7FA8-46BB-839F-A547F7C733E5}">
+        <File Id="FtpCmds.txt" Name="FtpCmds.txt" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\FtpCmds.txt" />
+      </Component>
+      <Component Id="FtpCmds_rus.txt" Guid="{989D0C71-4B3F-49D1-888B-D56B7F063DBA}">
+        <File Id="FtpCmds_rus.txt" Name="FtpCmds_rus.txt" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\FtpCmds_rus.txt" />
+      </Component>
+      <Component Id="FtpEng.hlf" Guid="{99082D35-DBB3-46F3-A108-CE297DED7724}">
+        <File Id="FtpEng.hlf" Name="FtpEng.hlf" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\FtpEng.hlf" />
+      </Component>
+      <Component Id="FtpEng.lng" Guid="{33517562-4230-4EFB-B646-528F0734D553}">
+        <File Id="FtpEng.lng" Name="FtpEng.lng" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\FtpEng.lng" />
+      </Component>
+      <Component Id="FtpRus.hlf" Guid="{F8029EA9-72E3-42FB-851E-B7B0B4505FB3}">
+        <File Id="FtpRus.hlf" Name="FtpRus.hlf" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\FtpRus.hlf" />
+      </Component>
+      <Component Id="FtpRus.lng" Guid="{D885801C-447C-4F26-9E7A-E6F626A6BCF6}">
+        <File Id="FtpRus.lng" Name="FtpRus.lng" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\FtpRus.lng" />
+      </Component>
+      <Component Id="Notes.txt" Guid="{9A410D5B-0373-4833-AEAB-57DAF49A6950}">
+        <File Id="Notes.txt" Name="Notes.txt" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\Notes.txt" />
+      </Component>
+      <Component Id="Notes_rus.txt" Guid="{4E3AA137-581B-4A5F-A95F-A3E0F6CA3C3A}">
+        <File Id="Notes_rus.txt" Name="Notes_rus.txt" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\Notes_rus.txt" />
+      </Component>
+      <Component Id="TechInfo.reg" Guid="{0674C3CE-EF3F-479C-A452-209AADAA0BD9}">
+        <File Id="TechInfo.reg" Name="TechInfo.reg" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\TechInfo.reg" />
+      </Component>
+      <Component Id="TechInfo_rus.reg" Guid="{F24963BD-1750-4E98-81A1-E66F5BAFF21D}">
+        <File Id="TechInfo_rus.reg" Name="TechInfo_rus.reg" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\TechInfo_rus.reg" />
+      </Component>
+      <Directory Id="lib" Name="lib">
+        <Component Id="ftpDirList.fll" Guid="{E8090DDC-8B79-4A20-BC44-63E05D7727A7}">
+          <File Id="ftpDirList.fll" Name="ftpDirList.fll" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\lib\ftpDirList.fll" />
+        </Component>
+        <Component Id="ftpDirList.map" Guid="{CD3FD5ED-7D24-4008-8AB2-8201DC6081D0}">
+          <File Id="ftpDirList.map" Name="ftpDirList.map" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\lib\ftpDirList.map" />
+        </Component>
+        <Component Id="ftpNotify.fll" Guid="{67FE913F-50D1-412D-9120-DCE0B4EC58D2}">
+          <File Id="ftpNotify.fll" Name="ftpNotify.fll" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\lib\ftpNotify.fll" />
+        </Component>
+        <Component Id="ftpNotify.map" Guid="{814FE417-7F02-4CF5-BB6E-B38D7360C985}">
+          <File Id="ftpNotify.map" Name="ftpNotify.map" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\lib\ftpNotify.map" />
+        </Component>
+        <Component Id="ftpProgress.fll" Guid="{1EEB8890-2C4F-477C-8219-5DDFE9FE362F}">
+          <File Id="ftpProgress.fll" Name="ftpProgress.fll" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\lib\ftpProgress.fll" />
+        </Component>
+        <Component Id="ftpProgress.map" Guid="{6C183DD3-647B-4B1B-A59E-0A373468D994}">
+          <File Id="ftpProgress.map" Name="ftpProgress.map" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\lib\ftpProgress.map" />
+        </Component>
+        <Component Id="Progress_FarCopy.reg" Guid="{8E50994B-16BB-4751-B109-2E9A58694E26}">
+          <File Id="Progress_FarCopy.reg" Name="Progress_FarCopy.reg" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\lib\Progress_FarCopy.reg" />
+        </Component>
+        <Component Id="Progress_JM.reg" Guid="{247C63CA-FC21-4C2B-8F82-787CDFA7FDA0}">
+          <File Id="Progress_JM.reg" Name="Progress_JM.reg" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\lib\Progress_JM.reg" />
+        </Component>
+        <Component Id="Progress_Wesha.reg" Guid="{23F6C05A-4683-45C1-A797-5E6F6E5FBB31}">
+          <File Id="Progress_Wesha.reg" Name="Progress_Wesha.reg" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\lib\Progress_Wesha.reg" />
+        </Component>
+        <Component Id="Progress_ZeMA.reg" Guid="{729A4A9F-6B52-4F82-8DEF-6654AE14F016}">
+          <File Id="Progress_ZeMA.reg" Name="Progress_ZeMA.reg" KeyPath="yes" Source="plugins\ftp\final.$(var.Suffix).vc\lib\Progress_ZeMA.reg" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Directory Id="hlfviewer" Name="hlfviewer">
+      <Component Id="changelog_13" Guid="{5F12EAE7-93FF-4A9F-8D31-0E4C1C691383}">
+        <File Id="changelog_13" Name="changelog" KeyPath="yes" Source="plugins\hlfviewer\changelog" />
+      </Component>
+      <Component Id="HlfViewer.dll" Guid="{8646D0E0-F99F-4DCF-BB75-0C3BFB8919BB}">
+        <File Id="HlfViewer.dll" Name="HlfViewer.dll" KeyPath="yes" Source="plugins\hlfviewer\final.$(var.Suffix)W.vc\HlfViewer.dll" />
+      </Component>
+      <Component Id="HlfViewer.map" Guid="{A6A0AB71-033C-43E2-BF30-38563CCB3EBE}">
+        <File Id="HlfViewer.map" Name="HlfViewer.map" KeyPath="yes" Source="plugins\hlfviewer\final.$(var.Suffix)W.vc\HlfViewer.map" />
+      </Component>
+      <Component Id="HlfViewerEng.hlf" Guid="{0C6148EC-A937-4972-99BD-53F7CCE3703C}">
+        <File Id="HlfViewerEng.hlf" Name="HlfViewerEng.hlf" KeyPath="yes" Source="plugins\hlfviewer\final.$(var.Suffix)W.vc\HlfViewerEng.hlf" />
+      </Component>
+      <Component Id="HlfViewerEng.lng" Guid="{3F961F00-9C2C-446E-8C00-9A5D6F9311C6}">
+        <File Id="HlfViewerEng.lng" Name="HlfViewerEng.lng" KeyPath="yes" Source="plugins\hlfviewer\final.$(var.Suffix)W.vc\HlfViewerEng.lng" />
+      </Component>
+      <Component Id="HlfViewerRus.hlf" Guid="{8C8B29F7-E239-42BC-94B8-903ED0A56BDC}">
+        <File Id="HlfViewerRus.hlf" Name="HlfViewerRus.hlf" KeyPath="yes" Source="plugins\hlfviewer\final.$(var.Suffix)W.vc\HlfViewerRus.hlf" />
+      </Component>
+      <Component Id="HlfViewerRus.lng" Guid="{8F9A85E9-B170-4DC9-86F6-CA627D3AA9E1}">
+        <File Id="HlfViewerRus.lng" Name="HlfViewerRus.lng" KeyPath="yes" Source="plugins\hlfviewer\final.$(var.Suffix)W.vc\HlfViewerRus.lng" />
+      </Component>
+    </Directory>
+    <Directory Id="macroview" Name="macroview">
+      <Component Id="changelog_14" Guid="{5863F01C-2AEB-47E5-914C-DBDEC646BD10}">
+        <File Id="changelog_14" Name="changelog" KeyPath="yes" Source="plugins\macroview\changelog" />
+      </Component>
+      <Component Id="MacroEng.hlf" Guid="{7CB13479-795E-4899-8B4F-2CB26D39B87E}">
+        <File Id="MacroEng.hlf" Name="MacroEng.hlf" KeyPath="yes" Source="plugins\macroview\final.$(var.Suffix)W.vc\MacroEng.hlf" />
+      </Component>
+      <Component Id="MacroEng.lng" Guid="{E605C7FC-4E2C-48C1-A332-7BEFEA6B1252}">
+        <File Id="MacroEng.lng" Name="MacroEng.lng" KeyPath="yes" Source="plugins\macroview\final.$(var.Suffix)W.vc\MacroEng.lng" />
+      </Component>
+      <Component Id="MacroRus.hlf" Guid="{AB97687D-0E10-4E56-8545-E8016F856045}">
+        <File Id="MacroRus.hlf" Name="MacroRus.hlf" KeyPath="yes" Source="plugins\macroview\final.$(var.Suffix)W.vc\MacroRus.hlf" />
+      </Component>
+      <Component Id="MacroRus.lng" Guid="{7FEE8D47-1E8E-4D2F-836E-592F4783CEA6}">
+        <File Id="MacroRus.lng" Name="MacroRus.lng" KeyPath="yes" Source="plugins\macroview\final.$(var.Suffix)W.vc\MacroRus.lng" />
+      </Component>
+      <Component Id="MacroView.dll" Guid="{27207F83-B533-4457-B1FA-A115D6B31C36}">
+        <File Id="MacroView.dll" Name="MacroView.dll" KeyPath="yes" Source="plugins\macroview\final.$(var.Suffix)W.vc\MacroView.dll" />
+      </Component>
+      <Component Id="MacroView.map" Guid="{189D4F3D-3F48-4E00-AD2C-2A14BAC391B2}">
+        <File Id="MacroView.map" Name="MacroView.map" KeyPath="yes" Source="plugins\macroview\final.$(var.Suffix)W.vc\MacroView.map" />
+      </Component>
+    </Directory>
+    <Directory Id="multiarc" Name="multiarc">
+      <Component Id="arceng.hlf" Guid="{DEF5A4AE-6B29-47F3-A4E8-5F6386B72961}">
+        <File Id="arceng.hlf" Name="arceng.hlf" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\arceng.hlf" />
+      </Component>
+      <Component Id="arceng.lng" Guid="{6DF940E9-2991-498F-8BA6-27052DD70112}">
+        <File Id="arceng.lng" Name="arceng.lng" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\arceng.lng" />
+      </Component>
+      <Component Id="arcrus.hlf" Guid="{9E49EC96-30F3-446D-A095-0D4A9001A87B}">
+        <File Id="arcrus.hlf" Name="arcrus.hlf" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\arcrus.hlf" />
+      </Component>
+      <Component Id="arcrus.lng" Guid="{85AE6328-5DF0-464E-A02B-D66FEA71DB54}">
+        <File Id="arcrus.lng" Name="arcrus.lng" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\arcrus.lng" />
+      </Component>
+      <Component Id="changelog_15" Guid="{76CAD7EE-4FB7-488D-8643-656F604AB3F3}">
+        <File Id="changelog_15" Name="changelog" KeyPath="yes" Source="plugins\multiarc\changelog" />
+      </Component>
+      <Component Id="MultiArc.dll" Guid="{A397E529-64CF-4F69-89BA-1EF95247CCD9}">
+        <File Id="MultiArc.dll" Name="MultiArc.dll" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\MultiArc.dll" />
+      </Component>
+      <Component Id="MultiArc.map" Guid="{DF094B68-F6DD-4947-8211-1E5D85513775}">
+        <File Id="MultiArc.map" Name="MultiArc.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\MultiArc.map" />
+      </Component>
+      <Directory Id="Formats" Name="Formats">
+        <Component Id="Ace.fmt" Guid="{38181AF9-74C2-4D8C-999F-BC8117D8A7BC}">
+          <File Id="Ace.fmt" Name="Ace.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Ace.fmt" />
+        </Component>
+        <Component Id="Ace.map" Guid="{8D7386A6-3565-4FB9-949D-FEDDC4635650}">
+          <File Id="Ace.map" Name="Ace.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Ace.map" />
+        </Component>
+        <Component Id="Arc.fmt" Guid="{D1CD7293-40F8-4625-B5CE-405800DC6CDB}">
+          <File Id="Arc.fmt" Name="Arc.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Arc.fmt" />
+        </Component>
+        <Component Id="Arc.map" Guid="{9CD94802-0E49-403E-8B57-F300B115AFD2}">
+          <File Id="Arc.map" Name="Arc.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Arc.map" />
+        </Component>
+        <Component Id="Arj.fmt" Guid="{19D3B7D7-1E78-4406-B2D3-913048AFB7D4}">
+          <File Id="Arj.fmt" Name="Arj.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Arj.fmt" />
+        </Component>
+        <Component Id="Arj.map" Guid="{D27F23D3-8652-4E2F-8224-454B0CFD9ED1}">
+          <File Id="Arj.map" Name="Arj.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Arj.map" />
+        </Component>
+        <Component Id="Cab.fmt" Guid="{9E514B5C-1E9D-4589-9F73-3B4DD71D04C3}">
+          <File Id="Cab.fmt" Name="Cab.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Cab.fmt" />
+        </Component>
+        <Component Id="Cab.map" Guid="{ED6C0960-691D-4E8F-A00E-462D8014B877}">
+          <File Id="Cab.map" Name="Cab.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Cab.map" />
+        </Component>
+        <Component Id="Custom.fmt" Guid="{611DF85A-705A-4F96-88E4-7FDA650A2D7F}">
+          <File Id="Custom.fmt" Name="Custom.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Custom.fmt" />
+        </Component>
+        <Component Id="custom.ini" Guid="{1C1464A5-8CE5-40C1-A5C0-B4B02186940E}">
+          <File Id="custom.ini" Name="custom.ini" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\custom.ini" />
+        </Component>
+        <Component Id="Custom.map" Guid="{CF5BE47D-919B-4AA3-AE94-36083295C409}">
+          <File Id="Custom.map" Name="Custom.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Custom.map" />
+        </Component>
+        <Component Id="Ha.fmt" Guid="{472C77F1-DC5D-49BB-A43B-18C3EA6E4CCF}">
+          <File Id="Ha.fmt" Name="Ha.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Ha.fmt" />
+        </Component>
+        <Component Id="Ha.map" Guid="{91F21399-86BB-4A91-AB83-DE90CE721000}">
+          <File Id="Ha.map" Name="Ha.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Ha.map" />
+        </Component>
+        <Component Id="Lzh.fmt" Guid="{A4EA4D23-DD1C-4921-B933-3E159008636A}">
+          <File Id="Lzh.fmt" Name="Lzh.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Lzh.fmt" />
+        </Component>
+        <Component Id="Lzh.map" Guid="{6AA5A257-77FE-47B0-9127-894EF33F19BC}">
+          <File Id="Lzh.map" Name="Lzh.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Lzh.map" />
+        </Component>
+        <Component Id="Rar.fmt" Guid="{5027B50A-C1F7-4E65-A2AD-19EDFD78C0C2}">
+          <File Id="Rar.fmt" Name="Rar.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Rar.fmt" />
+        </Component>
+        <Component Id="Rar.map" Guid="{EEE9E165-36CC-4661-9CFA-5B8A72F3F350}">
+          <File Id="Rar.map" Name="Rar.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Rar.map" />
+        </Component>
+        <Component Id="TarGz.fmt" Guid="{C4B7E1BE-0CA7-486F-855D-036D66B30B7A}">
+          <File Id="TarGz.fmt" Name="TarGz.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\TarGz.fmt" />
+        </Component>
+        <Component Id="TarGz.map" Guid="{11F4B582-35CE-4218-9CDA-EE42B56D4118}">
+          <File Id="TarGz.map" Name="TarGz.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\TarGz.map" />
+        </Component>
+        <Component Id="Zip.fmt" Guid="{F916BB46-EA27-4501-9851-5558D5BA1C90}">
+          <File Id="Zip.fmt" Name="Zip.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Zip.fmt" />
+        </Component>
+        <Component Id="Zip.map" Guid="{0E300051-8C59-419B-AC0A-C33A1D3E1E45}">
+          <File Id="Zip.map" Name="Zip.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Zip.map" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Directory Id="network" Name="network">
+      <Component Id="changelog_16" Guid="{885110C9-D007-4A90-803D-B43565BC2693}">
+        <File Id="changelog_16" Name="changelog" KeyPath="yes" Source="plugins\network\changelog" />
+      </Component>
+      <Component Id="NetEng.hlf" Guid="{E3B37DEC-444A-4C26-BDE0-3E75960A8A4D}">
+        <File Id="NetEng.hlf" Name="NetEng.hlf" KeyPath="yes" Source="plugins\network\final.$(var.Suffix)W.vc\NetEng.hlf" />
+      </Component>
+      <Component Id="NetEng.lng" Guid="{0745833F-D723-47C8-A19A-9A9619821C7F}">
+        <File Id="NetEng.lng" Name="NetEng.lng" KeyPath="yes" Source="plugins\network\final.$(var.Suffix)W.vc\NetEng.lng" />
+      </Component>
+      <Component Id="NetRus.hlf" Guid="{D670C3E8-A18C-4E9A-BD8B-B4E25C0A0DD5}">
+        <File Id="NetRus.hlf" Name="NetRus.hlf" KeyPath="yes" Source="plugins\network\final.$(var.Suffix)W.vc\NetRus.hlf" />
+      </Component>
+      <Component Id="NetRus.lng" Guid="{475F3591-A567-4061-AE29-087F18FD9933}">
+        <File Id="NetRus.lng" Name="NetRus.lng" KeyPath="yes" Source="plugins\network\final.$(var.Suffix)W.vc\NetRus.lng" />
+      </Component>
+      <Component Id="Network.dll" Guid="{620AEB4F-66C2-4789-849E-C51B3B4C7734}">
+        <File Id="Network.dll" Name="Network.dll" KeyPath="yes" Source="plugins\network\final.$(var.Suffix)W.vc\Network.dll" />
+      </Component>
+      <Component Id="Network.map" Guid="{B0683974-0786-4E03-B260-122535CACFE2}">
+        <File Id="Network.map" Name="Network.map" KeyPath="yes" Source="plugins\network\final.$(var.Suffix)W.vc\Network.map" />
+      </Component>
+    </Directory>
+    <Directory Id="proclist" Name="proclist">
+      <Component Id="changelog_17" Guid="{904C6214-04FB-419D-8AC8-7C833C3A5202}">
+        <File Id="changelog_17" Name="changelog" KeyPath="yes" Source="plugins\proclist\changelog" />
+      </Component>
+      <Component Id="ProcEng.hlf" Guid="{CA176654-97A4-4EEC-B36D-3FE9DCF2E032}">
+        <File Id="ProcEng.hlf" Name="ProcEng.hlf" KeyPath="yes" Source="plugins\proclist\final.$(var.Suffix)W.vc\ProcEng.hlf" />
+      </Component>
+      <Component Id="ProcEng.lng" Guid="{FE46CA6B-6212-475C-AF7F-6F398BFFD3C3}">
+        <File Id="ProcEng.lng" Name="ProcEng.lng" KeyPath="yes" Source="plugins\proclist\final.$(var.Suffix)W.vc\ProcEng.lng" />
+      </Component>
+      <Component Id="Proclist.dll" Guid="{64F2876B-AF5F-48EB-946B-70E80C6EED75}">
+        <File Id="Proclist.dll" Name="Proclist.dll" KeyPath="yes" Source="plugins\proclist\final.$(var.Suffix)W.vc\Proclist.dll" />
+      </Component>
+      <Component Id="Proclist.map" Guid="{932BA61F-56EB-420A-B2C2-4248EFB19DD9}">
+        <File Id="Proclist.map" Name="Proclist.map" KeyPath="yes" Source="plugins\proclist\final.$(var.Suffix)W.vc\Proclist.map" />
+      </Component>
+      <Component Id="ProcRus.hlf" Guid="{A703CEEF-C10C-49D1-B06D-FFF74A5AA409}">
+        <File Id="ProcRus.hlf" Name="ProcRus.hlf" KeyPath="yes" Source="plugins\proclist\final.$(var.Suffix)W.vc\ProcRus.hlf" />
+      </Component>
+      <Component Id="ProcRus.lng" Guid="{A73E2322-3BFA-4AF9-8F04-C34EE25A5553}">
+        <File Id="ProcRus.lng" Name="ProcRus.lng" KeyPath="yes" Source="plugins\proclist\final.$(var.Suffix)W.vc\ProcRus.lng" />
+      </Component>
+    </Directory>
+    <Directory Id="tmppanel" Name="tmppanel">
+      <Component Id="changelog_18" Guid="{8A2F8C61-E9BA-494E-8DE6-5BEB551E20AF}">
+        <File Id="changelog_18" Name="changelog" KeyPath="yes" Source="plugins\tmppanel\changelog" />
+      </Component>
+      <Component Id="disks.eng.temp" Guid="{9C25ACB1-9E6C-4EBA-B084-29D8C9D90E0F}">
+        <File Id="disks.eng.temp" Name="disks.eng.temp" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\disks.eng.temp" />
+      </Component>
+      <Component Id="disks.rus.temp" Guid="{1E60ED66-E3E3-43A1-8BAF-05CA15812F45}">
+        <File Id="disks.rus.temp" Name="disks.rus.temp" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\disks.rus.temp" />
+      </Component>
+      <Component Id="shortcuts.eng.reg" Guid="{23CF99D1-5058-44E5-9C47-A202ED8D7B08}">
+        <File Id="shortcuts.eng.reg" Name="shortcuts.eng.reg" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\shortcuts.eng.reg" />
+      </Component>
+      <Component Id="shortcuts.eng.temp" Guid="{A1BBBC7F-5DF8-4A80-8DB9-7CED6B298F36}">
+        <File Id="shortcuts.eng.temp" Name="shortcuts.eng.temp" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\shortcuts.eng.temp" />
+      </Component>
+      <Component Id="shortcuts.rus.reg" Guid="{9AC68F96-2461-4B73-9FC0-8198B05CCFA4}">
+        <File Id="shortcuts.rus.reg" Name="shortcuts.rus.reg" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\shortcuts.rus.reg" />
+      </Component>
+      <Component Id="shortcuts.rus.temp" Guid="{09AEF127-DDD8-47BF-8ABF-C3E2B723F16E}">
+        <File Id="shortcuts.rus.temp" Name="shortcuts.rus.temp" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\shortcuts.rus.temp" />
+      </Component>
+      <Component Id="TmpEng.hlf" Guid="{3A405072-E21F-4C3F-AEDB-B19A7694659F}">
+        <File Id="TmpEng.hlf" Name="TmpEng.hlf" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\TmpEng.hlf" />
+      </Component>
+      <Component Id="TmpEng.lng" Guid="{C6D5C1FD-ACF5-46CD-90F3-E48B12B2AEFC}">
+        <File Id="TmpEng.lng" Name="TmpEng.lng" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\TmpEng.lng" />
+      </Component>
+      <Component Id="TmpPanel.dll" Guid="{0DEB5C4A-70C7-4D54-8675-3C55D56C0FC5}">
+        <File Id="TmpPanel.dll" Name="TmpPanel.dll" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\TmpPanel.dll" />
+      </Component>
+      <Component Id="TmpPanel.map" Guid="{3B9786D9-171A-49B0-98A7-DA9313DA068E}">
+        <File Id="TmpPanel.map" Name="TmpPanel.map" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\TmpPanel.map" />
+      </Component>
+      <Component Id="TmpRus.hlf" Guid="{F4DAFC39-B733-479B-8181-816A471C3856}">
+        <File Id="TmpRus.hlf" Name="TmpRus.hlf" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\TmpRus.hlf" />
+      </Component>
+      <Component Id="TmpRus.lng" Guid="{52872F97-BFD3-4AE0-9BA9-995EC4D70D6A}">
+        <File Id="TmpRus.lng" Name="TmpRus.lng" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\TmpRus.lng" />
+      </Component>
+    </Directory>
+  </Directory>
+</Include>
