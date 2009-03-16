@@ -74,6 +74,7 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("_7_Zip", "FExcept");
   UPDATE_FEATURE("AltHistory", "Russian");
   UPDATE_FEATURE("Colorer", "Russian");
+  UPDATE_FEATURE("Colorer", "FExcept");
   UPDATE_FEATURE("FarSvc", "Russian");
   UPDATE_FEATURE("FarTrans", "Russian");
   UPDATE_FEATURE("FileCopyEx", "Russian");
