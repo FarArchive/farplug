@@ -105,6 +105,12 @@ const ULONG64 c_start_base = 0x20000000;
 UINT __stdcall Optimize(MSIHANDLE h_install) {
   if (!is_inst(h_install, "Far")) return ERROR_SUCCESS;
 
+  PMSIHANDLE h_action_start_rec = MsiCreateRecord(3);
+  MsiRecordSetString(h_action_start_rec, 1, "Optimize");
+  MsiRecordSetString(h_action_start_rec, 2, "Optimizing performance");
+  MsiRecordSetString(h_action_start_rec, 3, "[1] [2]: [3]");
+  MsiProcessMessage(h_install, INSTALLMESSAGE_ACTIONSTART, h_action_start_rec);
+
   char install_dir[MAX_PATH];
   DWORD install_dir_size = MAX_PATH;
   if (MsiGetProperty(h_install, "INSTALLDIR", install_dir, &install_dir_size) != ERROR_SUCCESS) return ERROR_INSTALL_FAILURE;
@@ -113,17 +119,46 @@ UINT __stdcall Optimize(MSIHANDLE h_install) {
   plugin_dir += "plugins";
 
   list<string> dll_list;
-  gen_dll_list(install_dir, dll_list);
+  gen_dll_list(plugin_dir, dll_list);
+
+  PMSIHANDLE h_progress_rec = MsiCreateRecord(4);
+  MsiRecordSetInteger(h_progress_rec, 1, 0);
+  MsiRecordSetInteger(h_progress_rec, 2, dll_list.size() * 2);
+  MsiRecordSetInteger(h_progress_rec, 3, 0);
+  MsiRecordSetInteger(h_progress_rec, 4, 0);
+  MsiProcessMessage(h_install, INSTALLMESSAGE_PROGRESS, h_progress_rec);
+  MsiRecordSetInteger(h_progress_rec, 1, 1);
+  MsiRecordSetInteger(h_progress_rec, 2, 1);
+  MsiRecordSetInteger(h_progress_rec, 3, 1);
+  MsiProcessMessage(h_install, INSTALLMESSAGE_PROGRESS, h_progress_rec);
+
+  PMSIHANDLE h_action_rec = MsiCreateRecord(3);
+  MsiRecordSetString(h_action_rec, 1, "rebase");
   ULONG64 curr_base = c_start_base;
   for (list<string>::const_iterator file_name = dll_list.begin(); file_name != dll_list.end(); file_name++) {
+    MsiRecordSetString(h_action_rec, 2, file_name->c_str());
     ULONG64 old_base, new_base = curr_base;
     ULONG old_size, new_size;
     if (ReBaseImage64(file_name->c_str(), "", TRUE, FALSE, FALSE, 0, &old_size, &old_base, &new_size, &new_base, 0)) {
       curr_base = new_base;
+      MsiRecordSetString(h_action_rec, 3, "ok");
     }
+    else {
+      MsiRecordSetInteger(h_action_rec, 3, GetLastError());
+    }
+    MsiProcessMessage(h_install, INSTALLMESSAGE_ACTIONDATA, h_action_rec);
   }
+
+  MsiRecordSetString(h_action_rec, 1, "bind");
   for (list<string>::const_iterator file_name = dll_list.begin(); file_name != dll_list.end(); file_name++) {
-    BindImage(file_name->c_str(), "", "");
+    MsiRecordSetString(h_action_rec, 2, file_name->c_str());
+    if (BindImage(file_name->c_str(), "", "")) {
+      MsiRecordSetString(h_action_rec, 3, "ok");
+    }
+    else {
+      MsiRecordSetInteger(h_action_rec, 3, GetLastError());
+    }
+    MsiProcessMessage(h_install, INSTALLMESSAGE_ACTIONDATA, h_action_rec);
   }
 
   return ERROR_SUCCESS;
