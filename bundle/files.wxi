@@ -657,5 +657,528 @@
         <File Id="TmpRus.lng" Name="TmpRus.lng" KeyPath="yes" Source="plugins\tmppanel\final.$(var.Suffix)W.vc\TmpRus.lng" />
       </Component>
     </Directory>
+    <Directory Id="_7_zip" Name="7-zip">
+      <Component Id="_7_ZipEng.hlf" Guid="{EF39FD34-3FB3-46A9-8537-CE46097A243A}">
+        <File Id="_7_ZipEng.hlf" Name="7-ZipEng.hlf" KeyPath="yes" Source="plugins2\7-zip\7-ZipEng.hlf" />
+      </Component>
+      <Component Id="_7_ZipEng.lng" Guid="{7CFB8731-2733-4E26-BBD3-73B37F9559DC}">
+        <File Id="_7_ZipEng.lng" Name="7-ZipEng.lng" KeyPath="yes" Source="plugins2\7-zip\7-ZipEng.lng" />
+      </Component>
+      <Component Id="_7_ZipFar.dll" Guid="{E1484329-6FF3-44C9-A29D-E7EE0C912088}">
+        <File Id="_7_ZipFar.dll" Name="7-ZipFar.dll" KeyPath="yes" Source="plugins2\7-zip\7-ZipFar.dll" />
+      </Component>
+      <Component Id="_7_ZipFar.map" Guid="{D94A6165-405C-4809-84BA-BBAB22290805}">
+        <File Id="_7_ZipFar.map" Name="7-ZipFar.map" KeyPath="yes" Source="plugins2\7-zip\7-ZipFar.map" />
+      </Component>
+      <Component Id="_7_ZipRus.hlf" Guid="{129ACD1A-7677-4430-BC21-705946DCF2ED}">
+        <File Id="_7_ZipRus.hlf" Name="7-ZipRus.hlf" KeyPath="yes" Source="plugins2\7-zip\7-ZipRus.hlf" />
+      </Component>
+      <Component Id="_7_ZipRus.lng" Guid="{70484B61-DEE8-4C58-B66B-F9D6F9BBFFBA}">
+        <File Id="_7_ZipRus.lng" Name="7-ZipRus.lng" KeyPath="yes" Source="plugins2\7-zip\7-ZipRus.lng" />
+      </Component>
+      <Component Id="_7z.dll" Guid="{DD5CE934-4064-4457-91F8-AEA095827E45}">
+        <File Id="_7z.dll" Name="7z.dll" KeyPath="yes" Source="plugins2\7-zip\7z.dll" />
+      </Component>
+      <Component Id="FILE_ID.DIZ_2" Guid="{EA9E214F-2ACA-4094-95BE-C793F6752D40}">
+        <File Id="FILE_ID.DIZ_2" Name="FILE_ID.DIZ" KeyPath="yes" Source="plugins2\7-zip\FILE_ID.DIZ" />
+      </Component>
+      <Component Id="history.txt_1" Guid="{38138B32-F869-4B7E-AFDB-E16E793AA4D6}">
+        <File Id="history.txt_1" Name="history.txt" KeyPath="yes" Source="plugins2\7-zip\history.txt" />
+      </Component>
+      <Component Id="readme.txt_2" Guid="{8C7FB939-2909-44F8-BF69-9DD6D3982065}">
+        <File Id="readme.txt_2" Name="readme.txt" KeyPath="yes" Source="plugins2\7-zip\readme.txt" />
+      </Component>
+      <Component Id="readme_ru.txt" Guid="{83C12332-8050-4210-B14D-BB0064C76671}">
+        <File Id="readme_ru.txt" Name="readme_ru.txt" KeyPath="yes" Source="plugins2\7-zip\readme_ru.txt" />
+      </Component>
+    </Directory>
+    <Directory Id="althistory" Name="althistory">
+      <Component Id="AltHistory.dll" Guid="{99619FB9-28A8-41C2-A374-ECD072F7D375}">
+        <File Id="AltHistory.dll" Name="AltHistory.dll" KeyPath="yes" Source="plugins2\althistory\AltHistory.dll" />
+      </Component>
+      <Component Id="AltHistoryEng.lng" Guid="{6F1ECDE9-76C0-4871-8D67-67F23B2FEDBF}">
+        <File Id="AltHistoryEng.lng" Name="AltHistoryEng.lng" KeyPath="yes" Source="plugins2\althistory\AltHistoryEng.lng" />
+      </Component>
+      <Component Id="AltHistoryRus.hlf" Guid="{24A3532F-CEA2-47EE-80FB-BBA2063FDD67}">
+        <File Id="AltHistoryRus.hlf" Name="AltHistoryRus.hlf" KeyPath="yes" Source="plugins2\althistory\AltHistoryRus.hlf" />
+      </Component>
+      <Component Id="AltHistoryRus.lng" Guid="{A190306B-1948-4236-B455-65540B03DD23}">
+        <File Id="AltHistoryRus.lng" Name="AltHistoryRus.lng" KeyPath="yes" Source="plugins2\althistory\AltHistoryRus.lng" />
+      </Component>
+      <Component Id="Descript.ion_3" Guid="{694BF2A2-0093-4FBA-B1FA-B958590A85F6}">
+        <File Id="Descript.ion_3" Name="Descript.ion" KeyPath="yes" Source="plugins2\althistory\Descript.ion" />
+      </Component>
+      <Component Id="File_Id.diz_3" Guid="{B5364F24-4367-4309-B656-78B8419D340B}">
+        <File Id="File_Id.diz_3" Name="File_Id.diz" KeyPath="yes" Source="plugins2\althistory\File_Id.diz" />
+      </Component>
+      <Component Id="ReadMeRus.txt" Guid="{4FA91629-56F2-47D8-A5C6-AD5C9356F9D6}">
+        <File Id="ReadMeRus.txt" Name="ReadMeRus.txt" KeyPath="yes" Source="plugins2\althistory\ReadMeRus.txt" />
+      </Component>
+      <Component Id="TechInfoRus.txt" Guid="{27E5B527-EE9A-4BDC-BBED-62D8E598A63C}">
+        <File Id="TechInfoRus.txt" Name="TechInfoRus.txt" KeyPath="yes" Source="plugins2\althistory\TechInfoRus.txt" />
+      </Component>
+      <Component Id="WhatsNewRus.txt" Guid="{A7651C55-1143-4E44-81B4-C0EDE7DF7C70}">
+        <File Id="WhatsNewRus.txt" Name="WhatsNewRus.txt" KeyPath="yes" Source="plugins2\althistory\WhatsNewRus.txt" />
+      </Component>
+      <Directory Id="Reg" Name="Reg">
+        <Component Id="Descript.ion_4" Guid="{62779841-96C8-4E43-981E-F62DC40BC553}">
+          <File Id="Descript.ion_4" Name="Descript.ion" KeyPath="yes" Source="plugins2\althistory\Reg\Descript.ion" />
+        </Component>
+        <Component Id="KeyMacros.reg" Guid="{DCB7456C-5BE0-4B36-B66C-E60F68D61DC1}">
+          <File Id="KeyMacros.reg" Name="KeyMacros.reg" KeyPath="yes" Source="plugins2\althistory\Reg\KeyMacros.reg" />
+        </Component>
+        <Component Id="Uninstall.reg" Guid="{BB6976E1-B0E6-4B66-91BC-80C1591C767F}">
+          <File Id="Uninstall.reg" Name="Uninstall.reg" KeyPath="yes" Source="plugins2\althistory\Reg\Uninstall.reg" />
+        </Component>
+        <Component Id="UninstallKeyMacros.reg" Guid="{07AB6ED3-CCD2-41ED-8DCC-E1E4F7955552}">
+          <File Id="UninstallKeyMacros.reg" Name="UninstallKeyMacros.reg" KeyPath="yes" Source="plugins2\althistory\Reg\UninstallKeyMacros.reg" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Directory Id="colorer" Name="colorer">
+      <Component Id="catalog.xml" Guid="{A4D589F0-31BF-4DE1-8414-4070A4AC457D}">
+        <File Id="catalog.xml" Name="catalog.xml" KeyPath="yes" Source="plugins2\colorer\catalog.xml" />
+      </Component>
+      <Component Id="LICENSE_2" Guid="{1EF6C5B9-CA48-442D-AF52-AF4B3BFA596E}">
+        <File Id="LICENSE_2" Name="LICENSE" KeyPath="yes" Source="plugins2\colorer\LICENSE" />
+      </Component>
+      <Component Id="README" Guid="{B060BA5A-EE87-4236-97C3-4D4D1B96C91E}">
+        <File Id="README" Name="README" KeyPath="yes" Source="plugins2\colorer\README" />
+      </Component>
+      <Directory Id="bin" Name="bin">
+        <Component Id="coloree.hlf" Guid="{204EF62B-427F-4C65-A2DF-08D35EF565F1}">
+          <File Id="coloree.hlf" Name="coloree.hlf" KeyPath="yes" Source="plugins2\colorer\bin\coloree.hlf" />
+        </Component>
+        <Component Id="coloree.lng" Guid="{F6849DEC-365F-43C4-95D1-7786CBBCA507}">
+          <File Id="coloree.lng" Name="coloree.lng" KeyPath="yes" Source="plugins2\colorer\bin\coloree.lng" />
+        </Component>
+        <Component Id="colorer.dll" Guid="{F47D8D80-45F2-48EA-A303-A803858B2DA1}">
+          <File Id="colorer.dll" Name="colorer.dll" KeyPath="yes" Source="plugins2\colorer\bin\colorer.dll" />
+        </Component>
+        <Component Id="colorer.hlf" Guid="{4C0E56F8-95C9-4215-BF68-6613A4B49652}">
+          <File Id="colorer.hlf" Name="colorer.hlf" KeyPath="yes" Source="plugins2\colorer\bin\colorer.hlf" />
+        </Component>
+        <Component Id="colorer.lng" Guid="{C28AD1B8-BE75-4057-842D-512594CE24C0}">
+          <File Id="colorer.lng" Name="colorer.lng" KeyPath="yes" Source="plugins2\colorer\bin\colorer.lng" />
+        </Component>
+        <Component Id="shortcuts.reg" Guid="{300E0F4E-A082-4C74-8857-33B4BC932071}">
+          <File Id="shortcuts.reg" Name="shortcuts.reg" KeyPath="yes" Source="plugins2\colorer\bin\shortcuts.reg" />
+        </Component>
+      </Directory>
+      <Directory Id="hrc" Name="hrc">
+        <Component Id="common.jar" Guid="{8BADA39E-E7FE-4F81-B7D4-CA346265CC4A}">
+          <File Id="common.jar" Name="common.jar" KeyPath="yes" Source="plugins2\colorer\hrc\common.jar" />
+        </Component>
+        <Component Id="proto_perl.xml" Guid="{6E3A536D-03AC-45D6-A854-A04B334DF496}">
+          <File Id="proto_perl.xml" Name="proto-perl.xml" KeyPath="yes" Source="plugins2\colorer\hrc\proto-perl.xml" />
+        </Component>
+        <Component Id="proto_php.xml" Guid="{8837BFAF-7340-4227-8695-87FCC8C6CC01}">
+          <File Id="proto_php.xml" Name="proto-php.xml" KeyPath="yes" Source="plugins2\colorer\hrc\proto-php.xml" />
+        </Component>
+        <Component Id="proto.hrc" Guid="{4085E311-C1FA-4B17-9BD6-3575C6A8C473}">
+          <File Id="proto.hrc" Name="proto.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\proto.hrc" />
+        </Component>
+        <Directory Id="auto" Name="auto">
+          <Component Id="ccsql.hrc" Guid="{E48AFB4F-E9C7-441A-B16F-E6CCE8498829}">
+            <File Id="ccsql.hrc" Name="ccsql.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\ccsql.hrc" />
+          </Component>
+          <Component Id="farmanager.hrc" Guid="{F4C47072-FC9D-429D-A167-F4421AEE1721}">
+            <File Id="farmanager.hrc" Name="farmanager.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\farmanager.hrc" />
+          </Component>
+          <Component Id="gen.hrc" Guid="{BD4E0ACA-5DCB-4BA7-9997-F7785DBD4776}">
+            <File Id="gen.hrc" Name="gen.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\gen.hrc" />
+          </Component>
+          <Component Id="litestep.hrc" Guid="{7DC22B81-4440-4DF0-A3F6-13CC5C900542}">
+            <File Id="litestep.hrc" Name="litestep.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\litestep.hrc" />
+          </Component>
+          <Component Id="qrm.hrc" Guid="{2CBC4E82-BAC4-42B6-8B87-7ACBEDB1A024}">
+            <File Id="qrm.hrc" Name="qrm.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\qrm.hrc" />
+          </Component>
+          <Component Id="rare_scripts.hrc" Guid="{9BDF93AB-2F21-49D4-9A49-E8B62DEE236F}">
+            <File Id="rare_scripts.hrc" Name="rare-scripts.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\rare-scripts.hrc" />
+          </Component>
+          <Component Id="vim.hrc" Guid="{A06F4752-9D9B-4358-A40A-5DCA7C70FDCA}">
+            <File Id="vim.hrc" Name="vim.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\vim.hrc" />
+          </Component>
+          <Directory Id="types" Name="types">
+            <Component Id="auto.jar" Guid="{02928BDB-94AD-48D9-92CF-26B334BD2828}">
+              <File Id="auto.jar" Name="auto.jar" KeyPath="yes" Source="plugins2\colorer\hrc\auto\types\auto.jar" />
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+      <Directory Id="hrd" Name="hrd">
+        <Directory Id="console" Name="console">
+          <Component Id="black.hrd" Guid="{DF738FB7-A9CB-4D89-B5B1-E92032DB7250}">
+            <File Id="black.hrd" Name="black.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\black.hrd" />
+          </Component>
+          <Component Id="blue.hrd" Guid="{F3111D3B-7E21-4F9E-9CDE-90B5C37EA7DE}">
+            <File Id="blue.hrd" Name="blue.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\blue.hrd" />
+          </Component>
+          <Component Id="default.hrd" Guid="{E23D65FB-4FEF-4BB9-B638-8E200273EB67}">
+            <File Id="default.hrd" Name="default.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\default.hrd" />
+          </Component>
+          <Component Id="dnlike.hrd" Guid="{C0F616C7-AD08-4944-B4C9-A488D0B8C9F4}">
+            <File Id="dnlike.hrd" Name="dnlike.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\dnlike.hrd" />
+          </Component>
+          <Component Id="gray.hrd" Guid="{19EAF67D-CDED-49B6-8C8D-D641F15449B5}">
+            <File Id="gray.hrd" Name="gray.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\gray.hrd" />
+          </Component>
+          <Component Id="hack.hrd" Guid="{3E8905DD-BF7D-4BC8-B945-07FD99FB9221}">
+            <File Id="hack.hrd" Name="hack.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\hack.hrd" />
+          </Component>
+          <Component Id="nc.hrd" Guid="{FCF2900C-28E5-4CB3-87D3-441742CF5072}">
+            <File Id="nc.hrd" Name="nc.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\nc.hrd" />
+          </Component>
+          <Component Id="white.hrd" Guid="{B9AB5E6F-9272-482B-973F-260BB0F05F9D}">
+            <File Id="white.hrd" Name="white.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\white.hrd" />
+          </Component>
+          <Component Id="xmastree.hrd" Guid="{4D9B5B23-DDDB-4B01-B26A-6D3DB2018B58}">
+            <File Id="xmastree.hrd" Name="xmastree.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\xmastree.hrd" />
+          </Component>
+          <Directory Id="contrib" Name="contrib">
+            <Component Id="black_ay.hrd" Guid="{DD746658-1A7C-4475-ABD0-F224D0CA11D6}">
+              <File Id="black_ay.hrd" Name="black_ay.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\black_ay.hrd" />
+            </Component>
+            <Component Id="black_sezal.hrd" Guid="{84F1C8D4-1D4A-4922-B0AF-440340AF5C96}">
+              <File Id="black_sezal.hrd" Name="black_sezal.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\black_sezal.hrd" />
+            </Component>
+            <Component Id="classic.hrd" Guid="{CA330CEF-A622-4328-BD2E-B34415424E19}">
+              <File Id="classic.hrd" Name="classic.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\classic.hrd" />
+            </Component>
+            <Component Id="gray_pult.hrd" Guid="{2CBE5A9C-1AED-4EAD-8A7C-67F66E5448C2}">
+              <File Id="gray_pult.hrd" Name="gray_pult.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\gray_pult.hrd" />
+            </Component>
+            <Component Id="mirror.hrd" Guid="{E85DF705-50DA-4741-B842-B6085E4EF7BE}">
+              <File Id="mirror.hrd" Name="mirror.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\mirror.hrd" />
+            </Component>
+            <Component Id="ocean.hrd" Guid="{8101BE94-0DBF-48DB-B088-D48E9A869E05}">
+              <File Id="ocean.hrd" Name="ocean.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\ocean.hrd" />
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+    <Directory Id="farsvc" Name="farsvc">
+      <Component Id="FarSvc.dll" Guid="{92A76AA5-58CB-4DE1-AECE-D59E408D7BBB}">
+        <File Id="FarSvc.dll" Name="FarSvc.dll" KeyPath="yes" Source="plugins2\farsvc\FarSvc.dll" />
+      </Component>
+      <Component Id="FILE_ID.DIZ_4" Guid="{F1234536-551D-47DC-809E-1352D217FADC}">
+        <File Id="FILE_ID.DIZ_4" Name="FILE_ID.DIZ" KeyPath="yes" Source="plugins2\farsvc\FILE_ID.DIZ" />
+      </Component>
+      <Component Id="README.RUS_1" Guid="{0086AC76-28C1-408C-B9DC-A8CFCCC3189B}">
+        <File Id="README.RUS_1" Name="README.RUS" KeyPath="yes" Source="plugins2\farsvc\README.RUS" />
+      </Component>
+      <Component Id="README.TXT_3" Guid="{EEA735BE-40ED-4656-A3EE-7B93EA6A9DC5}">
+        <File Id="README.TXT_3" Name="README.TXT" KeyPath="yes" Source="plugins2\farsvc\README.TXT" />
+      </Component>
+      <Component Id="SvcEng.hlf" Guid="{47084A14-2630-40BB-B1E1-29A02928AAA0}">
+        <File Id="SvcEng.hlf" Name="SvcEng.hlf" KeyPath="yes" Source="plugins2\farsvc\SvcEng.hlf" />
+      </Component>
+      <Component Id="SvcEng.lng" Guid="{4C196706-4DF4-4632-BC01-CB02D4A59717}">
+        <File Id="SvcEng.lng" Name="SvcEng.lng" KeyPath="yes" Source="plugins2\farsvc\SvcEng.lng" />
+      </Component>
+      <Component Id="SvcRus.hlf" Guid="{57C054EA-D516-4D3B-87E0-460E93ECD10C}">
+        <File Id="SvcRus.hlf" Name="SvcRus.hlf" KeyPath="yes" Source="plugins2\farsvc\SvcRus.hlf" />
+      </Component>
+      <Component Id="SvcRus.lng" Guid="{C20D38BE-AB3D-4D59-B497-4E275D3875CB}">
+        <File Id="SvcRus.lng" Name="SvcRus.lng" KeyPath="yes" Source="plugins2\farsvc\SvcRus.lng" />
+      </Component>
+      <Component Id="whatsnew.rus" Guid="{E28E0E4B-E385-4BCC-8294-8FBEB0CE2D74}">
+        <File Id="whatsnew.rus" Name="whatsnew.rus" KeyPath="yes" Source="plugins2\farsvc\whatsnew.rus" />
+      </Component>
+      <Component Id="whatsnew.txt_3" Guid="{A5D4D1F4-856E-4DDD-B3C7-2150BE74A398}">
+        <File Id="whatsnew.txt_3" Name="whatsnew.txt" KeyPath="yes" Source="plugins2\farsvc\whatsnew.txt" />
+      </Component>
+    </Directory>
+    <Directory Id="fartrans" Name="fartrans">
+      <Component Id="fartrans.dll" Guid="{5337D043-E03C-4873-801A-1F3AB44CFC2B}">
+        <File Id="fartrans.dll" Name="fartrans.dll" KeyPath="yes" Source="plugins2\fartrans\fartrans.dll" />
+      </Component>
+      <Component Id="install.txt" Guid="{908BB05D-F7A1-41A6-B71E-DA0BC32E23D1}">
+        <File Id="install.txt" Name="install.txt" KeyPath="yes" Source="plugins2\fartrans\install.txt" />
+      </Component>
+      <Component Id="readme.eng.txt" Guid="{31DC8A24-4CFD-4D2D-928C-A0E7CBB3C2A0}">
+        <File Id="readme.eng.txt" Name="readme.eng.txt" KeyPath="yes" Source="plugins2\fartrans\readme.eng.txt" />
+      </Component>
+      <Component Id="readme.rus.txt_1" Guid="{49E63950-CA26-46B3-9008-07E1A0CAA166}">
+        <File Id="readme.rus.txt_1" Name="readme.rus.txt" KeyPath="yes" Source="plugins2\fartrans\readme.rus.txt" />
+      </Component>
+      <Component Id="TransEng.hlf" Guid="{7026299B-0B56-45E9-BB40-7C7420D5B98F}">
+        <File Id="TransEng.hlf" Name="TransEng.hlf" KeyPath="yes" Source="plugins2\fartrans\TransEng.hlf" />
+      </Component>
+      <Component Id="TransEng.lng" Guid="{4293D716-49A5-42FB-BC7A-B0C858B1D567}">
+        <File Id="TransEng.lng" Name="TransEng.lng" KeyPath="yes" Source="plugins2\fartrans\TransEng.lng" />
+      </Component>
+      <Component Id="TransRus.hlf" Guid="{C9A5CCED-A599-432C-B407-6A974AE545A2}">
+        <File Id="TransRus.hlf" Name="TransRus.hlf" KeyPath="yes" Source="plugins2\fartrans\TransRus.hlf" />
+      </Component>
+      <Component Id="TransRus.lng" Guid="{19EDAA79-E48B-4C98-B58D-99FEF966A84F}">
+        <File Id="TransRus.lng" Name="TransRus.lng" KeyPath="yes" Source="plugins2\fartrans\TransRus.lng" />
+      </Component>
+    </Directory>
+    <Directory Id="filecopyex" Name="filecopyex">
+      <Component Id="english.lng" Guid="{0BDAB94A-A76F-48B1-A8FB-C369B2E8446C}">
+        <File Id="english.lng" Name="english.lng" KeyPath="yes" Source="plugins2\filecopyex\english.lng" />
+      </Component>
+      <Component Id="FileCopyEx.dll" Guid="{1D113A81-CD43-4F21-B0BD-83468A71782B}">
+        <File Id="FileCopyEx.dll" Name="FileCopyEx.dll" KeyPath="yes" Source="plugins2\filecopyex\FileCopyEx.dll" />
+      </Component>
+      <Component Id="FileCopyEx.map" Guid="{F648E50D-0A25-4AA0-9EAE-0DCF1F964796}">
+        <File Id="FileCopyEx.map" Name="FileCopyEx.map" KeyPath="yes" Source="plugins2\filecopyex\FileCopyEx.map" />
+      </Component>
+      <Component Id="file_id.diz_5" Guid="{4480CAC8-42B4-417B-A448-832B6ACCA18E}">
+        <File Id="file_id.diz_5" Name="file_id.diz" KeyPath="yes" Source="plugins2\filecopyex\file_id.diz" />
+      </Component>
+      <Component Id="Russian.hlf" Guid="{E2FADCE5-0764-4396-B8E8-29574DD07DEE}">
+        <File Id="Russian.hlf" Name="Russian.hlf" KeyPath="yes" Source="plugins2\filecopyex\Russian.hlf" />
+      </Component>
+      <Component Id="russian.lng" Guid="{BC9F16A2-A454-4333-9179-4C27B893DC3E}">
+        <File Id="russian.lng" Name="russian.lng" KeyPath="yes" Source="plugins2\filecopyex\russian.lng" />
+      </Component>
+      <Directory Id="doc" Name="doc">
+        <Component Id="history.eng.html" Guid="{61BA9CD6-CBC9-4408-868C-51489DD3CCA3}">
+          <File Id="history.eng.html" Name="history.eng.html" KeyPath="yes" Source="plugins2\filecopyex\doc\history.eng.html" />
+        </Component>
+        <Component Id="history.rus.html" Guid="{2CF357D6-51BE-4AA6-B3F8-AF6E22DF68BF}">
+          <File Id="history.rus.html" Name="history.rus.html" KeyPath="yes" Source="plugins2\filecopyex\doc\history.rus.html" />
+        </Component>
+        <Component Id="readme.eng.html" Guid="{BEF145D9-4CBF-471C-8C51-503A0BB953E3}">
+          <File Id="readme.eng.html" Name="readme.eng.html" KeyPath="yes" Source="plugins2\filecopyex\doc\readme.eng.html" />
+        </Component>
+        <Component Id="readme.rus.html" Guid="{65EB00B0-DCBB-4330-A200-B6009FA8EF0F}">
+          <File Id="readme.rus.html" Name="readme.rus.html" KeyPath="yes" Source="plugins2\filecopyex\doc\readme.rus.html" />
+        </Component>
+        <Component Id="text.css" Guid="{607CEF42-370E-47B5-9282-693B54EC3626}">
+          <File Id="text.css" Name="text.css" KeyPath="yes" Source="plugins2\filecopyex\doc\text.css" />
+        </Component>
+      </Directory>
+      <Directory Id="resource_1" Name="resource">
+        <Component Id="dialogs.objd" Guid="{CC398B64-EE08-418F-A371-98D08AF1E28C}">
+          <File Id="dialogs.objd" Name="dialogs.objd" KeyPath="yes" Source="plugins2\filecopyex\resource\dialogs.objd" />
+        </Component>
+        <Component Id="english.locd" Guid="{AD07E547-0D08-48BA-9BFC-936E0F131771}">
+          <File Id="english.locd" Name="english.locd" KeyPath="yes" Source="plugins2\filecopyex\resource\english.locd" />
+        </Component>
+        <Component Id="russian.locd" Guid="{0F08DC35-59F8-4489-808A-30FF526039AA}">
+          <File Id="russian.locd" Name="russian.locd" KeyPath="yes" Source="plugins2\filecopyex\resource\russian.locd" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Directory Id="ntfsfile" Name="ntfsfile">
+      <Component Id="en.hlf" Guid="{12EE2E52-66E8-4DAF-93EA-45407B2B140F}">
+        <File Id="en.hlf" Name="en.hlf" KeyPath="yes" Source="plugins2\ntfsfile\en.hlf" />
+      </Component>
+      <Component Id="en.lng" Guid="{DBD48585-0112-4BE3-9C97-7B433F3E3893}">
+        <File Id="en.lng" Name="en.lng" KeyPath="yes" Source="plugins2\ntfsfile\en.lng" />
+      </Component>
+      <Component Id="file_id.diz_6" Guid="{A9FE4B29-9E30-428F-BDCF-D5835136AD35}">
+        <File Id="file_id.diz_6" Name="file_id.diz" KeyPath="yes" Source="plugins2\ntfsfile\file_id.diz" />
+      </Component>
+      <Component Id="history_ru.txt_1" Guid="{E42D08EC-5E88-4979-AAED-DE007FFCC214}">
+        <File Id="history_ru.txt_1" Name="history_ru.txt" KeyPath="yes" Source="plugins2\ntfsfile\history_ru.txt" />
+      </Component>
+      <Component Id="ntfsfile.dll" Guid="{C51E5315-834A-45FB-A3EA-5C83084638AD}">
+        <File Id="ntfsfile.dll" Name="ntfsfile.dll" KeyPath="yes" Source="plugins2\ntfsfile\ntfsfile.dll" />
+      </Component>
+      <Component Id="ntfsfile.map" Guid="{46E01DD7-F847-4DDA-A7ED-75B249A3848B}">
+        <File Id="ntfsfile.map" Name="ntfsfile.map" KeyPath="yes" Source="plugins2\ntfsfile\ntfsfile.map" />
+      </Component>
+      <Component Id="ru.hlf" Guid="{CC24F497-2D85-4966-B546-21C1F766936E}">
+        <File Id="ru.hlf" Name="ru.hlf" KeyPath="yes" Source="plugins2\ntfsfile\ru.hlf" />
+      </Component>
+    </Directory>
+    <Directory Id="peditor" Name="peditor">
+      <Component Id="FILE_ID.DIZ_7" Guid="{9D6BBE0A-7F50-4396-BAC3-2F6C78CD6CB6}">
+        <File Id="FILE_ID.DIZ_7" Name="FILE_ID.DIZ" KeyPath="yes" Source="plugins2\peditor\FILE_ID.DIZ" />
+      </Component>
+      <Component Id="PEDITENG.HLF" Guid="{A31B279F-D049-41D7-8ED9-954DB3854319}">
+        <File Id="PEDITENG.HLF" Name="PEDITENG.HLF" KeyPath="yes" Source="plugins2\peditor\PEDITENG.HLF" />
+      </Component>
+      <Component Id="PEDITENG.LNG" Guid="{C77FF0F4-97BC-4678-AA78-202994C417C8}">
+        <File Id="PEDITENG.LNG" Name="PEDITENG.LNG" KeyPath="yes" Source="plugins2\peditor\PEDITENG.LNG" />
+      </Component>
+      <Component Id="PEDITOR.dll" Guid="{42726490-B3AC-4AFC-B577-04669A39EB7C}">
+        <File Id="PEDITOR.dll" Name="PEDITOR.dll" KeyPath="yes" Source="plugins2\peditor\PEDITOR.dll" />
+      </Component>
+      <Component Id="PEDITRUS.HLF" Guid="{FE8AB89E-2320-4A91-B417-86EC1FB8DA4D}">
+        <File Id="PEDITRUS.HLF" Name="PEDITRUS.HLF" KeyPath="yes" Source="plugins2\peditor\PEDITRUS.HLF" />
+      </Component>
+      <Component Id="PEDITRUS.LNG" Guid="{853E5187-4A13-467B-98BF-310618D71279}">
+        <File Id="PEDITRUS.LNG" Name="PEDITRUS.LNG" KeyPath="yes" Source="plugins2\peditor\PEDITRUS.LNG" />
+      </Component>
+      <Component Id="WHATSNEW.TXT_4" Guid="{8A499BE0-FA4E-481D-8905-0F0E5F12693C}">
+        <File Id="WHATSNEW.TXT_4" Name="WHATSNEW.TXT" KeyPath="yes" Source="plugins2\peditor\WHATSNEW.TXT" />
+      </Component>
+    </Directory>
+    <Directory Id="registry" Name="registry">
+      <Component Id="FILE_ID.DIZ_8" Guid="{A8FDD228-5B6E-45D8-A456-95304E97D4CC}">
+        <File Id="FILE_ID.DIZ_8" Name="FILE_ID.DIZ" KeyPath="yes" Source="plugins2\registry\FILE_ID.DIZ" />
+      </Component>
+      <Component Id="README.ENG" Guid="{7C63765D-B963-4A4C-8642-BC0887466069}">
+        <File Id="README.ENG" Name="README.ENG" KeyPath="yes" Source="plugins2\registry\README.ENG" />
+      </Component>
+      <Component Id="README.RUS_2" Guid="{38E90C9D-9E83-43A1-9CBB-A23D993E222E}">
+        <File Id="README.RUS_2" Name="README.RUS" KeyPath="yes" Source="plugins2\registry\README.RUS" />
+      </Component>
+      <Component Id="RegEng.lng" Guid="{38A54291-62A0-44DA-BF7B-4C96AB9CD3D1}">
+        <File Id="RegEng.lng" Name="RegEng.lng" KeyPath="yes" Source="plugins2\registry\RegEng.lng" />
+      </Component>
+      <Component Id="Registry.dll" Guid="{BD176911-8570-46E7-9BC1-80EB41EC7C36}">
+        <File Id="Registry.dll" Name="Registry.dll" KeyPath="yes" Source="plugins2\registry\Registry.dll" />
+      </Component>
+      <Component Id="Registry.hlf" Guid="{F96BF149-4626-4199-AD21-37BFC8FADC9A}">
+        <File Id="Registry.hlf" Name="Registry.hlf" KeyPath="yes" Source="plugins2\registry\Registry.hlf" />
+      </Component>
+      <Component Id="RegIta.Hlf" Guid="{141689F2-D2CB-453F-90A4-A5B8F0D09B38}">
+        <File Id="RegIta.Hlf" Name="RegIta.Hlf" KeyPath="yes" Source="plugins2\registry\RegIta.Hlf" />
+      </Component>
+      <Component Id="RegIta.Lng" Guid="{E303B077-B116-4BDB-9E5C-E02223B6EDF7}">
+        <File Id="RegIta.Lng" Name="RegIta.Lng" KeyPath="yes" Source="plugins2\registry\RegIta.Lng" />
+      </Component>
+      <Component Id="RegRus.hlf" Guid="{EDD5D789-7483-4A49-8896-CC15C1A8CBC5}">
+        <File Id="RegRus.hlf" Name="RegRus.hlf" KeyPath="yes" Source="plugins2\registry\RegRus.hlf" />
+      </Component>
+      <Component Id="RegRus.lng" Guid="{43028EDC-474E-4837-960A-2F155F10DF9A}">
+        <File Id="RegRus.lng" Name="RegRus.lng" KeyPath="yes" Source="plugins2\registry\RegRus.lng" />
+      </Component>
+      <Component Id="WHATSNEW.TXT_5" Guid="{46C0F2F6-2554-4E6F-B118-75D6D9096F51}">
+        <File Id="WHATSNEW.TXT_5" Name="WHATSNEW.TXT" KeyPath="yes" Source="plugins2\registry\WHATSNEW.TXT" />
+      </Component>
+    </Directory>
+    <Directory Id="research" Name="research">
+      <Component Id="EditFind.reg" Guid="{25F65CD1-76B9-413D-A27C-89E1969CC859}">
+        <File Id="EditFind.reg" Name="EditFind.reg" KeyPath="yes" Source="plugins2\research\EditFind.reg" />
+      </Component>
+      <Component Id="FileFind.reg" Guid="{7E0ED36F-B881-4EDF-B4FF-25EAC50DEE3E}">
+        <File Id="FileFind.reg" Name="FileFind.reg" KeyPath="yes" Source="plugins2\research\FileFind.reg" />
+      </Component>
+      <Component Id="FileRename.reg" Guid="{9F37C1B7-9F94-4BDD-99C4-70B849CA2587}">
+        <File Id="FileRename.reg" Name="FileRename.reg" KeyPath="yes" Source="plugins2\research\FileRename.reg" />
+      </Component>
+      <Component Id="FileSelect.reg" Guid="{CB530B70-D8AE-4749-8B89-E965A5FD5EE4}">
+        <File Id="FileSelect.reg" Name="FileSelect.reg" KeyPath="yes" Source="plugins2\research\FileSelect.reg" />
+      </Component>
+      <Component Id="File_Id.Diz_9" Guid="{6B8660FB-D7D8-4DE8-8C92-207A731636EB}">
+        <File Id="File_Id.Diz_9" Name="File_Id.Diz" KeyPath="yes" Source="plugins2\research\File_Id.Diz" />
+      </Component>
+      <Component Id="Hints.txt" Guid="{C76D1DB3-C6ED-466F-BF48-64E0BE068782}">
+        <File Id="Hints.txt" Name="Hints.txt" KeyPath="yes" Source="plugins2\research\Hints.txt" />
+      </Component>
+      <Component Id="History.txt_2" Guid="{43E79F29-582E-41F5-B1F1-2B85ECC54DC0}">
+        <File Id="History.txt_2" Name="History.txt" KeyPath="yes" Source="plugins2\research\History.txt" />
+      </Component>
+      <Component Id="pcrepattern.html" Guid="{78D62852-53C5-407E-B0BA-C456167674C8}">
+        <File Id="pcrepattern.html" Name="pcrepattern.html" KeyPath="yes" Source="plugins2\research\pcrepattern.html" />
+      </Component>
+      <Component Id="PluginHotkeys.reg" Guid="{5298CE89-DCA6-44BF-A4D2-17140C2C80FF}">
+        <File Id="PluginHotkeys.reg" Name="PluginHotkeys.reg" KeyPath="yes" Source="plugins2\research\PluginHotkeys.reg" />
+      </Component>
+      <Component Id="RESearch.dll" Guid="{5F864048-CCD4-4E76-94E8-5ABB5C21A728}">
+        <File Id="RESearch.dll" Name="RESearch.dll" KeyPath="yes" Source="plugins2\research\RESearch.dll" />
+      </Component>
+      <Component Id="RESearchEng.hlf" Guid="{B9BE486F-93B5-42BD-9B21-DF29FB494CAA}">
+        <File Id="RESearchEng.hlf" Name="RESearchEng.hlf" KeyPath="yes" Source="plugins2\research\RESearchEng.hlf" />
+      </Component>
+      <Component Id="RESearchEng.lng" Guid="{115431AC-3DAF-4058-91A0-9D12F5FE31CD}">
+        <File Id="RESearchEng.lng" Name="RESearchEng.lng" KeyPath="yes" Source="plugins2\research\RESearchEng.lng" />
+      </Component>
+      <Component Id="RESearchRus.hlf" Guid="{3C6F0743-BDB8-44F5-AD6F-2A7E9D29DD4D}">
+        <File Id="RESearchRus.hlf" Name="RESearchRus.hlf" KeyPath="yes" Source="plugins2\research\RESearchRus.hlf" />
+      </Component>
+      <Component Id="RESearchRus.lng" Guid="{9E335D45-E334-4080-86F5-115AA31E2C2B}">
+        <File Id="RESearchRus.lng" Name="RESearchRus.lng" KeyPath="yes" Source="plugins2\research\RESearchRus.lng" />
+      </Component>
+      <Component Id="ViewFind.reg" Guid="{E4A8D310-144E-4FE8-B844-2282BBB3DDEF}">
+        <File Id="ViewFind.reg" Name="ViewFind.reg" KeyPath="yes" Source="plugins2\research\ViewFind.reg" />
+      </Component>
+    </Directory>
+    <Directory Id="resource_2" Name="resource">
+      <Component Id="file_id.diz_10" Guid="{6CCB39FA-BDC2-45E0-B492-2EF18D8AE5C7}">
+        <File Id="file_id.diz_10" Name="file_id.diz" KeyPath="yes" Source="plugins2\resource\file_id.diz" />
+      </Component>
+      <Component Id="History.txt_3" Guid="{48FFC7D1-96DA-4679-9A1B-3DE13AB4C4BD}">
+        <File Id="History.txt_3" Name="History.txt" KeyPath="yes" Source="plugins2\resource\History.txt" />
+      </Component>
+      <Component Id="readme.txt_4" Guid="{9CEAD447-B255-47A1-BA8D-EBF66148E37D}">
+        <File Id="readme.txt_4" Name="readme.txt" KeyPath="yes" Source="plugins2\resource\readme.txt" />
+      </Component>
+      <Component Id="ResEng.hlf" Guid="{539A5ACB-4D92-4F0C-B755-E2C04E172420}">
+        <File Id="ResEng.hlf" Name="ResEng.hlf" KeyPath="yes" Source="plugins2\resource\ResEng.hlf" />
+      </Component>
+      <Component Id="ResEng.lng" Guid="{65042090-82EC-45A9-BFDE-A2B683CDCCD8}">
+        <File Id="ResEng.lng" Name="ResEng.lng" KeyPath="yes" Source="plugins2\resource\ResEng.lng" />
+      </Component>
+      <Component Id="Resource.dll" Guid="{EE8CA59E-04E5-4A6E-9D8F-3275B07E83DD}">
+        <File Id="Resource.dll" Name="Resource.dll" KeyPath="yes" Source="plugins2\resource\Resource.dll" />
+      </Component>
+      <Component Id="ResRus.hlf" Guid="{4C8802C7-A3E2-4144-AAE1-19A8B89C046C}">
+        <File Id="ResRus.hlf" Name="ResRus.hlf" KeyPath="yes" Source="plugins2\resource\ResRus.hlf" />
+      </Component>
+      <Component Id="ResRus.lng" Guid="{E76CBE40-4B1D-4AA2-93BD-0F2FD56820B2}">
+        <File Id="ResRus.lng" Name="ResRus.lng" KeyPath="yes" Source="plugins2\resource\ResRus.lng" />
+      </Component>
+    </Directory>
+    <Directory Id="uninstall" Name="uninstall">
+      <Component Id="File_ID.diz_11" Guid="{35DC6CA7-A162-4816-B6E2-7D6267E8C2FA}">
+        <File Id="File_ID.diz_11" Name="File_ID.diz" KeyPath="yes" Source="plugins2\uninstall\File_ID.diz" />
+      </Component>
+      <Component Id="ReadMe.Rus.txt_2" Guid="{8BBB457D-0280-4B96-B7A3-E9CB049A64F1}">
+        <File Id="ReadMe.Rus.txt_2" Name="ReadMe.Rus.txt" KeyPath="yes" Source="plugins2\uninstall\ReadMe.Rus.txt" />
+      </Component>
+      <Component Id="TechInfo.Rus.reg" Guid="{B421B76D-A007-4454-92B4-404A91C0CDC9}">
+        <File Id="TechInfo.Rus.reg" Name="TechInfo.Rus.reg" KeyPath="yes" Source="plugins2\uninstall\TechInfo.Rus.reg" />
+      </Component>
+      <Component Id="UnInstall.dll" Guid="{0E148046-E33A-431F-93B7-DE2C566AC86F}">
+        <File Id="UnInstall.dll" Name="UnInstall.dll" KeyPath="yes" Source="plugins2\uninstall\UnInstall.dll" />
+      </Component>
+      <Component Id="UnInstall.map" Guid="{F0FB6811-2D5A-47DA-9AB9-047A22972EA5}">
+        <File Id="UnInstall.map" Name="UnInstall.map" KeyPath="yes" Source="plugins2\uninstall\UnInstall.map" />
+      </Component>
+      <Component Id="UnInstall_Eng.hlf" Guid="{3829724E-12E4-4F25-9FB5-9FE82C4D8C65}">
+        <File Id="UnInstall_Eng.hlf" Name="UnInstall_Eng.hlf" KeyPath="yes" Source="plugins2\uninstall\UnInstall_Eng.hlf" />
+      </Component>
+      <Component Id="UnInstall_Eng.lng" Guid="{D59F22D5-988B-49C2-AD80-807477D0F354}">
+        <File Id="UnInstall_Eng.lng" Name="UnInstall_Eng.lng" KeyPath="yes" Source="plugins2\uninstall\UnInstall_Eng.lng" />
+      </Component>
+      <Component Id="UnInstall_Rus.hlf" Guid="{014146FB-69CC-4984-AAA2-28CAEC15E9DC}">
+        <File Id="UnInstall_Rus.hlf" Name="UnInstall_Rus.hlf" KeyPath="yes" Source="plugins2\uninstall\UnInstall_Rus.hlf" />
+      </Component>
+      <Component Id="UnInstall_Rus.lng" Guid="{5B1E3F09-D5D3-4F25-AA24-F09E3371C651}">
+        <File Id="UnInstall_Rus.lng" Name="UnInstall_Rus.lng" KeyPath="yes" Source="plugins2\uninstall\UnInstall_Rus.lng" />
+      </Component>
+      <Component Id="WhatsNew.Rus.txt" Guid="{2186117E-8760-4B2B-A62D-863C782B0837}">
+        <File Id="WhatsNew.Rus.txt" Name="WhatsNew.Rus.txt" KeyPath="yes" Source="plugins2\uninstall\WhatsNew.Rus.txt" />
+      </Component>
+    </Directory>
+    <Directory Id="wmexplorer" Name="wmexplorer">
+      <Component Id="file_id.diz_12" Guid="{85EB5DE9-7431-4065-BFAE-D122F40DFD37}">
+        <File Id="file_id.diz_12" Name="file_id.diz" KeyPath="yes" Source="plugins2\wmexplorer\file_id.diz" />
+      </Component>
+      <Component Id="history_en.txt" Guid="{54339D03-6B72-4058-B890-68934CBE6C9A}">
+        <File Id="history_en.txt" Name="history_en.txt" KeyPath="yes" Source="plugins2\wmexplorer\history_en.txt" />
+      </Component>
+      <Component Id="history_ru.txt_2" Guid="{23C1827A-4881-4FC6-A8C9-42AD9571B8A7}">
+        <File Id="history_ru.txt_2" Name="history_ru.txt" KeyPath="yes" Source="plugins2\wmexplorer\history_ru.txt" />
+      </Component>
+      <Component Id="wmexplorer.dll" Guid="{9690D5F4-3AB2-485B-921C-DD858CC0ABC2}">
+        <File Id="wmexplorer.dll" Name="wmexplorer.dll" KeyPath="yes" Source="plugins2\wmexplorer\wmexplorer.dll" />
+      </Component>
+      <Component Id="wmexplorer.map" Guid="{00F021F5-171E-4528-93E9-C4062DBFCB6C}">
+        <File Id="wmexplorer.map" Name="wmexplorer.map" KeyPath="yes" Source="plugins2\wmexplorer\wmexplorer.map" />
+      </Component>
+      <Component Id="wmexplorer_en.hlf" Guid="{7D1BD2AC-FD76-47F1-B009-1D4E6467AAAC}">
+        <File Id="wmexplorer_en.hlf" Name="wmexplorer_en.hlf" KeyPath="yes" Source="plugins2\wmexplorer\wmexplorer_en.hlf" />
+      </Component>
+      <Component Id="wmexplorer_en.lng" Guid="{BC630793-49DD-48BC-A552-C638F7907641}">
+        <File Id="wmexplorer_en.lng" Name="wmexplorer_en.lng" KeyPath="yes" Source="plugins2\wmexplorer\wmexplorer_en.lng" />
+      </Component>
+      <Component Id="wmexplorer_ru.hlf" Guid="{112B39AD-8296-449A-8D48-01405DE8AB1C}">
+        <File Id="wmexplorer_ru.hlf" Name="wmexplorer_ru.hlf" KeyPath="yes" Source="plugins2\wmexplorer\wmexplorer_ru.hlf" />
+      </Component>
+      <Component Id="wmexplorer_ru.lng" Guid="{B1F509A0-1260-44D6-B036-5877031BA08C}">
+        <File Id="wmexplorer_ru.lng" Name="wmexplorer_ru.lng" KeyPath="yes" Source="plugins2\wmexplorer\wmexplorer_ru.lng" />
+      </Component>
+    </Directory>
   </Directory>
 </Include>

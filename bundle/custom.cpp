@@ -70,6 +70,25 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("Network", "Changelogs");
   UPDATE_FEATURE("Proclist", "Changelogs");
   UPDATE_FEATURE("TmpPanel", "Changelogs");
+  UPDATE_FEATURE("_7_Zip", "Russian");
+  UPDATE_FEATURE("_7_Zip", "FExcept");
+  UPDATE_FEATURE("AltHistory", "Russian");
+  UPDATE_FEATURE("Colorer", "Russian");
+  UPDATE_FEATURE("FarSvc", "Russian");
+  UPDATE_FEATURE("FarTrans", "Russian");
+  UPDATE_FEATURE("FileCopyEx", "Russian");
+  UPDATE_FEATURE("FileCopyEx", "FExcept");
+  UPDATE_FEATURE("ntfsfile", "Russian");
+  UPDATE_FEATURE("ntfsfile", "FExcept");
+  UPDATE_FEATURE("PEDITOR", "Russian");
+  UPDATE_FEATURE("Registry", "Russian");
+//  UPDATE_FEATURE("Registry", "Italian");
+  UPDATE_FEATURE("RESearch", "Russian");
+  UPDATE_FEATURE("Resource", "Russian");
+  UPDATE_FEATURE("UnInstall", "Russian");
+  UPDATE_FEATURE("UnInstall", "FExcept");
+  UPDATE_FEATURE("wmexplorer", "Russian");
+  UPDATE_FEATURE("wmexplorer", "FExcept");
   return ERROR_SUCCESS;
 }
 
