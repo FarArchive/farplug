@@ -1,6 +1,6 @@
 diff -ruN fardev/docs/ClearPluginsCache.bat fardev-patched/docs/ClearPluginsCache.bat
 --- fardev/docs/ClearPluginsCache.bat	Sat Oct 27 17:22:24 2007
-+++ fardev-patched/docs/ClearPluginsCache.bat	Tue Mar 10 21:27:04 2009
++++ fardev-patched/docs/ClearPluginsCache.bat	Tue Mar 17 15:23:00 2009
 @@ -1,7 +1,4 @@
  @echo off
  rem This batch file cleared the Plugin Cache
@@ -12,7 +12,7 @@ diff -ruN fardev/docs/ClearPluginsCache.bat fardev-patched/docs/ClearPluginsCach
 +reg delete HKCU\Software\Far2\PluginsCache /f
 diff -ruN fardev/docs/RestoreSettings.bat fardev-patched/docs/RestoreSettings.bat
 --- fardev/docs/RestoreSettings.bat	Sat Oct 27 17:22:24 2007
-+++ fardev-patched/docs/RestoreSettings.bat	Tue Mar 10 21:27:04 2009
++++ fardev-patched/docs/RestoreSettings.bat	Tue Mar 17 15:23:00 2009
 @@ -2,17 +2,13 @@
  rem    This batch file restores Far settings from previously saved
  rem    files FarSave1.reg and FarSave2.reg to the registry
@@ -40,7 +40,7 @@ diff -ruN fardev/docs/RestoreSettings.bat fardev-patched/docs/RestoreSettings.ba
 +:end
 diff -ruN fardev/docs/SaveSettings.bat fardev-patched/docs/SaveSettings.bat
 --- fardev/docs/SaveSettings.bat	Sat Oct 27 17:22:24 2007
-+++ fardev-patched/docs/SaveSettings.bat	Tue Mar 10 21:27:04 2009
++++ fardev-patched/docs/SaveSettings.bat	Tue Mar 17 15:23:00 2009
 @@ -2,5 +2,5 @@
  rem    This batch file saves Far settings from the registry
  rem    to files FarSave1.reg and FarSave2.reg
@@ -51,7 +51,7 @@ diff -ruN fardev/docs/SaveSettings.bat fardev-patched/docs/SaveSettings.bat
 +reg export HKLM\Software\Far2 FarSave2.reg
 diff -ruN fardev/plugins/makefile_vc_def_inc fardev-patched/plugins/makefile_vc_def_inc
 --- fardev/plugins/makefile_vc_def_inc	Mon Jan 12 16:40:23 2009
-+++ fardev-patched/plugins/makefile_vc_def_inc	Tue Mar 10 21:27:04 2009
++++ fardev-patched/plugins/makefile_vc_def_inc	Tue Mar 17 15:23:00 2009
 @@ -127,27 +127,27 @@
  NOWIN98=/OPT:NOWIN98
  !endif
@@ -104,7 +104,7 @@ diff -ruN fardev/plugins/makefile_vc_def_inc fardev-patched/plugins/makefile_vc_
  CPP_DEBUG=/Z7
 diff -ruN fardev/plugins/tmppanel/TmpClass.cpp fardev-patched/plugins/tmppanel/TmpClass.cpp
 --- fardev/plugins/tmppanel/TmpClass.cpp	Tue Feb 24 01:24:39 2009
-+++ fardev-patched/plugins/tmppanel/TmpClass.cpp	Tue Mar 10 21:27:04 2009
++++ fardev-patched/plugins/tmppanel/TmpClass.cpp	Tue Mar 17 14:58:13 2009
 @@ -153,6 +153,17 @@
  #undef _NAME
  }
@@ -144,10 +144,35 @@ diff -ruN fardev/plugins/tmppanel/TmpClass.cpp fardev-patched/plugins/tmppanel/T
      lstrcat(wp, PanelItem.FindData.lpwszFileName);
      CurPanelItem->FindData.lpwszFileName = wp;
  #endif
+@@ -275,6 +287,8 @@
+ #ifdef UNICODE
+       if(TmpPanelItem[i].FindData.lpwszFileName)
+         TmpPanelItem[i].FindData.lpwszFileName = wcsdup(TmpPanelItem[i].FindData.lpwszFileName);
++      if(TmpPanelItem[i].FindData.lpwszAlternateFileName)
++        TmpPanelItem[i].FindData.lpwszAlternateFileName = wcsdup(TmpPanelItem[i].FindData.lpwszAlternateFileName);
+ #endif
+     }
+   }
+diff -ruN fardev/plugins/tmppanel/TmpMix.cpp fardev-patched/plugins/tmppanel/TmpMix.cpp
+--- fardev/plugins/tmppanel/TmpMix.cpp	Tue Feb 24 01:24:39 2009
++++ fardev-patched/plugins/tmppanel/TmpMix.cpp	Tue Mar 17 14:55:25 2009
+@@ -49,10 +49,10 @@
+ #ifdef UNICODE
+       if (Items[I].FindData.lpwszFileName)
+         free ((wchar_t*)Items[I].FindData.lpwszFileName);
+-/*
++
+       if (Items[I].FindData.lpwszAlternateFileName)
+         free ((wchar_t*)Items[I].FindData.lpwszAlternateFileName);
+-*/
++
+ #endif
+     }
+     free (Items);
 diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cpp
---- fardev/unicode_far/findfile.cpp	Thu Mar  5 10:30:45 2009
-+++ fardev-patched/unicode_far/findfile.cpp	Tue Mar 10 21:27:04 2009
-@@ -958,8 +958,8 @@
+--- fardev/unicode_far/findfile.cpp	Mon Mar 16 20:18:56 2009
++++ fardev-patched/unicode_far/findfile.cpp	Tue Mar 17 15:23:00 2009
+@@ -909,8 +909,8 @@
    wchar_t *lpFileName = xf_wcsdup (PanelItem->FindData.lpwszFileName);
    wchar_t *lpFileNameShort = xf_wcsdup (PanelItem->FindData.lpwszAlternateFileName);
  
@@ -158,7 +183,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
  
    if ( CtrlObject->Plugins.GetFindData (
        hPlugin,
-@@ -974,11 +974,11 @@
+@@ -925,11 +925,11 @@
        PluginPanelItem Item = *pItem;
  
        wchar_t *lpwszFileName = xf_wcsdup(NullToEmpty(pItem->FindData.lpwszFileName));
@@ -172,7 +197,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
        xf_free (lpwszFileName);
  
        if ( !StrCmp (lpFileNameToFind, Item.FindData.lpwszFileName) &&
-@@ -1749,8 +1749,7 @@
+@@ -1700,8 +1700,7 @@
        string strFileName=FindList[FindExitIndex]->FindData.strFileName;
        Panel *FindPanel=CtrlObject->Cp()->ActivePanel;
  
@@ -182,7 +207,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
        {
          HANDLE hPlugin = ArcList[FindList[FindExitIndex]->ArcIndex]->hPlugin;
          if (hPlugin == INVALID_HANDLE_VALUE)
-@@ -1781,7 +1780,7 @@
+@@ -1732,7 +1731,7 @@
                SearchMode==FFSEARCH_ALL ||
                SearchMode==FFSEARCH_ALL_BUTNETWORK ||
                SearchMode==FFSEARCH_INPATH)
@@ -191,7 +216,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
  
            SetPluginDirectory(strFileName,hPlugin,TRUE);
          }
-@@ -1854,32 +1853,19 @@
+@@ -1805,32 +1804,19 @@
  {
    string strName;
    wchar_t *StartName,*EndName;
@@ -231,7 +256,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
      StartName=EndName+1;
    }
  
-@@ -2341,8 +2327,6 @@
+@@ -2294,8 +2280,6 @@
    string strPathName;
    strPathName = FullName;
  
@@ -240,7 +265,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
    CutToSlash(strPathName);
  
    if ( strPathName.IsEmpty() )
-@@ -2749,7 +2733,8 @@
+@@ -2702,7 +2686,8 @@
      struct OpenPluginInfo Info;
      CtrlObject->Plugins.GetOpenPluginInfo(hPlugin,&Info);
      strSaveDir = Info.CurDir;
@@ -250,7 +275,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
      WaitForSingleObject(hPluginMutex,INFINITE);
      if (SearchMode==FFSEARCH_ROOT ||
          SearchMode==FFSEARCH_ALL ||
-@@ -2835,15 +2820,9 @@
+@@ -2788,15 +2773,9 @@
        string strFullName;
        if (StrCmp(strCurName,L".")==0 || TestParentFolderName(strCurName))
          continue;
@@ -269,7 +294,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
  
        /* $ 30.09.2003 KM
          Отфильтруем файлы не попадающие в действующий фильтр
-@@ -2859,7 +2838,6 @@
+@@ -2812,7 +2791,6 @@
            statusCS.Enter();
  
            strFindMessage = strFullName;
@@ -277,7 +302,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
            FindMessageReady=TRUE;
  
            statusCS.Leave();
-@@ -2889,28 +2867,29 @@
+@@ -2842,28 +2820,29 @@
          WaitForSingleObject(hPluginMutex,INFINITE);
  
  				size_t pos;
@@ -320,7 +345,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
      }
    }
    CtrlObject->Plugins.FreeFindData(hPlugin,PanelData,ItemCount);
-@@ -3163,25 +3142,4 @@
+@@ -3116,25 +3095,4 @@
    //SearchFromRoot[sz-1+MsgLenDiff]=0; //BUGBUG
  
    return strSearchFromRoot;
@@ -348,7 +373,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
  }
 diff -ruN fardev/unicode_far/findfile.hpp fardev-patched/unicode_far/findfile.hpp
 --- fardev/unicode_far/findfile.hpp	Sat Dec 27 17:00:42 2008
-+++ fardev-patched/unicode_far/findfile.hpp	Tue Mar 10 21:27:04 2009
++++ fardev-patched/unicode_far/findfile.hpp	Tue Mar 17 15:23:00 2009
 @@ -96,8 +96,6 @@
      static int GetPluginFile(DWORD ArcIndex, struct PluginPanelItem *PanelItem,
                               const wchar_t *DestPath, string &strResultName);
@@ -360,7 +385,7 @@ diff -ruN fardev/unicode_far/findfile.hpp fardev-patched/unicode_far/findfile.hp
  
 diff -ruN fardev/unicode_far/flupdate.cpp fardev-patched/unicode_far/flupdate.cpp
 --- fardev/unicode_far/flupdate.cpp	Sun Feb 15 19:41:27 2009
-+++ fardev-patched/unicode_far/flupdate.cpp	Tue Mar 10 21:27:04 2009
++++ fardev-patched/unicode_far/flupdate.cpp	Tue Mar 17 15:23:00 2009
 @@ -724,10 +724,6 @@
  
      //memset(CurListData,0,sizeof(*CurListData));
@@ -373,8 +398,8 @@ diff -ruN fardev/unicode_far/flupdate.cpp fardev-patched/unicode_far/flupdate.cp
  
      if ((Info.Flags & OPIF_USESORTGROUPS)/* && (CurListData->FileAttr & FILE_ATTRIBUTE_DIRECTORY)==0*/)
 diff -ruN fardev/unicode_far/makefile_vc fardev-patched/unicode_far/makefile_vc
---- fardev/unicode_far/makefile_vc	Sun Mar  8 19:42:40 2009
-+++ fardev-patched/unicode_far/makefile_vc	Tue Mar 10 21:27:04 2009
+--- fardev/unicode_far/makefile_vc	Fri Mar 13 16:22:32 2009
++++ fardev-patched/unicode_far/makefile_vc	Tue Mar 17 15:23:00 2009
 @@ -281,25 +281,25 @@
  	/D "_CRT_NONSTDC_NO_DEPRECATE"\
  	/D "_CRT_NON_CONFORMING_SWPRINTFS"
