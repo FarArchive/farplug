@@ -213,8 +213,10 @@ PluginItemList FilePanel::create_panel_items(const std::list<PanelItemData>& pid
 #ifdef FARAPI18
     pi_list.names += pid->file_name;
     pi.FindData.lpwszFileName = const_cast<wchar_t*>(pi_list.names.last().data());
-    pi_list.names += pid->alt_file_name;
-    pi.FindData.lpwszAlternateFileName = const_cast<wchar_t*>(pi_list.names.last().data());
+    if (pid->alt_file_name.size() != 0) {
+      pi_list.names += pid->alt_file_name;
+      pi.FindData.lpwszAlternateFileName = const_cast<wchar_t*>(pi_list.names.last().data());
+    }
 #endif
     pi.FindData.dwFileAttributes = pid->file_attr;
     pi.FindData.ftCreationTime = pid->creation_time;
