@@ -470,155 +470,6 @@
       <Feature Id="ColorerFExcept" Level="2" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="colorer.map" />
       </Feature>
-      <Feature Id="FarSvc" Level="2" Title="FarSvc" AllowAdvertise="no" Description="Service manager">
-        <ComponentRef Id="FarSvc.dll" />
-        <ComponentRef Id="FILE_ID.DIZ_4" />
-        <ComponentRef Id="README.TXT_3" />
-        <ComponentRef Id="SvcEng.hlf" />
-        <ComponentRef Id="SvcEng.lng" />
-        <ComponentRef Id="whatsnew.txt_3" />
-      </Feature>
-      <Feature Id="FarSvcRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="README.RUS_1" />
-        <ComponentRef Id="SvcRus.hlf" />
-        <ComponentRef Id="SvcRus.lng" />
-        <ComponentRef Id="whatsnew.rus" />
-      </Feature>
-      <Feature Id="FarTrans" Level="2" Title="FarTrans" AllowAdvertise="no" Description="Convert text files from one cyrillic codepage to another and change line endings">
-        <ComponentRef Id="fartrans.dll" />
-        <ComponentRef Id="install.txt" />
-        <ComponentRef Id="readme.eng.txt" />
-        <ComponentRef Id="TransEng.hlf" />
-        <ComponentRef Id="TransEng.lng" />
-      </Feature>
-      <Feature Id="FarTransRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="readme.rus.txt_1" />
-        <ComponentRef Id="TransRus.hlf" />
-        <ComponentRef Id="TransRus.lng" />
-      </Feature>
-      <Feature Id="FileCopyEx" Level="2" Title="FileCopyEx" AllowAdvertise="no" Description="Fast file copy implementation">
-        <ComponentRef Id="english.lng" />
-        <ComponentRef Id="FileCopyEx.dll" />
-        <ComponentRef Id="file_id.diz_5" />
-        <ComponentRef Id="history.eng.html" />
-        <ComponentRef Id="readme.eng.html" />
-        <ComponentRef Id="text.css" />
-        <ComponentRef Id="dialogs.objd" />
-        <ComponentRef Id="english.locd" />
-      </Feature>
-      <Feature Id="FileCopyExRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="Russian.hlf" />
-        <ComponentRef Id="russian.lng" />
-        <ComponentRef Id="history.rus.html" />
-        <ComponentRef Id="readme.rus.html" />
-        <ComponentRef Id="russian.locd" />
-      </Feature>
-      <Feature Id="FileCopyExFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="FileCopyEx.map" />
-      </Feature>
-      <Feature Id="ntfsfile" Level="2" Title="NtfsFile" AllowAdvertise="no" Description="NTFS file utilities: show file disk size and structure, manage alternate streams, perform defragmentation and fast search over entire volume">
-        <ComponentRef Id="en.hlf" />
-        <ComponentRef Id="en.lng" />
-        <ComponentRef Id="file_id.diz_6" />
-        <ComponentRef Id="ntfsfile.dll" />
-      </Feature>
-      <Feature Id="ntfsfileRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="history_ru.txt_1" />
-        <ComponentRef Id="ru.hlf" />
-      </Feature>
-      <Feature Id="ntfsfileFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="ntfsfile.map" />
-      </Feature>
-      <Feature Id="PEDITOR" Level="2" Title="PEditor" AllowAdvertise="no" Description="Portable executable (PE) file editor">
-        <ComponentRef Id="FILE_ID.DIZ_7" />
-        <ComponentRef Id="PEDITENG.HLF" />
-        <ComponentRef Id="PEDITENG.LNG" />
-        <ComponentRef Id="PEDITOR.dll" />
-        <ComponentRef Id="WHATSNEW.TXT_4" />
-      </Feature>
-      <Feature Id="PEDITORRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="PEDITRUS.HLF" />
-        <ComponentRef Id="PEDITRUS.LNG" />
-      </Feature>
-      <Feature Id="Registry" Level="2" Title="Registry" AllowAdvertise="no" Description="Registry browser">
-        <ComponentRef Id="FILE_ID.DIZ_8" />
-        <ComponentRef Id="README.ENG" />
-        <ComponentRef Id="RegEng.lng" />
-        <ComponentRef Id="Registry.dll" />
-        <ComponentRef Id="Registry.hlf" />
-        <ComponentRef Id="WHATSNEW.TXT_5" />
-      </Feature>
-      <Feature Id="RegistryRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="README.RUS_2" />
-        <ComponentRef Id="RegRus.hlf" />
-        <ComponentRef Id="RegRus.lng" />
-      </Feature>
-      <Feature Id="RegistryItalian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="RegIta.Hlf" />
-        <ComponentRef Id="RegIta.Lng" />
-      </Feature>
-      <Feature Id="RESearch" Level="2" Title="RESearch" AllowAdvertise="no" Description="Regular expression search and replace">
-        <ComponentRef Id="EditFind.reg" />
-        <ComponentRef Id="FileFind.reg" />
-        <ComponentRef Id="FileRename.reg" />
-        <ComponentRef Id="FileSelect.reg" />
-        <ComponentRef Id="File_Id.Diz_9" />
-        <ComponentRef Id="Hints.txt" />
-        <ComponentRef Id="History.txt_2" />
-        <ComponentRef Id="pcrepattern.html" />
-        <ComponentRef Id="PluginHotkeys.reg" />
-        <ComponentRef Id="RESearch.dll" />
-        <ComponentRef Id="RESearchEng.hlf" />
-        <ComponentRef Id="RESearchEng.lng" />
-        <ComponentRef Id="ViewFind.reg" />
-      </Feature>
-      <Feature Id="RESearchRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="RESearchRus.hlf" />
-        <ComponentRef Id="RESearchRus.lng" />
-      </Feature>
-      <Feature Id="Resource" Level="2" Title="Resource" AllowAdvertise="no" Description="Portable executable (PE) resource browser">
-        <ComponentRef Id="file_id.diz_10" />
-        <ComponentRef Id="History.txt_3" />
-        <ComponentRef Id="readme.txt_4" />
-        <ComponentRef Id="ResEng.hlf" />
-        <ComponentRef Id="ResEng.lng" />
-        <ComponentRef Id="Resource.dll" />
-      </Feature>
-      <Feature Id="ResourceRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="ResRus.hlf" />
-        <ComponentRef Id="ResRus.lng" />
-      </Feature>
-      <Feature Id="UnInstall" Level="2" Title="UnInstall" AllowAdvertise="no" Description="Browse and remove installed programs">
-        <ComponentRef Id="File_ID.diz_11" />
-        <ComponentRef Id="UnInstall.dll" />
-        <ComponentRef Id="UnInstall_Eng.hlf" />
-        <ComponentRef Id="UnInstall_Eng.lng" />
-      </Feature>
-      <Feature Id="UnInstallRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="ReadMe.Rus.txt_2" />
-        <ComponentRef Id="TechInfo.Rus.reg" />
-        <ComponentRef Id="UnInstall_Rus.hlf" />
-        <ComponentRef Id="UnInstall_Rus.lng" />
-        <ComponentRef Id="WhatsNew.Rus.txt" />
-      </Feature>
-      <Feature Id="UnInstallFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="UnInstall.map" />
-      </Feature>
-      <Feature Id="wmexplorer" Level="2" Title="WMExplorer" AllowAdvertise="no" Description="Manage files on Windows Mobile based PDA/SmartPhone via ActiveSync">
-        <ComponentRef Id="file_id.diz_12" />
-        <ComponentRef Id="history_en.txt" />
-        <ComponentRef Id="wmexplorer.dll" />
-        <ComponentRef Id="wmexplorer_en.hlf" />
-        <ComponentRef Id="wmexplorer_en.lng" />
-      </Feature>
-      <Feature Id="wmexplorerRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="history_ru.txt_2" />
-        <ComponentRef Id="wmexplorer_ru.hlf" />
-        <ComponentRef Id="wmexplorer_ru.lng" />
-      </Feature>
-      <Feature Id="wmexplorerFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="wmexplorer.map" />
-      </Feature>
       <Feature Id="DVDPanel" Level="2" Title="DVDPanel" AllowAdvertise="no" Description="Burn CD/DVD using external tools: NeroCmd, ImgBurn">
         <ComponentRef Id="DVDPanel.dll" />
         <ComponentRef Id="DVDPanel.hlf" />
@@ -685,6 +536,52 @@
       <Feature Id="FarHintsRussian" Level="2" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="FarHintsRus.lng" />
       </Feature>
+      <Feature Id="FarSvc" Level="2" Title="FarSvc" AllowAdvertise="no" Description="Service manager">
+        <ComponentRef Id="FarSvc.dll" />
+        <ComponentRef Id="FILE_ID.DIZ_4" />
+        <ComponentRef Id="README.TXT_3" />
+        <ComponentRef Id="SvcEng.hlf" />
+        <ComponentRef Id="SvcEng.lng" />
+        <ComponentRef Id="whatsnew.txt_3" />
+      </Feature>
+      <Feature Id="FarSvcRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="README.RUS_1" />
+        <ComponentRef Id="SvcRus.hlf" />
+        <ComponentRef Id="SvcRus.lng" />
+        <ComponentRef Id="whatsnew.rus" />
+      </Feature>
+      <Feature Id="FarTrans" Level="2" Title="FarTrans" AllowAdvertise="no" Description="Convert text files from one cyrillic codepage to another and change line endings">
+        <ComponentRef Id="fartrans.dll" />
+        <ComponentRef Id="install.txt" />
+        <ComponentRef Id="readme.eng.txt" />
+        <ComponentRef Id="TransEng.hlf" />
+        <ComponentRef Id="TransEng.lng" />
+      </Feature>
+      <Feature Id="FarTransRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="readme.rus.txt_1" />
+        <ComponentRef Id="TransRus.hlf" />
+        <ComponentRef Id="TransRus.lng" />
+      </Feature>
+      <Feature Id="FileCopyEx" Level="2" Title="FileCopyEx" AllowAdvertise="no" Description="Fast file copy implementation">
+        <ComponentRef Id="english.lng" />
+        <ComponentRef Id="FileCopyEx.dll" />
+        <ComponentRef Id="file_id.diz_5" />
+        <ComponentRef Id="history.eng.html" />
+        <ComponentRef Id="readme.eng.html" />
+        <ComponentRef Id="text.css" />
+        <ComponentRef Id="dialogs.objd" />
+        <ComponentRef Id="english.locd" />
+      </Feature>
+      <Feature Id="FileCopyExRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="Russian.hlf" />
+        <ComponentRef Id="russian.lng" />
+        <ComponentRef Id="history.rus.html" />
+        <ComponentRef Id="readme.rus.html" />
+        <ComponentRef Id="russian.locd" />
+      </Feature>
+      <Feature Id="FileCopyExFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="FileCopyEx.map" />
+      </Feature>
       <Feature Id="FontMan" Level="2" Title="FontMan" AllowAdvertise="no" Description="Font manager">
         <ComponentRef Id="file_id.diz_14" />
         <ComponentRef Id="FontMan.dll" />
@@ -748,6 +645,19 @@
         <ComponentRef Id="NoisyRus.lng" />
         <ComponentRef Id="NoisyRus.mnu" />
       </Feature>
+      <Feature Id="ntfsfile" Level="2" Title="NtfsFile" AllowAdvertise="no" Description="NTFS file utilities: show file disk size and structure, manage alternate streams, perform defragmentation and fast search over entire volume">
+        <ComponentRef Id="en.hlf" />
+        <ComponentRef Id="en.lng" />
+        <ComponentRef Id="file_id.diz_6" />
+        <ComponentRef Id="ntfsfile.dll" />
+      </Feature>
+      <Feature Id="ntfsfileRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="history_ru.txt_1" />
+        <ComponentRef Id="ru.hlf" />
+      </Feature>
+      <Feature Id="ntfsfileFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="ntfsfile.map" />
+      </Feature>
       <Feature Id="Opera" Level="2" Title="Opera" AllowAdvertise="no" Description="Opera cache browser">
         <ComponentRef Id="file_id.diz_17" />
         <ComponentRef Id="History.txt_8" />
@@ -758,6 +668,17 @@
       </Feature>
       <Feature Id="OperaRussian" Level="2" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="operac4Rus.lng" />
+      </Feature>
+      <Feature Id="PEDITOR" Level="2" Title="PEditor" AllowAdvertise="no" Description="Portable executable (PE) file editor">
+        <ComponentRef Id="FILE_ID.DIZ_7" />
+        <ComponentRef Id="PEDITENG.HLF" />
+        <ComponentRef Id="PEDITENG.LNG" />
+        <ComponentRef Id="PEDITOR.dll" />
+        <ComponentRef Id="WHATSNEW.TXT_4" />
+      </Feature>
+      <Feature Id="PEDITORRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="PEDITRUS.HLF" />
+        <ComponentRef Id="PEDITRUS.LNG" />
       </Feature>
       <Feature Id="qPlayEx" Level="2" Title="qPlayEx" AllowAdvertise="no" Description="Music player">
         <ComponentRef Id="file_id.diz_18" />
@@ -803,6 +724,54 @@
       <Feature Id="qPlayExRussian" Level="2" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="qPlayEx2Rus.lng" />
       </Feature>
+      <Feature Id="Registry" Level="2" Title="Registry" AllowAdvertise="no" Description="Registry browser">
+        <ComponentRef Id="FILE_ID.DIZ_8" />
+        <ComponentRef Id="README.ENG" />
+        <ComponentRef Id="RegEng.lng" />
+        <ComponentRef Id="Registry.dll" />
+        <ComponentRef Id="Registry.hlf" />
+        <ComponentRef Id="WHATSNEW.TXT_5" />
+      </Feature>
+      <Feature Id="RegistryRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="README.RUS_2" />
+        <ComponentRef Id="RegRus.hlf" />
+        <ComponentRef Id="RegRus.lng" />
+      </Feature>
+      <Feature Id="RegistryItalian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="RegIta.Hlf" />
+        <ComponentRef Id="RegIta.Lng" />
+      </Feature>
+      <Feature Id="RESearch" Level="2" Title="RESearch" AllowAdvertise="no" Description="Regular expression search and replace">
+        <ComponentRef Id="EditFind.reg" />
+        <ComponentRef Id="FileFind.reg" />
+        <ComponentRef Id="FileRename.reg" />
+        <ComponentRef Id="FileSelect.reg" />
+        <ComponentRef Id="File_Id.Diz_9" />
+        <ComponentRef Id="Hints.txt" />
+        <ComponentRef Id="History.txt_2" />
+        <ComponentRef Id="pcrepattern.html" />
+        <ComponentRef Id="PluginHotkeys.reg" />
+        <ComponentRef Id="RESearch.dll" />
+        <ComponentRef Id="RESearchEng.hlf" />
+        <ComponentRef Id="RESearchEng.lng" />
+        <ComponentRef Id="ViewFind.reg" />
+      </Feature>
+      <Feature Id="RESearchRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="RESearchRus.hlf" />
+        <ComponentRef Id="RESearchRus.lng" />
+      </Feature>
+      <Feature Id="Resource" Level="2" Title="Resource" AllowAdvertise="no" Description="Portable executable (PE) resource browser">
+        <ComponentRef Id="file_id.diz_10" />
+        <ComponentRef Id="History.txt_3" />
+        <ComponentRef Id="readme.txt_4" />
+        <ComponentRef Id="ResEng.hlf" />
+        <ComponentRef Id="ResEng.lng" />
+        <ComponentRef Id="Resource.dll" />
+      </Feature>
+      <Feature Id="ResourceRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="ResRus.hlf" />
+        <ComponentRef Id="ResRus.lng" />
+      </Feature>
       <Feature Id="TorrentView" Level="2" Title="TorrentView" AllowAdvertise="no" Description="Torrent file viewer">
         <ComponentRef Id="History.txt_10" />
         <ComponentRef Id="ReadMe.txt_12" />
@@ -820,6 +789,37 @@
       </Feature>
       <Feature Id="UCharMapRussian" Level="2" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="UCharMapRus.lng" />
+      </Feature>
+      <Feature Id="UnInstall" Level="2" Title="UnInstall" AllowAdvertise="no" Description="Browse and remove installed programs">
+        <ComponentRef Id="File_ID.diz_11" />
+        <ComponentRef Id="UnInstall.dll" />
+        <ComponentRef Id="UnInstall_Eng.hlf" />
+        <ComponentRef Id="UnInstall_Eng.lng" />
+      </Feature>
+      <Feature Id="UnInstallRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="ReadMe.Rus.txt_2" />
+        <ComponentRef Id="TechInfo.Rus.reg" />
+        <ComponentRef Id="UnInstall_Rus.hlf" />
+        <ComponentRef Id="UnInstall_Rus.lng" />
+        <ComponentRef Id="WhatsNew.Rus.txt" />
+      </Feature>
+      <Feature Id="UnInstallFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="UnInstall.map" />
+      </Feature>
+      <Feature Id="wmexplorer" Level="2" Title="WMExplorer" AllowAdvertise="no" Description="Manage files on Windows Mobile based PDA/SmartPhone via ActiveSync">
+        <ComponentRef Id="file_id.diz_12" />
+        <ComponentRef Id="history_en.txt" />
+        <ComponentRef Id="wmexplorer.dll" />
+        <ComponentRef Id="wmexplorer_en.hlf" />
+        <ComponentRef Id="wmexplorer_en.lng" />
+      </Feature>
+      <Feature Id="wmexplorerRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="history_ru.txt_2" />
+        <ComponentRef Id="wmexplorer_ru.hlf" />
+        <ComponentRef Id="wmexplorer_ru.lng" />
+      </Feature>
+      <Feature Id="wmexplorerFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="wmexplorer.map" />
       </Feature>
       <Feature Id="yac" Level="2" Title="yac" AllowAdvertise="no" Description="Command line completion">
         <ComponentRef Id="changelog_19" />
