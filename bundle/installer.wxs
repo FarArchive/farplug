@@ -1,5 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!--?include defines.wxi ?-->
 <?define Product="FAR Manager $(var.Version)" ?>
 <?define Manufacturer="Eugene Roshal & FAR Group" ?>
 <?define UpgradeCode="45ab8d55-86a1-44f1-8e0a-1890fa69ba2b" ?>
@@ -10,6 +9,7 @@
       <RegistrySearch Id="InstallDir" Root="HKLM" Key="Software\Far2" Name="InstallDir" Type="raw"/>
     </Property>
     <Media Id="1" Cabinet="far.cab" EmbedCab="yes"/>
+    <Condition Message="$(var.Product) requires Windows 2000 or above."><![CDATA[NOT Version9X AND (VersionNT>=500)]]></Condition>
     <Binary Id="CustomActions.dll" SourceFile="CustomActions.dll"/>
     <CustomAction Id="UpdateFeatureState" BinaryKey="CustomActions.dll" DllEntry="UpdateFeatureState"/>
     <CustomAction Id="Optimize" BinaryKey="CustomActions.dll" DllEntry="Optimize" />
