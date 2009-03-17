@@ -736,141 +736,126 @@
       </Directory>
     </Directory>
     <Directory Id="colorer" Name="colorer">
-      <Component Id="catalog.xml" Guid="{A5D98B75-AE91-4B93-B6F0-9D2D1DB84ED6}">
+      <Component Id="catalog.xml" Guid="{A4D589F0-31BF-4DE1-8414-4070A4AC457D}">
         <File Id="catalog.xml" Name="catalog.xml" KeyPath="yes" Source="plugins2\colorer\catalog.xml" />
       </Component>
-      <Component Id="LICENSE_2" Guid="{EFEAB815-EF13-4ADA-B75D-370710F5F8D6}">
+      <Component Id="LICENSE_2" Guid="{1EF6C5B9-CA48-442D-AF52-AF4B3BFA596E}">
         <File Id="LICENSE_2" Name="LICENSE" KeyPath="yes" Source="plugins2\colorer\LICENSE" />
       </Component>
-      <Component Id="README" Guid="{ADB3B988-18FC-4FFE-A070-83171B666BDE}">
+      <Component Id="README" Guid="{B060BA5A-EE87-4236-97C3-4D4D1B96C91E}">
         <File Id="README" Name="README" KeyPath="yes" Source="plugins2\colorer\README" />
       </Component>
       <Directory Id="bin" Name="bin">
-        <Component Id="coloree.hlf" Guid="{09CADCEF-D7D7-4F6F-88A7-B653E304F5DA}">
+        <Component Id="coloree.hlf" Guid="{204EF62B-427F-4C65-A2DF-08D35EF565F1}">
           <File Id="coloree.hlf" Name="coloree.hlf" KeyPath="yes" Source="plugins2\colorer\bin\coloree.hlf" />
         </Component>
-        <Component Id="coloree.lng" Guid="{65BF2954-92E8-47D9-A4CA-E93FE0A998E4}">
+        <Component Id="coloree.lng" Guid="{F6849DEC-365F-43C4-95D1-7786CBBCA507}">
           <File Id="coloree.lng" Name="coloree.lng" KeyPath="yes" Source="plugins2\colorer\bin\coloree.lng" />
         </Component>
-        <Component Id="colorer.dll" Guid="{F715E687-09E8-4521-A999-4AFC7E51C412}">
+        <Component Id="colorer.dll" Guid="{F47D8D80-45F2-48EA-A303-A803858B2DA1}">
           <File Id="colorer.dll" Name="colorer.dll" KeyPath="yes" Source="plugins2\colorer\bin\colorer.dll" />
         </Component>
-        <Component Id="colorer.hlf" Guid="{5F3571D7-9EF5-45C6-B0A0-722FE2071F7C}">
+        <Component Id="colorer.hlf" Guid="{4C0E56F8-95C9-4215-BF68-6613A4B49652}">
           <File Id="colorer.hlf" Name="colorer.hlf" KeyPath="yes" Source="plugins2\colorer\bin\colorer.hlf" />
         </Component>
-        <Component Id="colorer.lng" Guid="{DAD3B2F5-CAEC-4FFA-879F-37B2A1F81DFB}">
+        <Component Id="colorer.lng" Guid="{C28AD1B8-BE75-4057-842D-512594CE24C0}">
           <File Id="colorer.lng" Name="colorer.lng" KeyPath="yes" Source="plugins2\colorer\bin\colorer.lng" />
         </Component>
         <Component Id="colorer.map" Guid="{00DAD9F7-5FE9-4BD9-B042-1E05EC6265E5}">
           <File Id="colorer.map" Name="colorer.map" KeyPath="yes" Source="plugins2\colorer\bin\colorer.map" />
         </Component>
-        <Component Id="shortcuts.reg" Guid="{484A67F6-0A7F-4983-87C4-0C3874AF02A9}">
+        <Component Id="shortcuts.reg" Guid="{300E0F4E-A082-4C74-8857-33B4BC932071}">
           <File Id="shortcuts.reg" Name="shortcuts.reg" KeyPath="yes" Source="plugins2\colorer\bin\shortcuts.reg" />
         </Component>
       </Directory>
       <Directory Id="hrc" Name="hrc">
-        <Component Id="common.jar" Guid="{853455E2-1DF1-4B91-9427-C2C3486C2ED0}">
+        <Component Id="common.jar" Guid="{8BADA39E-E7FE-4F81-B7D4-CA346265CC4A}">
           <File Id="common.jar" Name="common.jar" KeyPath="yes" Source="plugins2\colorer\hrc\common.jar" />
         </Component>
-        <Component Id="ini.ent.hrc" Guid="{8E7E1E8B-B983-4F57-B33B-0F672D7462AC}">
-          <File Id="ini.ent.hrc" Name="ini.ent.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\ini.ent.hrc" />
+        <Component Id="proto_perl.xml" Guid="{6E3A536D-03AC-45D6-A854-A04B334DF496}">
+          <File Id="proto_perl.xml" Name="proto-perl.xml" KeyPath="yes" Source="plugins2\colorer\hrc\proto-perl.xml" />
         </Component>
-        <Component Id="msg.ent.hrc" Guid="{D0AB449C-B21C-4C33-857E-E73548C6A9F4}">
-          <File Id="msg.ent.hrc" Name="msg.ent.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\msg.ent.hrc" />
+        <Component Id="proto_php.xml" Guid="{8837BFAF-7340-4227-8695-87FCC8C6CC01}">
+          <File Id="proto_php.xml" Name="proto-php.xml" KeyPath="yes" Source="plugins2\colorer\hrc\proto-php.xml" />
         </Component>
-        <Component Id="php_prot.ent.hrc" Guid="{9935FD0F-EB89-426B-9D3F-C7144F37EA1C}">
-          <File Id="php_prot.ent.hrc" Name="php-prot.ent.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\php-prot.ent.hrc" />
-        </Component>
-        <Component Id="proto.hrc" Guid="{CA786345-46AC-478A-AD5A-DCF6F6A8EC4E}">
+        <Component Id="proto.hrc" Guid="{4085E311-C1FA-4B17-9BD6-3575C6A8C473}">
           <File Id="proto.hrc" Name="proto.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\proto.hrc" />
         </Component>
         <Directory Id="auto" Name="auto">
-          <Component Id="ccsql.hrc" Guid="{B9EC954C-36E3-41FC-8283-727D9CD5ACC2}">
+          <Component Id="ccsql.hrc" Guid="{E48AFB4F-E9C7-441A-B16F-E6CCE8498829}">
             <File Id="ccsql.hrc" Name="ccsql.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\ccsql.hrc" />
           </Component>
-          <Component Id="far.hrc" Guid="{5BA774E5-ABCB-4780-96F2-984FD84FEC62}">
-            <File Id="far.hrc" Name="far.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\far.hrc" />
+          <Component Id="farmanager.hrc" Guid="{F4C47072-FC9D-429D-A167-F4421AEE1721}">
+            <File Id="farmanager.hrc" Name="farmanager.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\farmanager.hrc" />
           </Component>
-          <Component Id="gen.hrc" Guid="{9E20BBEF-A838-42EC-9B4A-6B3FA3E19C5E}">
+          <Component Id="gen.hrc" Guid="{BD4E0ACA-5DCB-4BA7-9997-F7785DBD4776}">
             <File Id="gen.hrc" Name="gen.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\gen.hrc" />
           </Component>
-          <Component Id="litestep.hrc" Guid="{80CFEFC7-3C61-44CE-9098-8F636E9A2989}">
+          <Component Id="litestep.hrc" Guid="{7DC22B81-4440-4DF0-A3F6-13CC5C900542}">
             <File Id="litestep.hrc" Name="litestep.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\litestep.hrc" />
           </Component>
-          <Component Id="qrm.hrc" Guid="{90B4E45B-637E-41A7-9EE0-61F5C98F187C}">
+          <Component Id="qrm.hrc" Guid="{2CBC4E82-BAC4-42B6-8B87-7ACBEDB1A024}">
             <File Id="qrm.hrc" Name="qrm.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\qrm.hrc" />
           </Component>
-          <Component Id="rare_scripts.hrc" Guid="{18FFA0C5-7881-41F6-A139-229403066B78}">
+          <Component Id="rare_scripts.hrc" Guid="{9BDF93AB-2F21-49D4-9A49-E8B62DEE236F}">
             <File Id="rare_scripts.hrc" Name="rare-scripts.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\rare-scripts.hrc" />
           </Component>
-          <Component Id="vim.hrc" Guid="{3C8607A4-6A99-4C02-828F-EB9B4FE9DAEB}">
+          <Component Id="vim.hrc" Guid="{A06F4752-9D9B-4358-A40A-5DCA7C70FDCA}">
             <File Id="vim.hrc" Name="vim.hrc" KeyPath="yes" Source="plugins2\colorer\hrc\auto\vim.hrc" />
           </Component>
           <Directory Id="types" Name="types">
-            <Component Id="auto.jar" Guid="{14C8143F-DA0B-46EA-8E76-FBC9EDB32FA1}">
+            <Component Id="auto.jar" Guid="{02928BDB-94AD-48D9-92CF-26B334BD2828}">
               <File Id="auto.jar" Name="auto.jar" KeyPath="yes" Source="plugins2\colorer\hrc\auto\types\auto.jar" />
             </Component>
           </Directory>
         </Directory>
       </Directory>
       <Directory Id="hrd" Name="hrd">
-        <Component Id="catalog_console.xml" Guid="{2236CF52-8551-4D5C-96F7-879C9C61B2C2}">
-          <File Id="catalog_console.xml" Name="catalog-console.xml" KeyPath="yes" Source="plugins2\colorer\hrd\catalog-console.xml" />
-        </Component>
-        <Component Id="catalog_rgb.xml" Guid="{3AED9CEF-7F4C-4BB1-B9FA-2930B99DDCCB}">
-          <File Id="catalog_rgb.xml" Name="catalog-rgb.xml" KeyPath="yes" Source="plugins2\colorer\hrd\catalog-rgb.xml" />
-        </Component>
-        <Component Id="catalog_text.xml" Guid="{95BF4789-7180-4277-8246-AE0B08C3F6E4}">
-          <File Id="catalog_text.xml" Name="catalog-text.xml" KeyPath="yes" Source="plugins2\colorer\hrd\catalog-text.xml" />
-        </Component>
         <Directory Id="console" Name="console">
-          <Component Id="black.hrd" Guid="{964046F8-752F-48C7-9FC5-B956F5039F9D}">
+          <Component Id="black.hrd" Guid="{DF738FB7-A9CB-4D89-B5B1-E92032DB7250}">
             <File Id="black.hrd" Name="black.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\black.hrd" />
           </Component>
-          <Component Id="blue.hrd" Guid="{772A0893-581D-44A8-9347-977ED3E36A4E}">
+          <Component Id="blue.hrd" Guid="{F3111D3B-7E21-4F9E-9CDE-90B5C37EA7DE}">
             <File Id="blue.hrd" Name="blue.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\blue.hrd" />
           </Component>
-          <Component Id="default.hrd" Guid="{A0507E58-31CC-4C15-A2B2-10F2152233B1}">
+          <Component Id="default.hrd" Guid="{E23D65FB-4FEF-4BB9-B638-8E200273EB67}">
             <File Id="default.hrd" Name="default.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\default.hrd" />
           </Component>
-          <Component Id="dnlike.hrd" Guid="{AEC75A5E-0684-4C23-97C9-A9ECC2E5F1CB}">
+          <Component Id="dnlike.hrd" Guid="{C0F616C7-AD08-4944-B4C9-A488D0B8C9F4}">
             <File Id="dnlike.hrd" Name="dnlike.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\dnlike.hrd" />
           </Component>
-          <Component Id="gray.hrd" Guid="{9DD9C345-5949-4EE2-BA1E-5112638C20BC}">
+          <Component Id="gray.hrd" Guid="{19EAF67D-CDED-49B6-8C8D-D641F15449B5}">
             <File Id="gray.hrd" Name="gray.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\gray.hrd" />
           </Component>
-          <Component Id="hack.hrd" Guid="{4A34BC41-3DF0-4CD5-8C28-7C2DA2D2C1F4}">
+          <Component Id="hack.hrd" Guid="{3E8905DD-BF7D-4BC8-B945-07FD99FB9221}">
             <File Id="hack.hrd" Name="hack.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\hack.hrd" />
           </Component>
-          <Component Id="mirror.hrd" Guid="{DFFD53A9-5059-4055-9800-99FF8E7E7512}">
-            <File Id="mirror.hrd" Name="mirror.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\mirror.hrd" />
-          </Component>
-          <Component Id="nc.hrd" Guid="{630CCA1A-60ED-49F3-9C47-859160A03E2D}">
+          <Component Id="nc.hrd" Guid="{FCF2900C-28E5-4CB3-87D3-441742CF5072}">
             <File Id="nc.hrd" Name="nc.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\nc.hrd" />
           </Component>
-          <Component Id="white.hrd" Guid="{8F5234A0-4BE7-40C2-AE5F-A1D65A1ED26A}">
+          <Component Id="white.hrd" Guid="{B9AB5E6F-9272-482B-973F-260BB0F05F9D}">
             <File Id="white.hrd" Name="white.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\white.hrd" />
           </Component>
-          <Component Id="xmastree.hrd" Guid="{3EB07533-A0D8-4054-9546-09AEFBCAA18C}">
+          <Component Id="xmastree.hrd" Guid="{4D9B5B23-DDDB-4B01-B26A-6D3DB2018B58}">
             <File Id="xmastree.hrd" Name="xmastree.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\xmastree.hrd" />
           </Component>
           <Directory Id="contrib" Name="contrib">
-            <Component Id="black_ay.hrd" Guid="{B669442A-DF03-4D59-B3FA-483C8EC4137D}">
+            <Component Id="black_ay.hrd" Guid="{DD746658-1A7C-4475-ABD0-F224D0CA11D6}">
               <File Id="black_ay.hrd" Name="black_ay.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\black_ay.hrd" />
             </Component>
-            <Component Id="black_sezal.hrd" Guid="{42F6F9C4-F910-4DED-93BD-8A5EAA4F0EE0}">
+            <Component Id="black_sezal.hrd" Guid="{84F1C8D4-1D4A-4922-B0AF-440340AF5C96}">
               <File Id="black_sezal.hrd" Name="black_sezal.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\black_sezal.hrd" />
             </Component>
-            <Component Id="classic.hrd" Guid="{074CC317-FA8B-43AC-B5B4-391590277091}">
+            <Component Id="classic.hrd" Guid="{CA330CEF-A622-4328-BD2E-B34415424E19}">
               <File Id="classic.hrd" Name="classic.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\classic.hrd" />
             </Component>
-            <Component Id="cyberpunk.hrd" Guid="{B7476090-AA14-4A4E-8126-9995EE9C30DB}">
-              <File Id="cyberpunk.hrd" Name="cyberpunk.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\cyberpunk.hrd" />
-            </Component>
-            <Component Id="gray_pult.hrd" Guid="{B00D7D1B-75D0-4F3C-95C5-DC690A38B864}">
+            <Component Id="gray_pult.hrd" Guid="{2CBE5A9C-1AED-4EAD-8A7C-67F66E5448C2}">
               <File Id="gray_pult.hrd" Name="gray_pult.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\gray_pult.hrd" />
             </Component>
-            <Component Id="ocean.hrd" Guid="{68EEE6FC-0355-4556-AE6F-9BE7D59CBE1B}">
+            <Component Id="mirror.hrd" Guid="{E85DF705-50DA-4741-B842-B6085E4EF7BE}">
+              <File Id="mirror.hrd" Name="mirror.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\mirror.hrd" />
+            </Component>
+            <Component Id="ocean.hrd" Guid="{8101BE94-0DBF-48DB-B088-D48E9A869E05}">
               <File Id="ocean.hrd" Name="ocean.hrd" KeyPath="yes" Source="plugins2\colorer\hrd\console\contrib\ocean.hrd" />
             </Component>
           </Directory>
