@@ -619,6 +619,226 @@
       <Feature Id="wmexplorerFExcept" Level="2" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="wmexplorer.map" />
       </Feature>
+      <Feature Id="DVDPanel" Level="2" Title="DVDPanel" AllowAdvertise="no" Description="Burn CD/DVD using external tools: NeroCmd, ImgBurn">
+        <ComponentRef Id="DVDPanel.dll" />
+        <ComponentRef Id="DVDPanel.hlf" />
+        <ComponentRef Id="History.txt_4" />
+        <ComponentRef Id="NeroErrors.txt" />
+        <ComponentRef Id="ReadMe.txt_5" />
+      </Feature>
+      <Feature Id="FarHints" Level="2" Title="FarHints" AllowAdvertise="no" Description="Show various file information (graphical too) using popup hints">
+        <ComponentRef Id="FarHints.dll" />
+        <ComponentRef Id="FarHintsEng.lng" />
+        <ComponentRef Id="file_id.diz_13" />
+        <ComponentRef Id="History.txt_5" />
+        <ComponentRef Id="Readme.txt_6" />
+        <ComponentRef Id="Settings.reg_1" />
+        <ComponentRef Id="Setup.reg" />
+        <ComponentRef Id="SetupEsc.reg" />
+        <ComponentRef Id="SetupWheel.reg" />
+        <ComponentRef Id="Uninstall.reg_2" />
+        <Feature Id="FarHintsCursors" Level="2" Title="Cursor" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsCursors.hll" />
+          <ComponentRef Id="FarHintsCursorsEng.lng" />
+          <ComponentRef Id="Settings.reg_2" />
+        </Feature>
+        <Feature Id="FarHintsCursorsRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsCursorsRus.lng" />
+        </Feature>
+        <Feature Id="FarHintsFolders" Level="2" Title="Folder" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsFolders.hll" />
+          <ComponentRef Id="FarHintsFoldersEng.lng" />
+        </Feature>
+        <Feature Id="FarHintsFoldersRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsFoldersRus.lng" />
+        </Feature>
+        <Feature Id="FarHintsImage" Level="2" Title="Image" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsImage.hll" />
+          <ComponentRef Id="FarHintsImageEng.lng" />
+          <ComponentRef Id="Settings.reg_3" />
+        </Feature>
+        <Feature Id="FarHintsImageRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsImageRus.lng" />
+        </Feature>
+        <Feature Id="FarHintsMP3" Level="2" Title="MP3" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsMP3.hll" />
+          <ComponentRef Id="FarHintsMP3Eng.lng" />
+        </Feature>
+        <Feature Id="FarHintsMP3Russian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsMP3Rus.lng" />
+        </Feature>
+        <Feature Id="FarHintsProcess" Level="2" Title="Process" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsProcess.hll" />
+          <ComponentRef Id="FarHintsProcessEng.lng" />
+        </Feature>
+        <Feature Id="FarHintsProcessRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsProcessRus.lng" />
+        </Feature>
+        <Feature Id="FarHintsVerInfo" Level="2" Title="VerInfo" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsVerInfo.hll" />
+          <ComponentRef Id="FarHintsVerInfoEng.lng" />
+        </Feature>
+        <Feature Id="FarHintsVerInfoRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsVerInfoRus.lng" />
+        </Feature>
+      </Feature>
+      <Feature Id="FarHintsRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="FarHintsRus.lng" />
+      </Feature>
+      <Feature Id="FontMan" Level="2" Title="FontMan" AllowAdvertise="no" Description="Font manager">
+        <ComponentRef Id="file_id.diz_14" />
+        <ComponentRef Id="FontMan.dll" />
+        <ComponentRef Id="FontMan.hlf" />
+        <ComponentRef Id="FontManEng.lng" />
+        <ComponentRef Id="Readme.txt_7" />
+        <ComponentRef Id="Samples.ini" />
+        <ComponentRef Id="vssver.scc" />
+      </Feature>
+      <Feature Id="FontManRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="FontManRus.lng" />
+      </Feature>
+      <Feature Id="MoreHistory" Level="2" Title="MoreHistory" AllowAdvertise="no" Description="Enhanced version of standard folder history">
+        <ComponentRef Id="file_id.diz_15" />
+        <ComponentRef Id="History.txt_6" />
+        <ComponentRef Id="MoreHistory.dll" />
+        <ComponentRef Id="MoreHistory.hlf" />
+        <ComponentRef Id="MoreHistoryEng.lng" />
+        <ComponentRef Id="Readme.txt_8" />
+        <ComponentRef Id="Settings.reg_4" />
+      </Feature>
+      <Feature Id="MoreHistoryRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="MoreHistoryRus.lng" />
+      </Feature>
+      <Feature Id="Noisy" Level="2" Title="Noisy" AllowAdvertise="no" Description="Music player">
+        <ComponentRef Id="bass.dll_1" />
+        <ComponentRef Id="file_id.diz_16" />
+        <ComponentRef Id="History.txt_7" />
+        <ComponentRef Id="Hotkeys.reg_1" />
+        <ComponentRef Id="Macro.reg" />
+        <ComponentRef Id="Noisy.exe" />
+        <ComponentRef Id="NoisyCmd.txt" />
+        <ComponentRef Id="NoisyEng.lng" />
+        <ComponentRef Id="NoisyEng.mnu" />
+        <ComponentRef Id="NoisyFar.dll" />
+        <ComponentRef Id="NoisyRus.hlf" />
+        <ComponentRef Id="Readme.txt_9" />
+        <ComponentRef Id="Settings.reg_5" />
+        <ComponentRef Id="tags.dll" />
+        <Feature Id="WinNoisy" Level="2" Title="WinNoisy" AllowAdvertise="no" Description="GUI controller application">
+          <ComponentRef Id="WinNoisy.exe" />
+        </Feature>
+        <Feature Id="RadioLinks" Level="2" Title="Radio links" AllowAdvertise="no" Description="Predefined links to Internet radio stations">
+          <ComponentRef Id="BEST_FM.m3u" />
+          <ComponentRef Id="D_FM.m3u" />
+          <ComponentRef Id="Love______.m3u" />
+          <ComponentRef Id="___________.m3u" />
+          <ComponentRef Id="__________.m3u_1" />
+          <ComponentRef Id="______ULTRA.m3u" />
+          <ComponentRef Id="__________.m3u_2" />
+          <ComponentRef Id="__________.m3u_3" />
+          <ComponentRef Id="____________.m3u_1" />
+          <ComponentRef Id="____________.m3u_2" />
+          <ComponentRef Id="________.m3u" />
+          <ComponentRef Id="_____________.m3u" />
+          <ComponentRef Id="________________.m3u" />
+          <ComponentRef Id="__________.m3u_4" />
+        </Feature>
+      </Feature>
+      <Feature Id="NoisyRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="NoisyRus.lng" />
+        <ComponentRef Id="NoisyRus.mnu" />
+      </Feature>
+      <Feature Id="Opera" Level="2" Title="Opera" AllowAdvertise="no" Description="Opera cache browser">
+        <ComponentRef Id="file_id.diz_17" />
+        <ComponentRef Id="History.txt_8" />
+        <ComponentRef Id="operac4.dll" />
+        <ComponentRef Id="operac4.hlf" />
+        <ComponentRef Id="operac4Eng.lng" />
+        <ComponentRef Id="readme.txt_10" />
+      </Feature>
+      <Feature Id="OperaRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="operac4Rus.lng" />
+      </Feature>
+      <Feature Id="qPlayEx" Level="2" Title="qPlayEx" AllowAdvertise="no" Description="Music player">
+        <ComponentRef Id="file_id.diz_18" />
+        <ComponentRef Id="History.txt_9" />
+        <ComponentRef Id="qPlayEx2.dll" />
+        <ComponentRef Id="qPlayEx2.hlf" />
+        <ComponentRef Id="qPlayEx2Eng.lng" />
+        <ComponentRef Id="readme.txt_11" />
+        <ComponentRef Id="clown.col" />
+        <ComponentRef Id="default.col" />
+        <ComponentRef Id="far_ever_blue.col" />
+        <ComponentRef Id="matrix.col" />
+        <ComponentRef Id="Hotkeys.reg_2" />
+        <ComponentRef Id="Install.reg" />
+        <ComponentRef Id="QPlayEx_Dialog.REG" />
+        <ComponentRef Id="QPlayEx_Editor.REG" />
+        <ComponentRef Id="QPlayEx_Shell.REG" />
+        <ComponentRef Id="QPlayEx_Viewer.REG" />
+        <ComponentRef Id="Uninstall.reg_3" />
+        <ComponentRef Id="UnQPlayEx_Dialog.REG" />
+        <ComponentRef Id="UnQPlayEx_Editor.REG" />
+        <ComponentRef Id="UnQPlayEx_Shell.REG" />
+        <ComponentRef Id="UnQPlayEx_Viewer.REG" />
+        <ComponentRef Id="bass.dll_2" />
+        <Feature Id="BASSPlugins" Level="2" Title="BASS Plugins" AllowAdvertise="no">
+          <ComponentRef Id="basscd.inp" />
+          <ComponentRef Id="bassflac.inp" />
+          <ComponentRef Id="bassmidi.inp" />
+          <ComponentRef Id="basswma.inp" />
+          <ComponentRef Id="basswv.inp" />
+          <ComponentRef Id="bass_aac.inp" />
+          <ComponentRef Id="bass_ac3.inp" />
+          <ComponentRef Id="bass_alac.inp" />
+          <ComponentRef Id="bass_ape.inp" />
+          <ComponentRef Id="bass_mpc.inp" />
+          <ComponentRef Id="in_nez.ini" />
+          <ComponentRef Id="in_nez.inp" />
+          <ComponentRef Id="in_v2m.inp" />
+          <ComponentRef Id="in_ym.inp" />
+          <ComponentRef Id="plugin.ini" />
+        </Feature>
+      </Feature>
+      <Feature Id="qPlayExRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="qPlayEx2Rus.lng" />
+      </Feature>
+      <Feature Id="TorrentView" Level="2" Title="TorrentView" AllowAdvertise="no" Description="Torrent file viewer">
+        <ComponentRef Id="History.txt_10" />
+        <ComponentRef Id="ReadMe.txt_12" />
+        <ComponentRef Id="Torrent.hlf" />
+        <ComponentRef Id="TorrentEng.lng" />
+        <ComponentRef Id="TorrentU.dll" />
+      </Feature>
+      <Feature Id="UCharMap" Level="2" Title="UCharMap" AllowAdvertise="no" Description="Unicode character table">
+        <ComponentRef Id="file_id.diz_19" />
+        <ComponentRef Id="GroupsList.txt" />
+        <ComponentRef Id="History.txt_11" />
+        <ComponentRef Id="Settings.reg_6" />
+        <ComponentRef Id="UCharMap.dll" />
+        <ComponentRef Id="UCharMapEng.lng" />
+      </Feature>
+      <Feature Id="UCharMapRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="UCharMapRus.lng" />
+      </Feature>
+      <Feature Id="yac" Level="2" Title="yac" AllowAdvertise="no" Description="Command line completion">
+        <ComponentRef Id="changelog_19" />
+        <ComponentRef Id="readme_2" />
+        <ComponentRef Id="setmacros.cmd" />
+        <ComponentRef Id="yac32W.dll" />
+        <ComponentRef Id="yac_en.hlf" />
+        <ComponentRef Id="yac_en.lng" />
+        <ComponentRef Id="cl.reg" />
+        <ComponentRef Id="farcmds.reg" />
+        <ComponentRef Id="help.reg" />
+        <ComponentRef Id="net.reg" />
+        <ComponentRef Id="reg.reg" />
+        <ComponentRef Id="svn.reg" />
+      </Feature>
+      <Feature Id="yacRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="yac_ru.hlf" />
+        <ComponentRef Id="yac_ru.lng" />
+      </Feature>
     </Feature>
   </Feature>
 </Include>

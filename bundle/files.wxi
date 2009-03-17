@@ -1183,5 +1183,515 @@
         <File Id="wmexplorer_ru.lng" Name="wmexplorer_ru.lng" KeyPath="yes" Source="plugins2\wmexplorer\wmexplorer_ru.lng" />
       </Component>
     </Directory>
+    <Directory Id="dvdpanel" Name="dvdpanel">
+      <Component Id="DVDPanel.dll" Guid="{864861B2-F98F-4463-AC62-526CDEF6D227}">
+        <File Id="DVDPanel.dll" Name="DVDPanel.dll" KeyPath="yes" Source="plugins2\dvdpanel\DVDPanel.dll" />
+      </Component>
+      <Component Id="DVDPanel.hlf" Guid="{66597535-0906-4614-8F55-E8B3BAFFD3BA}">
+        <File Id="DVDPanel.hlf" Name="DVDPanel.hlf" KeyPath="yes" Source="plugins2\dvdpanel\DVDPanel.hlf" />
+      </Component>
+      <Component Id="History.txt_4" Guid="{63D9719C-3E47-40EB-AE9F-15F4EDE2D471}">
+        <File Id="History.txt_4" Name="History.txt" KeyPath="yes" Source="plugins2\dvdpanel\History.txt" />
+      </Component>
+      <Component Id="NeroErrors.txt" Guid="{CD33CC4D-64CE-403F-8935-EC1767170708}">
+        <File Id="NeroErrors.txt" Name="NeroErrors.txt" KeyPath="yes" Source="plugins2\dvdpanel\NeroErrors.txt" />
+      </Component>
+      <Component Id="ReadMe.txt_5" Guid="{3A97406D-BA3F-4734-AB2D-DA166FFB8B15}">
+        <File Id="ReadMe.txt_5" Name="ReadMe.txt" KeyPath="yes" Source="plugins2\dvdpanel\ReadMe.txt" />
+      </Component>
+    </Directory>
+    <Directory Id="farhints" Name="farhints">
+      <Component Id="FarHints.dll" Guid="{4DD3DAE7-367E-4F98-B5B7-92CD27375B8F}">
+        <File Id="FarHints.dll" Name="FarHints.dll" KeyPath="yes" Source="plugins2\farhints\FarHints.dll" />
+      </Component>
+      <Component Id="FarHintsEng.lng" Guid="{DB1672E0-87BC-4B1D-AC4E-E2691354F1B1}">
+        <File Id="FarHintsEng.lng" Name="FarHintsEng.lng" KeyPath="yes" Source="plugins2\farhints\FarHintsEng.lng" />
+      </Component>
+      <Component Id="FarHintsRus.lng" Guid="{397B216C-A76C-4CDB-9750-BF8A9D9E434E}">
+        <File Id="FarHintsRus.lng" Name="FarHintsRus.lng" KeyPath="yes" Source="plugins2\farhints\FarHintsRus.lng" />
+      </Component>
+      <Component Id="file_id.diz_13" Guid="{2835D1E6-685D-4EBD-9DDA-867FE68DAD51}">
+        <File Id="file_id.diz_13" Name="file_id.diz" KeyPath="yes" Source="plugins2\farhints\file_id.diz" />
+      </Component>
+      <Component Id="History.txt_5" Guid="{B2E7877A-1B4F-43AC-9C4E-963E7C58D39F}">
+        <File Id="History.txt_5" Name="History.txt" KeyPath="yes" Source="plugins2\farhints\History.txt" />
+      </Component>
+      <Component Id="Readme.txt_6" Guid="{EF34EB14-A7FE-49E2-96CA-7A17CEA082EC}">
+        <File Id="Readme.txt_6" Name="Readme.txt" KeyPath="yes" Source="plugins2\farhints\Readme.txt" />
+      </Component>
+      <Component Id="Settings.reg_1" Guid="{F383C47A-8968-41F2-9C2B-8785FDC156D2}">
+        <File Id="Settings.reg_1" Name="Settings.reg" KeyPath="yes" Source="plugins2\farhints\Settings.reg" />
+      </Component>
+      <Component Id="Setup.reg" Guid="{56D80006-AAC8-4C98-95E8-E800C558B23A}">
+        <File Id="Setup.reg" Name="Setup.reg" KeyPath="yes" Source="plugins2\farhints\Setup.reg" />
+      </Component>
+      <Component Id="SetupEsc.reg" Guid="{D5E8264A-75E4-4B59-B677-808AB50FA18B}">
+        <File Id="SetupEsc.reg" Name="SetupEsc.reg" KeyPath="yes" Source="plugins2\farhints\SetupEsc.reg" />
+      </Component>
+      <Component Id="SetupWheel.reg" Guid="{78D7B072-BAD3-4DC3-8CDF-A264F996391A}">
+        <File Id="SetupWheel.reg" Name="SetupWheel.reg" KeyPath="yes" Source="plugins2\farhints\SetupWheel.reg" />
+      </Component>
+      <Component Id="Uninstall.reg_2" Guid="{5CED0E28-4865-450B-98E6-E045EADEDF69}">
+        <File Id="Uninstall.reg_2" Name="Uninstall.reg" KeyPath="yes" Source="plugins2\farhints\Uninstall.reg" />
+      </Component>
+      <Directory Id="Plugins_2" Name="Plugins">
+        <Directory Id="Cursors" Name="Cursors">
+          <Component Id="FarHintsCursors.hll" Guid="{75D66906-5C8A-40A7-A49D-FE038F7F69EE}">
+            <File Id="FarHintsCursors.hll" Name="FarHintsCursors.hll" KeyPath="yes" Source="plugins2\farhints\Plugins\Cursors\FarHintsCursors.hll" />
+          </Component>
+          <Component Id="FarHintsCursorsEng.lng" Guid="{60B1D5AE-81DB-44AA-A715-B4FF8FF5538E}">
+            <File Id="FarHintsCursorsEng.lng" Name="FarHintsCursorsEng.lng" KeyPath="yes" Source="plugins2\farhints\Plugins\Cursors\FarHintsCursorsEng.lng" />
+          </Component>
+          <Component Id="FarHintsCursorsRus.lng" Guid="{20F1AB38-9EEA-4310-8113-BE3F1AB44975}">
+            <File Id="FarHintsCursorsRus.lng" Name="FarHintsCursorsRus.lng" KeyPath="yes" Source="plugins2\farhints\Plugins\Cursors\FarHintsCursorsRus.lng" />
+          </Component>
+          <Component Id="Settings.reg_2" Guid="{64B423F4-BFED-4FD8-A578-C8EA1F187C92}">
+            <File Id="Settings.reg_2" Name="Settings.reg" KeyPath="yes" Source="plugins2\farhints\Plugins\Cursors\Settings.reg" />
+          </Component>
+        </Directory>
+        <Directory Id="Folders" Name="Folders">
+          <Component Id="FarHintsFolders.hll" Guid="{3C967DF6-50F9-40AD-8958-EC07997DC192}">
+            <File Id="FarHintsFolders.hll" Name="FarHintsFolders.hll" KeyPath="yes" Source="plugins2\farhints\Plugins\Folders\FarHintsFolders.hll" />
+          </Component>
+          <Component Id="FarHintsFoldersEng.lng" Guid="{BBF1AF9E-DCE0-4792-AD6A-8D5C6CEEAA8C}">
+            <File Id="FarHintsFoldersEng.lng" Name="FarHintsFoldersEng.lng" KeyPath="yes" Source="plugins2\farhints\Plugins\Folders\FarHintsFoldersEng.lng" />
+          </Component>
+          <Component Id="FarHintsFoldersRus.lng" Guid="{166C6E2A-50F9-400F-BED7-60F0B56B242C}">
+            <File Id="FarHintsFoldersRus.lng" Name="FarHintsFoldersRus.lng" KeyPath="yes" Source="plugins2\farhints\Plugins\Folders\FarHintsFoldersRus.lng" />
+          </Component>
+        </Directory>
+        <Directory Id="Image" Name="Image">
+          <Component Id="FarHintsImage.hll" Guid="{C6D73C68-A04A-4FCA-9334-89B9E920B4CC}">
+            <File Id="FarHintsImage.hll" Name="FarHintsImage.hll" KeyPath="yes" Source="plugins2\farhints\Plugins\Image\FarHintsImage.hll" />
+          </Component>
+          <Component Id="FarHintsImageEng.lng" Guid="{B3DDAC5A-8EE4-4B76-9270-37237115EA50}">
+            <File Id="FarHintsImageEng.lng" Name="FarHintsImageEng.lng" KeyPath="yes" Source="plugins2\farhints\Plugins\Image\FarHintsImageEng.lng" />
+          </Component>
+          <Component Id="FarHintsImageRus.lng" Guid="{34807EC3-E324-4751-A23D-239180C9C3E2}">
+            <File Id="FarHintsImageRus.lng" Name="FarHintsImageRus.lng" KeyPath="yes" Source="plugins2\farhints\Plugins\Image\FarHintsImageRus.lng" />
+          </Component>
+          <Component Id="Settings.reg_3" Guid="{678B72DF-9AA5-4FFE-9C77-EDA4050799FA}">
+            <File Id="Settings.reg_3" Name="Settings.reg" KeyPath="yes" Source="plugins2\farhints\Plugins\Image\Settings.reg" />
+          </Component>
+        </Directory>
+        <Directory Id="MP3" Name="MP3">
+          <Component Id="FarHintsMP3.hll" Guid="{7454A447-379D-4561-A95A-8B71CF3304BA}">
+            <File Id="FarHintsMP3.hll" Name="FarHintsMP3.hll" KeyPath="yes" Source="plugins2\farhints\Plugins\MP3\FarHintsMP3.hll" />
+          </Component>
+          <Component Id="FarHintsMP3Eng.lng" Guid="{A623CFE6-7F60-4CA0-A6AC-5E03E4054A1E}">
+            <File Id="FarHintsMP3Eng.lng" Name="FarHintsMP3Eng.lng" KeyPath="yes" Source="plugins2\farhints\Plugins\MP3\FarHintsMP3Eng.lng" />
+          </Component>
+          <Component Id="FarHintsMP3Rus.lng" Guid="{B713F73C-1D82-4F62-B9A5-CC01D90B388E}">
+            <File Id="FarHintsMP3Rus.lng" Name="FarHintsMP3Rus.lng" KeyPath="yes" Source="plugins2\farhints\Plugins\MP3\FarHintsMP3Rus.lng" />
+          </Component>
+        </Directory>
+        <Directory Id="Process" Name="Process">
+          <Component Id="FarHintsProcess.hll" Guid="{F6F3D61D-24CD-4498-BF53-910A20D8EFA1}">
+            <File Id="FarHintsProcess.hll" Name="FarHintsProcess.hll" KeyPath="yes" Source="plugins2\farhints\Plugins\Process\FarHintsProcess.hll" />
+          </Component>
+          <Component Id="FarHintsProcessEng.lng" Guid="{4C4B05A3-A76C-4EC8-8AE6-84EF71425088}">
+            <File Id="FarHintsProcessEng.lng" Name="FarHintsProcessEng.lng" KeyPath="yes" Source="plugins2\farhints\Plugins\Process\FarHintsProcessEng.lng" />
+          </Component>
+          <Component Id="FarHintsProcessRus.lng" Guid="{0449BC63-E41F-4196-85C7-C7B88B6E4C14}">
+            <File Id="FarHintsProcessRus.lng" Name="FarHintsProcessRus.lng" KeyPath="yes" Source="plugins2\farhints\Plugins\Process\FarHintsProcessRus.lng" />
+          </Component>
+        </Directory>
+        <Directory Id="VerInfo" Name="VerInfo">
+          <Component Id="FarHintsVerInfo.hll" Guid="{3E63EA52-4098-4A3E-A469-806C388FC837}">
+            <File Id="FarHintsVerInfo.hll" Name="FarHintsVerInfo.hll" KeyPath="yes" Source="plugins2\farhints\Plugins\VerInfo\FarHintsVerInfo.hll" />
+          </Component>
+          <Component Id="FarHintsVerInfoEng.lng" Guid="{2CD90EEC-5948-4D4B-9D53-338AAB95075C}">
+            <File Id="FarHintsVerInfoEng.lng" Name="FarHintsVerInfoEng.lng" KeyPath="yes" Source="plugins2\farhints\Plugins\VerInfo\FarHintsVerInfoEng.lng" />
+          </Component>
+          <Component Id="FarHintsVerInfoRus.lng" Guid="{FBCBB0E9-34BB-494E-9E5D-7A93FD0AC460}">
+            <File Id="FarHintsVerInfoRus.lng" Name="FarHintsVerInfoRus.lng" KeyPath="yes" Source="plugins2\farhints\Plugins\VerInfo\FarHintsVerInfoRus.lng" />
+          </Component>
+        </Directory>
+      </Directory>
+    </Directory>
+    <Directory Id="fontman" Name="fontman">
+      <Component Id="file_id.diz_14" Guid="{B1638F17-DD72-44C8-A58F-A4E0EF198B17}">
+        <File Id="file_id.diz_14" Name="file_id.diz" KeyPath="yes" Source="plugins2\fontman\file_id.diz" />
+      </Component>
+      <Component Id="FontMan.dll" Guid="{B1AB443B-631F-4562-AD58-525D991838C7}">
+        <File Id="FontMan.dll" Name="FontMan.dll" KeyPath="yes" Source="plugins2\fontman\FontMan.dll" />
+      </Component>
+      <Component Id="FontMan.hlf" Guid="{9D9B5A7E-332D-4F6B-9E82-DB92BB52ACEF}">
+        <File Id="FontMan.hlf" Name="FontMan.hlf" KeyPath="yes" Source="plugins2\fontman\FontMan.hlf" />
+      </Component>
+      <Component Id="FontManEng.lng" Guid="{3483996D-2034-41DD-AC22-3E572A5CD4E6}">
+        <File Id="FontManEng.lng" Name="FontManEng.lng" KeyPath="yes" Source="plugins2\fontman\FontManEng.lng" />
+      </Component>
+      <Component Id="FontManRus.lng" Guid="{6082EF1D-E693-4157-B059-629BA52EEDB3}">
+        <File Id="FontManRus.lng" Name="FontManRus.lng" KeyPath="yes" Source="plugins2\fontman\FontManRus.lng" />
+      </Component>
+      <Component Id="Readme.txt_7" Guid="{278C6689-C2A6-4FB5-A990-897BD1F1F4BE}">
+        <File Id="Readme.txt_7" Name="Readme.txt" KeyPath="yes" Source="plugins2\fontman\Readme.txt" />
+      </Component>
+      <Component Id="Samples.ini" Guid="{222FCE1D-FAF3-4EE6-BDB3-7592A916F262}">
+        <File Id="Samples.ini" Name="Samples.ini" KeyPath="yes" Source="plugins2\fontman\Samples.ini" />
+      </Component>
+      <Component Id="vssver.scc" Guid="{3747ECEB-7608-439C-BDCC-315D3F57094D}">
+        <File Id="vssver.scc" Name="vssver.scc" KeyPath="yes" Source="plugins2\fontman\vssver.scc" />
+      </Component>
+    </Directory>
+    <Directory Id="morehistory" Name="morehistory">
+      <Component Id="file_id.diz_15" Guid="{9FB52831-88B6-4DE6-8C3C-DD3E34156515}">
+        <File Id="file_id.diz_15" Name="file_id.diz" KeyPath="yes" Source="plugins2\morehistory\file_id.diz" />
+      </Component>
+      <Component Id="History.txt_6" Guid="{B75F765B-544F-483E-B8B2-437D8A65C768}">
+        <File Id="History.txt_6" Name="History.txt" KeyPath="yes" Source="plugins2\morehistory\History.txt" />
+      </Component>
+      <Component Id="MoreHistory.dll" Guid="{9E4DD188-331D-43C0-9073-B7FF2D28FE51}">
+        <File Id="MoreHistory.dll" Name="MoreHistory.dll" KeyPath="yes" Source="plugins2\morehistory\MoreHistory.dll" />
+      </Component>
+      <Component Id="MoreHistory.hlf" Guid="{2FDD3AB1-5C4F-4056-9648-CAA2E813E303}">
+        <File Id="MoreHistory.hlf" Name="MoreHistory.hlf" KeyPath="yes" Source="plugins2\morehistory\MoreHistory.hlf" />
+      </Component>
+      <Component Id="MoreHistoryEng.lng" Guid="{908C08A9-DCE9-415B-954B-2B799B3D3F16}">
+        <File Id="MoreHistoryEng.lng" Name="MoreHistoryEng.lng" KeyPath="yes" Source="plugins2\morehistory\MoreHistoryEng.lng" />
+      </Component>
+      <Component Id="MoreHistoryRus.lng" Guid="{9135AD73-6C89-4156-8092-DDFB82F2071C}">
+        <File Id="MoreHistoryRus.lng" Name="MoreHistoryRus.lng" KeyPath="yes" Source="plugins2\morehistory\MoreHistoryRus.lng" />
+      </Component>
+      <Component Id="Readme.txt_8" Guid="{CADEA7CF-5FDD-4399-A877-598E8C03FED8}">
+        <File Id="Readme.txt_8" Name="Readme.txt" KeyPath="yes" Source="plugins2\morehistory\Readme.txt" />
+      </Component>
+      <Component Id="Settings.reg_4" Guid="{9AD67FCA-D8BF-4907-BFDE-FF4EA30B9234}">
+        <File Id="Settings.reg_4" Name="Settings.reg" KeyPath="yes" Source="plugins2\morehistory\Settings.reg" />
+      </Component>
+    </Directory>
+    <Directory Id="noisy" Name="noisy">
+      <Component Id="bass.dll_1" Guid="{B22A92C6-9439-4CDC-B203-0CE25FF2097D}">
+        <File Id="bass.dll_1" Name="bass.dll" KeyPath="yes" Source="plugins2\noisy\bass.dll" />
+      </Component>
+      <Component Id="file_id.diz_16" Guid="{7F4E09A7-9529-4FD2-B84D-69357BF29BE5}">
+        <File Id="file_id.diz_16" Name="file_id.diz" KeyPath="yes" Source="plugins2\noisy\file_id.diz" />
+      </Component>
+      <Component Id="History.txt_7" Guid="{2FB5FFD7-9867-4D03-8037-AF7E1EF9CF56}">
+        <File Id="History.txt_7" Name="History.txt" KeyPath="yes" Source="plugins2\noisy\History.txt" />
+      </Component>
+      <Component Id="Hotkeys.reg_1" Guid="{CD7BFC73-8127-4840-8F92-747C3D7FF8CE}">
+        <File Id="Hotkeys.reg_1" Name="Hotkeys.reg" KeyPath="yes" Source="plugins2\noisy\Hotkeys.reg" />
+      </Component>
+      <Component Id="Macro.reg" Guid="{07255FC6-6992-4358-852C-09EA4F6FD222}">
+        <File Id="Macro.reg" Name="Macro.reg" KeyPath="yes" Source="plugins2\noisy\Macro.reg" />
+      </Component>
+      <Component Id="Noisy.exe" Guid="{A78326D0-621E-43AC-A892-5DF91F29B887}">
+        <File Id="Noisy.exe" Name="Noisy.exe" KeyPath="yes" Source="plugins2\noisy\Noisy.exe" />
+      </Component>
+      <Component Id="NoisyCmd.txt" Guid="{8A7BB394-5722-4247-8ECE-79759D044580}">
+        <File Id="NoisyCmd.txt" Name="NoisyCmd.txt" KeyPath="yes" Source="plugins2\noisy\NoisyCmd.txt" />
+      </Component>
+      <Component Id="NoisyEng.lng" Guid="{0DC0D113-06C8-447B-B12F-0061E0C7B22A}">
+        <File Id="NoisyEng.lng" Name="NoisyEng.lng" KeyPath="yes" Source="plugins2\noisy\NoisyEng.lng" />
+      </Component>
+      <Component Id="NoisyEng.mnu" Guid="{2A657709-FA48-434D-A232-5416790CAF48}">
+        <File Id="NoisyEng.mnu" Name="NoisyEng.mnu" KeyPath="yes" Source="plugins2\noisy\NoisyEng.mnu" />
+      </Component>
+      <Component Id="NoisyFar.dll" Guid="{E7AFC544-54CE-4FE2-BEC0-9F1C960662E5}">
+        <File Id="NoisyFar.dll" Name="NoisyFar.dll" KeyPath="yes" Source="plugins2\noisy\NoisyFar.dll" />
+      </Component>
+      <Component Id="NoisyRus.hlf" Guid="{AE30829C-DA28-414B-94AC-871FA42F34F8}">
+        <File Id="NoisyRus.hlf" Name="NoisyRus.hlf" KeyPath="yes" Source="plugins2\noisy\NoisyRus.hlf" />
+      </Component>
+      <Component Id="NoisyRus.lng" Guid="{630264AB-8088-44E9-A9B6-EC0011A7273D}">
+        <File Id="NoisyRus.lng" Name="NoisyRus.lng" KeyPath="yes" Source="plugins2\noisy\NoisyRus.lng" />
+      </Component>
+      <Component Id="NoisyRus.mnu" Guid="{8DA81831-F1D6-47D7-9BAD-4A7E73DDBC73}">
+        <File Id="NoisyRus.mnu" Name="NoisyRus.mnu" KeyPath="yes" Source="plugins2\noisy\NoisyRus.mnu" />
+      </Component>
+      <Component Id="Readme.txt_9" Guid="{ED4A69B7-4F7A-4941-B400-BE6673F0DE57}">
+        <File Id="Readme.txt_9" Name="Readme.txt" KeyPath="yes" Source="plugins2\noisy\Readme.txt" />
+      </Component>
+      <Component Id="Settings.reg_5" Guid="{BB8A3104-27C4-40BD-B848-F0D296393F1D}">
+        <File Id="Settings.reg_5" Name="Settings.reg" KeyPath="yes" Source="plugins2\noisy\Settings.reg" />
+      </Component>
+      <Component Id="tags.dll" Guid="{7E04398C-DFE3-4D0F-AA92-6ED6D0AA9E3B}">
+        <File Id="tags.dll" Name="tags.dll" KeyPath="yes" Source="plugins2\noisy\tags.dll" />
+      </Component>
+      <Component Id="WinNoisy.exe" Guid="{09750A13-9E0D-473E-892B-79C320DA77E8}">
+        <File Id="WinNoisy.exe" Name="WinNoisy.exe" KeyPath="yes" Source="plugins2\noisy\WinNoisy.exe" />
+      </Component>
+      <Directory Id="Radio" Name="Radio">
+        <Component Id="BEST_FM.m3u" Guid="{A88E7D60-FC3F-4F6A-9722-12EC1B0FC480}">
+          <File Id="BEST_FM.m3u" Name="BEST FM.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\BEST FM.m3u" />
+        </Component>
+        <Component Id="D_FM.m3u" Guid="{20474582-CCB7-4407-9E3C-65337105BB51}">
+          <File Id="D_FM.m3u" Name="D-FM.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\D-FM.m3u" />
+        </Component>
+        <Component Id="Love______.m3u" Guid="{2E0CC1E2-548E-4143-BB16-BFD5EB876F3C}">
+          <File Id="Love______.m3u" Name="Love Радио.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\Love Радио.m3u" />
+        </Component>
+        <Component Id="___________.m3u" Guid="{8B690BA2-3E3B-4C04-AB4F-E1353C68DA27}">
+          <File Id="___________.m3u" Name="Европа Плюс.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\Европа Плюс.m3u" />
+        </Component>
+        <Component Id="__________.m3u_1" Guid="{97DF9CFE-4A7F-4C72-BF86-75884B250FF1}">
+          <File Id="__________.m3u_1" Name="Наше Радио.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\Наше Радио.m3u" />
+        </Component>
+        <Component Id="______ULTRA.m3u" Guid="{847A1E6A-F086-48B5-A75F-BA007C349A8C}">
+          <File Id="______ULTRA.m3u" Name="Радио ULTRA.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\Радио ULTRA.m3u" />
+        </Component>
+        <Component Id="__________.m3u_2" Guid="{79BABA9F-80BC-4DCF-B1B0-A309843A5AE6}">
+          <File Id="__________.m3u_2" Name="Радио Маяк.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\Радио Маяк.m3u" />
+        </Component>
+        <Component Id="__________.m3u_3" Guid="{D4A56FD7-4EF0-4A43-B5D1-994CD3B79116}">
+          <File Id="__________.m3u_3" Name="Радио РОКС.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\Радио РОКС.m3u" />
+        </Component>
+        <Component Id="____________.m3u_1" Guid="{CCA03290-F993-46FA-B317-6A4709DB951A}">
+          <File Id="____________.m3u_1" Name="Радио Шансон.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\Радио Шансон.m3u" />
+        </Component>
+        <Component Id="____________.m3u_2" Guid="{1AF97BC8-7590-44AC-8424-75663EAB5603}">
+          <File Id="____________.m3u_2" Name="Радио Юность.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\Радио Юность.m3u" />
+        </Component>
+        <Component Id="________.m3u" Guid="{CCD93AF2-8AD6-4E47-BE62-F26CD90A3917}">
+          <File Id="________.m3u" Name="Ретро ФМ.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\Ретро ФМ.m3u" />
+        </Component>
+        <Component Id="_____________.m3u" Guid="{A67B74B3-79A3-48B4-87CE-69F9C626E768}">
+          <File Id="_____________.m3u" Name="Русское Радио.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\Русское Радио.m3u" />
+        </Component>
+        <Component Id="________________.m3u" Guid="{4325D838-1777-498D-92E5-02AC6A97330F}">
+          <File Id="________________.m3u" Name="Серебряный дождь.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\Серебряный дождь.m3u" />
+        </Component>
+        <Component Id="__________.m3u_4" Guid="{047EE7C3-0CE4-4225-856A-7372028833B4}">
+          <File Id="__________.m3u_4" Name="Эхо Москвы.m3u" KeyPath="yes" Source="plugins2\noisy\Radio\Эхо Москвы.m3u" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Directory Id="opera" Name="opera">
+      <Component Id="file_id.diz_17" Guid="{F72D568E-2D36-49AA-AF1F-61CCFA856CE8}">
+        <File Id="file_id.diz_17" Name="file_id.diz" KeyPath="yes" Source="plugins2\opera\file_id.diz" />
+      </Component>
+      <Component Id="History.txt_8" Guid="{8F54007E-604D-4165-ABA5-422991ED2FBB}">
+        <File Id="History.txt_8" Name="History.txt" KeyPath="yes" Source="plugins2\opera\History.txt" />
+      </Component>
+      <Component Id="operac4.dll" Guid="{2E160507-ECE8-48E2-9144-5EEB31271D04}">
+        <File Id="operac4.dll" Name="operac4.dll" KeyPath="yes" Source="plugins2\opera\operac4.dll" />
+      </Component>
+      <Component Id="operac4.hlf" Guid="{F773A778-CF0D-4795-BC9B-2671282A98E3}">
+        <File Id="operac4.hlf" Name="operac4.hlf" KeyPath="yes" Source="plugins2\opera\operac4.hlf" />
+      </Component>
+      <Component Id="operac4Eng.lng" Guid="{195FC04A-8514-4E14-9F9E-184F5E7E9756}">
+        <File Id="operac4Eng.lng" Name="operac4Eng.lng" KeyPath="yes" Source="plugins2\opera\operac4Eng.lng" />
+      </Component>
+      <Component Id="operac4Rus.lng" Guid="{4B7AFFE0-C87D-4065-818E-C26DF3C3D27A}">
+        <File Id="operac4Rus.lng" Name="operac4Rus.lng" KeyPath="yes" Source="plugins2\opera\operac4Rus.lng" />
+      </Component>
+      <Component Id="readme.txt_10" Guid="{36BD8CAC-2ACB-4398-8FA6-3BA4CDA6A62B}">
+        <File Id="readme.txt_10" Name="readme.txt" KeyPath="yes" Source="plugins2\opera\readme.txt" />
+      </Component>
+    </Directory>
+    <Directory Id="qplayex" Name="qplayex">
+      <Component Id="file_id.diz_18" Guid="{336B17A1-3FE5-403E-9B0B-D82FAAF24DAD}">
+        <File Id="file_id.diz_18" Name="file_id.diz" KeyPath="yes" Source="plugins2\qplayex\file_id.diz" />
+      </Component>
+      <Component Id="History.txt_9" Guid="{10731E02-A5F8-40A9-B2D4-E4FB736A3784}">
+        <File Id="History.txt_9" Name="History.txt" KeyPath="yes" Source="plugins2\qplayex\History.txt" />
+      </Component>
+      <Component Id="qPlayEx2.dll" Guid="{704324AC-4D84-437A-8AA7-FC823C5D67C0}">
+        <File Id="qPlayEx2.dll" Name="qPlayEx2.dll" KeyPath="yes" Source="plugins2\qplayex\qPlayEx2.dll" />
+      </Component>
+      <Component Id="qPlayEx2.hlf" Guid="{112CA401-7066-4DCF-B5FA-CDE0872835FA}">
+        <File Id="qPlayEx2.hlf" Name="qPlayEx2.hlf" KeyPath="yes" Source="plugins2\qplayex\qPlayEx2.hlf" />
+      </Component>
+      <Component Id="qPlayEx2Eng.lng" Guid="{155D6AE7-4A2F-4D6B-903F-044CB0376C17}">
+        <File Id="qPlayEx2Eng.lng" Name="qPlayEx2Eng.lng" KeyPath="yes" Source="plugins2\qplayex\qPlayEx2Eng.lng" />
+      </Component>
+      <Component Id="qPlayEx2Rus.lng" Guid="{464EF230-4A89-4A01-8612-72A88AB5FC55}">
+        <File Id="qPlayEx2Rus.lng" Name="qPlayEx2Rus.lng" KeyPath="yes" Source="plugins2\qplayex\qPlayEx2Rus.lng" />
+      </Component>
+      <Component Id="readme.txt_11" Guid="{213E492A-57A4-418A-AF15-014F4F5D6527}">
+        <File Id="readme.txt_11" Name="readme.txt" KeyPath="yes" Source="plugins2\qplayex\readme.txt" />
+      </Component>
+      <Directory Id="colors" Name="colors">
+        <Component Id="clown.col" Guid="{C58DF4FC-B2B9-49B5-B415-146C738FDBCC}">
+          <File Id="clown.col" Name="clown.col" KeyPath="yes" Source="plugins2\qplayex\colors\clown.col" />
+        </Component>
+        <Component Id="default.col" Guid="{68961F7E-7638-47C2-9ABF-A557EAD1533F}">
+          <File Id="default.col" Name="default.col" KeyPath="yes" Source="plugins2\qplayex\colors\default.col" />
+        </Component>
+        <Component Id="far_ever_blue.col" Guid="{DDD155B1-073C-46E6-AA22-E3D07EA52B9D}">
+          <File Id="far_ever_blue.col" Name="far_ever_blue.col" KeyPath="yes" Source="plugins2\qplayex\colors\far_ever_blue.col" />
+        </Component>
+        <Component Id="matrix.col" Guid="{1F272F25-E529-4326-9058-119BEEAC8C0B}">
+          <File Id="matrix.col" Name="matrix.col" KeyPath="yes" Source="plugins2\qplayex\colors\matrix.col" />
+        </Component>
+      </Directory>
+      <Directory Id="Setup" Name="Setup">
+        <Component Id="Hotkeys.reg_2" Guid="{5C98F0FD-B8A5-4183-BA1B-C825F20F2DE6}">
+          <File Id="Hotkeys.reg_2" Name="Hotkeys.reg" KeyPath="yes" Source="plugins2\qplayex\Setup\Hotkeys.reg" />
+        </Component>
+        <Component Id="Install.reg" Guid="{44C52279-0260-4CD6-A1BA-EAD60B49B319}">
+          <File Id="Install.reg" Name="Install.reg" KeyPath="yes" Source="plugins2\qplayex\Setup\Install.reg" />
+        </Component>
+        <Component Id="QPlayEx_Dialog.REG" Guid="{066C6946-D023-4371-B0EA-A69CF7E949A6}">
+          <File Id="QPlayEx_Dialog.REG" Name="QPlayEx_Dialog.REG" KeyPath="yes" Source="plugins2\qplayex\Setup\QPlayEx_Dialog.REG" />
+        </Component>
+        <Component Id="QPlayEx_Editor.REG" Guid="{043DAE43-A482-4EB2-8E37-92A96CC38F29}">
+          <File Id="QPlayEx_Editor.REG" Name="QPlayEx_Editor.REG" KeyPath="yes" Source="plugins2\qplayex\Setup\QPlayEx_Editor.REG" />
+        </Component>
+        <Component Id="QPlayEx_Shell.REG" Guid="{55AA4973-6F5D-4654-B7A6-CBB2F3846191}">
+          <File Id="QPlayEx_Shell.REG" Name="QPlayEx_Shell.REG" KeyPath="yes" Source="plugins2\qplayex\Setup\QPlayEx_Shell.REG" />
+        </Component>
+        <Component Id="QPlayEx_Viewer.REG" Guid="{56577D0D-7A20-4AFC-A189-3E7E962167F0}">
+          <File Id="QPlayEx_Viewer.REG" Name="QPlayEx_Viewer.REG" KeyPath="yes" Source="plugins2\qplayex\Setup\QPlayEx_Viewer.REG" />
+        </Component>
+        <Component Id="Uninstall.reg_3" Guid="{70F6EE3F-BD9B-409F-AF5F-578913AB3645}">
+          <File Id="Uninstall.reg_3" Name="Uninstall.reg" KeyPath="yes" Source="plugins2\qplayex\Setup\Uninstall.reg" />
+        </Component>
+        <Component Id="UnQPlayEx_Dialog.REG" Guid="{BA9C99CF-E69C-4098-918C-C10495CD779B}">
+          <File Id="UnQPlayEx_Dialog.REG" Name="UnQPlayEx_Dialog.REG" KeyPath="yes" Source="plugins2\qplayex\Setup\UnQPlayEx_Dialog.REG" />
+        </Component>
+        <Component Id="UnQPlayEx_Editor.REG" Guid="{87355C5B-A153-40DB-974D-28C3E8E51DC5}">
+          <File Id="UnQPlayEx_Editor.REG" Name="UnQPlayEx_Editor.REG" KeyPath="yes" Source="plugins2\qplayex\Setup\UnQPlayEx_Editor.REG" />
+        </Component>
+        <Component Id="UnQPlayEx_Shell.REG" Guid="{C80DF597-0616-41E5-894F-4577B104C0E5}">
+          <File Id="UnQPlayEx_Shell.REG" Name="UnQPlayEx_Shell.REG" KeyPath="yes" Source="plugins2\qplayex\Setup\UnQPlayEx_Shell.REG" />
+        </Component>
+        <Component Id="UnQPlayEx_Viewer.REG" Guid="{91ACBBA0-685D-424F-98F7-7CCB5940184E}">
+          <File Id="UnQPlayEx_Viewer.REG" Name="UnQPlayEx_Viewer.REG" KeyPath="yes" Source="plugins2\qplayex\Setup\UnQPlayEx_Viewer.REG" />
+        </Component>
+      </Directory>
+      <Directory Id="engine" Name="engine">
+        <Component Id="bass.dll_2" Guid="{CE665070-C43A-4BF9-8376-74BCDE083094}">
+          <File Id="bass.dll_2" Name="bass.dll" KeyPath="yes" Source="plugins2\qplayex\engine\bass.dll" />
+        </Component>
+      </Directory>
+      <Directory Id="plugins_3" Name="plugins">
+        <Component Id="basscd.inp" Guid="{89DBEEA6-2EF1-42F3-AA57-895BFCFFBB1D}">
+          <File Id="basscd.inp" Name="basscd.inp" KeyPath="yes" Source="plugins2\qplayex\plugins\basscd.inp" />
+        </Component>
+        <Component Id="bassflac.inp" Guid="{A0B288C4-6819-40CD-A32B-00C56609CF25}">
+          <File Id="bassflac.inp" Name="bassflac.inp" KeyPath="yes" Source="plugins2\qplayex\plugins\bassflac.inp" />
+        </Component>
+        <Component Id="bassmidi.inp" Guid="{D6D34FC4-421D-4485-BE69-B0C1B4B9BE81}">
+          <File Id="bassmidi.inp" Name="bassmidi.inp" KeyPath="yes" Source="plugins2\qplayex\plugins\bassmidi.inp" />
+        </Component>
+        <Component Id="basswma.inp" Guid="{E0970EDA-8C77-4D02-974D-903E64AB05D2}">
+          <File Id="basswma.inp" Name="basswma.inp" KeyPath="yes" Source="plugins2\qplayex\plugins\basswma.inp" />
+        </Component>
+        <Component Id="basswv.inp" Guid="{4CBD4205-86CE-4C39-96FD-1C194D563A71}">
+          <File Id="basswv.inp" Name="basswv.inp" KeyPath="yes" Source="plugins2\qplayex\plugins\basswv.inp" />
+        </Component>
+        <Component Id="bass_aac.inp" Guid="{94220121-486A-4E97-AF0A-7B2E60812975}">
+          <File Id="bass_aac.inp" Name="bass_aac.inp" KeyPath="yes" Source="plugins2\qplayex\plugins\bass_aac.inp" />
+        </Component>
+        <Component Id="bass_ac3.inp" Guid="{F1DC01DF-D8D8-4264-B8C1-DAFE2DF2FB25}">
+          <File Id="bass_ac3.inp" Name="bass_ac3.inp" KeyPath="yes" Source="plugins2\qplayex\plugins\bass_ac3.inp" />
+        </Component>
+        <Component Id="bass_alac.inp" Guid="{12FE5977-C64B-4437-A3F3-B266E459E22F}">
+          <File Id="bass_alac.inp" Name="bass_alac.inp" KeyPath="yes" Source="plugins2\qplayex\plugins\bass_alac.inp" />
+        </Component>
+        <Component Id="bass_ape.inp" Guid="{56720989-33A4-4A30-A85D-8562D7ECF15D}">
+          <File Id="bass_ape.inp" Name="bass_ape.inp" KeyPath="yes" Source="plugins2\qplayex\plugins\bass_ape.inp" />
+        </Component>
+        <Component Id="bass_mpc.inp" Guid="{763EE4D2-E489-4A7F-BE79-6D3FC93EB520}">
+          <File Id="bass_mpc.inp" Name="bass_mpc.inp" KeyPath="yes" Source="plugins2\qplayex\plugins\bass_mpc.inp" />
+        </Component>
+      </Directory>
+      <Directory Id="waplugins" Name="waplugins">
+        <Component Id="in_nez.ini" Guid="{E3EC7706-1389-4097-A459-070A8FDBBDE9}">
+          <File Id="in_nez.ini" Name="in_nez.ini" KeyPath="yes" Source="plugins2\qplayex\waplugins\in_nez.ini" />
+        </Component>
+        <Component Id="in_nez.inp" Guid="{C194A3C7-CC98-4F8A-B628-62837C43B6E9}">
+          <File Id="in_nez.inp" Name="in_nez.inp" KeyPath="yes" Source="plugins2\qplayex\waplugins\in_nez.inp" />
+        </Component>
+        <Component Id="in_v2m.inp" Guid="{BD3BB5D1-8964-4512-AF61-6F45E3C168AD}">
+          <File Id="in_v2m.inp" Name="in_v2m.inp" KeyPath="yes" Source="plugins2\qplayex\waplugins\in_v2m.inp" />
+        </Component>
+        <Component Id="in_ym.inp" Guid="{8BE03539-D1DB-4328-813E-5DBDDF52F462}">
+          <File Id="in_ym.inp" Name="in_ym.inp" KeyPath="yes" Source="plugins2\qplayex\waplugins\in_ym.inp" />
+        </Component>
+        <Component Id="plugin.ini" Guid="{489F52C6-DCDE-47D0-8DB7-1CE10E845FF7}">
+          <File Id="plugin.ini" Name="plugin.ini" KeyPath="yes" Source="plugins2\qplayex\waplugins\plugin.ini" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Directory Id="torrent" Name="torrent">
+      <Component Id="History.txt_10" Guid="{0E5C16DA-A8EA-44DE-BA3E-3D890AD8CA0D}">
+        <File Id="History.txt_10" Name="History.txt" KeyPath="yes" Source="plugins2\torrent\History.txt" />
+      </Component>
+      <Component Id="ReadMe.txt_12" Guid="{D3E3DE01-BCF5-44B6-9329-F114AB7A4BF7}">
+        <File Id="ReadMe.txt_12" Name="ReadMe.txt" KeyPath="yes" Source="plugins2\torrent\ReadMe.txt" />
+      </Component>
+      <Component Id="Torrent.hlf" Guid="{EED71EEC-5608-4A4D-9254-94CEECE95F32}">
+        <File Id="Torrent.hlf" Name="Torrent.hlf" KeyPath="yes" Source="plugins2\torrent\Torrent.hlf" />
+      </Component>
+      <Component Id="TorrentEng.lng" Guid="{2F0FE4B7-6862-4DA6-B960-08CF640508A9}">
+        <File Id="TorrentEng.lng" Name="TorrentEng.lng" KeyPath="yes" Source="plugins2\torrent\TorrentEng.lng" />
+      </Component>
+      <Component Id="TorrentU.dll" Guid="{B99D969F-B10E-4EBA-8C2A-93DB62AA4EA8}">
+        <File Id="TorrentU.dll" Name="TorrentU.dll" KeyPath="yes" Source="plugins2\torrent\TorrentU.dll" />
+      </Component>
+    </Directory>
+    <Directory Id="ucharmap" Name="ucharmap">
+      <Component Id="file_id.diz_19" Guid="{180089CF-65F4-4091-86B2-A2A0364CB60A}">
+        <File Id="file_id.diz_19" Name="file_id.diz" KeyPath="yes" Source="plugins2\ucharmap\file_id.diz" />
+      </Component>
+      <Component Id="GroupsList.txt" Guid="{844B6B88-E739-4060-951C-0A7C6D386593}">
+        <File Id="GroupsList.txt" Name="GroupsList.txt" KeyPath="yes" Source="plugins2\ucharmap\GroupsList.txt" />
+      </Component>
+      <Component Id="History.txt_11" Guid="{6954125B-161B-4EEE-AEFA-62DDE56C1604}">
+        <File Id="History.txt_11" Name="History.txt" KeyPath="yes" Source="plugins2\ucharmap\History.txt" />
+      </Component>
+      <Component Id="Settings.reg_6" Guid="{9346D0D0-C8A6-410E-99A2-70AA21BA1210}">
+        <File Id="Settings.reg_6" Name="Settings.reg" KeyPath="yes" Source="plugins2\ucharmap\Settings.reg" />
+      </Component>
+      <Component Id="UCharMap.dll" Guid="{6A61D7B6-D7FF-49F9-BCBF-8AC3BF3B7F7C}">
+        <File Id="UCharMap.dll" Name="UCharMap.dll" KeyPath="yes" Source="plugins2\ucharmap\UCharMap.dll" />
+      </Component>
+      <Component Id="UCharMapEng.lng" Guid="{D26A0B75-7326-44A9-83AC-26A460F48034}">
+        <File Id="UCharMapEng.lng" Name="UCharMapEng.lng" KeyPath="yes" Source="plugins2\ucharmap\UCharMapEng.lng" />
+      </Component>
+      <Component Id="UCharMapRus.lng" Guid="{96A7A66D-31DB-4663-8732-27F8EEE4F8AB}">
+        <File Id="UCharMapRus.lng" Name="UCharMapRus.lng" KeyPath="yes" Source="plugins2\ucharmap\UCharMapRus.lng" />
+      </Component>
+    </Directory>
+    <Directory Id="yac" Name="yac">
+      <Component Id="changelog_19" Guid="{12CACFAA-01AA-4B6B-B165-E4E92F167E8F}">
+        <File Id="changelog_19" Name="changelog" KeyPath="yes" Source="plugins2\yac\changelog" />
+      </Component>
+      <Component Id="readme_2" Guid="{DBB2EF04-C748-45D1-9A21-04FD62AF7A94}">
+        <File Id="readme_2" Name="readme" KeyPath="yes" Source="plugins2\yac\readme" />
+      </Component>
+      <Component Id="setmacros.cmd" Guid="{43227558-91BC-4214-B724-239E1626A8E0}">
+        <File Id="setmacros.cmd" Name="setmacros.cmd" KeyPath="yes" Source="plugins2\yac\setmacros.cmd" />
+      </Component>
+      <Component Id="yac32W.dll" Guid="{835234C2-C093-43D5-B666-20F163693F9B}">
+        <File Id="yac32W.dll" Name="yac32W.dll" KeyPath="yes" Source="plugins2\yac\yac32W.dll" />
+      </Component>
+      <Component Id="yac_en.hlf" Guid="{E16117AE-54D4-4770-A79B-D6289841C7F6}">
+        <File Id="yac_en.hlf" Name="yac_en.hlf" KeyPath="yes" Source="plugins2\yac\yac_en.hlf" />
+      </Component>
+      <Component Id="yac_en.lng" Guid="{81AF6B9F-5107-4F0C-95EA-528D889D6567}">
+        <File Id="yac_en.lng" Name="yac_en.lng" KeyPath="yes" Source="plugins2\yac\yac_en.lng" />
+      </Component>
+      <Component Id="yac_ru.hlf" Guid="{CB156D19-6F5A-4379-A0E0-9C1C14B91086}">
+        <File Id="yac_ru.hlf" Name="yac_ru.hlf" KeyPath="yes" Source="plugins2\yac\yac_ru.hlf" />
+      </Component>
+      <Component Id="yac_ru.lng" Guid="{0B1A8589-DEE1-4D6D-8F4A-83F6DEACA8AB}">
+        <File Id="yac_ru.lng" Name="yac_ru.lng" KeyPath="yes" Source="plugins2\yac\yac_ru.lng" />
+      </Component>
+      <Directory Id="context" Name="context">
+        <Component Id="cl.reg" Guid="{152CF909-F3AA-4121-B22F-263E58C81566}">
+          <File Id="cl.reg" Name="cl.reg" KeyPath="yes" Source="plugins2\yac\context\cl.reg" />
+        </Component>
+        <Component Id="farcmds.reg" Guid="{3D51B9BB-C901-47DF-8E20-7A7D6F4B3519}">
+          <File Id="farcmds.reg" Name="farcmds.reg" KeyPath="yes" Source="plugins2\yac\context\farcmds.reg" />
+        </Component>
+        <Component Id="help.reg" Guid="{261D69AD-7279-4AEC-A6D7-94D9AEFE93E1}">
+          <File Id="help.reg" Name="help.reg" KeyPath="yes" Source="plugins2\yac\context\help.reg" />
+        </Component>
+        <Component Id="net.reg" Guid="{3CB99E89-2946-4686-9B9C-25D3E824AAEE}">
+          <File Id="net.reg" Name="net.reg" KeyPath="yes" Source="plugins2\yac\context\net.reg" />
+        </Component>
+        <Component Id="reg.reg" Guid="{D641AE89-70D0-4755-990A-0356D249F914}">
+          <File Id="reg.reg" Name="reg.reg" KeyPath="yes" Source="plugins2\yac\context\reg.reg" />
+        </Component>
+        <Component Id="svn.reg" Guid="{0E89FFF9-71E9-42BA-8747-6B2D5DC348E4}">
+          <File Id="svn.reg" Name="svn.reg" KeyPath="yes" Source="plugins2\yac\context\svn.reg" />
+        </Component>
+      </Directory>
+    </Directory>
   </Directory>
 </Include>

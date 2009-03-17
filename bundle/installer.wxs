@@ -3,7 +3,7 @@
 <?define Manufacturer="Eugene Roshal & FAR Group" ?>
 <?define UpgradeCode="45ab8d55-86a1-44f1-8e0a-1890fa69ba2b" ?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="*" Language="1033" Name="$(var.Product)" Version="$(var.Version)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
+  <Product Id="*" Language="1033" Codepage="1251" Name="$(var.Product)" Version="$(var.Version)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
     <Package Id="*" Platform="$(var.Platform)" Compressed="yes" Manufacturer="$(var.Manufacturer)" Description="$(var.Product)" InstallerVersion="150"/>
     <Property Id="INSTALLDIR">
       <RegistrySearch Id="InstallDir" Root="HKLM" Key="Software\Far2" Name="InstallDir" Type="raw"/>

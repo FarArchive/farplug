@@ -22,6 +22,6 @@ all:
   cd ..\ftp
   nmake -f makefile_vc MP=/MP
   cd ..\..
-  cl -nologo -O1 -GS- -EHsc installer\custom.cpp -link -dll -out:CustomActions.dll -export:UpdateFeatureState -export:Optimize msi.lib imagehlp.lib
+  cl -nologo -O1 -EHsc installer\custom.cpp -link -dll -out:CustomActions.dll -export:UpdateFeatureState -export:Optimize msi.lib imagehlp.lib
   candle -nologo -Iinstaller -dSuffix=$(suffix) -dPlatform=$(platform) -dVersion=$(version) installer\installer.wxs installer\MyWixUI_FeatureTree.wxs
-  light -nologo -ext WixUIExtension -cultures:en-us -sice:ICE61 -spdb -sval -dcl:high -dWixUIBannerBmp=installer\banner.bmp -dWixUIDialogBmp=installer\dialog.bmp -out far_$(version)$(distrsuffix)_bundle.msi installer.wixobj MyWixUI_FeatureTree.wixobj
+  light -nologo -ext WixUIExtension -cultures:en-us -spdb -sval -dcl:high -dWixUIBannerBmp=installer\banner.bmp -dWixUIDialogBmp=installer\dialog.bmp -out far_$(version)$(distrsuffix)_bundle.msi installer.wixobj MyWixUI_FeatureTree.wixobj

@@ -2,6 +2,7 @@
 #include <msiquery.h>
 #include <imagehlp.h>
 
+#include <algorithm>
 #include <list>
 #include <string>
 using namespace std;
@@ -90,9 +91,41 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("UnInstall", "FExcept");
   UPDATE_FEATURE("wmexplorer", "Russian");
   UPDATE_FEATURE("wmexplorer", "FExcept");
+  UPDATE_FEATURE("FarHints", "Russian");
+  UPDATE_FEATURE("FarHintsCursors", "Russian");
+  UPDATE_FEATURE("FarHintsFolders", "Russian");
+  UPDATE_FEATURE("FarHintsImage", "Russian");
+  UPDATE_FEATURE("FarHintsMP3", "Russian");
+  UPDATE_FEATURE("FarHintsProcess", "Russian");
+  UPDATE_FEATURE("FarHintsVerInfo", "Russian");
+  UPDATE_FEATURE("FontMan", "Russian");
+  UPDATE_FEATURE("MoreHistory", "Russian");
+  UPDATE_FEATURE("Noisy", "Russian");
+  UPDATE_FEATURE("Opera", "Russian");
+  UPDATE_FEATURE("qPlayEx", "Russian");
+  UPDATE_FEATURE("UCharMap", "Russian");
+  UPDATE_FEATURE("yac", "Russian");
   return ERROR_SUCCESS;
 }
 
+const char* dll_exclude[] = {
+  "bass.dll",
+  "bass_aac.inp",
+  "bass_ac3.inp",
+  "bass_alac.inp",
+  "bass_ape.inp",
+  "bass_mpc.inp",
+  "basscd.inp",
+  "bassflac.inp",
+  "bassmidi.inp",
+  "basswma.inp",
+  "basswv.inp",
+  "tags.dll",
+};
+
+bool cmp(const char* s1, const char* s2) {
+  return stricmp(s1, s2) < 0;
+}
 
 bool check_dll(const string& file_name) {
   LOADED_IMAGE* image = ImageLoad(file_name.c_str(), "");
@@ -112,7 +145,9 @@ void gen_dll_list(const string& path, list<string>& dll_list) {
         gen_dll_list(file_name, dll_list);
       }
       else {
-        if (check_dll(file_name)) dll_list.push_back(file_name);
+        if (!binary_search(dll_exclude, dll_exclude + ARRAYSIZE(dll_exclude), find_data.cFileName, cmp)) {
+          if (check_dll(file_name)) dll_list.push_back(file_name);
+        }
       }
     }
     if (!FindNextFile(h_find, &find_data)) break;
