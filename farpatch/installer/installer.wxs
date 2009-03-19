@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!--?include defines.wxi ?-->
 <?define Product="FAR Manager $(var.Version)" ?>
 <?define Manufacturer="Eugene Roshal & FAR Group" ?>
 <?define UpgradeCode="45ab8d55-86a1-44f1-8e0a-1890fa69ba2b" ?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="*" Language="1033" Name="$(var.Product)" Version="$(var.Version)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
+  <Product Id="*" Language="1033" Codepage="1251" Name="$(var.Product)" Version="$(var.Version)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
     <Package Id="*" Platform="$(var.Platform)" Compressed="yes" Manufacturer="$(var.Manufacturer)" Description="$(var.Product)" InstallerVersion="150"/>
     <Property Id="INSTALLDIR">
       <RegistrySearch Id="InstallDir" Root="HKLM" Key="Software\Far2" Name="InstallDir" Type="raw"/>
     </Property>
     <Media Id="1" Cabinet="far.cab" EmbedCab="yes"/>
+    <Condition Message="$(var.Product) requires Windows 2000 or above."><![CDATA[NOT Version9X AND (VersionNT>=500)]]></Condition>
     <Binary Id="CustomActions.dll" SourceFile="CustomActions.dll"/>
     <CustomAction Id="UpdateFeatureState" BinaryKey="CustomActions.dll" DllEntry="UpdateFeatureState"/>
     <CustomAction Id="Optimize" BinaryKey="CustomActions.dll" DllEntry="Optimize" />
@@ -30,6 +30,9 @@
           <Component Id="FStd_trap.log" Guid="4b82fe4f-1cc0-4a5c-b9ec-bd11449b6b8a">
             <RemoveFile Id="FStd_trap.log" Name="FStd_trap.log" On="uninstall"/>
           </Component>
+          <Component Id="ClearPluginsCache" Guid="cfc3ab7b-fecc-4fce-b178-98f82afb9bac">
+            <RemoveRegistryKey Root="HKCU" Key="Software\Far2\PluginsCache" Action="removeOnInstall"/>
+          </Component>
         </Directory>
       </Directory>
     </Directory>
@@ -40,7 +43,7 @@
     <InstallExecuteSequence>
       <Custom Action="UpdateFeatureState" After="CostFinalize"/>
       <Custom Action="Optimize" After="InstallFinalize"/>
-      <RemoveExistingProducts After="Optimize"/>
+      <RemoveExistingProducts Before="InstallInitialize"/>
     </InstallExecuteSequence>
     <UIRef Id="MyWixUI_FeatureTree"/>
     <UIRef Id="WixUI_ErrorProgressText"/>

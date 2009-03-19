@@ -3,6 +3,7 @@
   <Feature Id="Complete" Level="1" Title="FAR Manager" Display="expand" Absent="disallow" AllowAdvertise="no" ConfigurableDirectory="INSTALLDIR">
     <Feature Id="Far" Level="1" Title="Base Files" Absent="disallow" AllowAdvertise="no" Description="FAR Manager executable, English help and language file">
       <ComponentRef Id="InstallDir" />
+      <ComponentRef Id="ClearPluginsCache" />
       <ComponentRef Id="ClearPluginsCache.bat" />
       <ComponentRef Id="Far.exe" />
       <ComponentRef Id="FarEng.hlf" />
