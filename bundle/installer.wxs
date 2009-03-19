@@ -43,7 +43,7 @@
     <InstallExecuteSequence>
       <Custom Action="UpdateFeatureState" After="CostFinalize"/>
       <Custom Action="Optimize" After="InstallFinalize"/>
-      <RemoveExistingProducts After="Optimize"/>
+      <RemoveExistingProducts Before="InstallInitialize"/>
     </InstallExecuteSequence>
     <UIRef Id="MyWixUI_FeatureTree"/>
     <UIRef Id="WixUI_ErrorProgressText"/>
