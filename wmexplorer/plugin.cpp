@@ -362,7 +362,7 @@ int WINAPI FAR_EXPORT(GetFindData)(HANDLE hPlugin, struct PluginPanelItem **pPan
     plugin->file_lists += file_list;
     *pPanelItem = (PluginPanelItem*) plugin->file_lists.last().data();
     *pItemsNumber = plugin->file_lists.last().size();
-    NOFAIL(refresh_system_info(plugin));
+    if (!(OpMode & OPM_FIND)) NOFAIL(refresh_system_info(plugin));
     return TRUE;
   }
   HANDLE_ERROR(FALSE, TRUE);
