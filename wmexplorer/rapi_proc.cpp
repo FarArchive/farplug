@@ -1058,10 +1058,7 @@ void find_real_file_path(FilePath& fp, IRAPISession* session) {
 bool dir_exists(const UnicodeString& path) {
   WIN32_FIND_DATAW find_data;
   HANDLE h_find = FindFirstFileW(long_path(path).data(), &find_data);
-  if (h_find == INVALID_HANDLE_VALUE) {
-    if ((GetLastError() == ERROR_NO_MORE_FILES) || (GetLastError() == ERROR_PATH_NOT_FOUND) || (GetLastError() == ERROR_FILE_NOT_FOUND)) return false;
-    CHECK_API(false);
-  }
+  if (h_find == INVALID_HANDLE_VALUE) return false;
   VERIFY(FindClose(h_find) != 0);
   return IS_DIR(find_data);
 }
@@ -1069,10 +1066,7 @@ bool dir_exists(const UnicodeString& path) {
 bool dir_exists(const UnicodeString& path, IRAPISession* session) {
   CE_FIND_DATA find_data;
   HANDLE h_find = RAPI(CeFindFirstFile(path.data(), &find_data));
-  if (h_find == INVALID_HANDLE_VALUE) {
-    if ((RAPI(CeGetLastError()) == ERROR_NO_MORE_FILES) || (RAPI(CeGetLastError()) == ERROR_PATH_NOT_FOUND) || (RAPI(CeGetLastError()) == ERROR_FILE_NOT_FOUND)) return false;
-    CHECK_RAPI(false);
-  }
+  if (h_find == INVALID_HANDLE_VALUE) return false;
   VERIFY(RAPI(CeFindClose(h_find)) != 0);
   return IS_DIR(find_data);
 }
