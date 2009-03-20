@@ -33,6 +33,9 @@
           <Component Id="ClearPluginsCache" Guid="cfc3ab7b-fecc-4fce-b178-98f82afb9bac">
             <RemoveRegistryKey Root="HKCU" Key="Software\Far2\PluginsCache" Action="removeOnInstall"/>
           </Component>
+          <Component Id="ConMan.lnk" Guid="{01f85c2c-9f1d-4d93-8465-833a85382373}">
+            <Shortcut Id="ConMan.lnk" Name="ConMan.lnk" Target="[INSTALLDIR]\ConEmu.exe" Arguments="/ConMan /cmd Far" WorkingDirectory="INSTALLDIR"/>
+          </Component>
         </Directory>
       </Directory>
     </Directory>

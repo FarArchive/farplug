@@ -75,6 +75,43 @@
         <ComponentRef Id="FarHun.lng" />
       </Feature>
     </Feature>
+    <Feature Id="ConEmu" Level="2" Title="ConEmu" AllowAdvertise="no" Description="Console emulator">
+      <ComponentRef Id="ConEmu.exe" />
+      <Feature Id="DocsConEmu" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="About_ConEmu.txt" />
+        <ComponentRef Id="FAQ_ConEmu.txt" />
+        <ComponentRef Id="License_ConEmu.txt" />
+        <ComponentRef Id="Settings_ConEmu.reg" />
+        <ComponentRef Id="WhatsNew_ConEmu.txt" />
+      </Feature>
+      <ComponentRef Id="AltEnter.reg" />
+      <ComponentRef Id="AltEnter_ANSI.reg" />
+      <ComponentRef Id="ConEmu.dll" />
+      <ComponentRef Id="ConEmuPlugin_en.lng" />
+      <ComponentRef Id="F14.reg" />
+      <ComponentRef Id="F14_ANSI.reg" />
+      <Feature Id="ConEmuRussian" Level="2" Display="hidden" AllowAdvertise="no">
+        <ComponentRef Id="ConEmuPlugin_ru.lng" />
+      </Feature>
+      <Feature Id="ConMan" Level="2" Display="expand" Title="ConMan" AllowAdvertise="no" Description="Console manager">
+        <ComponentRef Id="conman.dll" />
+        <ComponentRef Id="hook.dll" />
+        <ComponentRef Id="infis.dll" />
+        <ComponentRef Id="alt_key.reg" />
+        <ComponentRef Id="changelog.txt" />
+        <ComponentRef Id="config.hta" />
+        <ComponentRef Id="ctrlalt.reg" />
+        <ComponentRef Id="default.reg" />
+        <ComponentRef Id="License.txt" />
+        <ComponentRef Id="print_codes.exe" />
+        <ComponentRef Id="ReadMe.eng_2" />
+        <ComponentRef Id="win_key.reg" />
+        <ComponentRef Id="ConMan.lnk" />
+        <Feature Id="ConManRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="ReadMe.rus_3" />
+        </Feature>
+      </Feature>
+    </Feature>
     <Feature Id="Plugins" Level="1" Display="expand" Title="Plugins" AllowAdvertise="no" Description="Standard plugins">
       <Feature Id="Editor" Level="1" Title="Editor" AllowAdvertise="no" Description="Editor plugins">
         <Feature Id="Align" Level="1" Title="Align" AllowAdvertise="no" Description="Text block formatter">

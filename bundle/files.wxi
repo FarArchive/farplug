@@ -63,6 +63,18 @@
   <Component Id="SaveSettings.bat" Guid="{5E825C9F-ADDA-4B51-AF00-5AF2350711A3}">
     <File Id="SaveSettings.bat" Name="SaveSettings.bat" KeyPath="yes" Source="docs\SaveSettings.bat" />
   </Component>
+  <Component Id="ConEmu.exe" Guid="{CFC879BD-2BCB-4B72-B6E1-D63CC6EB910B}">
+    <File Id="ConEmu.exe" Name="ConEmu.exe" KeyPath="yes" Source="plugins2\conemu\ConEmu.exe" />
+  </Component>
+  <Component Id="conman.dll" Guid="{C68456C2-098C-4157-9597-74469990FFD2}">
+    <File Id="conman.dll" Name="conman.dll" KeyPath="yes" Source="plugins2\conman\conman.dll" />
+  </Component>
+  <Component Id="hook.dll" Guid="{B6A0F5B9-0C01-4745-9EDE-4EED99A32866}">
+    <File Id="hook.dll" Name="hook.dll" KeyPath="yes" Source="plugins2\conman\hook.dll" />
+  </Component>
+  <Component Id="infis.dll" Guid="{6CFE36E1-0AAE-4055-9D00-E81EA3F6F654}">
+    <File Id="infis.dll" Name="infis.dll" KeyPath="yes" Source="plugins2\conman\infis.dll" />
+  </Component>
   <Directory Id="docs" Name="docs">
     <Directory Id="eng" Name="eng">
       <Component Id="Arc.Support.txt_1" Guid="{7EDCFDD7-2B04-4218-B231-5B52218B88DB}">
@@ -145,6 +157,55 @@
         <File Id="WhatsNew.txt_2" Name="WhatsNew.txt" KeyPath="yes" Source="docs\RUS\WhatsNew.txt" />
       </Component>
     </Directory>
+    <Directory Id="conemu_1" Name="conemu">
+      <Component Id="About_ConEmu.txt" Guid="{8CB995E3-BAD9-45EB-BE03-B661116F32E7}">
+        <File Id="About_ConEmu.txt" Name="About-ConEmu.txt" KeyPath="yes" Source="plugins2\conemu\About-ConEmu.txt" />
+      </Component>
+      <Component Id="FAQ_ConEmu.txt" Guid="{56828627-96B0-483A-9F04-E780864B59E5}">
+        <File Id="FAQ_ConEmu.txt" Name="FAQ-ConEmu.txt" KeyPath="yes" Source="plugins2\conemu\FAQ-ConEmu.txt" />
+      </Component>
+      <Component Id="License_ConEmu.txt" Guid="{8CC72804-4B2B-40D6-B8F7-36FD6C854FFA}">
+        <File Id="License_ConEmu.txt" Name="License-ConEmu.txt" KeyPath="yes" Source="plugins2\conemu\License-ConEmu.txt" />
+      </Component>
+      <Component Id="Settings_ConEmu.reg" Guid="{674C89C5-099F-4170-A4B0-FF612F8F3627}">
+        <File Id="Settings_ConEmu.reg" Name="Settings-ConEmu.reg" KeyPath="yes" Source="plugins2\conemu\Settings-ConEmu.reg" />
+      </Component>
+      <Component Id="WhatsNew_ConEmu.txt" Guid="{ABFC47E9-B333-40CD-809F-2EF3E789BC1B}">
+        <File Id="WhatsNew_ConEmu.txt" Name="WhatsNew-ConEmu.txt" KeyPath="yes" Source="plugins2\conemu\WhatsNew-ConEmu.txt" />
+      </Component>
+    </Directory>
+  </Directory>
+  <Directory Id="conman" Name="conman">
+    <Component Id="alt_key.reg" Guid="{54896DBB-2C70-4E6F-AD0A-7F9B4E4344D3}">
+      <File Id="alt_key.reg" Name="alt_key.reg" KeyPath="yes" Source="plugins2\conman\alt_key.reg" />
+    </Component>
+    <Component Id="changelog.txt" Guid="{EA331469-7A43-4434-992E-E4855E1C7E73}">
+      <File Id="changelog.txt" Name="changelog.txt" KeyPath="yes" Source="plugins2\conman\changelog.txt" />
+    </Component>
+    <Component Id="config.hta" Guid="{A336EF04-06E0-4CED-AA5C-132E2CCF9FEF}">
+      <File Id="config.hta" Name="config.hta" KeyPath="yes" Source="plugins2\conman\config.hta" />
+    </Component>
+    <Component Id="ctrlalt.reg" Guid="{AA11C95A-0568-4BDC-8237-D68A7435E6CA}">
+      <File Id="ctrlalt.reg" Name="ctrlalt.reg" KeyPath="yes" Source="plugins2\conman\ctrlalt.reg" />
+    </Component>
+    <Component Id="default.reg" Guid="{2A9EDE09-E80C-431A-9376-6ABE03D1A6CD}">
+      <File Id="default.reg" Name="default.reg" KeyPath="yes" Source="plugins2\conman\default.reg" />
+    </Component>
+    <Component Id="License.txt" Guid="{D6040161-09D5-416A-8637-41ACA3A67EE7}">
+      <File Id="License.txt" Name="License.txt" KeyPath="yes" Source="plugins2\conman\License.txt" />
+    </Component>
+    <Component Id="print_codes.exe" Guid="{3382F552-4D77-4B34-A479-CB28A45BB05A}">
+      <File Id="print_codes.exe" Name="print_codes.exe" KeyPath="yes" Source="plugins2\conman\print_codes.exe" />
+    </Component>
+    <Component Id="ReadMe.eng_2" Guid="{3B3AD788-1BB6-44B5-9F10-5A36D8BE9F95}">
+      <File Id="ReadMe.eng_2" Name="ReadMe.eng" KeyPath="yes" Source="plugins2\conman\ReadMe.eng" />
+    </Component>
+    <Component Id="ReadMe.rus_3" Guid="{B5886EF7-FCD5-4C88-A127-264B04E57F01}">
+      <File Id="ReadMe.rus_3" Name="ReadMe.rus" KeyPath="yes" Source="plugins2\conman\ReadMe.rus" />
+    </Component>
+    <Component Id="win_key.reg" Guid="{B518E183-B812-4C92-9CC8-497219269203}">
+      <File Id="win_key.reg" Name="win_key.reg" KeyPath="yes" Source="plugins2\conman\win_key.reg" />
+    </Component>
   </Directory>
   <Directory Id="plugins" Name="plugins">
     <Directory Id="align" Name="align">
@@ -1692,6 +1753,29 @@
           <File Id="svn.reg" Name="svn.reg" KeyPath="yes" Source="plugins2\yac\context\svn.reg" />
         </Component>
       </Directory>
+    </Directory>
+    <Directory Id="conemu_2" Name="conemu">
+      <Component Id="AltEnter.reg" Guid="{5D40E49A-A836-49B2-A24B-205CE6C15596}">
+        <File Id="AltEnter.reg" Name="AltEnter.reg" KeyPath="yes" Source="plugins2\conemu\plugins\ConEmu\AltEnter.reg" />
+      </Component>
+      <Component Id="AltEnter_ANSI.reg" Guid="{CADB50FA-24C0-409B-A88E-A4557BD30DC2}">
+        <File Id="AltEnter_ANSI.reg" Name="AltEnter_ANSI.reg" KeyPath="yes" Source="plugins2\conemu\plugins\ConEmu\AltEnter_ANSI.reg" />
+      </Component>
+      <Component Id="ConEmu.dll" Guid="{96E7EE7C-711B-4C07-8454-8D136DD8EEB3}">
+        <File Id="ConEmu.dll" Name="ConEmu.dll" KeyPath="yes" Source="plugins2\conemu\plugins\ConEmu\ConEmu.dll" />
+      </Component>
+      <Component Id="ConEmuPlugin_en.lng" Guid="{B1B5F857-F5E6-4CC6-B63C-938948640072}">
+        <File Id="ConEmuPlugin_en.lng" Name="ConEmuPlugin_en.lng" KeyPath="yes" Source="plugins2\conemu\plugins\ConEmu\ConEmuPlugin_en.lng" />
+      </Component>
+      <Component Id="ConEmuPlugin_ru.lng" Guid="{B17DE9A1-2EAC-4DC2-BA5E-3BF02900D5B1}">
+        <File Id="ConEmuPlugin_ru.lng" Name="ConEmuPlugin_ru.lng" KeyPath="yes" Source="plugins2\conemu\plugins\ConEmu\ConEmuPlugin_ru.lng" />
+      </Component>
+      <Component Id="F14.reg" Guid="{5DFE7754-779C-4330-95DF-0E8107DBBCB7}">
+        <File Id="F14.reg" Name="F14.reg" KeyPath="yes" Source="plugins2\conemu\plugins\ConEmu\F14.reg" />
+      </Component>
+      <Component Id="F14_ANSI.reg" Guid="{9F3EF3BE-2ADD-4D38-8843-928374D58A78}">
+        <File Id="F14_ANSI.reg" Name="F14_ANSI.reg" KeyPath="yes" Source="plugins2\conemu\plugins\ConEmu\F14_ANSI.reg" />
+      </Component>
     </Directory>
   </Directory>
 </Include>
