@@ -447,6 +447,75 @@
       <Feature Id="_7_ZipFExcept" Level="2" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="_7_ZipFar.map" />
       </Feature>
+      <Feature Id="airbrush" Level="2" Title="AirBrush" AllowAdvertise="no" Description="Fast syntax highlighting">
+        <ComponentRef Id="airbrush.dll" />
+        <ComponentRef Id="airbrush.hlf" />
+        <ComponentRef Id="airbrush.lng" />
+        <ComponentRef Id="file_id.diz_20" />
+        <Feature Id="airbrushFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="airbrush.map" />
+        </Feature>
+        <Feature Id="c.fmt" Level="2" Title="c/c++" AllowAdvertise="no">
+          <ComponentRef Id="c.fmt" />
+          <Feature Id="c.fmtFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="c.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="html.fmt" Level="2" Title="html" AllowAdvertise="no">
+          <ComponentRef Id="html.fmt" />
+          <Feature Id="html.fmtFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="html.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="pas.fmt" Level="2" Title="pascal" AllowAdvertise="no">
+          <ComponentRef Id="pas.fmt" />
+          <Feature Id="pas.fmtFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="pas.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="php.fmt" Level="2" Title="php" AllowAdvertise="no">
+          <ComponentRef Id="php.fmt" />
+          <Feature Id="php.fmtFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="php.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="re2c.fmt" Level="2" Title="re2c" AllowAdvertise="no">
+          <ComponentRef Id="re2c.fmt" />
+          <Feature Id="re2c.fmtFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="re2c.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="sql.fmt" Level="2" Title="sql" AllowAdvertise="no">
+          <ComponentRef Id="sql.fmt" />
+          <Feature Id="sql.fmtFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="sql.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="yacclex.fmt" Level="2" Title="yacclex" AllowAdvertise="no">
+          <ComponentRef Id="yacclex.fmt" />
+          <Feature Id="yacclex.fmtFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="yacclex.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="zcustom.fmt" Level="2" Title="custom" AllowAdvertise="no">
+          <ComponentRef Id="zcustom.fmt" />
+          <ComponentRef Id="syntax" />
+          <ComponentRef Id="asm.syntax" />
+          <ComponentRef Id="cl.syntax" />
+          <ComponentRef Id="cmd.syntax" />
+          <ComponentRef Id="diff.syntax" />
+          <ComponentRef Id="gnuasm.syntax" />
+          <ComponentRef Id="m4.syntax" />
+          <ComponentRef Id="make.syntax" />
+          <ComponentRef Id="ps.syntax" />
+          <ComponentRef Id="rc.syntax" />
+          <ComponentRef Id="sh.syntax" />
+          <ComponentRef Id="xml.syntax" />
+          <Feature Id="zcustom.fmtFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="zcustom.map" />
+          </Feature>
+        </Feature>
+      </Feature>
       <Feature Id="AltHistory" Level="2" Title="AltHistory" AllowAdvertise="no" Description="Alternative history">
         <ComponentRef Id="AltHistory.dll" />
         <ComponentRef Id="AltHistoryEng.lng" />
@@ -463,6 +532,75 @@
         <ComponentRef Id="ReadMeRus.txt" />
         <ComponentRef Id="TechInfoRus.txt" />
         <ComponentRef Id="WhatsNewRus.txt" />
+      </Feature>
+      <Feature Id="bcopy" Level="2" Title="bcopy" AllowAdvertise="no" Description="Background copy">
+        <ComponentRef Id="bcopy.dll" />
+        <ComponentRef Id="bcopy.hlf" />
+        <ComponentRef Id="bcopy.lng" />
+        <ComponentRef Id="bcsvc.exe" />
+        <ComponentRef Id="file_id.diz_21" />
+        <ComponentRef Id="readme.txt_13" />
+        <ComponentRef Id="techinfo.eng.reg" />
+        <ComponentRef Id="BGattrib.cmd" />
+        <ComponentRef Id="BGcopy.cmd" />
+        <ComponentRef Id="BGdelete.cmd" />
+        <ComponentRef Id="BGedit.cmd" />
+        <ComponentRef Id="BGeject.cmd" />
+        <ComponentRef Id="BGexec.cmd" />
+        <ComponentRef Id="BGinfo.cmd" />
+        <ComponentRef Id="BGload.cmd" />
+        <ComponentRef Id="BGmove.cmd" />
+        <ComponentRef Id="BGshowname.cmd" />
+        <ComponentRef Id="BGview.cmd" />
+        <ComponentRef Id="BGwipe.cmd" />
+        <ComponentRef Id="FAR_old_style_Overwrite.cmd" />
+        <ComponentRef Id="FAR_standard_operations.cmd" />
+        <ComponentRef Id="readme.eng.txt_2" />
+        <Feature Id="bcopyRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="bcopyru.hlf" />
+          <ComponentRef Id="bcopyru.lng" />
+          <ComponentRef Id="techinfo.rus.reg_2" />
+          <ComponentRef Id="readme.rus.txt_3" />
+        </Feature>
+        <Feature Id="bcopyFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="bcopy.map" />
+        </Feature>
+      </Feature>
+      <Feature Id="BlockIndent" Level="2" Title="BlockIndent" AllowAdvertise="no" Description="Block indent">
+        <ComponentRef Id="BlockIndent.dll" />
+        <ComponentRef Id="BlockIndentEng.lng" />
+        <ComponentRef Id="COPYING_1" />
+        <ComponentRef Id="file_id.diz_22" />
+        <ComponentRef Id="history.txt_12" />
+        <ComponentRef Id="ReadMe.Eng.txt_3" />
+        <Feature Id="BlockIndentRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="BlockIndentRus.lng" />
+          <ComponentRef Id="ReadMe.Rus.txt_4" />
+        </Feature>
+        <Feature Id="BlockIndentFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="BlockIndent.map" />
+        </Feature>
+      </Feature>
+      <Feature Id="calc" Level="2" Title="Calculator" AllowAdvertise="no" Description="Calculator">
+        <ComponentRef Id="calc.dll" />
+        <ComponentRef Id="calce.hlf" />
+        <ComponentRef Id="calce.lng" />
+        <ComponentRef Id="calcset.csr" />
+        <ComponentRef Id="csr.dtd" />
+        <ComponentRef Id="file_id.diz_23" />
+        <ComponentRef Id="readme.txt_14" />
+        <ComponentRef Id="shotcuts.reg" />
+        <ComponentRef Id="license.txt_2" />
+        <ComponentRef Id="regform.txt_1" />
+        <ComponentRef Id="whatsnew.txt_6" />
+        <Feature Id="calcRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="calcr.hlf" />
+          <ComponentRef Id="calcr.lng" />
+          <ComponentRef Id="readmr.txt" />
+          <ComponentRef Id="license.txt_3" />
+          <ComponentRef Id="regform.txt_2" />
+          <ComponentRef Id="whatsnew.txt_7" />
+        </Feature>
       </Feature>
       <Feature Id="Colorer" Level="2" Title="Colorer" AllowAdvertise="no" Description="Editor syntax highlighting">
         <ComponentRef Id="catalog.xml" />
@@ -507,12 +645,71 @@
       <Feature Id="ColorerFExcept" Level="2" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="colorer.map" />
       </Feature>
+      <Feature Id="dialogtools" Level="2" Title="DialogTools" AllowAdvertise="no" Description="Dialog Tools: Change Case, Open File Dialog, Paste Selection, Show Password, Search, Replace, Undo">
+        <ComponentRef Id="dt.dll" />
+        <ComponentRef Id="dtEng.lng" />
+        <Feature Id="dialogtoolsFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="dt.map" />
+        </Feature>
+      </Feature>
       <Feature Id="DVDPanel" Level="2" Title="DVDPanel" AllowAdvertise="no" Description="Burn CD/DVD using external tools: NeroCmd, ImgBurn">
         <ComponentRef Id="DVDPanel.dll" />
         <ComponentRef Id="DVDPanel.hlf" />
         <ComponentRef Id="History.txt_4" />
         <ComponentRef Id="NeroErrors.txt" />
         <ComponentRef Id="ReadMe.txt_5" />
+      </Feature>
+      <Feature Id="EditCmpl" Level="2" Title="EditCmpl" AllowAdvertise="no" Description="Word completion in editor">
+        <ComponentRef Id="ECmplEng.hlf" />
+        <ComponentRef Id="ECmplEng.lng" />
+        <ComponentRef Id="EditCmpl.dll" />
+        <Feature Id="EditCmplRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="ECmplRus.hlf" />
+          <ComponentRef Id="ECmplRus.lng" />
+        </Feature>
+        <Feature Id="EditCmplFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="EditCmpl.map" />
+        </Feature>
+      </Feature>
+      <Feature Id="esc" Level="2" Title="ESC" AllowAdvertise="no" Description="Editor's settings changer">
+        <ComponentRef Id="COPYING_2" />
+        <ComponentRef Id="esc.dll" />
+        <ComponentRef Id="esc.xml" />
+        <ComponentRef Id="esc_eng.lng" />
+        <ComponentRef Id="File_ID.DIZ_24" />
+        <ComponentRef Id="history.txt_13" />
+        <ComponentRef Id="ReadMe.txt_15" />
+        <ComponentRef Id="uninstallW.reg_1" />
+        <ComponentRef Id="esc_abstract.xml" />
+        <ComponentRef Id="esc_binary.xml" />
+        <ComponentRef Id="esc_message.xml" />
+        <ComponentRef Id="esc_others.xml" />
+        <ComponentRef Id="esc_sources.xml" />
+        <ComponentRef Id="esc_tex.xml" />
+        <ComponentRef Id="esc_text.xml" />
+        <ComponentRef Id="esc_xml.xml" />
+        <Feature Id="escRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="esc_rus.lng" />
+        </Feature>
+        <Feature Id="escUkrainian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="esc_ukr.lng" />
+        </Feature>
+        <Feature Id="escFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="esc.map" />
+        </Feature>
+      </Feature>
+      <Feature Id="esc_tsc_mini" Level="2" Title="ESC-TSC-Mini" AllowAdvertise="no" Description="[ESC-TSC] Minimalistic">
+        <ComponentRef Id="COPYING_3" />
+        <ComponentRef Id="esc_tsc_mini.dll" />
+        <ComponentRef Id="esc_tsc_mini.lng" />
+        <ComponentRef Id="file_id.diz_25" />
+        <ComponentRef Id="history.txt_14" />
+        <ComponentRef Id="installW.reg" />
+        <ComponentRef Id="readme.txt_16" />
+        <ComponentRef Id="uninstallW.reg_2" />
+        <Feature Id="esc_tsc_miniFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="esc_tsc_mini.map" />
+        </Feature>
       </Feature>
       <Feature Id="FarHints" Level="2" Title="FarHints" AllowAdvertise="no" Description="Show various file information (graphical too) using popup hints">
         <ComponentRef Id="FarHints.dll" />
@@ -573,6 +770,39 @@
       <Feature Id="FarHintsRussian" Level="2" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="FarHintsRus.lng" />
       </Feature>
+      <Feature Id="FarMobile" Level="2" Title="FarMobile" AllowAdvertise="no" Description="Mobile Phone Interface">
+        <ComponentRef Id="config.txt" />
+        <ComponentRef Id="FarMobile2.dll" />
+        <ComponentRef Id="FarMobile2Eng.lng" />
+        <ComponentRef Id="File_Id.Diz_26" />
+        <ComponentRef Id="gnapplet.sis" />
+        <ComponentRef Id="History.txt_15" />
+      </Feature>
+      <Feature Id="farspell" Level="2" Title="FarSpell" AllowAdvertise="no" Description="Spell check for editor">
+        <ComponentRef Id="_clean.txt" />
+        <ComponentRef Id="_clean_win9x.reg" />
+        <ComponentRef Id="_clean_winxp.reg" />
+        <ComponentRef Id="cp1125.txt" />
+        <ComponentRef Id="farspell.dll" />
+        <ComponentRef Id="FarSpellEng.hlf" />
+        <ComponentRef Id="FarSpellEng.lng" />
+        <ComponentRef Id="file_id.diz_27" />
+        <ComponentRef Id="history.txt_16" />
+        <ComponentRef Id="TechInfo.txt_3" />
+        <ComponentRef Id="todo.txt" />
+        <ComponentRef Id="WordChars.reg" />
+        <Feature Id="farspellRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FarSpellRus.hlf" />
+          <ComponentRef Id="FarSpellRus.lng" />
+        </Feature>
+        <Feature Id="farspellFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="farspell.map" />
+        </Feature>
+        <Feature Id="RU_EN" Level="2" Title="RU-EN" AllowAdvertise="no" Description="Combined Russian, English dictionary">
+          <ComponentRef Id="Russian_English.aff" />
+          <ComponentRef Id="Russian_English.dic" />
+        </Feature>
+      </Feature>
       <Feature Id="FarSvc" Level="2" Title="FarSvc" AllowAdvertise="no" Description="Service manager">
         <ComponentRef Id="FarSvc.dll" />
         <ComponentRef Id="FILE_ID.DIZ_4" />
@@ -631,6 +861,61 @@
       <Feature Id="FontManRussian" Level="2" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="FontManRus.lng" />
       </Feature>
+      <Feature Id="MailView" Level="2" Title="MailView" AllowAdvertise="no" Description="Mailbox and e-mail message viewer">
+        <ComponentRef Id="COPYING_4" />
+        <ComponentRef Id="file_id.diz_28" />
+        <ComponentRef Id="MailView.dll" />
+        <ComponentRef Id="MailView.ini" />
+        <ComponentRef Id="MailView.tpl" />
+        <ComponentRef Id="MailViewEng.Lng" />
+        <ComponentRef Id="MailViewRus.Hlf" />
+        <ComponentRef Id="ReadMe.Rus.txt_5" />
+        <ComponentRef Id="RFCCharset.reg" />
+        <ComponentRef Id="todo_1" />
+        <ComponentRef Id="WhatsNew.txt_8" />
+        <Feature Id="MailViewRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="MailViewRus.Lng" />
+        </Feature>
+        <Feature Id="MailViewFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="MailView.map" />
+        </Feature>
+        <Feature Id="Folder.mvp" Level="2" Title="Folder" AllowAdvertise="no" Description="Folder with messages">
+          <ComponentRef Id="Folder.mvp" />
+          <Feature Id="Folder.mvpFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Folder.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="oe_dbx.mvp" Level="2" Title="OE" AllowAdvertise="no" Description="Outlook Express DBX 5.0 database">
+          <ComponentRef Id="oe_dbx.mvp" />
+          <Feature Id="oe_dbx.mvpFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="oe_dbx.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="pkt.mvp" Level="2" Title="pkt" AllowAdvertise="no" Description="Fido Packet base">
+          <ComponentRef Id="pkt.mvp" />
+          <Feature Id="pkt.mvpFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="pkt.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="Squish.mvp" Level="2" Title="Squish" AllowAdvertise="no" Description="Squish message base">
+          <ComponentRef Id="Squish.mvp" />
+          <Feature Id="Squish.mvpFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Squish.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="TheBat.mvp" Level="2" Title="The Bat!" AllowAdvertise="no" Description="The Bat! message base">
+          <ComponentRef Id="TheBat.mvp" />
+          <Feature Id="TheBat.mvpFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="TheBat.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="Unix.mvp" Level="2" Title="Unix" AllowAdvertise="no" Description="Unix-style mailbox">
+          <ComponentRef Id="Unix.mvp" />
+          <Feature Id="Unix.mvpFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Unix.map" />
+          </Feature>
+        </Feature>
+      </Feature>
       <Feature Id="MoreHistory" Level="2" Title="MoreHistory" AllowAdvertise="no" Description="Enhanced version of standard folder history">
         <ComponentRef Id="file_id.diz_15" />
         <ComponentRef Id="History.txt_6" />
@@ -682,6 +967,19 @@
         <ComponentRef Id="NoisyRus.lng" />
         <ComponentRef Id="NoisyRus.mnu" />
       </Feature>
+      <Feature Id="ntevent" Level="2" Title="NTEvent" AllowAdvertise="no" Description="List/backup/clear NT Event Logs">
+        <ComponentRef Id="file_id.diz_29" />
+        <ComponentRef Id="ntevent.dll" />
+        <ComponentRef Id="ntevent.hlf" />
+        <ComponentRef Id="ntevent.lng" />
+        <Feature Id="nteventRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="nteventr.hlf" />
+          <ComponentRef Id="nteventr.lng" />
+        </Feature>
+        <Feature Id="nteventFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="ntevent.map" />
+        </Feature>
+      </Feature>
       <Feature Id="ntfsfile" Level="2" Title="NtfsFile" AllowAdvertise="no" Description="NTFS file utilities: show file disk size and structure, manage alternate streams, perform defragmentation and fast search over entire volume">
         <ComponentRef Id="en.hlf" />
         <ComponentRef Id="en.lng" />
@@ -716,6 +1014,48 @@
       <Feature Id="PEDITORRussian" Level="2" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="PEDITRUS.HLF" />
         <ComponentRef Id="PEDITRUS.LNG" />
+      </Feature>
+      <Feature Id="PicViewAdv" Level="2" Title="PicViewAdv" AllowAdvertise="no" Description="Image file viewer">
+        <ComponentRef Id="COPYING_5" />
+        <ComponentRef Id="file_id.diz_30" />
+        <ComponentRef Id="history.txt_17" />
+        <ComponentRef Id="libgfl220.dll" />
+        <ComponentRef Id="PicViewAdv.dll" />
+        <ComponentRef Id="PicViewAdv.lng" />
+        <ComponentRef Id="readme.txt_17" />
+        <Feature Id="PicViewAdvFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="PicViewAdv.map" />
+        </Feature>
+      </Feature>
+      <Feature Id="PPCBrowser" Level="2" Title="PPCBrowser" AllowAdvertise="no" Description="Control Windows Mobile based device via ActiveSync">
+        <ComponentRef Id="PPCBrowser.dll" />
+        <ComponentRef Id="PPCBrowser.hlf" />
+        <ComponentRef Id="PPCBrowserEng.lng" />
+        <ComponentRef Id="ReadMe.txt_18" />
+        <ComponentRef Id="WhatsNew.txt_9" />
+        <Feature Id="PPCBrowserRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="PPCBrowserRus.lng" />
+        </Feature>
+        <Feature Id="control.module" Level="2" Title="Control" AllowAdvertise="no" Description="Direct input from PC keyboard">
+          <ComponentRef Id="control.module" />
+        </Feature>
+        <Feature Id="desktop.module" Level="2" Title="Desktop" AllowAdvertise="no" Description="Desktop screenshot">
+          <ComponentRef Id="desktop.module" />
+        </Feature>
+        <Feature Id="files.module" Level="2" Title="Files" AllowAdvertise="no" Description="Manage files">
+          <ComponentRef Id="files.module" />
+        </Feature>
+        <Feature Id="pim.module" Level="2" Title="PIM" AllowAdvertise="no" Description="Manage tasks, contacts and calendar">
+          <ComponentRef Id="pim.ini" />
+          <ComponentRef Id="pim.module" />
+        </Feature>
+        <Feature Id="registry.module" Level="2" Title="Registry" AllowAdvertise="no" Description="Registry browser">
+          <ComponentRef Id="registry.module" />
+        </Feature>
+        <Feature Id="windows.module" Level="2" Title="Windows" AllowAdvertise="no" Description="Manage windows">
+          <ComponentRef Id="windows.ini" />
+          <ComponentRef Id="windows.module" />
+        </Feature>
       </Feature>
       <Feature Id="qPlayEx" Level="2" Title="qPlayEx" AllowAdvertise="no" Description="Music player">
         <ComponentRef Id="file_id.diz_18" />
@@ -842,6 +1182,47 @@
       </Feature>
       <Feature Id="UnInstallFExcept" Level="2" Display="hidden" AllowAdvertise="no">
         <ComponentRef Id="UnInstall.map" />
+      </Feature>
+      <Feature Id="userman" Level="2" Title="UserMan" AllowAdvertise="no" Description="System user manager">
+        <ComponentRef Id="COPYING_6" />
+        <ComponentRef Id="file_id.diz_31" />
+        <ComponentRef Id="history.txt_18" />
+        <ComponentRef Id="userman.dll" />
+        <ComponentRef Id="userman.hlf" />
+        <ComponentRef Id="userman.lng" />
+        <Feature Id="usermanFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="userman.map" />
+        </Feature>
+      </Feature>
+      <Feature Id="VisRen" Level="2" Title="VisRen" AllowAdvertise="no" Description="Visual rename">
+        <ComponentRef Id="Dialog.nfo" />
+        <ComponentRef Id="pcre.dll" />
+        <ComponentRef Id="PCRE_Syntax.htm" />
+        <ComponentRef Id="Readme.txt_19" />
+        <ComponentRef Id="TechInfo.reg_2" />
+        <ComponentRef Id="VisRen.dll" />
+        <ComponentRef Id="VisRenEng.hlf" />
+        <ComponentRef Id="VisRenEng.lng" />
+        <ComponentRef Id="WhatsNew_Rus.txt" />
+        <Feature Id="VisRenRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="VisRenRus.hlf" />
+          <ComponentRef Id="VisRenRus.lng" />
+        </Feature>
+        <Feature Id="VisRenFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="VisRen.map" />
+        </Feature>
+      </Feature>
+      <Feature Id="Visualizer" Level="2" Title="Visualizer" AllowAdvertise="no" Description="Visualize things like right border, tabs, end of line, cross, etc.">
+        <ComponentRef Id="COPYING_7" />
+        <ComponentRef Id="file_id.diz_32" />
+        <ComponentRef Id="history.txt_19" />
+        <ComponentRef Id="readme.txt_20" />
+        <ComponentRef Id="todo_2" />
+        <ComponentRef Id="Visualizer.dll" />
+        <ComponentRef Id="Visualizer.lng" />
+        <Feature Id="VisualizerFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="Visualizer.map" />
+        </Feature>
       </Feature>
       <Feature Id="wmexplorer" Level="2" Title="WMExplorer" AllowAdvertise="no" Description="Manage files on Windows Mobile based PDA/SmartPhone via ActiveSync">
         <ComponentRef Id="file_id.diz_12" />

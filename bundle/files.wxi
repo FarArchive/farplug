@@ -1777,5 +1777,740 @@
         <File Id="F14_ANSI.reg" Name="F14_ANSI.reg" KeyPath="yes" Source="plugins2\conemu\plugins\ConEmu\F14_ANSI.reg" />
       </Component>
     </Directory>
+    <Directory Id="airbrush" Name="airbrush">
+      <Component Id="airbrush.dll" Guid="{C65577D3-4489-4F37-8BB0-A09775E50D65}">
+        <File Id="airbrush.dll" Name="airbrush.dll" KeyPath="yes" Source="plugins2\airbrush\airbrush.dll" />
+      </Component>
+      <Component Id="airbrush.hlf" Guid="{A2FF2607-3591-4805-A288-989A2F81A7F4}">
+        <File Id="airbrush.hlf" Name="airbrush.hlf" KeyPath="yes" Source="plugins2\airbrush\airbrush.hlf" />
+      </Component>
+      <Component Id="airbrush.lng" Guid="{071B56E4-BE02-46C5-BC8D-2EC560FB2517}">
+        <File Id="airbrush.lng" Name="airbrush.lng" KeyPath="yes" Source="plugins2\airbrush\airbrush.lng" />
+      </Component>
+      <Component Id="airbrush.map" Guid="{E775D48F-F660-4955-A1F9-D0251766F2DD}">
+        <File Id="airbrush.map" Name="airbrush.map" KeyPath="yes" Source="plugins2\airbrush\airbrush.map" />
+      </Component>
+      <Component Id="file_id.diz_20" Guid="{25CDC087-2512-4623-B500-60A3929AD3C1}">
+        <File Id="file_id.diz_20" Name="file_id.diz" KeyPath="yes" Source="plugins2\airbrush\file_id.diz" />
+      </Component>
+      <Directory Id="Formats_2" Name="Formats">
+        <Component Id="c.fmt" Guid="{979BEFA8-302F-4609-B925-FAA28EF22D9F}">
+          <File Id="c.fmt" Name="c.fmt" KeyPath="yes" Source="plugins2\airbrush\Formats\c.fmt" />
+        </Component>
+        <Component Id="c.map" Guid="{FD87C894-1362-49DD-9FE5-1B3CAE504FC5}">
+          <File Id="c.map" Name="c.map" KeyPath="yes" Source="plugins2\airbrush\Formats\c.map" />
+        </Component>
+        <Component Id="html.fmt" Guid="{02CA5F38-F12A-4746-A467-53DBFD3449D8}">
+          <File Id="html.fmt" Name="html.fmt" KeyPath="yes" Source="plugins2\airbrush\Formats\html.fmt" />
+        </Component>
+        <Component Id="html.map" Guid="{363AC23B-110B-4B87-977D-8F0A18E5868F}">
+          <File Id="html.map" Name="html.map" KeyPath="yes" Source="plugins2\airbrush\Formats\html.map" />
+        </Component>
+        <Component Id="pas.fmt" Guid="{9DA51388-31AE-429F-9E56-5F62E86B2CDD}">
+          <File Id="pas.fmt" Name="pas.fmt" KeyPath="yes" Source="plugins2\airbrush\Formats\pas.fmt" />
+        </Component>
+        <Component Id="pas.map" Guid="{8BECBB30-8952-4DCE-83F9-59D5DEF14965}">
+          <File Id="pas.map" Name="pas.map" KeyPath="yes" Source="plugins2\airbrush\Formats\pas.map" />
+        </Component>
+        <Component Id="php.fmt" Guid="{34FE7CC3-BD62-437D-822B-CD2DC3912A77}">
+          <File Id="php.fmt" Name="php.fmt" KeyPath="yes" Source="plugins2\airbrush\Formats\php.fmt" />
+        </Component>
+        <Component Id="php.map" Guid="{02DC94F2-06AF-47C9-A323-38F992D41B54}">
+          <File Id="php.map" Name="php.map" KeyPath="yes" Source="plugins2\airbrush\Formats\php.map" />
+        </Component>
+        <Component Id="re2c.fmt" Guid="{4777437E-4E87-4BF1-9C39-F2CD5BA44222}">
+          <File Id="re2c.fmt" Name="re2c.fmt" KeyPath="yes" Source="plugins2\airbrush\Formats\re2c.fmt" />
+        </Component>
+        <Component Id="re2c.map" Guid="{3C2123CA-BE9A-41A6-BC13-5C5972978407}">
+          <File Id="re2c.map" Name="re2c.map" KeyPath="yes" Source="plugins2\airbrush\Formats\re2c.map" />
+        </Component>
+        <Component Id="sql.fmt" Guid="{6C5480E0-20B2-4EAC-9628-7EB296F0EC58}">
+          <File Id="sql.fmt" Name="sql.fmt" KeyPath="yes" Source="plugins2\airbrush\Formats\sql.fmt" />
+        </Component>
+        <Component Id="sql.map" Guid="{D19F55A9-DDFF-444D-9DF3-29A1202BB811}">
+          <File Id="sql.map" Name="sql.map" KeyPath="yes" Source="plugins2\airbrush\Formats\sql.map" />
+        </Component>
+        <Component Id="syntax" Guid="{5932BD3D-E551-4BE8-B8AD-A2409BCC8645}">
+          <File Id="syntax" Name="syntax" KeyPath="yes" Source="plugins2\airbrush\Formats\syntax" />
+        </Component>
+        <Component Id="yacclex.fmt" Guid="{611A63DA-4673-4505-B683-A7DED64A02D1}">
+          <File Id="yacclex.fmt" Name="yacclex.fmt" KeyPath="yes" Source="plugins2\airbrush\Formats\yacclex.fmt" />
+        </Component>
+        <Component Id="yacclex.map" Guid="{D33373A4-8BAD-4E8F-B4A0-2BB95665DA35}">
+          <File Id="yacclex.map" Name="yacclex.map" KeyPath="yes" Source="plugins2\airbrush\Formats\yacclex.map" />
+        </Component>
+        <Component Id="zcustom.fmt" Guid="{F54AE012-5F8E-4088-81F1-AFEB05B26F91}">
+          <File Id="zcustom.fmt" Name="zcustom.fmt" KeyPath="yes" Source="plugins2\airbrush\Formats\zcustom.fmt" />
+        </Component>
+        <Component Id="zcustom.map" Guid="{4834B64E-27CE-42CA-B37B-93C155FF65FD}">
+          <File Id="zcustom.map" Name="zcustom.map" KeyPath="yes" Source="plugins2\airbrush\Formats\zcustom.map" />
+        </Component>
+        <Directory Id="syntaxes" Name="syntaxes">
+          <Component Id="asm.syntax" Guid="{A6FB58B6-D555-4AF4-ADC4-D821DE7DEFD3}">
+            <File Id="asm.syntax" Name="asm.syntax" KeyPath="yes" Source="plugins2\airbrush\Formats\syntaxes\asm.syntax" />
+          </Component>
+          <Component Id="cl.syntax" Guid="{53218611-116F-4B3A-9751-6B4339239FFF}">
+            <File Id="cl.syntax" Name="cl.syntax" KeyPath="yes" Source="plugins2\airbrush\Formats\syntaxes\cl.syntax" />
+          </Component>
+          <Component Id="cmd.syntax" Guid="{0B2DBB77-6B0A-4599-9FA1-6C7343E25EA5}">
+            <File Id="cmd.syntax" Name="cmd.syntax" KeyPath="yes" Source="plugins2\airbrush\Formats\syntaxes\cmd.syntax" />
+          </Component>
+          <Component Id="diff.syntax" Guid="{1E1A5255-107A-4DF1-AE19-E4A865687DBA}">
+            <File Id="diff.syntax" Name="diff.syntax" KeyPath="yes" Source="plugins2\airbrush\Formats\syntaxes\diff.syntax" />
+          </Component>
+          <Component Id="gnuasm.syntax" Guid="{9B424688-F14A-448E-B000-C8F405CDE468}">
+            <File Id="gnuasm.syntax" Name="gnuasm.syntax" KeyPath="yes" Source="plugins2\airbrush\Formats\syntaxes\gnuasm.syntax" />
+          </Component>
+          <Component Id="m4.syntax" Guid="{142D8966-41CB-444F-93C0-E4D9AAF7E9DA}">
+            <File Id="m4.syntax" Name="m4.syntax" KeyPath="yes" Source="plugins2\airbrush\Formats\syntaxes\m4.syntax" />
+          </Component>
+          <Component Id="make.syntax" Guid="{84E2FFB0-BEEE-4839-9F7D-690CEB628E0C}">
+            <File Id="make.syntax" Name="make.syntax" KeyPath="yes" Source="plugins2\airbrush\Formats\syntaxes\make.syntax" />
+          </Component>
+          <Component Id="ps.syntax" Guid="{770044FC-EE86-406F-9A54-3CF2269DCCB7}">
+            <File Id="ps.syntax" Name="ps.syntax" KeyPath="yes" Source="plugins2\airbrush\Formats\syntaxes\ps.syntax" />
+          </Component>
+          <Component Id="rc.syntax" Guid="{FB4655A7-F3C5-4287-BF38-DBCA53104F4C}">
+            <File Id="rc.syntax" Name="rc.syntax" KeyPath="yes" Source="plugins2\airbrush\Formats\syntaxes\rc.syntax" />
+          </Component>
+          <Component Id="sh.syntax" Guid="{CCD01E6A-1846-4534-9802-9C310F987586}">
+            <File Id="sh.syntax" Name="sh.syntax" KeyPath="yes" Source="plugins2\airbrush\Formats\syntaxes\sh.syntax" />
+          </Component>
+          <Component Id="xml.syntax" Guid="{0C397972-CED9-4D91-90EF-ED0CB745B3ED}">
+            <File Id="xml.syntax" Name="xml.syntax" KeyPath="yes" Source="plugins2\airbrush\Formats\syntaxes\xml.syntax" />
+          </Component>
+        </Directory>
+      </Directory>
+    </Directory>
+    <Directory Id="bcopy" Name="bcopy">
+      <Component Id="bcopy.dll" Guid="{0751FF4E-139B-4820-B43E-A81D6A16E7FD}">
+        <File Id="bcopy.dll" Name="bcopy.dll" KeyPath="yes" Source="plugins2\bcopy\bcopy.dll" />
+      </Component>
+      <Component Id="bcopy.hlf" Guid="{A05DC64F-2F32-4353-9822-A44E9D951E0C}">
+        <File Id="bcopy.hlf" Name="bcopy.hlf" KeyPath="yes" Source="plugins2\bcopy\bcopy.hlf" />
+      </Component>
+      <Component Id="bcopy.lng" Guid="{E983ADD6-06FB-4A19-A8D8-FBB9DF43261E}">
+        <File Id="bcopy.lng" Name="bcopy.lng" KeyPath="yes" Source="plugins2\bcopy\bcopy.lng" />
+      </Component>
+      <Component Id="bcopy.map" Guid="{DD43E6AB-28BE-4662-9503-769C51563235}">
+        <File Id="bcopy.map" Name="bcopy.map" KeyPath="yes" Source="plugins2\bcopy\bcopy.map" />
+      </Component>
+      <Component Id="bcopyru.hlf" Guid="{D8F56A3E-F73F-4392-B9B1-22E5D0E6D8FF}">
+        <File Id="bcopyru.hlf" Name="bcopyru.hlf" KeyPath="yes" Source="plugins2\bcopy\bcopyru.hlf" />
+      </Component>
+      <Component Id="bcopyru.lng" Guid="{8C3FF2D7-9A5A-4939-8E2A-0057EC6BB2E5}">
+        <File Id="bcopyru.lng" Name="bcopyru.lng" KeyPath="yes" Source="plugins2\bcopy\bcopyru.lng" />
+      </Component>
+      <Component Id="bcsvc.exe" Guid="{D2FBFF6B-1816-4F9A-9FAF-3A7A136D46F2}">
+        <File Id="bcsvc.exe" Name="bcsvc.exe" KeyPath="yes" Source="plugins2\bcopy\bcsvc.exe" />
+      </Component>
+      <Component Id="file_id.diz_21" Guid="{73D7F079-F7C3-4A6C-9F09-16FB56DFAB2D}">
+        <File Id="file_id.diz_21" Name="file_id.diz" KeyPath="yes" Source="plugins2\bcopy\file_id.diz" />
+      </Component>
+      <Component Id="readme.txt_13" Guid="{14D41375-FB5F-4763-922C-DEBA5EE7E391}">
+        <File Id="readme.txt_13" Name="readme.txt" KeyPath="yes" Source="plugins2\bcopy\readme.txt" />
+      </Component>
+      <Component Id="techinfo.eng.reg" Guid="{6C48EE84-713D-479C-97B4-FADF6BE726EC}">
+        <File Id="techinfo.eng.reg" Name="techinfo.eng.reg" KeyPath="yes" Source="plugins2\bcopy\techinfo.eng.reg" />
+      </Component>
+      <Component Id="techinfo.rus.reg_2" Guid="{2E246327-BAE4-43C9-AB5D-A3259512199D}">
+        <File Id="techinfo.rus.reg_2" Name="techinfo.rus.reg" KeyPath="yes" Source="plugins2\bcopy\techinfo.rus.reg" />
+      </Component>
+      <Directory Id="macros" Name="macros">
+        <Component Id="BGattrib.cmd" Guid="{9304B01C-C6E8-4BF4-BEDD-575788891AAB}">
+          <File Id="BGattrib.cmd" Name="BGattrib.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\BGattrib.cmd" />
+        </Component>
+        <Component Id="BGcopy.cmd" Guid="{8E4A48EC-350D-4696-9C9F-22A90495418A}">
+          <File Id="BGcopy.cmd" Name="BGcopy.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\BGcopy.cmd" />
+        </Component>
+        <Component Id="BGdelete.cmd" Guid="{FB129214-9D04-446A-9DF4-803FF3B10AC3}">
+          <File Id="BGdelete.cmd" Name="BGdelete.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\BGdelete.cmd" />
+        </Component>
+        <Component Id="BGedit.cmd" Guid="{6561CEEA-5AEF-4EFD-8B4C-0E7A336E8C79}">
+          <File Id="BGedit.cmd" Name="BGedit.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\BGedit.cmd" />
+        </Component>
+        <Component Id="BGeject.cmd" Guid="{AB6E8507-E72F-4FEB-87B9-74CEE38B0EFD}">
+          <File Id="BGeject.cmd" Name="BGeject.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\BGeject.cmd" />
+        </Component>
+        <Component Id="BGexec.cmd" Guid="{CCF0F7BF-B993-4A66-A1FE-78FF879F2212}">
+          <File Id="BGexec.cmd" Name="BGexec.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\BGexec.cmd" />
+        </Component>
+        <Component Id="BGinfo.cmd" Guid="{EEC48BD7-754D-4813-AE10-8372163BF7D1}">
+          <File Id="BGinfo.cmd" Name="BGinfo.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\BGinfo.cmd" />
+        </Component>
+        <Component Id="BGload.cmd" Guid="{A8CFAFCE-6339-4401-95EB-71201DB77592}">
+          <File Id="BGload.cmd" Name="BGload.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\BGload.cmd" />
+        </Component>
+        <Component Id="BGmove.cmd" Guid="{D53FD9D1-34EC-4F23-A418-200562B7DD18}">
+          <File Id="BGmove.cmd" Name="BGmove.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\BGmove.cmd" />
+        </Component>
+        <Component Id="BGshowname.cmd" Guid="{FDA4762A-DD64-47BB-80A6-B65639FB95B9}">
+          <File Id="BGshowname.cmd" Name="BGshowname.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\BGshowname.cmd" />
+        </Component>
+        <Component Id="BGview.cmd" Guid="{0ED868A2-CB00-4D0F-90DA-A2A0A85DB583}">
+          <File Id="BGview.cmd" Name="BGview.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\BGview.cmd" />
+        </Component>
+        <Component Id="BGwipe.cmd" Guid="{D17AA661-7888-406A-B53B-C43E4A816394}">
+          <File Id="BGwipe.cmd" Name="BGwipe.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\BGwipe.cmd" />
+        </Component>
+        <Component Id="FAR_old_style_Overwrite.cmd" Guid="{69BC5BBB-BC0A-4203-98EE-C6E20369DF92}">
+          <File Id="FAR_old_style_Overwrite.cmd" Name="FAR_old_style_Overwrite.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\FAR_old_style_Overwrite.cmd" />
+        </Component>
+        <Component Id="FAR_standard_operations.cmd" Guid="{BC303A92-0706-4680-8245-D75AB0C606F0}">
+          <File Id="FAR_standard_operations.cmd" Name="FAR_standard_operations.cmd" KeyPath="yes" Source="plugins2\bcopy\macros\FAR_standard_operations.cmd" />
+        </Component>
+        <Component Id="readme.eng.txt_2" Guid="{36CF2061-6484-4A10-87E2-D8C6D8553027}">
+          <File Id="readme.eng.txt_2" Name="readme.eng.txt" KeyPath="yes" Source="plugins2\bcopy\macros\readme.eng.txt" />
+        </Component>
+        <Component Id="readme.rus.txt_3" Guid="{4ECFAE58-894C-4CBE-A790-D8443895EF50}">
+          <File Id="readme.rus.txt_3" Name="readme.rus.txt" KeyPath="yes" Source="plugins2\bcopy\macros\readme.rus.txt" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Directory Id="blockindent" Name="blockindent">
+      <Component Id="BlockIndent.dll" Guid="{0FC1F8C6-B6EC-4B0F-9B06-68CDA344B4E6}">
+        <File Id="BlockIndent.dll" Name="BlockIndent.dll" KeyPath="yes" Source="plugins2\blockindent\BlockIndent.dll" />
+      </Component>
+      <Component Id="BlockIndent.map" Guid="{3BA6EE5D-E0C8-4BA9-B4B3-6CA6E4FD64E9}">
+        <File Id="BlockIndent.map" Name="BlockIndent.map" KeyPath="yes" Source="plugins2\blockindent\BlockIndent.map" />
+      </Component>
+      <Component Id="BlockIndentEng.lng" Guid="{01C49AED-3A0F-443D-8EA4-CBA55489AE47}">
+        <File Id="BlockIndentEng.lng" Name="BlockIndentEng.lng" KeyPath="yes" Source="plugins2\blockindent\BlockIndentEng.lng" />
+      </Component>
+      <Component Id="BlockIndentRus.lng" Guid="{F4F90A45-718C-4DC5-BB68-118DDD2A3D1B}">
+        <File Id="BlockIndentRus.lng" Name="BlockIndentRus.lng" KeyPath="yes" Source="plugins2\blockindent\BlockIndentRus.lng" />
+      </Component>
+      <Component Id="COPYING_1" Guid="{579BC622-BCB2-4C8C-9275-89DF4D58185D}">
+        <File Id="COPYING_1" Name="COPYING" KeyPath="yes" Source="plugins2\blockindent\COPYING" />
+      </Component>
+      <Component Id="file_id.diz_22" Guid="{5B5F2042-079E-49D8-862C-4909D6AEEC38}">
+        <File Id="file_id.diz_22" Name="file_id.diz" KeyPath="yes" Source="plugins2\blockindent\file_id.diz" />
+      </Component>
+      <Component Id="history.txt_12" Guid="{59592975-9960-4DBE-8B71-006A722B0922}">
+        <File Id="history.txt_12" Name="history.txt" KeyPath="yes" Source="plugins2\blockindent\history.txt" />
+      </Component>
+      <Component Id="ReadMe.Eng.txt_3" Guid="{D26F757F-47F6-4EBE-9747-0411921888A4}">
+        <File Id="ReadMe.Eng.txt_3" Name="ReadMe.Eng.txt" KeyPath="yes" Source="plugins2\blockindent\ReadMe.Eng.txt" />
+      </Component>
+      <Component Id="ReadMe.Rus.txt_4" Guid="{B876E52C-C494-4487-8795-B99ED3DAC752}">
+        <File Id="ReadMe.Rus.txt_4" Name="ReadMe.Rus.txt" KeyPath="yes" Source="plugins2\blockindent\ReadMe.Rus.txt" />
+      </Component>
+    </Directory>
+    <Directory Id="calc" Name="calc">
+      <Component Id="calc.dll" Guid="{48745B02-1D17-4A82-AD4A-EE6CFF6EC846}">
+        <File Id="calc.dll" Name="calc.dll" KeyPath="yes" Source="plugins2\calc\calc.dll" />
+      </Component>
+      <Component Id="calce.hlf" Guid="{702A3BC0-B2A0-444C-B635-F4973C715251}">
+        <File Id="calce.hlf" Name="calce.hlf" KeyPath="yes" Source="plugins2\calc\calce.hlf" />
+      </Component>
+      <Component Id="calce.lng" Guid="{F638BD05-7E4F-4BD3-B292-5A6C46735953}">
+        <File Id="calce.lng" Name="calce.lng" KeyPath="yes" Source="plugins2\calc\calce.lng" />
+      </Component>
+      <Component Id="calcr.hlf" Guid="{75B6FAF9-AAA2-45C6-9478-EC4883018A89}">
+        <File Id="calcr.hlf" Name="calcr.hlf" KeyPath="yes" Source="plugins2\calc\calcr.hlf" />
+      </Component>
+      <Component Id="calcr.lng" Guid="{F626EEB3-5086-4EFF-96B8-7CC162EB3552}">
+        <File Id="calcr.lng" Name="calcr.lng" KeyPath="yes" Source="plugins2\calc\calcr.lng" />
+      </Component>
+      <Component Id="calcset.csr" Guid="{D1250163-FCF4-4D0D-BD2D-6CACAE1698EE}">
+        <File Id="calcset.csr" Name="calcset.csr" KeyPath="yes" Source="plugins2\calc\calcset.csr" />
+      </Component>
+      <Component Id="csr.dtd" Guid="{6703EADD-6EFE-4A19-B7D3-63A5FE541214}">
+        <File Id="csr.dtd" Name="csr.dtd" KeyPath="yes" Source="plugins2\calc\csr.dtd" />
+      </Component>
+      <Component Id="file_id.diz_23" Guid="{37C0D190-8B3B-4E3A-AA0F-F296F3657A97}">
+        <File Id="file_id.diz_23" Name="file_id.diz" KeyPath="yes" Source="plugins2\calc\file_id.diz" />
+      </Component>
+      <Component Id="readme.txt_14" Guid="{DD3DFE3A-9573-4758-AD0D-C76C04A1C45A}">
+        <File Id="readme.txt_14" Name="readme.txt" KeyPath="yes" Source="plugins2\calc\readme.txt" />
+      </Component>
+      <Component Id="readmr.txt" Guid="{D36B8296-046B-4D79-A567-BB3A7C8682E2}">
+        <File Id="readmr.txt" Name="readmr.txt" KeyPath="yes" Source="plugins2\calc\readmr.txt" />
+      </Component>
+      <Component Id="shotcuts.reg" Guid="{199C57DF-C6AF-48E3-83BB-C53C87202D80}">
+        <File Id="shotcuts.reg" Name="shotcuts.reg" KeyPath="yes" Source="plugins2\calc\shotcuts.reg" />
+      </Component>
+      <Directory Id="doc_2" Name="doc">
+        <Directory Id="en" Name="en">
+          <Component Id="license.txt_2" Guid="{25F23948-45DF-45AE-8C84-31137629AB96}">
+            <File Id="license.txt_2" Name="license.txt" KeyPath="yes" Source="plugins2\calc\doc\en\license.txt" />
+          </Component>
+          <Component Id="regform.txt_1" Guid="{D569A54B-4A42-482B-B556-C43B468431F0}">
+            <File Id="regform.txt_1" Name="regform.txt" KeyPath="yes" Source="plugins2\calc\doc\en\regform.txt" />
+          </Component>
+          <Component Id="whatsnew.txt_6" Guid="{79DC1512-8E36-445E-92DA-843D88B8A57B}">
+            <File Id="whatsnew.txt_6" Name="whatsnew.txt" KeyPath="yes" Source="plugins2\calc\doc\en\whatsnew.txt" />
+          </Component>
+        </Directory>
+        <Directory Id="ru" Name="ru">
+          <Component Id="license.txt_3" Guid="{C2761182-1F61-4165-889E-D4E6B4EEE60E}">
+            <File Id="license.txt_3" Name="license.txt" KeyPath="yes" Source="plugins2\calc\doc\ru\license.txt" />
+          </Component>
+          <Component Id="regform.txt_2" Guid="{2907A565-148F-4067-B199-84E442957840}">
+            <File Id="regform.txt_2" Name="regform.txt" KeyPath="yes" Source="plugins2\calc\doc\ru\regform.txt" />
+          </Component>
+          <Component Id="whatsnew.txt_7" Guid="{38E03A84-D6A0-4D37-A0A6-2235F2D59016}">
+            <File Id="whatsnew.txt_7" Name="whatsnew.txt" KeyPath="yes" Source="plugins2\calc\doc\ru\whatsnew.txt" />
+          </Component>
+        </Directory>
+      </Directory>
+    </Directory>
+    <Directory Id="dialogtools" Name="dialogtools">
+      <Component Id="dt.dll" Guid="{513891BB-BF4B-43E1-824F-E967A0BA7CA5}">
+        <File Id="dt.dll" Name="dt.dll" KeyPath="yes" Source="plugins2\dialogtools\dt.dll" />
+      </Component>
+      <Component Id="dt.map" Guid="{1592CC74-569D-464A-BC3B-458B340D077E}">
+        <File Id="dt.map" Name="dt.map" KeyPath="yes" Source="plugins2\dialogtools\dt.map" />
+      </Component>
+      <Component Id="dtEng.lng" Guid="{0ED26CFC-74AD-4ECE-AC05-F951614B1D1A}">
+        <File Id="dtEng.lng" Name="dtEng.lng" KeyPath="yes" Source="plugins2\dialogtools\dtEng.lng" />
+      </Component>
+    </Directory>
+    <Directory Id="editcmpl" Name="editcmpl">
+      <Component Id="ECmplEng.hlf" Guid="{15263A04-A3E9-46E8-897A-FB641C58F5E1}">
+        <File Id="ECmplEng.hlf" Name="ECmplEng.hlf" KeyPath="yes" Source="plugins2\editcmpl\ECmplEng.hlf" />
+      </Component>
+      <Component Id="ECmplEng.lng" Guid="{1F7C07C9-A66B-4966-A4A7-1FAF6D440DC7}">
+        <File Id="ECmplEng.lng" Name="ECmplEng.lng" KeyPath="yes" Source="plugins2\editcmpl\ECmplEng.lng" />
+      </Component>
+      <Component Id="ECmplRus.hlf" Guid="{F67230A3-7C6B-4D2E-B9A4-2905D1DB9BC4}">
+        <File Id="ECmplRus.hlf" Name="ECmplRus.hlf" KeyPath="yes" Source="plugins2\editcmpl\ECmplRus.hlf" />
+      </Component>
+      <Component Id="ECmplRus.lng" Guid="{1D445672-EA4E-4BD6-8427-337B7E6C6A3A}">
+        <File Id="ECmplRus.lng" Name="ECmplRus.lng" KeyPath="yes" Source="plugins2\editcmpl\ECmplRus.lng" />
+      </Component>
+      <Component Id="EditCmpl.dll" Guid="{F0B61B84-8464-4203-93F4-2197868DAAB4}">
+        <File Id="EditCmpl.dll" Name="EditCmpl.dll" KeyPath="yes" Source="plugins2\editcmpl\EditCmpl.dll" />
+      </Component>
+      <Component Id="EditCmpl.map" Guid="{A4C0D951-5A83-4289-BE71-94820CFA9C3B}">
+        <File Id="EditCmpl.map" Name="EditCmpl.map" KeyPath="yes" Source="plugins2\editcmpl\EditCmpl.map" />
+      </Component>
+    </Directory>
+    <Directory Id="esc" Name="esc">
+      <Component Id="COPYING_2" Guid="{7560BF2D-4C51-480E-9FCE-8965A6238992}">
+        <File Id="COPYING_2" Name="COPYING" KeyPath="yes" Source="plugins2\esc\COPYING" />
+      </Component>
+      <Component Id="esc.dll" Guid="{7DEBD5E6-35A1-4DDE-8CED-4E13BC51AA79}">
+        <File Id="esc.dll" Name="esc.dll" KeyPath="yes" Source="plugins2\esc\esc.dll" />
+      </Component>
+      <Component Id="esc.map" Guid="{ABBE7B54-5217-4556-B163-9D40B891AF1A}">
+        <File Id="esc.map" Name="esc.map" KeyPath="yes" Source="plugins2\esc\esc.map" />
+      </Component>
+      <Component Id="esc.xml" Guid="{9430E3C9-AF52-414E-909F-73552C77461C}">
+        <File Id="esc.xml" Name="esc.xml" KeyPath="yes" Source="plugins2\esc\esc.xml" />
+      </Component>
+      <Component Id="esc_eng.lng" Guid="{568CF12C-D597-48F9-B122-B4A57D6DE080}">
+        <File Id="esc_eng.lng" Name="esc_eng.lng" KeyPath="yes" Source="plugins2\esc\esc_eng.lng" />
+      </Component>
+      <Component Id="esc_rus.lng" Guid="{F6AC2E81-6467-4A85-96FB-B393C54C58BE}">
+        <File Id="esc_rus.lng" Name="esc_rus.lng" KeyPath="yes" Source="plugins2\esc\esc_rus.lng" />
+      </Component>
+      <Component Id="esc_ukr.lng" Guid="{128E51C4-9BB7-4A8A-B294-99F504F4C15C}">
+        <File Id="esc_ukr.lng" Name="esc_ukr.lng" KeyPath="yes" Source="plugins2\esc\esc_ukr.lng" />
+      </Component>
+      <Component Id="File_ID.DIZ_24" Guid="{FFA0D38B-619F-444E-AD6F-2C086BB5D4BE}">
+        <File Id="File_ID.DIZ_24" Name="File_ID.DIZ" KeyPath="yes" Source="plugins2\esc\File_ID.DIZ" />
+      </Component>
+      <Component Id="history.txt_13" Guid="{070AE79D-66ED-4812-843A-4E0BB2EF75B0}">
+        <File Id="history.txt_13" Name="history.txt" KeyPath="yes" Source="plugins2\esc\history.txt" />
+      </Component>
+      <Component Id="ReadMe.txt_15" Guid="{9426582C-AF28-4EF3-B452-13A05C66B5DC}">
+        <File Id="ReadMe.txt_15" Name="ReadMe.txt" KeyPath="yes" Source="plugins2\esc\ReadMe.txt" />
+      </Component>
+      <Component Id="uninstallW.reg_1" Guid="{B879824E-15C9-4CA3-A983-BD6ECF57BC90}">
+        <File Id="uninstallW.reg_1" Name="uninstallW.reg" KeyPath="yes" Source="plugins2\esc\uninstallW.reg" />
+      </Component>
+      <Directory Id="Cfg" Name="Cfg">
+        <Component Id="esc_abstract.xml" Guid="{754BC724-1FC4-4AB6-8219-8428683930BC}">
+          <File Id="esc_abstract.xml" Name="esc_abstract.xml" KeyPath="yes" Source="plugins2\esc\Cfg\esc_abstract.xml" />
+        </Component>
+        <Component Id="esc_binary.xml" Guid="{AF16DA6D-FDE2-41FD-BEDA-0BA9D51CD620}">
+          <File Id="esc_binary.xml" Name="esc_binary.xml" KeyPath="yes" Source="plugins2\esc\Cfg\esc_binary.xml" />
+        </Component>
+        <Component Id="esc_message.xml" Guid="{848EA6FF-27C7-4F2A-AF40-D9FBD062C4B7}">
+          <File Id="esc_message.xml" Name="esc_message.xml" KeyPath="yes" Source="plugins2\esc\Cfg\esc_message.xml" />
+        </Component>
+        <Component Id="esc_others.xml" Guid="{EDE4D032-7FA5-4333-9FA3-029A9891DE7F}">
+          <File Id="esc_others.xml" Name="esc_others.xml" KeyPath="yes" Source="plugins2\esc\Cfg\esc_others.xml" />
+        </Component>
+        <Component Id="esc_sources.xml" Guid="{F49B68A2-2A61-49F3-9B96-20F9AC8BC1E8}">
+          <File Id="esc_sources.xml" Name="esc_sources.xml" KeyPath="yes" Source="plugins2\esc\Cfg\esc_sources.xml" />
+        </Component>
+        <Component Id="esc_tex.xml" Guid="{FA5A344D-2E85-4ADA-80C9-E0D7F309965B}">
+          <File Id="esc_tex.xml" Name="esc_tex.xml" KeyPath="yes" Source="plugins2\esc\Cfg\esc_tex.xml" />
+        </Component>
+        <Component Id="esc_text.xml" Guid="{075638C2-556B-4E8A-834F-848102C86518}">
+          <File Id="esc_text.xml" Name="esc_text.xml" KeyPath="yes" Source="plugins2\esc\Cfg\esc_text.xml" />
+        </Component>
+        <Component Id="esc_xml.xml" Guid="{802677D0-F03A-400A-A431-A35458AD418D}">
+          <File Id="esc_xml.xml" Name="esc_xml.xml" KeyPath="yes" Source="plugins2\esc\Cfg\esc_xml.xml" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Directory Id="esc_tsc_mini" Name="esc-tsc-mini">
+      <Component Id="COPYING_3" Guid="{F03CFDEB-A9A5-4E8C-A7BB-939EBB116207}">
+        <File Id="COPYING_3" Name="COPYING" KeyPath="yes" Source="plugins2\esc-tsc-mini\COPYING" />
+      </Component>
+      <Component Id="esc_tsc_mini.dll" Guid="{774D4D00-2A34-4E24-8C14-A49750F25D15}">
+        <File Id="esc_tsc_mini.dll" Name="esc-tsc-mini.dll" KeyPath="yes" Source="plugins2\esc-tsc-mini\esc-tsc-mini.dll" />
+      </Component>
+      <Component Id="esc_tsc_mini.lng" Guid="{9BAE031A-635A-4FA8-A062-E6CEF65CC897}">
+        <File Id="esc_tsc_mini.lng" Name="esc-tsc-mini.lng" KeyPath="yes" Source="plugins2\esc-tsc-mini\esc-tsc-mini.lng" />
+      </Component>
+      <Component Id="esc_tsc_mini.map" Guid="{6283B841-D516-4D8B-A5E5-113D2C64C6C1}">
+        <File Id="esc_tsc_mini.map" Name="esc-tsc-mini.map" KeyPath="yes" Source="plugins2\esc-tsc-mini\esc-tsc-mini.map" />
+      </Component>
+      <Component Id="file_id.diz_25" Guid="{FA851163-DF14-4BAF-AE23-8965C3F6CE38}">
+        <File Id="file_id.diz_25" Name="file_id.diz" KeyPath="yes" Source="plugins2\esc-tsc-mini\file_id.diz" />
+      </Component>
+      <Component Id="history.txt_14" Guid="{1BA84662-85E6-41A8-AD67-C9E02EDD69A6}">
+        <File Id="history.txt_14" Name="history.txt" KeyPath="yes" Source="plugins2\esc-tsc-mini\history.txt" />
+      </Component>
+      <Component Id="installW.reg" Guid="{EDEE0310-EAC1-46DB-812F-2AA256856108}">
+        <File Id="installW.reg" Name="installW.reg" KeyPath="yes" Source="plugins2\esc-tsc-mini\installW.reg" />
+      </Component>
+      <Component Id="readme.txt_16" Guid="{597864B2-5DE9-400D-8216-3FB99EF847BE}">
+        <File Id="readme.txt_16" Name="readme.txt" KeyPath="yes" Source="plugins2\esc-tsc-mini\readme.txt" />
+      </Component>
+      <Component Id="uninstallW.reg_2" Guid="{888A61D8-E3FA-4EB9-B322-A2AD7D7F3CA0}">
+        <File Id="uninstallW.reg_2" Name="uninstallW.reg" KeyPath="yes" Source="plugins2\esc-tsc-mini\uninstallW.reg" />
+      </Component>
+    </Directory>
+    <Directory Id="farmobile" Name="farmobile">
+      <Component Id="config.txt" Guid="{C4BE8725-4F40-4166-981C-5B9D4567F212}">
+        <File Id="config.txt" Name="config.txt" KeyPath="yes" Source="plugins2\farmobile\config.txt" />
+      </Component>
+      <Component Id="FarMobile2.dll" Guid="{01F8D18B-4704-4CDA-8118-68374E433455}">
+        <File Id="FarMobile2.dll" Name="FarMobile2.dll" KeyPath="yes" Source="plugins2\farmobile\FarMobile2.dll" />
+      </Component>
+      <Component Id="FarMobile2Eng.lng" Guid="{35635435-4D78-4877-B13E-B994933CA7AA}">
+        <File Id="FarMobile2Eng.lng" Name="FarMobile2Eng.lng" KeyPath="yes" Source="plugins2\farmobile\FarMobile2Eng.lng" />
+      </Component>
+      <Component Id="File_Id.Diz_26" Guid="{89712A29-FC62-43B9-9400-1E8B3C4F1AA2}">
+        <File Id="File_Id.Diz_26" Name="File_Id.Diz" KeyPath="yes" Source="plugins2\farmobile\File_Id.Diz" />
+      </Component>
+      <Component Id="gnapplet.sis" Guid="{4FBC8E4B-C2B5-4EAD-9D7C-B54B664C2AE2}">
+        <File Id="gnapplet.sis" Name="gnapplet.sis" KeyPath="yes" Source="plugins2\farmobile\gnapplet.sis" />
+      </Component>
+      <Component Id="History.txt_15" Guid="{B993262E-4E8C-4126-AA55-75F7F2DF58A2}">
+        <File Id="History.txt_15" Name="History.txt" KeyPath="yes" Source="plugins2\farmobile\History.txt" />
+      </Component>
+    </Directory>
+    <Directory Id="farspell" Name="farspell">
+      <Component Id="_clean.txt" Guid="{BA81204F-5DA6-4EE6-914D-E38C6C988BEA}">
+        <File Id="_clean.txt" Name="!clean.txt" KeyPath="yes" Source="plugins2\farspell\!clean.txt" />
+      </Component>
+      <Component Id="_clean_win9x.reg" Guid="{3069488F-122F-491E-9761-F285D6274BA3}">
+        <File Id="_clean_win9x.reg" Name="!clean_win9x.reg" KeyPath="yes" Source="plugins2\farspell\!clean_win9x.reg" />
+      </Component>
+      <Component Id="_clean_winxp.reg" Guid="{378FE522-1DA3-433F-9BFE-731544DC91C9}">
+        <File Id="_clean_winxp.reg" Name="!clean_winxp.reg" KeyPath="yes" Source="plugins2\farspell\!clean_winxp.reg" />
+      </Component>
+      <Component Id="cp1125.txt" Guid="{E97008C3-4EDC-42BA-8320-7421AA856711}">
+        <File Id="cp1125.txt" Name="cp1125.txt" KeyPath="yes" Source="plugins2\farspell\cp1125.txt" />
+      </Component>
+      <Component Id="farspell.dll" Guid="{F3B37515-7439-40BA-B75D-C5B637A9D973}">
+        <File Id="farspell.dll" Name="farspell.dll" KeyPath="yes" Source="plugins2\farspell\farspell.dll" />
+      </Component>
+      <Component Id="farspell.map" Guid="{746464B4-C347-4798-978E-2066F8CA6ED3}">
+        <File Id="farspell.map" Name="farspell.map" KeyPath="yes" Source="plugins2\farspell\farspell.map" />
+      </Component>
+      <Component Id="FarSpellEng.hlf" Guid="{3B6B32B4-605B-4764-89BD-99CFE6F19799}">
+        <File Id="FarSpellEng.hlf" Name="FarSpellEng.hlf" KeyPath="yes" Source="plugins2\farspell\FarSpellEng.hlf" />
+      </Component>
+      <Component Id="FarSpellEng.lng" Guid="{04C403E9-7763-4402-B975-48210E933DD5}">
+        <File Id="FarSpellEng.lng" Name="FarSpellEng.lng" KeyPath="yes" Source="plugins2\farspell\FarSpellEng.lng" />
+      </Component>
+      <Component Id="FarSpellRus.hlf" Guid="{5889E3DE-9698-4F69-BB4E-5C502CBA836F}">
+        <File Id="FarSpellRus.hlf" Name="FarSpellRus.hlf" KeyPath="yes" Source="plugins2\farspell\FarSpellRus.hlf" />
+      </Component>
+      <Component Id="FarSpellRus.lng" Guid="{A8E79B20-D144-4B2C-84F3-A33EDC088EAE}">
+        <File Id="FarSpellRus.lng" Name="FarSpellRus.lng" KeyPath="yes" Source="plugins2\farspell\FarSpellRus.lng" />
+      </Component>
+      <Component Id="file_id.diz_27" Guid="{26C641E3-BAD4-4C4D-895A-871622EFED27}">
+        <File Id="file_id.diz_27" Name="file_id.diz" KeyPath="yes" Source="plugins2\farspell\file_id.diz" />
+      </Component>
+      <Component Id="history.txt_16" Guid="{53481F0F-6EE9-4389-B0D9-26E4E7060F67}">
+        <File Id="history.txt_16" Name="history.txt" KeyPath="yes" Source="plugins2\farspell\history.txt" />
+      </Component>
+      <Component Id="TechInfo.txt_3" Guid="{801CE513-3C91-437E-9156-5430D401BCF3}">
+        <File Id="TechInfo.txt_3" Name="TechInfo.txt" KeyPath="yes" Source="plugins2\farspell\TechInfo.txt" />
+      </Component>
+      <Component Id="todo.txt" Guid="{118FD68B-579E-482D-A0D9-675EE45FA2E6}">
+        <File Id="todo.txt" Name="todo.txt" KeyPath="yes" Source="plugins2\farspell\todo.txt" />
+      </Component>
+      <Component Id="WordChars.reg" Guid="{20529D58-6A20-451B-B7DE-01A4BCC37752}">
+        <File Id="WordChars.reg" Name="WordChars.reg" KeyPath="yes" Source="plugins2\farspell\WordChars.reg" />
+      </Component>
+      <Directory Id="dict" Name="dict">
+        <Component Id="Russian_English.aff" Guid="{DE110A6D-D5CD-4CE0-A8DC-A7ACEF29888B}">
+          <File Id="Russian_English.aff" Name="Russian-English.aff" KeyPath="yes" Source="plugins2\farspell\dict\Russian-English.aff" />
+        </Component>
+        <Component Id="Russian_English.dic" Guid="{F5B0B818-6219-412F-96E3-87A3C88AEAC4}">
+          <File Id="Russian_English.dic" Name="Russian-English.dic" KeyPath="yes" Source="plugins2\farspell\dict\Russian-English.dic" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Directory Id="mailview" Name="mailview">
+      <Component Id="COPYING_4" Guid="{A0331210-7AF6-4E02-841D-DEAC924797CD}">
+        <File Id="COPYING_4" Name="COPYING" KeyPath="yes" Source="plugins2\mailview\COPYING" />
+      </Component>
+      <Component Id="file_id.diz_28" Guid="{2B1FBA39-2C72-4172-BAC4-4C462FC779C5}">
+        <File Id="file_id.diz_28" Name="file_id.diz" KeyPath="yes" Source="plugins2\mailview\file_id.diz" />
+      </Component>
+      <Component Id="MailView.dll" Guid="{1E1FB84F-E008-46CE-8D3A-0EA420AB6ACF}">
+        <File Id="MailView.dll" Name="MailView.dll" KeyPath="yes" Source="plugins2\mailview\MailView.dll" />
+      </Component>
+      <Component Id="MailView.ini" Guid="{957A6AFE-ACF9-4FB4-B31E-EDC3BBDED762}">
+        <File Id="MailView.ini" Name="MailView.ini" KeyPath="yes" Source="plugins2\mailview\MailView.ini" />
+      </Component>
+      <Component Id="MailView.map" Guid="{28A43902-8773-4BC6-B439-B7BB71DC2F94}">
+        <File Id="MailView.map" Name="MailView.map" KeyPath="yes" Source="plugins2\mailview\MailView.map" />
+      </Component>
+      <Component Id="MailView.tpl" Guid="{F7D90D4C-6B04-4435-972A-C4B48131C854}">
+        <File Id="MailView.tpl" Name="MailView.tpl" KeyPath="yes" Source="plugins2\mailview\MailView.tpl" />
+      </Component>
+      <Component Id="MailViewEng.Lng" Guid="{2F548255-A780-404E-A76D-8553DFDF4A42}">
+        <File Id="MailViewEng.Lng" Name="MailViewEng.Lng" KeyPath="yes" Source="plugins2\mailview\MailViewEng.Lng" />
+      </Component>
+      <Component Id="MailViewRus.Hlf" Guid="{41135F55-16D2-461B-BD8C-688055DF7D41}">
+        <File Id="MailViewRus.Hlf" Name="MailViewRus.Hlf" KeyPath="yes" Source="plugins2\mailview\MailViewRus.Hlf" />
+      </Component>
+      <Component Id="MailViewRus.Lng" Guid="{7CF4BD38-1051-4A2B-B37E-D0BE1D6DFAB2}">
+        <File Id="MailViewRus.Lng" Name="MailViewRus.Lng" KeyPath="yes" Source="plugins2\mailview\MailViewRus.Lng" />
+      </Component>
+      <Component Id="ReadMe.Rus.txt_5" Guid="{6B8716AD-C6A3-471C-B557-459F740C6387}">
+        <File Id="ReadMe.Rus.txt_5" Name="ReadMe.Rus.txt" KeyPath="yes" Source="plugins2\mailview\ReadMe.Rus.txt" />
+      </Component>
+      <Component Id="RFCCharset.reg" Guid="{24F21B8D-2A90-489C-B3BC-3B3A53EB708C}">
+        <File Id="RFCCharset.reg" Name="RFCCharset.reg" KeyPath="yes" Source="plugins2\mailview\RFCCharset.reg" />
+      </Component>
+      <Component Id="todo_1" Guid="{7666EDCA-1051-4D01-9270-12A4C87D596D}">
+        <File Id="todo_1" Name="todo" KeyPath="yes" Source="plugins2\mailview\todo" />
+      </Component>
+      <Component Id="WhatsNew.txt_8" Guid="{A975E9F9-0195-47B1-8431-ACFC24EC83E6}">
+        <File Id="WhatsNew.txt_8" Name="WhatsNew.txt" KeyPath="yes" Source="plugins2\mailview\WhatsNew.txt" />
+      </Component>
+      <Directory Id="Plugins_4" Name="Plugins">
+        <Component Id="Folder.map" Guid="{28293287-0465-4841-9D10-E0D310024476}">
+          <File Id="Folder.map" Name="Folder.map" KeyPath="yes" Source="plugins2\mailview\Plugins\Folder.map" />
+        </Component>
+        <Component Id="Folder.mvp" Guid="{13D2EF9B-1C16-4268-87F2-31C35654B97E}">
+          <File Id="Folder.mvp" Name="Folder.mvp" KeyPath="yes" Source="plugins2\mailview\Plugins\Folder.mvp" />
+        </Component>
+        <Component Id="oe_dbx.map" Guid="{2508D188-7D8E-4DBE-BB63-0B2BB149C4E7}">
+          <File Id="oe_dbx.map" Name="oe_dbx.map" KeyPath="yes" Source="plugins2\mailview\Plugins\oe_dbx.map" />
+        </Component>
+        <Component Id="oe_dbx.mvp" Guid="{900F6513-C63A-4D72-B67F-5F027D323AFF}">
+          <File Id="oe_dbx.mvp" Name="oe_dbx.mvp" KeyPath="yes" Source="plugins2\mailview\Plugins\oe_dbx.mvp" />
+        </Component>
+        <Component Id="pkt.map" Guid="{DA8DA14D-4888-447E-B5BF-DCF67319A023}">
+          <File Id="pkt.map" Name="pkt.map" KeyPath="yes" Source="plugins2\mailview\Plugins\pkt.map" />
+        </Component>
+        <Component Id="pkt.mvp" Guid="{8677A3EE-B3AB-443D-B942-B8C5EB254DB2}">
+          <File Id="pkt.mvp" Name="pkt.mvp" KeyPath="yes" Source="plugins2\mailview\Plugins\pkt.mvp" />
+        </Component>
+        <Component Id="Squish.map" Guid="{D7011DE9-49D1-44A4-8585-E863BF9C2ACE}">
+          <File Id="Squish.map" Name="Squish.map" KeyPath="yes" Source="plugins2\mailview\Plugins\Squish.map" />
+        </Component>
+        <Component Id="Squish.mvp" Guid="{7EE547E1-41EB-4EF1-A23D-D7BC94B2067C}">
+          <File Id="Squish.mvp" Name="Squish.mvp" KeyPath="yes" Source="plugins2\mailview\Plugins\Squish.mvp" />
+        </Component>
+        <Component Id="TheBat.map" Guid="{73A3C628-9CB8-4C5C-8D06-3D406D0C936B}">
+          <File Id="TheBat.map" Name="TheBat.map" KeyPath="yes" Source="plugins2\mailview\Plugins\TheBat.map" />
+        </Component>
+        <Component Id="TheBat.mvp" Guid="{3A6E096B-1D3F-44D7-9CB4-FA21A735935B}">
+          <File Id="TheBat.mvp" Name="TheBat.mvp" KeyPath="yes" Source="plugins2\mailview\Plugins\TheBat.mvp" />
+        </Component>
+        <Component Id="Unix.map" Guid="{534CFAB3-7FDB-4E1C-AC07-A9A3009A5B33}">
+          <File Id="Unix.map" Name="Unix.map" KeyPath="yes" Source="plugins2\mailview\Plugins\Unix.map" />
+        </Component>
+        <Component Id="Unix.mvp" Guid="{B772F567-CF95-4453-BF7A-AC786DD9A945}">
+          <File Id="Unix.mvp" Name="Unix.mvp" KeyPath="yes" Source="plugins2\mailview\Plugins\Unix.mvp" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Directory Id="ntevent" Name="ntevent">
+      <Component Id="file_id.diz_29" Guid="{FBD2556F-4288-4EC0-B84A-7BBAF1578D4B}">
+        <File Id="file_id.diz_29" Name="file_id.diz" KeyPath="yes" Source="plugins2\ntevent\file_id.diz" />
+      </Component>
+      <Component Id="ntevent.dll" Guid="{D61A7D14-E43C-4042-9B2F-CAE9AED956EC}">
+        <File Id="ntevent.dll" Name="ntevent.dll" KeyPath="yes" Source="plugins2\ntevent\ntevent.dll" />
+      </Component>
+      <Component Id="ntevent.hlf" Guid="{9B2FF210-9CF0-4B79-B508-ECED7B51ECBD}">
+        <File Id="ntevent.hlf" Name="ntevent.hlf" KeyPath="yes" Source="plugins2\ntevent\ntevent.hlf" />
+      </Component>
+      <Component Id="ntevent.lng" Guid="{4244DA6C-B051-46E1-BF23-585EACFEBB87}">
+        <File Id="ntevent.lng" Name="ntevent.lng" KeyPath="yes" Source="plugins2\ntevent\ntevent.lng" />
+      </Component>
+      <Component Id="ntevent.map" Guid="{968B5186-A434-45EE-8C2E-232BE3B1C8E7}">
+        <File Id="ntevent.map" Name="ntevent.map" KeyPath="yes" Source="plugins2\ntevent\ntevent.map" />
+      </Component>
+      <Component Id="nteventr.hlf" Guid="{19FD82D6-7452-457C-8514-79030BC7378A}">
+        <File Id="nteventr.hlf" Name="nteventr.hlf" KeyPath="yes" Source="plugins2\ntevent\nteventr.hlf" />
+      </Component>
+      <Component Id="nteventr.lng" Guid="{609EB561-16C7-4251-9B34-CCD5673E7A59}">
+        <File Id="nteventr.lng" Name="nteventr.lng" KeyPath="yes" Source="plugins2\ntevent\nteventr.lng" />
+      </Component>
+    </Directory>
+    <Directory Id="picviewadv" Name="picviewadv">
+      <Component Id="COPYING_5" Guid="{4260CB24-E456-4198-8D97-BD42882EA473}">
+        <File Id="COPYING_5" Name="COPYING" KeyPath="yes" Source="plugins2\picviewadv\COPYING" />
+      </Component>
+      <Component Id="file_id.diz_30" Guid="{830E7E13-91B2-43F7-BC30-D1E541FE8392}">
+        <File Id="file_id.diz_30" Name="file_id.diz" KeyPath="yes" Source="plugins2\picviewadv\file_id.diz" />
+      </Component>
+      <Component Id="history.txt_17" Guid="{356F3834-1DB2-476E-85D0-F896D463625A}">
+        <File Id="history.txt_17" Name="history.txt" KeyPath="yes" Source="plugins2\picviewadv\history.txt" />
+      </Component>
+      <Component Id="libgfl220.dll" Guid="{2C56928C-6C67-4747-BFE8-3D23560093EA}">
+        <File Id="libgfl220.dll" Name="libgfl220.dll" KeyPath="yes" Source="plugins2\picviewadv\libgfl220.dll" />
+      </Component>
+      <Component Id="PicViewAdv.dll" Guid="{5938D7FC-7FCD-44DE-BE8E-500AA99AEFDD}">
+        <File Id="PicViewAdv.dll" Name="PicViewAdv.dll" KeyPath="yes" Source="plugins2\picviewadv\PicViewAdv.dll" />
+      </Component>
+      <Component Id="PicViewAdv.lng" Guid="{9D1163AC-4967-4190-B3E0-C1F02E56E641}">
+        <File Id="PicViewAdv.lng" Name="PicViewAdv.lng" KeyPath="yes" Source="plugins2\picviewadv\PicViewAdv.lng" />
+      </Component>
+      <Component Id="PicViewAdv.map" Guid="{C1FBC57B-9062-44EC-A096-C807EC42E2F8}">
+        <File Id="PicViewAdv.map" Name="PicViewAdv.map" KeyPath="yes" Source="plugins2\picviewadv\PicViewAdv.map" />
+      </Component>
+      <Component Id="readme.txt_17" Guid="{10843A2D-29BB-4F93-BEDD-67949C697027}">
+        <File Id="readme.txt_17" Name="readme.txt" KeyPath="yes" Source="plugins2\picviewadv\readme.txt" />
+      </Component>
+    </Directory>
+    <Directory Id="ppcbrowser" Name="ppcbrowser">
+      <Component Id="PPCBrowser.dll" Guid="{E7372071-3110-414F-9F14-95DE79166354}">
+        <File Id="PPCBrowser.dll" Name="PPCBrowser.dll" KeyPath="yes" Source="plugins2\ppcbrowser\PPCBrowser.dll" />
+      </Component>
+      <Component Id="PPCBrowser.hlf" Guid="{1C718798-EB86-4484-9284-2C5460DE8044}">
+        <File Id="PPCBrowser.hlf" Name="PPCBrowser.hlf" KeyPath="yes" Source="plugins2\ppcbrowser\PPCBrowser.hlf" />
+      </Component>
+      <Component Id="PPCBrowserEng.lng" Guid="{253087FD-D91A-420A-AEF8-F59EC7709143}">
+        <File Id="PPCBrowserEng.lng" Name="PPCBrowserEng.lng" KeyPath="yes" Source="plugins2\ppcbrowser\PPCBrowserEng.lng" />
+      </Component>
+      <Component Id="PPCBrowserRus.lng" Guid="{08E5A9EA-C5EA-4A3F-A930-C0413FED4338}">
+        <File Id="PPCBrowserRus.lng" Name="PPCBrowserRus.lng" KeyPath="yes" Source="plugins2\ppcbrowser\PPCBrowserRus.lng" />
+      </Component>
+      <Component Id="ReadMe.txt_18" Guid="{2F88B094-27BC-4E43-AF71-D8F8E7FFA851}">
+        <File Id="ReadMe.txt_18" Name="ReadMe.txt" KeyPath="yes" Source="plugins2\ppcbrowser\ReadMe.txt" />
+      </Component>
+      <Component Id="WhatsNew.txt_9" Guid="{F8CAF9E7-160D-4D59-B3AD-7C1672339597}">
+        <File Id="WhatsNew.txt_9" Name="WhatsNew.txt" KeyPath="yes" Source="plugins2\ppcbrowser\WhatsNew.txt" />
+      </Component>
+      <Directory Id="Modules" Name="Modules">
+        <Component Id="control.module" Guid="{351AE2FF-E030-48BF-88D3-FDD5834FAB82}">
+          <File Id="control.module" Name="control.module" KeyPath="yes" Source="plugins2\ppcbrowser\Modules\control.module" />
+        </Component>
+        <Component Id="desktop.module" Guid="{A33C7A94-577B-4CB7-B6D9-1245304CFB82}">
+          <File Id="desktop.module" Name="desktop.module" KeyPath="yes" Source="plugins2\ppcbrowser\Modules\desktop.module" />
+        </Component>
+        <Component Id="files.module" Guid="{EC08CA9C-C059-4035-80E0-3CD80E568FD0}">
+          <File Id="files.module" Name="files.module" KeyPath="yes" Source="plugins2\ppcbrowser\Modules\files.module" />
+        </Component>
+        <Component Id="pim.ini" Guid="{E0EA5ABE-C827-4168-9BFE-4F8E07EC8AE2}">
+          <File Id="pim.ini" Name="pim.ini" KeyPath="yes" Source="plugins2\ppcbrowser\Modules\pim.ini" />
+        </Component>
+        <Component Id="pim.module" Guid="{685246F2-92E3-4293-9BFE-F26391FABF74}">
+          <File Id="pim.module" Name="pim.module" KeyPath="yes" Source="plugins2\ppcbrowser\Modules\pim.module" />
+        </Component>
+        <Component Id="registry.module" Guid="{5BB18235-5526-43FD-837C-79D6F2B8B74D}">
+          <File Id="registry.module" Name="registry.module" KeyPath="yes" Source="plugins2\ppcbrowser\Modules\registry.module" />
+        </Component>
+        <Component Id="windows.ini" Guid="{7DCD892C-67CE-449D-9BF4-CBA94118A7E4}">
+          <File Id="windows.ini" Name="windows.ini" KeyPath="yes" Source="plugins2\ppcbrowser\Modules\windows.ini" />
+        </Component>
+        <Component Id="windows.module" Guid="{2B4D0491-5D81-4704-98EF-46E3D423C4A4}">
+          <File Id="windows.module" Name="windows.module" KeyPath="yes" Source="plugins2\ppcbrowser\Modules\windows.module" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Directory Id="userman" Name="userman">
+      <Component Id="COPYING_6" Guid="{53FDD219-FB75-42DF-A259-DFD4F4F14C7D}">
+        <File Id="COPYING_6" Name="COPYING" KeyPath="yes" Source="plugins2\userman\COPYING" />
+      </Component>
+      <Component Id="file_id.diz_31" Guid="{DDD6F34D-245F-44B4-960C-4253D12D7476}">
+        <File Id="file_id.diz_31" Name="file_id.diz" KeyPath="yes" Source="plugins2\userman\file_id.diz" />
+      </Component>
+      <Component Id="history.txt_18" Guid="{7AA1F5E2-7CE6-4394-B095-021B7BAE6A9D}">
+        <File Id="history.txt_18" Name="history.txt" KeyPath="yes" Source="plugins2\userman\history.txt" />
+      </Component>
+      <Component Id="userman.dll" Guid="{E924CE8B-DB4A-482B-A93B-E515F779B5FC}">
+        <File Id="userman.dll" Name="userman.dll" KeyPath="yes" Source="plugins2\userman\userman.dll" />
+      </Component>
+      <Component Id="userman.hlf" Guid="{193FCA0A-06A7-4BE7-9731-E3EBA8D3804E}">
+        <File Id="userman.hlf" Name="userman.hlf" KeyPath="yes" Source="plugins2\userman\userman.hlf" />
+      </Component>
+      <Component Id="userman.lng" Guid="{3B9EDF46-D105-465E-8CD1-55CE5937CA52}">
+        <File Id="userman.lng" Name="userman.lng" KeyPath="yes" Source="plugins2\userman\userman.lng" />
+      </Component>
+      <Component Id="userman.map" Guid="{73B1A91C-A5A0-40FB-BA96-51AC1561D4DD}">
+        <File Id="userman.map" Name="userman.map" KeyPath="yes" Source="plugins2\userman\userman.map" />
+      </Component>
+    </Directory>
+    <Directory Id="visren" Name="visren">
+      <Component Id="Dialog.nfo" Guid="{83D75C0F-879F-4FED-AE2B-51C14BA6FD6D}">
+        <File Id="Dialog.nfo" Name="Dialog.nfo" KeyPath="yes" Source="plugins2\visren\Dialog.nfo" />
+      </Component>
+      <Component Id="pcre.dll" Guid="{CF53088B-48C2-4FE0-B571-2AA5077764CA}">
+        <File Id="pcre.dll" Name="pcre.dll" KeyPath="yes" Source="plugins2\visren\pcre.dll" />
+      </Component>
+      <Component Id="PCRE_Syntax.htm" Guid="{3C18BFF7-44A1-4EB6-BC81-C5A2086478A5}">
+        <File Id="PCRE_Syntax.htm" Name="PCRE_Syntax.htm" KeyPath="yes" Source="plugins2\visren\PCRE_Syntax.htm" />
+      </Component>
+      <Component Id="Readme.txt_19" Guid="{97B08B6C-D4E3-47CD-A9C7-7F813E98E19B}">
+        <File Id="Readme.txt_19" Name="Readme.txt" KeyPath="yes" Source="plugins2\visren\Readme.txt" />
+      </Component>
+      <Component Id="TechInfo.reg_2" Guid="{1128AA3E-4C39-480C-A6DF-1A18D37A60CD}">
+        <File Id="TechInfo.reg_2" Name="TechInfo.reg" KeyPath="yes" Source="plugins2\visren\TechInfo.reg" />
+      </Component>
+      <Component Id="VisRen.dll" Guid="{BCA91C0E-6857-4DEE-8FA0-078A31931604}">
+        <File Id="VisRen.dll" Name="VisRen.dll" KeyPath="yes" Source="plugins2\visren\VisRen.dll" />
+      </Component>
+      <Component Id="VisRen.map" Guid="{3BAA5464-B9F2-4AD1-AEDE-0FDF2EA2B8BA}">
+        <File Id="VisRen.map" Name="VisRen.map" KeyPath="yes" Source="plugins2\visren\VisRen.map" />
+      </Component>
+      <Component Id="VisRenEng.hlf" Guid="{A4FA8BDC-18E8-47F0-8101-B0BF7F79044A}">
+        <File Id="VisRenEng.hlf" Name="VisRenEng.hlf" KeyPath="yes" Source="plugins2\visren\VisRenEng.hlf" />
+      </Component>
+      <Component Id="VisRenEng.lng" Guid="{846AFF07-9F30-4478-9839-4BE6FBD10D60}">
+        <File Id="VisRenEng.lng" Name="VisRenEng.lng" KeyPath="yes" Source="plugins2\visren\VisRenEng.lng" />
+      </Component>
+      <Component Id="VisRenRus.hlf" Guid="{F6FE7605-55DA-41FE-AC30-67524D974552}">
+        <File Id="VisRenRus.hlf" Name="VisRenRus.hlf" KeyPath="yes" Source="plugins2\visren\VisRenRus.hlf" />
+      </Component>
+      <Component Id="VisRenRus.lng" Guid="{7FA0F01F-EF63-4EF6-AC8A-D9A9B7F5024F}">
+        <File Id="VisRenRus.lng" Name="VisRenRus.lng" KeyPath="yes" Source="plugins2\visren\VisRenRus.lng" />
+      </Component>
+      <Component Id="WhatsNew_Rus.txt" Guid="{CFF8EAB5-2481-46E7-8F02-74D9E41E9558}">
+        <File Id="WhatsNew_Rus.txt" Name="WhatsNew_Rus.txt" KeyPath="yes" Source="plugins2\visren\WhatsNew_Rus.txt" />
+      </Component>
+    </Directory>
+    <Directory Id="visualizer" Name="visualizer">
+      <Component Id="COPYING_7" Guid="{395661D0-2309-4874-BABB-841405A748CF}">
+        <File Id="COPYING_7" Name="COPYING" KeyPath="yes" Source="plugins2\visualizer\COPYING" />
+      </Component>
+      <Component Id="file_id.diz_32" Guid="{6B6534F3-4EBF-4EA3-814C-6BCB1ECE9403}">
+        <File Id="file_id.diz_32" Name="file_id.diz" KeyPath="yes" Source="plugins2\visualizer\file_id.diz" />
+      </Component>
+      <Component Id="history.txt_19" Guid="{C6EA2834-D318-44CF-BB77-2A847810A124}">
+        <File Id="history.txt_19" Name="history.txt" KeyPath="yes" Source="plugins2\visualizer\history.txt" />
+      </Component>
+      <Component Id="readme.txt_20" Guid="{2D1DC847-2B1D-472B-85DC-6D2133D458CF}">
+        <File Id="readme.txt_20" Name="readme.txt" KeyPath="yes" Source="plugins2\visualizer\readme.txt" />
+      </Component>
+      <Component Id="todo_2" Guid="{E4BE4351-0CF6-44AE-AEA3-D3B4665EAF6F}">
+        <File Id="todo_2" Name="todo" KeyPath="yes" Source="plugins2\visualizer\todo" />
+      </Component>
+      <Component Id="Visualizer.dll" Guid="{000C9C76-434E-4C7E-BC54-37B701D9E2EC}">
+        <File Id="Visualizer.dll" Name="Visualizer.dll" KeyPath="yes" Source="plugins2\visualizer\Visualizer.dll" />
+      </Component>
+      <Component Id="Visualizer.lng" Guid="{199E13DF-7D5A-4676-A093-EB93E5205D4B}">
+        <File Id="Visualizer.lng" Name="Visualizer.lng" KeyPath="yes" Source="plugins2\visualizer\Visualizer.lng" />
+      </Component>
+      <Component Id="Visualizer.map" Guid="{D01B1601-FB8F-465D-A4F6-33D5F70D62FC}">
+        <File Id="Visualizer.map" Name="Visualizer.map" KeyPath="yes" Source="plugins2\visualizer\Visualizer.map" />
+      </Component>
+    </Directory>
   </Directory>
 </Include>
