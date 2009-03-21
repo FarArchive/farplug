@@ -107,7 +107,7 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("UCharMap", "Russian");
   UPDATE_FEATURE("yac", "Russian");
   UPDATE_FEATURE("Docs", "ConEmu");
-  UPDATE_FEATURE("ConEmu", "Russian");
+  UPDATE_FEATURE("ConEmuPlugin", "Russian");
   UPDATE_FEATURE("ConMan", "Russian");
   UPDATE_FEATURE("airbrush", "FExcept");
   UPDATE_FEATURE("c.fmt", "FExcept");
