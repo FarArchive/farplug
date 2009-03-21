@@ -74,6 +74,9 @@
         <ComponentRef Id="FarHun.hlf" />
         <ComponentRef Id="FarHun.lng" />
       </Feature>
+      <Feature Id="Polish" Level="2" Title="Polish" AllowAdvertise="no">
+        <ComponentRef Id="FarPol.lng" />
+      </Feature>
     </Feature>
     <?ifdef bundle ?>
     <Feature Id="ConEmu" Level="2" Title="ConEmu" AllowAdvertise="no" Description="Console emulator">

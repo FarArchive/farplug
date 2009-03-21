@@ -36,6 +36,9 @@
   <Component Id="FarHun.lng" Guid="{75B1C70E-82B9-4CAB-890A-05DD9F67C235}">
     <File Id="FarHun.lng" Name="FarHun.lng" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarHun.lng" />
   </Component>
+  <Component Id="FarPol.lng" Guid="{DD3501E6-D072-4E46-95F8-DE9AF6CB7618}">
+    <File Id="FarPol.lng" Name="FarPol.lng" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarPol.lng" />
+  </Component>
   <Component Id="FarRus.hlf" Guid="{52BE3AC4-4585-45DE-A067-D72E1B7D12F6}">
     <File Id="FarRus.hlf" Name="FarRus.hlf" KeyPath="yes" Source="unicode_far\Release.$(var.Suffix).vc\FarRus.hlf" />
   </Component>
