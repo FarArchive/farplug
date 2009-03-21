@@ -12,7 +12,11 @@
     <Condition Message="$(var.Product) requires Windows 2000 or above."><![CDATA[NOT Version9X AND (VersionNT>=500)]]></Condition>
     <Binary Id="CustomActions.dll" SourceFile="CustomActions.dll"/>
     <CustomAction Id="UpdateFeatureState" BinaryKey="CustomActions.dll" DllEntry="UpdateFeatureState"/>
-    <CustomAction Id="Optimize" BinaryKey="CustomActions.dll" DllEntry="Optimize" />
+    <CustomAction Id="Optimize" BinaryKey="CustomActions.dll" DllEntry="Optimize"/>
+    <?ifdef bundle ?>
+    <CustomAction Id="BCopyInstall" FileKey="bcsvc.exe" ExeCommand="/i" Execute="deferred" Impersonate="no" Return="ignore"/>
+    <CustomAction Id="BCopyUninstall" FileKey="bcsvc.exe" ExeCommand="/R" Execute="deferred" Impersonate="no" Return="ignore"/>
+    <?endif?>
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder">
         <Directory Id="INSTALLDIR" Name="Far">
@@ -33,6 +37,11 @@
           <Component Id="ClearPluginsCache" Guid="cfc3ab7b-fecc-4fce-b178-98f82afb9bac">
             <RemoveRegistryKey Root="HKCU" Key="Software\Far2\PluginsCache" Action="removeOnInstall"/>
           </Component>
+          <?ifdef bundle ?>
+          <Component Id="ConMan.lnk" Guid="{01f85c2c-9f1d-4d93-8465-833a85382373}">
+            <Shortcut Id="ConMan.lnk" Name="ConMan.lnk" Target="[INSTALLDIR]\ConEmu.exe" Arguments="/ConMan /cmd Far" WorkingDirectory="INSTALLDIR"/>
+          </Component>
+          <?endif?>
         </Directory>
       </Directory>
     </Directory>
@@ -44,6 +53,10 @@
       <Custom Action="UpdateFeatureState" After="CostFinalize"/>
       <Custom Action="Optimize" After="InstallFinalize"/>
       <RemoveExistingProducts Before="InstallInitialize"/>
+      <?ifdef bundle ?>
+      <Custom Action="BCopyInstall" After="InstallFiles"><![CDATA[(?bcsvc.exe <> 3) AND ($bcsvc.exe = 3)]]></Custom>
+      <Custom Action="BCopyUninstall" Before="RemoveFiles"><![CDATA[(?bcsvc.exe = 3) AND ($bcsvc.exe = 2)]]></Custom>
+      <?endif?>
     </InstallExecuteSequence>
     <UIRef Id="MyWixUI_FeatureTree"/>
     <UIRef Id="WixUI_ErrorProgressText"/>

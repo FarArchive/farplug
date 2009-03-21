@@ -75,6 +75,7 @@
         <ComponentRef Id="FarHun.lng" />
       </Feature>
     </Feature>
+    <?ifdef bundle ?>
     <Feature Id="ConEmu" Level="2" Title="ConEmu" AllowAdvertise="no" Description="Console emulator">
       <ComponentRef Id="ConEmu.exe" />
       <Feature Id="DocsConEmu" Level="2" Display="hidden" AllowAdvertise="no">
@@ -112,6 +113,7 @@
         </Feature>
       </Feature>
     </Feature>
+    <?endif?>
     <Feature Id="Plugins" Level="1" Display="expand" Title="Plugins" AllowAdvertise="no" Description="Standard plugins">
       <Feature Id="Editor" Level="1" Title="Editor" AllowAdvertise="no" Description="Editor plugins">
         <Feature Id="Align" Level="1" Title="Align" AllowAdvertise="no" Description="Text block formatter">
@@ -429,6 +431,7 @@
         <ComponentRef Id="changelog_18" />
       </Feature>
     </Feature>
+    <?ifdef bundle ?>
     <Feature Id="Plugins2" Level="2" Display="expand" Title="Additional plugins" AllowAdvertise="no" Description="Additional 3rd party plugins">
       <Feature Id="_7_Zip" Level="2" Title="7-Zip Alternative" AllowAdvertise="no" Description="Archive support from 7-Zip project: 7z, ZIP, RAR, CAB, ARJ, GZIP, BZIP2, Z, TAR, CPIO, RPM and DEB.">
         <ComponentRef Id="_7_ZipEng.hlf" />
@@ -1258,5 +1261,6 @@
         <ComponentRef Id="yac_ru.lng" />
       </Feature>
     </Feature>
+    <?endif?>
   </Feature>
 </Include>

@@ -71,10 +71,88 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("Network", "Changelogs");
   UPDATE_FEATURE("Proclist", "Changelogs");
   UPDATE_FEATURE("TmpPanel", "Changelogs");
+#ifdef bundle
+  UPDATE_FEATURE("_7_Zip", "Russian");
+  UPDATE_FEATURE("_7_Zip", "FExcept");
+  UPDATE_FEATURE("AltHistory", "Russian");
+  UPDATE_FEATURE("Colorer", "Russian");
+  UPDATE_FEATURE("Colorer", "FExcept");
+  UPDATE_FEATURE("FarSvc", "Russian");
+  UPDATE_FEATURE("FarTrans", "Russian");
+  UPDATE_FEATURE("FileCopyEx", "Russian");
+  UPDATE_FEATURE("FileCopyEx", "FExcept");
+  UPDATE_FEATURE("ntfsfile", "Russian");
+  UPDATE_FEATURE("ntfsfile", "FExcept");
+  UPDATE_FEATURE("PEDITOR", "Russian");
+  UPDATE_FEATURE("Registry", "Russian");
+  if (MsiSetFeatureState(h_install, "RegistryItalian", INSTALLSTATE_ABSENT) != ERROR_SUCCESS) return ERROR_INSTALL_FAILURE;
+  UPDATE_FEATURE("RESearch", "Russian");
+  UPDATE_FEATURE("Resource", "Russian");
+  UPDATE_FEATURE("UnInstall", "Russian");
+  UPDATE_FEATURE("UnInstall", "FExcept");
+  UPDATE_FEATURE("wmexplorer", "Russian");
+  UPDATE_FEATURE("wmexplorer", "FExcept");
+  UPDATE_FEATURE("FarHints", "Russian");
+  UPDATE_FEATURE("FarHintsCursors", "Russian");
+  UPDATE_FEATURE("FarHintsFolders", "Russian");
+  UPDATE_FEATURE("FarHintsImage", "Russian");
+  UPDATE_FEATURE("FarHintsMP3", "Russian");
+  UPDATE_FEATURE("FarHintsProcess", "Russian");
+  UPDATE_FEATURE("FarHintsVerInfo", "Russian");
+  UPDATE_FEATURE("FontMan", "Russian");
+  UPDATE_FEATURE("MoreHistory", "Russian");
+  UPDATE_FEATURE("Noisy", "Russian");
+  UPDATE_FEATURE("Opera", "Russian");
+  UPDATE_FEATURE("qPlayEx", "Russian");
+  UPDATE_FEATURE("UCharMap", "Russian");
+  UPDATE_FEATURE("yac", "Russian");
+  UPDATE_FEATURE("Docs", "ConEmu");
+  UPDATE_FEATURE("ConEmu", "Russian");
+  UPDATE_FEATURE("ConMan", "Russian");
+  UPDATE_FEATURE("airbrush", "FExcept");
+  UPDATE_FEATURE("c.fmt", "FExcept");
+  UPDATE_FEATURE("html.fmt", "FExcept");
+  UPDATE_FEATURE("pas.fmt", "FExcept");
+  UPDATE_FEATURE("php.fmt", "FExcept");
+  UPDATE_FEATURE("re2c.fmt", "FExcept");
+  UPDATE_FEATURE("sql.fmt", "FExcept");
+  UPDATE_FEATURE("yacclex.fmt", "FExcept");
+  UPDATE_FEATURE("zcustom.fmt", "FExcept");
+  UPDATE_FEATURE("bcopy", "Russian");
+  UPDATE_FEATURE("bcopy", "FExcept");
+  UPDATE_FEATURE("BlockIndent", "Russian");
+  UPDATE_FEATURE("BlockIndent", "FExcept");
+  UPDATE_FEATURE("calc", "Russian");
+  UPDATE_FEATURE("dialogtools", "FExcept");
+  UPDATE_FEATURE("EditCmpl", "Russian");
+  UPDATE_FEATURE("EditCmpl", "FExcept");
+  UPDATE_FEATURE("esc", "Russian");
+  if (MsiSetFeatureState(h_install, "escUkrainian", INSTALLSTATE_ABSENT) != ERROR_SUCCESS) return ERROR_INSTALL_FAILURE;
+  UPDATE_FEATURE("esc", "FExcept");
+  UPDATE_FEATURE("esc_tsc_mini", "FExcept");
+  UPDATE_FEATURE("farspell", "Russian");
+  UPDATE_FEATURE("farspell", "FExcept");
+  UPDATE_FEATURE("MailView", "Russian");
+  UPDATE_FEATURE("MailView", "FExcept");
+  UPDATE_FEATURE("Folder.mvp", "FExcept");
+  UPDATE_FEATURE("oe_dbx.mvp", "FExcept");
+  UPDATE_FEATURE("pkt.mvp", "FExcept");
+  UPDATE_FEATURE("Squish.mvp", "FExcept");
+  UPDATE_FEATURE("TheBat.mvp", "FExcept");
+  UPDATE_FEATURE("Unix.mvp", "FExcept");
+  UPDATE_FEATURE("ntevent", "Russian");
+  UPDATE_FEATURE("ntevent", "FExcept");
+  UPDATE_FEATURE("PicViewAdv", "FExcept");
+  UPDATE_FEATURE("PPCBrowser", "Russian");
+  UPDATE_FEATURE("userman", "FExcept");
+  UPDATE_FEATURE("VisRen", "Russian");
+  UPDATE_FEATURE("VisRen", "FExcept");
+  UPDATE_FEATURE("Visualizer", "FExcept");
+#endif
   return ERROR_SUCCESS;
 }
 
-const char* dll_exclude[] = {
+const char* exclude_list[] = {
   "bass.dll",
   "bass_aac.inp",
   "bass_ac3.inp",
@@ -93,14 +171,7 @@ bool cmp(const char* s1, const char* s2) {
   return stricmp(s1, s2) < 0;
 }
 
-bool check_dll(const string& file_name) {
-  LOADED_IMAGE* image = ImageLoad(file_name.c_str(), "");
-  bool res = (image != NULL) && (image->Characteristics & IMAGE_FILE_DLL);
-  if (image) ImageUnload(image);
-  return res;
-}
-
-void gen_dll_list(const string& path, list<string>& dll_list) {
+void gen_dll_list(const string& path, list<string>& dll_list, list<string>& exe_list) {
   WIN32_FIND_DATA find_data;
   HANDLE h_find = FindFirstFile((path + "\\*").c_str(), &find_data);
   if (h_find == INVALID_HANDLE_VALUE) return;
@@ -108,11 +179,18 @@ void gen_dll_list(const string& path, list<string>& dll_list) {
     if ((strcmp(find_data.cFileName, ".") != 0) && (strcmp(find_data.cFileName, "..") != 0)) {
       string file_name = path + '\\' + find_data.cFileName;
       if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-        gen_dll_list(file_name, dll_list);
+        gen_dll_list(file_name, dll_list, exe_list);
       }
       else {
-        if (!binary_search(dll_exclude, dll_exclude + ARRAYSIZE(dll_exclude), find_data.cFileName, cmp)) {
-          if (check_dll(file_name)) dll_list.push_back(file_name);
+        if (!binary_search(exclude_list, exclude_list + ARRAYSIZE(exclude_list), find_data.cFileName, cmp)) {
+          LOADED_IMAGE* image = ImageLoad(file_name.c_str(), "");
+          if (image) {
+            if (!image->fSystemImage && !image->fDOSImage) {
+              if (image->Characteristics & IMAGE_FILE_DLL) dll_list.push_back(file_name);
+              else exe_list.push_back(file_name);
+            }
+            ImageUnload(image);
+          }
         }
       }
     }
@@ -135,16 +213,14 @@ UINT __stdcall Optimize(MSIHANDLE h_install) {
   char install_dir[MAX_PATH];
   DWORD install_dir_size = MAX_PATH;
   if (MsiGetProperty(h_install, "INSTALLDIR", install_dir, &install_dir_size) != ERROR_SUCCESS) return ERROR_INSTALL_FAILURE;
-  string plugin_dir(install_dir);
-  if (plugin_dir[plugin_dir.size() - 1] != '\\') plugin_dir += '\\';
-  plugin_dir += "plugins";
+  if (install_dir[install_dir_size - 1] == '\\') install_dir[install_dir_size - 1] = 0;
 
-  list<string> dll_list;
-  gen_dll_list(plugin_dir, dll_list);
+  list<string> dll_list, exe_list;
+  gen_dll_list(install_dir, dll_list, exe_list);
 
   PMSIHANDLE h_progress_rec = MsiCreateRecord(4);
   MsiRecordSetInteger(h_progress_rec, 1, 0);
-  MsiRecordSetInteger(h_progress_rec, 2, dll_list.size() * 2);
+  MsiRecordSetInteger(h_progress_rec, 2, dll_list.size() * 2 + exe_list.size());
   MsiRecordSetInteger(h_progress_rec, 3, 0);
   MsiRecordSetInteger(h_progress_rec, 4, 0);
   MsiProcessMessage(h_install, INSTALLMESSAGE_PROGRESS, h_progress_rec);
@@ -172,6 +248,16 @@ UINT __stdcall Optimize(MSIHANDLE h_install) {
 
   MsiRecordSetString(h_action_rec, 1, "bind");
   for (list<string>::const_iterator file_name = dll_list.begin(); file_name != dll_list.end(); file_name++) {
+    MsiRecordSetString(h_action_rec, 2, file_name->c_str());
+    if (BindImage(file_name->c_str(), "", "")) {
+      MsiRecordSetString(h_action_rec, 3, "ok");
+    }
+    else {
+      MsiRecordSetInteger(h_action_rec, 3, GetLastError());
+    }
+    MsiProcessMessage(h_install, INSTALLMESSAGE_ACTIONDATA, h_action_rec);
+  }
+  for (list<string>::const_iterator file_name = exe_list.begin(); file_name != exe_list.end(); file_name++) {
     MsiRecordSetString(h_action_rec, 2, file_name->c_str());
     if (BindImage(file_name->c_str(), "", "")) {
       MsiRecordSetString(h_action_rec, 3, "ok");
