@@ -53,6 +53,7 @@ PanelState save_state(HANDLE h_panel) {
         state.top_panel_file = CompositeFileName(ppi->FindData);
       }
     }
+    state.selected_files.extend(pi.SelectedItemsNumber);
     for (int i = 0; i < pi.SelectedItemsNumber; i++) {
       PluginPanelItem* ppi = far_get_selected_panel_item(h_panel, i, pi);
       if (ppi) {
