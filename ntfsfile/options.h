@@ -27,6 +27,7 @@ struct FilePanelMode {
   bool use_cache;
   bool default_mft_mode;
   bool backward_mft_scan;
+  bool flat_mode_auto_off;
   UnicodeString cache_dir;
 };
 

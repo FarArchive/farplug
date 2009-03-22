@@ -624,6 +624,7 @@ void FilePanel::change_directory(const UnicodeString& target_dir, bool search_mo
 #ifdef FARAPI17
   current_dir_oem = unicode_to_oem(current_dir);
 #endif // FARAPI17
+  if (g_file_panel_mode.flat_mode_auto_off) flat_mode = false;
 }
 
 void FilePanel::fill_plugin_info(OpenPluginInfo* info) {
@@ -689,6 +690,7 @@ private:
   int backward_mft_scan_ctrl_id;
   int cache_dir_lbl_id;
   int cache_dir_ctrl_id;
+  int flat_mode_auto_off_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -711,6 +713,7 @@ private:
       dlg->mode.default_mft_mode = dlg->get_check(dlg->default_mft_mode_ctrl_id);
       dlg->mode.backward_mft_scan = dlg->get_check(dlg->backward_mft_scan_ctrl_id);
       dlg->mode.cache_dir = dlg->get_text(dlg->cache_dir_ctrl_id);
+      dlg->mode.flat_mode_auto_off = dlg->get_check(dlg->flat_mode_auto_off_ctrl_id);
     }
     else if ((msg == DN_BTNCLICK) && (param1 == dlg->show_streams_ctrl_id)) {
       dlg->enable(dlg->show_main_stream_ctrl_id, param2 != 0);
@@ -786,6 +789,8 @@ public:
     default_mft_mode_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_DEFAULT_MFT_MODE), mode.default_mft_mode);
     spacer(2);
     backward_mft_scan_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_BACKWARD_MFT_SCAN), mode.backward_mft_scan);
+    new_line();
+    flat_mode_auto_off_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_FLAT_MODE_AUTO_OFF), mode.flat_mode_auto_off);
     new_line();
     separator();
     new_line();
