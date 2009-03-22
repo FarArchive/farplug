@@ -541,6 +541,19 @@
         <ComponentRef Id="TechInfoRus.txt" />
         <ComponentRef Id="WhatsNewRus.txt" />
       </Feature>
+      <Feature Id="AutoComplete" Level="2" Title="AutoComplete" AllowAdvertise="no" Description="Unix-like filename completion">
+        <ComponentRef Id="cmpl_new.reg" />
+        <ComponentRef Id="compleng.hlf" />
+        <ComponentRef Id="compleng.lng" />
+        <ComponentRef Id="complete.dll" />
+        <ComponentRef Id="complete.reg" />
+        <ComponentRef Id="WhatsNew.eng" />
+        <Feature Id="completeRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="complrus.hlf" />
+          <ComponentRef Id="complrus.lng" />
+          <ComponentRef Id="WhatsNew.rus_2" />
+        </Feature>
+      </Feature>
       <Feature Id="bcopy" Level="2" Title="bcopy" AllowAdvertise="no" Description="Background copy">
         <ComponentRef Id="bcopy.dll" />
         <ComponentRef Id="bcopy.hlf" />
@@ -572,21 +585,6 @@
         </Feature>
         <Feature Id="bcopyFExcept" Level="2" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="bcopy.map" />
-        </Feature>
-      </Feature>
-      <Feature Id="BlockIndent" Level="2" Title="BlockIndent" AllowAdvertise="no" Description="Block indent">
-        <ComponentRef Id="BlockIndent.dll" />
-        <ComponentRef Id="BlockIndentEng.lng" />
-        <ComponentRef Id="COPYING_1" />
-        <ComponentRef Id="file_id.diz_22" />
-        <ComponentRef Id="history.txt_12" />
-        <ComponentRef Id="ReadMe.Eng.txt_3" />
-        <Feature Id="BlockIndentRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="BlockIndentRus.lng" />
-          <ComponentRef Id="ReadMe.Rus.txt_4" />
-        </Feature>
-        <Feature Id="BlockIndentFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="BlockIndent.map" />
         </Feature>
       </Feature>
       <Feature Id="calc" Level="2" Title="Calculator" AllowAdvertise="no" Description="Calculator">
@@ -658,6 +656,18 @@
         <ComponentRef Id="dtEng.lng" />
         <Feature Id="dialogtoolsFExcept" Level="2" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="dt.map" />
+        </Feature>
+      </Feature>
+      <Feature Id="drgndrop" Level="2" Title="Drag'n'drop" AllowAdvertise="no" Description="Drag and drop operations between FAR manager and GUI-based applications">
+        <ComponentRef Id="dndeng.lng" />
+        <ComponentRef Id="drgndrop.dll" />
+        <ComponentRef Id="drgndrop.hook" />
+        <ComponentRef Id="holder.dnd" />
+        <Feature Id="drgndropRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="dndrus.lng" />
+        </Feature>
+        <Feature Id="drgndropFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="drgndrop.map" />
         </Feature>
       </Feature>
       <Feature Id="DVDPanel" Level="2" Title="DVDPanel" AllowAdvertise="no" Description="Burn CD/DVD using external tools: NeroCmd, ImgBurn">
@@ -1163,6 +1173,108 @@
         <ComponentRef Id="Torrent.hlf" />
         <ComponentRef Id="TorrentEng.lng" />
         <ComponentRef Id="TorrentU.dll" />
+      </Feature>
+      <Feature Id="true_tpl" Level="2" Title="True Template" AllowAdvertise="no" Description="Smart indent and macro expansion">
+        <ComponentRef Id="file_id.diz_33" />
+        <ComponentRef Id="readme.___" />
+        <ComponentRef Id="true_tpl_eng.lng" />
+        <ComponentRef Id="true_tpl.dll" />
+        <ComponentRef Id="true_tpl.txt" />
+        <ComponentRef Id="true_tpl.xml" />
+        <ComponentRef Id="WHATSNEW.TXT_10" />
+        <ComponentRef Id="true_beautifiers.xml" />
+        <ComponentRef Id="true_compilers.xml" />
+        <ComponentRef Id="true_default.xml" />
+        <ComponentRef Id="true_defines.xml" />
+        <ComponentRef Id="true_global.xml" />
+        <ComponentRef Id="ANTLR2_calculator_parser__C__.g" />
+        <ComponentRef Id="ANTLR2_calculator_parser__C___.g" />
+        <ComponentRef Id="ANTLR2_calculator_parser__Java_.g" />
+        <ComponentRef Id="ANTLR2_calculator_parser__Python_.g" />
+        <ComponentRef Id="AWT_applet_application.java" />
+        <ComponentRef Id="Blank.c" />
+        <ComponentRef Id="Blank.cs" />
+        <ComponentRef Id="Blank.java" />
+        <ComponentRef Id="Console_application.asm" />
+        <ComponentRef Id="Console_application.c" />
+        <ComponentRef Id="Console_application.cs" />
+        <ComponentRef Id="Console_application.java" />
+        <ComponentRef Id="Console_application.php" />
+        <ComponentRef Id="Console_application.pl" />
+        <ComponentRef Id="Console_application.py" />
+        <ComponentRef Id="Console_application.rb" />
+        <ComponentRef Id="Console_application.s" />
+        <ComponentRef Id="Device_driver__header_.c" />
+        <ComponentRef Id="Device_driver__source_.c" />
+        <ComponentRef Id="Doxyfile_default" />
+        <ComponentRef Id="Doxyfile_full" />
+        <ComponentRef Id="Export_file__GNU_version_.def" />
+        <ComponentRef Id="Export_file__VCC_version_.def" />
+        <ComponentRef Id="Flex_parser.l" />
+        <ComponentRef Id="GLUT_application.c" />
+        <ComponentRef Id="header_base" />
+        <ComponentRef Id="header_cvs" />
+        <ComponentRef Id="header_gnu" />
+        <ComponentRef Id="header_java" />
+        <ComponentRef Id="Inline_function.s" />
+        <ComponentRef Id="Lemon_parser.y" />
+        <ComponentRef Id="makefile__Cygwin_dll_.mak" />
+        <ComponentRef Id="makefile__Cygwin_exe_.mak" />
+        <ComponentRef Id="makefile__Cygwin_lib_.mak" />
+        <ComponentRef Id="makefile__MinGW_dll_.mak" />
+        <ComponentRef Id="makefile__MinGW_exe_.mak" />
+        <ComponentRef Id="makefile__MinGW_lib_.mak" />
+        <ComponentRef Id="makefile__Unix_dll_.mak" />
+        <ComponentRef Id="makefile__Unix_exe_.mak" />
+        <ComponentRef Id="makefile__Unix_lib_.mak" />
+        <ComponentRef Id="Qt_application.cpp" />
+        <ComponentRef Id="true_source_antlr.xml" />
+        <ComponentRef Id="true_source_asm.xml" />
+        <ComponentRef Id="true_source_base.xml" />
+        <ComponentRef Id="true_source_c__base.xml" />
+        <ComponentRef Id="true_source_c_.xml" />
+        <ComponentRef Id="true_source_c___base.xml" />
+        <ComponentRef Id="true_source_c___beautify.xml" />
+        <ComponentRef Id="true_source_c___win32.xml" />
+        <ComponentRef Id="true_source_c__.xml" />
+        <ComponentRef Id="true_source_def.xml" />
+        <ComponentRef Id="true_source_doxygen.xml" />
+        <ComponentRef Id="true_source_java_base.xml" />
+        <ComponentRef Id="true_source_java.xml" />
+        <ComponentRef Id="true_source_l.xml" />
+        <ComponentRef Id="true_source_mak.xml" />
+        <ComponentRef Id="true_source_php.xml" />
+        <ComponentRef Id="true_source_pl.xml" />
+        <ComponentRef Id="true_source_py.xml" />
+        <ComponentRef Id="true_source_rb.xml" />
+        <ComponentRef Id="true_source_swig.xml" />
+        <ComponentRef Id="true_source_tti.xml" />
+        <ComponentRef Id="true_source_vcproject.xml" />
+        <ComponentRef Id="true_source_y.xml" />
+        <ComponentRef Id="true_source.xml" />
+        <ComponentRef Id="Win32_application.c" />
+        <ComponentRef Id="Win32_console_application.c" />
+        <ComponentRef Id="Win32_dynamic_link_library.c" />
+        <ComponentRef Id="Win32_OpenGL_application.c" />
+        <ComponentRef Id="Clipboard_contents.txt" />
+        <ComponentRef Id="Fast_note_with_clipboard_contents.txt" />
+        <ComponentRef Id="Fast_note.txt" />
+        <ComponentRef Id="General_test.tt" />
+        <ComponentRef Id="GNU_license.txt" />
+        <ComponentRef Id="shortcut.url" />
+        <ComponentRef Id="true_text_base.xml" />
+        <ComponentRef Id="true_text_hlf.xml" />
+        <ComponentRef Id="true_text_msg.xml" />
+        <ComponentRef Id="true_text_tt.xml" />
+        <ComponentRef Id="true_text_txt.xml" />
+        <ComponentRef Id="true_text_url.xml" />
+        <ComponentRef Id="true_text.xml" />
+        <Feature Id="true_tplRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="true_tpl_rus.lng" />
+        </Feature>
+        <Feature Id="true_tplFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="true_tpl.map" />
+        </Feature>
       </Feature>
       <Feature Id="UCharMap" Level="2" Title="UCharMap" AllowAdvertise="no" Description="Unicode character table">
         <ComponentRef Id="file_id.diz_19" />

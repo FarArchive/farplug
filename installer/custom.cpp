@@ -120,8 +120,6 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("zcustom.fmt", "FExcept");
   UPDATE_FEATURE("bcopy", "Russian");
   UPDATE_FEATURE("bcopy", "FExcept");
-  UPDATE_FEATURE("BlockIndent", "Russian");
-  UPDATE_FEATURE("BlockIndent", "FExcept");
   UPDATE_FEATURE("calc", "Russian");
   UPDATE_FEATURE("dialogtools", "FExcept");
   UPDATE_FEATURE("EditCmpl", "Russian");
@@ -148,6 +146,11 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("VisRen", "Russian");
   UPDATE_FEATURE("VisRen", "FExcept");
   UPDATE_FEATURE("Visualizer", "FExcept");
+  UPDATE_FEATURE("complete", "Russian");
+  UPDATE_FEATURE("drgndrop", "Russian");
+  UPDATE_FEATURE("drgndrop", "FExcept");
+  UPDATE_FEATURE("true_tpl", "Russian");
+  UPDATE_FEATURE("true_tpl", "FExcept");
 #endif
   return ERROR_SUCCESS;
 }

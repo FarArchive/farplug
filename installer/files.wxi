@@ -1977,35 +1977,6 @@
         </Component>
       </Directory>
     </Directory>
-    <Directory Id="blockindent" Name="blockindent">
-      <Component Id="BlockIndent.dll" Guid="{0FC1F8C6-B6EC-4B0F-9B06-68CDA344B4E6}">
-        <File Id="BlockIndent.dll" Name="BlockIndent.dll" KeyPath="yes" Source="$(var.bundle)\blockindent\BlockIndent.dll" />
-      </Component>
-      <Component Id="BlockIndent.map" Guid="{3BA6EE5D-E0C8-4BA9-B4B3-6CA6E4FD64E9}">
-        <File Id="BlockIndent.map" Name="BlockIndent.map" KeyPath="yes" Source="$(var.bundle)\blockindent\BlockIndent.map" />
-      </Component>
-      <Component Id="BlockIndentEng.lng" Guid="{01C49AED-3A0F-443D-8EA4-CBA55489AE47}">
-        <File Id="BlockIndentEng.lng" Name="BlockIndentEng.lng" KeyPath="yes" Source="$(var.bundle)\blockindent\BlockIndentEng.lng" />
-      </Component>
-      <Component Id="BlockIndentRus.lng" Guid="{F4F90A45-718C-4DC5-BB68-118DDD2A3D1B}">
-        <File Id="BlockIndentRus.lng" Name="BlockIndentRus.lng" KeyPath="yes" Source="$(var.bundle)\blockindent\BlockIndentRus.lng" />
-      </Component>
-      <Component Id="COPYING_1" Guid="{579BC622-BCB2-4C8C-9275-89DF4D58185D}">
-        <File Id="COPYING_1" Name="COPYING" KeyPath="yes" Source="$(var.bundle)\blockindent\COPYING" />
-      </Component>
-      <Component Id="file_id.diz_22" Guid="{5B5F2042-079E-49D8-862C-4909D6AEEC38}">
-        <File Id="file_id.diz_22" Name="file_id.diz" KeyPath="yes" Source="$(var.bundle)\blockindent\file_id.diz" />
-      </Component>
-      <Component Id="history.txt_12" Guid="{59592975-9960-4DBE-8B71-006A722B0922}">
-        <File Id="history.txt_12" Name="history.txt" KeyPath="yes" Source="$(var.bundle)\blockindent\history.txt" />
-      </Component>
-      <Component Id="ReadMe.Eng.txt_3" Guid="{D26F757F-47F6-4EBE-9747-0411921888A4}">
-        <File Id="ReadMe.Eng.txt_3" Name="ReadMe.Eng.txt" KeyPath="yes" Source="$(var.bundle)\blockindent\ReadMe.Eng.txt" />
-      </Component>
-      <Component Id="ReadMe.Rus.txt_4" Guid="{B876E52C-C494-4487-8795-B99ED3DAC752}">
-        <File Id="ReadMe.Rus.txt_4" Name="ReadMe.Rus.txt" KeyPath="yes" Source="$(var.bundle)\blockindent\ReadMe.Rus.txt" />
-      </Component>
-    </Directory>
     <Directory Id="calc" Name="calc">
       <Component Id="calc.dll" Guid="{48745B02-1D17-4A82-AD4A-EE6CFF6EC846}">
         <File Id="calc.dll" Name="calc.dll" KeyPath="yes" Source="$(var.bundle)\calc\calc.dll" />
@@ -2521,6 +2492,351 @@
       <Component Id="Visualizer.map" Guid="{D01B1601-FB8F-465D-A4F6-33D5F70D62FC}">
         <File Id="Visualizer.map" Name="Visualizer.map" KeyPath="yes" Source="$(var.bundle)\visualizer\Visualizer.map" />
       </Component>
+    </Directory>
+    <Directory Id="complete" Name="complete">
+      <Component Id="cmpl_new.reg" Guid="{F4008942-2B64-495D-A877-4367BA43283D}">
+        <File Id="cmpl_new.reg" Name="cmpl_new.reg" KeyPath="yes" Source="$(var.bundle)\complete\cmpl_new.reg" />
+      </Component>
+      <Component Id="compleng.hlf" Guid="{97F0119D-AEA9-4BB2-AC17-FDE191EA6955}">
+        <File Id="compleng.hlf" Name="compleng.hlf" KeyPath="yes" Source="$(var.bundle)\complete\compleng.hlf" />
+      </Component>
+      <Component Id="compleng.lng" Guid="{86B0C632-B1C1-47BC-A020-E0A463A3AF18}">
+        <File Id="compleng.lng" Name="compleng.lng" KeyPath="yes" Source="$(var.bundle)\complete\compleng.lng" />
+      </Component>
+      <Component Id="complete.dll" Guid="{0D1648BF-5221-4A9C-AF84-871568731778}">
+        <File Id="complete.dll" Name="complete.dll" KeyPath="yes" Source="$(var.bundle)\complete\complete.dll" />
+      </Component>
+      <Component Id="complete.reg" Guid="{3C62B482-532B-426A-93F5-201B138E60D5}">
+        <File Id="complete.reg" Name="complete.reg" KeyPath="yes" Source="$(var.bundle)\complete\complete.reg" />
+      </Component>
+      <Component Id="complrus.hlf" Guid="{1061FC37-5B30-432D-8299-FD24F249D87A}">
+        <File Id="complrus.hlf" Name="complrus.hlf" KeyPath="yes" Source="$(var.bundle)\complete\complrus.hlf" />
+      </Component>
+      <Component Id="complrus.lng" Guid="{5145F473-38C1-4A64-89AF-0C6E4A48EB9A}">
+        <File Id="complrus.lng" Name="complrus.lng" KeyPath="yes" Source="$(var.bundle)\complete\complrus.lng" />
+      </Component>
+      <Component Id="WhatsNew.eng" Guid="{FC334EEF-97E2-4AFF-A3B6-1DAC0CF739C8}">
+        <File Id="WhatsNew.eng" Name="WhatsNew.eng" KeyPath="yes" Source="$(var.bundle)\complete\WhatsNew.eng" />
+      </Component>
+      <Component Id="WhatsNew.rus_2" Guid="{21D3AA2E-985E-4135-933B-07F3389D9805}">
+        <File Id="WhatsNew.rus_2" Name="WhatsNew.rus" KeyPath="yes" Source="$(var.bundle)\complete\WhatsNew.rus" />
+      </Component>
+    </Directory>
+    <Directory Id="drgndrop" Name="drgndrop">
+      <Component Id="dndeng.lng" Guid="{B88E0535-05ED-4C7E-A018-28BAB339F641}">
+        <File Id="dndeng.lng" Name="dndeng.lng" KeyPath="yes" Source="$(var.bundle)\drgndrop\dndeng.lng" />
+      </Component>
+      <Component Id="dndrus.lng" Guid="{482F6CC9-4D70-443C-A7EF-ACEA82862924}">
+        <File Id="dndrus.lng" Name="dndrus.lng" KeyPath="yes" Source="$(var.bundle)\drgndrop\dndrus.lng" />
+      </Component>
+      <Component Id="drgndrop.dll" Guid="{BC31C4A6-A75C-4FAE-8AA2-73BF41D80D8E}">
+        <File Id="drgndrop.dll" Name="drgndrop.dll" KeyPath="yes" Source="$(var.bundle)\drgndrop\drgndrop.dll" />
+      </Component>
+      <Component Id="drgndrop.hook" Guid="{AD427526-6545-404A-993B-20CD09051C52}">
+        <File Id="drgndrop.hook" Name="drgndrop.hook" KeyPath="yes" Source="$(var.bundle)\drgndrop\drgndrop.hook" />
+      </Component>
+      <Component Id="drgndrop.map" Guid="{375BF434-D912-4346-B6FC-5DDDBCBB3174}">
+        <File Id="drgndrop.map" Name="drgndrop.map" KeyPath="yes" Source="$(var.bundle)\drgndrop\drgndrop.map" />
+      </Component>
+      <Component Id="holder.dnd" Guid="{8B6060ED-1D21-4612-A42F-B8E8D4377AB3}">
+        <File Id="holder.dnd" Name="holder.dnd" KeyPath="yes" Source="$(var.bundle)\drgndrop\holder.dnd" />
+      </Component>
+    </Directory>
+    <Directory Id="true_tpl" Name="true-tpl">
+      <Component Id="file_id.diz_33" Guid="{E6C8A573-50BA-4E3B-A98D-2D3CA06AD86E}">
+        <File Id="file_id.diz_33" Name="file_id.diz" KeyPath="yes" Source="$(var.bundle)\true-tpl\file_id.diz" />
+      </Component>
+      <Component Id="readme.___" Guid="{919C8F2D-B3B8-4807-B85D-DFFE8BE138A5}">
+        <File Id="readme.___" Name="readme.!!!" KeyPath="yes" Source="$(var.bundle)\true-tpl\readme.!!!" />
+      </Component>
+      <Component Id="true_tpl_eng.lng" Guid="{EACEDD8D-63AA-4AB9-9E90-A205E1FF43F5}">
+        <File Id="true_tpl_eng.lng" Name="true-tpl-eng.lng" KeyPath="yes" Source="$(var.bundle)\true-tpl\true-tpl-eng.lng" />
+      </Component>
+      <Component Id="true_tpl_rus.lng" Guid="{0F5F6B06-27FC-415A-BA1D-85A267A29482}">
+        <File Id="true_tpl_rus.lng" Name="true-tpl-rus.lng" KeyPath="yes" Source="$(var.bundle)\true-tpl\true-tpl-rus.lng" />
+      </Component>
+      <Component Id="true_tpl.dll" Guid="{9B0FE7BF-3C54-44E8-B8ED-2431FF148A2D}">
+        <File Id="true_tpl.dll" Name="true-tpl.dll" KeyPath="yes" Source="$(var.bundle)\true-tpl\true-tpl.dll" />
+      </Component>
+      <Component Id="true_tpl.map" Guid="{EDC01F86-2E11-46E8-9100-DA8AA1EA5BD0}">
+        <File Id="true_tpl.map" Name="true-tpl.map" KeyPath="yes" Source="$(var.bundle)\true-tpl\true-tpl.map" />
+      </Component>
+      <Component Id="true_tpl.txt" Guid="{1A91B142-769A-4EF1-A364-AE1D8B6D3CC5}">
+        <File Id="true_tpl.txt" Name="true-tpl.txt" KeyPath="yes" Source="$(var.bundle)\true-tpl\true-tpl.txt" />
+      </Component>
+      <Component Id="true_tpl.xml" Guid="{E270C4F8-D44E-4104-BE11-043D8F2414C3}">
+        <File Id="true_tpl.xml" Name="true-tpl.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\true-tpl.xml" />
+      </Component>
+      <Component Id="WHATSNEW.TXT_10" Guid="{2B2EA248-8B69-419D-9FD6-32AB7275B628}">
+        <File Id="WHATSNEW.TXT_10" Name="WHATSNEW.TXT" KeyPath="yes" Source="$(var.bundle)\true-tpl\WHATSNEW.TXT" />
+      </Component>
+      <Directory Id="templates" Name="templates">
+        <Component Id="true_beautifiers.xml" Guid="{74C1AD9D-23D0-414D-9B04-9C8202DBB79C}">
+          <File Id="true_beautifiers.xml" Name="true-beautifiers.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\true-beautifiers.xml" />
+        </Component>
+        <Component Id="true_compilers.xml" Guid="{BDA22D0D-8938-4ABB-AFC2-9FDD258066DB}">
+          <File Id="true_compilers.xml" Name="true-compilers.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\true-compilers.xml" />
+        </Component>
+        <Component Id="true_default.xml" Guid="{800DB056-EA96-4F5E-80BE-92F18EAFE551}">
+          <File Id="true_default.xml" Name="true-default.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\true-default.xml" />
+        </Component>
+        <Component Id="true_defines.xml" Guid="{9A1C1535-3662-4A7D-A1E0-3F0D378E6228}">
+          <File Id="true_defines.xml" Name="true-defines.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\true-defines.xml" />
+        </Component>
+        <Component Id="true_global.xml" Guid="{8F988390-A555-4227-840E-1DA1633E00BD}">
+          <File Id="true_global.xml" Name="true-global.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\true-global.xml" />
+        </Component>
+        <Directory Id="source" Name="source">
+          <Component Id="ANTLR2_calculator_parser__C__.g" Guid="{3FF3B01D-8B8B-44BC-913B-383CE557AC47}">
+            <File Id="ANTLR2_calculator_parser__C__.g" Name="ANTLR2 calculator parser (C#).g" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\ANTLR2 calculator parser (C#).g" />
+          </Component>
+          <Component Id="ANTLR2_calculator_parser__C___.g" Guid="{72B0188C-3D75-4F67-AADB-7496B8C94912}">
+            <File Id="ANTLR2_calculator_parser__C___.g" Name="ANTLR2 calculator parser (C++).g" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\ANTLR2 calculator parser (C++).g" />
+          </Component>
+          <Component Id="ANTLR2_calculator_parser__Java_.g" Guid="{AD805804-7063-42EF-AA95-BC9976A6BB4E}">
+            <File Id="ANTLR2_calculator_parser__Java_.g" Name="ANTLR2 calculator parser (Java).g" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\ANTLR2 calculator parser (Java).g" />
+          </Component>
+          <Component Id="ANTLR2_calculator_parser__Python_.g" Guid="{877BDB99-45FA-4F4A-8E9E-C6054BA6D7B9}">
+            <File Id="ANTLR2_calculator_parser__Python_.g" Name="ANTLR2 calculator parser (Python).g" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\ANTLR2 calculator parser (Python).g" />
+          </Component>
+          <Component Id="AWT_applet_application.java" Guid="{195F50BC-EE35-43E4-9546-2613343DF240}">
+            <File Id="AWT_applet_application.java" Name="AWT applet application.java" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\AWT applet application.java" />
+          </Component>
+          <Component Id="Blank.c" Guid="{1247B4DD-D648-4708-8B46-C7519A94F826}">
+            <File Id="Blank.c" Name="Blank.c" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Blank.c" />
+          </Component>
+          <Component Id="Blank.cs" Guid="{6D417D46-6DD3-4494-B68C-820C6EB56D66}">
+            <File Id="Blank.cs" Name="Blank.cs" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Blank.cs" />
+          </Component>
+          <Component Id="Blank.java" Guid="{E53D1C87-E9F9-4A28-9C51-445DF7F92182}">
+            <File Id="Blank.java" Name="Blank.java" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Blank.java" />
+          </Component>
+          <Component Id="Console_application.asm" Guid="{8BE3B6E4-13BD-4EB4-9E0F-6221C726B761}">
+            <File Id="Console_application.asm" Name="Console application.asm" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Console application.asm" />
+          </Component>
+          <Component Id="Console_application.c" Guid="{49E6FE7C-0D62-474C-8772-13661DD4F927}">
+            <File Id="Console_application.c" Name="Console application.c" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Console application.c" />
+          </Component>
+          <Component Id="Console_application.cs" Guid="{5A90C7E9-A674-476D-87C2-31C5E0497CAF}">
+            <File Id="Console_application.cs" Name="Console application.cs" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Console application.cs" />
+          </Component>
+          <Component Id="Console_application.java" Guid="{2C4BBC3F-DB82-4C22-A399-8764CC07AFAA}">
+            <File Id="Console_application.java" Name="Console application.java" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Console application.java" />
+          </Component>
+          <Component Id="Console_application.php" Guid="{29B5F7A0-6108-450B-B75F-4E4690837B74}">
+            <File Id="Console_application.php" Name="Console application.php" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Console application.php" />
+          </Component>
+          <Component Id="Console_application.pl" Guid="{BE3A2A5C-9D7A-4E02-9815-F39A9A3AD44D}">
+            <File Id="Console_application.pl" Name="Console application.pl" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Console application.pl" />
+          </Component>
+          <Component Id="Console_application.py" Guid="{E07219DA-E84D-4308-BA2A-2B5976F7D672}">
+            <File Id="Console_application.py" Name="Console application.py" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Console application.py" />
+          </Component>
+          <Component Id="Console_application.rb" Guid="{E83A8059-20BE-4DAE-85DE-971C67326732}">
+            <File Id="Console_application.rb" Name="Console application.rb" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Console application.rb" />
+          </Component>
+          <Component Id="Console_application.s" Guid="{0CB45F87-4CEB-4162-8A6D-430D20B62664}">
+            <File Id="Console_application.s" Name="Console application.s" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Console application.s" />
+          </Component>
+          <Component Id="Device_driver__header_.c" Guid="{3AAF8998-7CC8-4440-892C-CD788B3E8E52}">
+            <File Id="Device_driver__header_.c" Name="Device driver (header).c" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Device driver (header).c" />
+          </Component>
+          <Component Id="Device_driver__source_.c" Guid="{5CA1D48B-60EC-4DC2-AEAC-CCE61B858AA8}">
+            <File Id="Device_driver__source_.c" Name="Device driver (source).c" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Device driver (source).c" />
+          </Component>
+          <Component Id="Doxyfile_default" Guid="{458A16A4-E93A-48B5-8D05-44629195641C}">
+            <File Id="Doxyfile_default" Name="Doxyfile default" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Doxyfile default" />
+          </Component>
+          <Component Id="Doxyfile_full" Guid="{B0BC2220-571A-469D-8218-E4A7F497BD5F}">
+            <File Id="Doxyfile_full" Name="Doxyfile full" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Doxyfile full" />
+          </Component>
+          <Component Id="Export_file__GNU_version_.def" Guid="{DE75160E-7D2C-48FB-862D-3C7F229CF9AB}">
+            <File Id="Export_file__GNU_version_.def" Name="Export file (GNU version).def" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Export file (GNU version).def" />
+          </Component>
+          <Component Id="Export_file__VCC_version_.def" Guid="{9D05B102-252F-4877-8A2F-ADCCE75D9F92}">
+            <File Id="Export_file__VCC_version_.def" Name="Export file (VCC version).def" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Export file (VCC version).def" />
+          </Component>
+          <Component Id="Flex_parser.l" Guid="{D6E297B4-3445-4F8C-A896-F66F01A63136}">
+            <File Id="Flex_parser.l" Name="Flex parser.l" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Flex parser.l" />
+          </Component>
+          <Component Id="GLUT_application.c" Guid="{75E55F38-99B5-4482-9C50-11AE130E67D8}">
+            <File Id="GLUT_application.c" Name="GLUT application.c" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\GLUT application.c" />
+          </Component>
+          <Component Id="header_base" Guid="{188FF6C9-8F14-437B-8914-0D7ADE3C6959}">
+            <File Id="header_base" Name="header-base" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\header-base" />
+          </Component>
+          <Component Id="header_cvs" Guid="{2486F0AE-04A7-4931-BA50-AAA2C8A635C8}">
+            <File Id="header_cvs" Name="header-cvs" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\header-cvs" />
+          </Component>
+          <Component Id="header_gnu" Guid="{B54DC1F8-0F77-498B-BAB2-99566CA88EC2}">
+            <File Id="header_gnu" Name="header-gnu" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\header-gnu" />
+          </Component>
+          <Component Id="header_java" Guid="{3779A968-9E78-495F-99CA-EF2D116E81EF}">
+            <File Id="header_java" Name="header-java" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\header-java" />
+          </Component>
+          <Component Id="Inline_function.s" Guid="{54927163-FD70-4F02-BF8B-603D713AB164}">
+            <File Id="Inline_function.s" Name="Inline function.s" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Inline function.s" />
+          </Component>
+          <Component Id="Lemon_parser.y" Guid="{00CFE7DD-FDB0-41F0-A38F-29D07A449099}">
+            <File Id="Lemon_parser.y" Name="Lemon parser.y" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Lemon parser.y" />
+          </Component>
+          <Component Id="makefile__Cygwin_dll_.mak" Guid="{8C0DAEED-BBB3-4262-BAF4-8679C63D5BF0}">
+            <File Id="makefile__Cygwin_dll_.mak" Name="makefile (Cygwin dll).mak" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\makefile (Cygwin dll).mak" />
+          </Component>
+          <Component Id="makefile__Cygwin_exe_.mak" Guid="{493AB980-8BEC-4466-9A9A-A9C6AC638434}">
+            <File Id="makefile__Cygwin_exe_.mak" Name="makefile (Cygwin exe).mak" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\makefile (Cygwin exe).mak" />
+          </Component>
+          <Component Id="makefile__Cygwin_lib_.mak" Guid="{61F976BF-A818-4434-B401-EC60FE9D836F}">
+            <File Id="makefile__Cygwin_lib_.mak" Name="makefile (Cygwin lib).mak" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\makefile (Cygwin lib).mak" />
+          </Component>
+          <Component Id="makefile__MinGW_dll_.mak" Guid="{42BA19F1-B330-4F19-AE2B-95A7559D60A6}">
+            <File Id="makefile__MinGW_dll_.mak" Name="makefile (MinGW dll).mak" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\makefile (MinGW dll).mak" />
+          </Component>
+          <Component Id="makefile__MinGW_exe_.mak" Guid="{2D21ED63-0013-4A2D-80A8-8115F0B96082}">
+            <File Id="makefile__MinGW_exe_.mak" Name="makefile (MinGW exe).mak" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\makefile (MinGW exe).mak" />
+          </Component>
+          <Component Id="makefile__MinGW_lib_.mak" Guid="{2CB192DB-07A8-4DED-AA14-9114BEF067E2}">
+            <File Id="makefile__MinGW_lib_.mak" Name="makefile (MinGW lib).mak" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\makefile (MinGW lib).mak" />
+          </Component>
+          <Component Id="makefile__Unix_dll_.mak" Guid="{12E658A2-E7A0-4035-8F34-27642142D895}">
+            <File Id="makefile__Unix_dll_.mak" Name="makefile (Unix dll).mak" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\makefile (Unix dll).mak" />
+          </Component>
+          <Component Id="makefile__Unix_exe_.mak" Guid="{6FA4B672-4C78-4D15-8EF2-0EE0A3825FFB}">
+            <File Id="makefile__Unix_exe_.mak" Name="makefile (Unix exe).mak" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\makefile (Unix exe).mak" />
+          </Component>
+          <Component Id="makefile__Unix_lib_.mak" Guid="{5111C9E1-B942-4E36-A969-DB21E364212D}">
+            <File Id="makefile__Unix_lib_.mak" Name="makefile (Unix lib).mak" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\makefile (Unix lib).mak" />
+          </Component>
+          <Component Id="Qt_application.cpp" Guid="{7778947B-9B80-4EFA-87D9-126714E29C83}">
+            <File Id="Qt_application.cpp" Name="Qt application.cpp" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Qt application.cpp" />
+          </Component>
+          <Component Id="true_source_antlr.xml" Guid="{B486E561-4923-47B5-91FD-BF63B825AFF1}">
+            <File Id="true_source_antlr.xml" Name="true-source-antlr.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-antlr.xml" />
+          </Component>
+          <Component Id="true_source_asm.xml" Guid="{D7F1D5D9-7C1F-4FB9-BE74-F3BCA7D759CD}">
+            <File Id="true_source_asm.xml" Name="true-source-asm.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-asm.xml" />
+          </Component>
+          <Component Id="true_source_base.xml" Guid="{DEF306C0-0AA4-4E98-A90D-79759113AF85}">
+            <File Id="true_source_base.xml" Name="true-source-base.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-base.xml" />
+          </Component>
+          <Component Id="true_source_c__base.xml" Guid="{CECF1C0B-0F9E-47C7-B330-79F463BAC5D7}">
+            <File Id="true_source_c__base.xml" Name="true-source-c#-base.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-c#-base.xml" />
+          </Component>
+          <Component Id="true_source_c_.xml" Guid="{FC437BFE-31E3-408A-8BE2-80110151412F}">
+            <File Id="true_source_c_.xml" Name="true-source-c#.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-c#.xml" />
+          </Component>
+          <Component Id="true_source_c___base.xml" Guid="{6775A4B8-3A05-4510-BBA4-C8B1838CD94F}">
+            <File Id="true_source_c___base.xml" Name="true-source-c++-base.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-c++-base.xml" />
+          </Component>
+          <Component Id="true_source_c___beautify.xml" Guid="{39484410-EC13-4F27-BE17-56F766832887}">
+            <File Id="true_source_c___beautify.xml" Name="true-source-c++-beautify.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-c++-beautify.xml" />
+          </Component>
+          <Component Id="true_source_c___win32.xml" Guid="{FE72D81E-E680-4713-8806-F71C46E0789D}">
+            <File Id="true_source_c___win32.xml" Name="true-source-c++-win32.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-c++-win32.xml" />
+          </Component>
+          <Component Id="true_source_c__.xml" Guid="{8F1FFB51-29B5-419F-BC9E-E1D24D14F6B7}">
+            <File Id="true_source_c__.xml" Name="true-source-c++.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-c++.xml" />
+          </Component>
+          <Component Id="true_source_def.xml" Guid="{36AB568A-56CF-438D-A15B-AB7AA26D3D28}">
+            <File Id="true_source_def.xml" Name="true-source-def.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-def.xml" />
+          </Component>
+          <Component Id="true_source_doxygen.xml" Guid="{110DE359-0397-4893-929E-4C9DE7B63828}">
+            <File Id="true_source_doxygen.xml" Name="true-source-doxygen.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-doxygen.xml" />
+          </Component>
+          <Component Id="true_source_java_base.xml" Guid="{0CD35336-77AE-4D8A-B5F8-11FEBEB365D7}">
+            <File Id="true_source_java_base.xml" Name="true-source-java-base.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-java-base.xml" />
+          </Component>
+          <Component Id="true_source_java.xml" Guid="{A306F2D8-0AD5-4A09-BA9A-5B829E220507}">
+            <File Id="true_source_java.xml" Name="true-source-java.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-java.xml" />
+          </Component>
+          <Component Id="true_source_l.xml" Guid="{762D5DD7-A43D-42FD-B7BE-692F4CF4984A}">
+            <File Id="true_source_l.xml" Name="true-source-l.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-l.xml" />
+          </Component>
+          <Component Id="true_source_mak.xml" Guid="{95A6F4A0-9C3D-49AE-91E1-9D12626ED780}">
+            <File Id="true_source_mak.xml" Name="true-source-mak.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-mak.xml" />
+          </Component>
+          <Component Id="true_source_php.xml" Guid="{2793DEB0-B127-4F58-AA15-C763FD167E37}">
+            <File Id="true_source_php.xml" Name="true-source-php.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-php.xml" />
+          </Component>
+          <Component Id="true_source_pl.xml" Guid="{8F63842A-3B67-4A08-A29F-F53689EEAD03}">
+            <File Id="true_source_pl.xml" Name="true-source-pl.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-pl.xml" />
+          </Component>
+          <Component Id="true_source_py.xml" Guid="{F731A895-119E-4E6D-87CA-6594F1276EB1}">
+            <File Id="true_source_py.xml" Name="true-source-py.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-py.xml" />
+          </Component>
+          <Component Id="true_source_rb.xml" Guid="{1C24C034-7A33-4815-8D3C-FDA4CDE4CEB6}">
+            <File Id="true_source_rb.xml" Name="true-source-rb.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-rb.xml" />
+          </Component>
+          <Component Id="true_source_swig.xml" Guid="{DC251F07-781F-4B10-A815-6311B726EA45}">
+            <File Id="true_source_swig.xml" Name="true-source-swig.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-swig.xml" />
+          </Component>
+          <Component Id="true_source_tti.xml" Guid="{49DDA9AA-C55A-477C-BCEE-24265C0A00CC}">
+            <File Id="true_source_tti.xml" Name="true-source-tti.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-tti.xml" />
+          </Component>
+          <Component Id="true_source_vcproject.xml" Guid="{6C1EB1AA-D341-460E-A834-0031DB84FF0D}">
+            <File Id="true_source_vcproject.xml" Name="true-source-vcproject.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-vcproject.xml" />
+          </Component>
+          <Component Id="true_source_y.xml" Guid="{57276CC2-F924-40DA-80A3-0FF8DA350443}">
+            <File Id="true_source_y.xml" Name="true-source-y.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source-y.xml" />
+          </Component>
+          <Component Id="true_source.xml" Guid="{A978F0F3-5357-4582-A64A-A4292F14518F}">
+            <File Id="true_source.xml" Name="true-source.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\true-source.xml" />
+          </Component>
+          <Component Id="Win32_application.c" Guid="{22E014DC-FBFC-4205-BD5E-1C3EDF7020D0}">
+            <File Id="Win32_application.c" Name="Win32 application.c" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Win32 application.c" />
+          </Component>
+          <Component Id="Win32_console_application.c" Guid="{D621C65E-C4CE-4408-9E6E-32BE71D2ECEA}">
+            <File Id="Win32_console_application.c" Name="Win32 console application.c" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Win32 console application.c" />
+          </Component>
+          <Component Id="Win32_dynamic_link_library.c" Guid="{0F4CEE76-0640-451B-A5DC-30E0EE691869}">
+            <File Id="Win32_dynamic_link_library.c" Name="Win32 dynamic link library.c" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Win32 dynamic link library.c" />
+          </Component>
+          <Component Id="Win32_OpenGL_application.c" Guid="{DDFCCC4A-F9A9-4CC7-A3DB-F366A74288ED}">
+            <File Id="Win32_OpenGL_application.c" Name="Win32 OpenGL application.c" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\source\Win32 OpenGL application.c" />
+          </Component>
+        </Directory>
+        <Directory Id="text" Name="text">
+          <Component Id="Clipboard_contents.txt" Guid="{37B6FA88-99EE-4B16-9F01-B1E099DA7078}">
+            <File Id="Clipboard_contents.txt" Name="Clipboard contents.txt" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\Clipboard contents.txt" />
+          </Component>
+          <Component Id="Fast_note_with_clipboard_contents.txt" Guid="{714C4128-524C-46E3-9733-EC6FE13A90AA}">
+            <File Id="Fast_note_with_clipboard_contents.txt" Name="Fast note with clipboard contents.txt" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\Fast note with clipboard contents.txt" />
+          </Component>
+          <Component Id="Fast_note.txt" Guid="{F3CB938C-02AE-4470-88F9-7891A63AF7A1}">
+            <File Id="Fast_note.txt" Name="Fast note.txt" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\Fast note.txt" />
+          </Component>
+          <Component Id="General_test.tt" Guid="{538252D9-1663-49CE-9D59-A541D93B7E40}">
+            <File Id="General_test.tt" Name="General test.tt" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\General test.tt" />
+          </Component>
+          <Component Id="GNU_license.txt" Guid="{E4F354FC-BC44-44E1-BFF7-0541AF185796}">
+            <File Id="GNU_license.txt" Name="GNU license.txt" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\GNU license.txt" />
+          </Component>
+          <Component Id="shortcut.url" Guid="{0B065995-963C-4D63-8BB6-80371B960B18}">
+            <File Id="shortcut.url" Name="shortcut.url" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\shortcut.url" />
+          </Component>
+          <Component Id="true_text_base.xml" Guid="{9467C296-0FC7-439A-A67D-2C569FD3E461}">
+            <File Id="true_text_base.xml" Name="true-text-base.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\true-text-base.xml" />
+          </Component>
+          <Component Id="true_text_hlf.xml" Guid="{33EE81C2-B218-465F-B9C8-1579E2A26B9B}">
+            <File Id="true_text_hlf.xml" Name="true-text-hlf.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\true-text-hlf.xml" />
+          </Component>
+          <Component Id="true_text_msg.xml" Guid="{A8C39299-7C95-4663-9E65-936E590FC30D}">
+            <File Id="true_text_msg.xml" Name="true-text-msg.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\true-text-msg.xml" />
+          </Component>
+          <Component Id="true_text_tt.xml" Guid="{F2DCB0C1-F8C6-45CE-BAC5-B6AFC22B7CDE}">
+            <File Id="true_text_tt.xml" Name="true-text-tt.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\true-text-tt.xml" />
+          </Component>
+          <Component Id="true_text_txt.xml" Guid="{7D57E0F9-1ED4-42B3-BF48-71F13B507CE3}">
+            <File Id="true_text_txt.xml" Name="true-text-txt.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\true-text-txt.xml" />
+          </Component>
+          <Component Id="true_text_url.xml" Guid="{59A9791D-79AF-4192-8587-86EF4747E698}">
+            <File Id="true_text_url.xml" Name="true-text-url.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\true-text-url.xml" />
+          </Component>
+          <Component Id="true_text.xml" Guid="{444D52C6-018E-48DD-9D90-521C632B95C5}">
+            <File Id="true_text.xml" Name="true-text.xml" KeyPath="yes" Source="$(var.bundle)\true-tpl\templates\text\true-text.xml" />
+          </Component>
+        </Directory>
+      </Directory>
     </Directory>
     <?endif?>
   </Directory>
