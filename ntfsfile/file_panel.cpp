@@ -630,7 +630,7 @@ void FilePanel::change_directory(const UnicodeString& target_dir, bool search_mo
 void FilePanel::fill_plugin_info(OpenPluginInfo* info) {
   info->StructSize = sizeof(struct OpenPluginInfo);
   info->Flags = OPIF_USEFILTER | OPIF_USESORTGROUPS | OPIF_ADDDOTS | OPIF_REALNAMES;
-  info->Flags |= g_file_panel_mode.use_highlighting ? OPIF_USEHIGHLIGHTING : OPIF_USEATTRHIGHLIGHTING;
+  info->Flags |= !flat_mode || g_file_panel_mode.use_highlighting ? OPIF_USEHIGHLIGHTING : OPIF_USEATTRHIGHLIGHTING;
   panel_title = far_msg_ptr(MSG_FILE_PANEL_TITLE_PREFIX);
   if (flat_mode || mft_mode) {
     panel_title += FAR_T('(');
