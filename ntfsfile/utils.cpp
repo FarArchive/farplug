@@ -340,18 +340,6 @@ ObjectArray<UnicodeString> split_str(const UnicodeString& str, wchar_t split_ch)
   return list;
 }
 
-UnicodeString& lpad(UnicodeString& str, unsigned size) {
-  if (str.size() < size) {
-    str.extend(size);
-    unsigned cnt = size - str.size();
-    wchar_t* buf = str.buf();
-    wmemmove(buf + cnt, buf, str.size());
-    wmemset(buf, L' ', cnt);
-    str.set_size(size);
-  }
-  return str;
-}
-
 ProgressMonitor::ProgressMonitor(bool lazy): h_scr(NULL) {
   unsigned __int64 t_curr;
   QueryPerformanceCounter((PLARGE_INTEGER) &t_curr);

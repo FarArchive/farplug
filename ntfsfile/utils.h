@@ -47,7 +47,6 @@ UnicodeString center(const UnicodeString& str, unsigned width);
 UnicodeString fit_str(const UnicodeString& path, unsigned size);
 void unquote(UnicodeString& str);
 ObjectArray<UnicodeString> split_str(const UnicodeString& str, wchar_t split_ch);
-UnicodeString& lpad(UnicodeString& str, unsigned size);
 
 extern ObjectArray<UnicodeString> size_suffixes;
 extern ObjectArray<UnicodeString> speed_suffixes;

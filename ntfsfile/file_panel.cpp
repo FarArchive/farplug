@@ -176,6 +176,22 @@ void FileListProgress::do_update_ui() {
   draw_text_box(far_get_msg(MSG_FILE_PANEL_READ_DIR_PROGRESS_TITLE), lines, c_client_xs);
 }
 
+UnicodeString& fit_col_str(UnicodeString& str, unsigned size) {
+  if (str.size() < size) {
+    str.extend(size);
+    unsigned cnt = size - str.size();
+    wchar_t* buf = str.buf();
+    wmemmove(buf + cnt, buf, str.size());
+    wmemset(buf, L' ', cnt);
+    str.set_size(size);
+  }
+  else if (str.size() > size) {
+    str.set_size(size);
+    if (size != 0) str.last_item() = L'}';
+  }
+  return str;
+}
+
 PluginItemList FilePanel::create_panel_items(const std::list<PanelItemData>& pid_list, bool search_mode) {
   PluginItemList pi_list;
   unsigned sz = static_cast<unsigned>(pid_list.size());
@@ -244,49 +260,49 @@ PluginItemList FilePanel::create_panel_items(const std::list<PanelItemData>& pid
         case 0: // data size
           if ((pid->stream_cnt == 0) && !pid->ntfs_attr) col_data += FAR_T("");
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(lpad(format_data_size(pid->data_size, short_size_suffixes), col_sizes[i]));
+            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(format_data_size(pid->data_size, short_size_suffixes), col_sizes[i]));
             col_data += pi_list.col_str.last().data();
           }
           break;
         case 1: // disk size
           if (pid->resident) col_data += FAR_T("");
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(lpad(format_data_size(pid->disk_size, short_size_suffixes), col_sizes[i]));
+            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(format_data_size(pid->disk_size, short_size_suffixes), col_sizes[i]));
             col_data += pi_list.col_str.last().data();
           }
           break;
         case 2: // fragment count
           if (pid->resident) col_data += FAR_T("");
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(lpad(int_to_str(pid->fragment_cnt), col_sizes[i]));
+            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(int_to_str(pid->fragment_cnt), col_sizes[i]));
             col_data += pi_list.col_str.last().data();
           }
           break;
         case 3: // stream count
           if (pid->ntfs_attr) col_data += FAR_T("");
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(lpad(int_to_str(pid->stream_cnt), col_sizes[i]));
+            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(int_to_str(pid->stream_cnt), col_sizes[i]));
             col_data += pi_list.col_str.last().data();
           }
           break;
         case 4: // hard links
           if (pid->ntfs_attr) col_data += FAR_T("");
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(lpad(int_to_str(pid->hard_link_cnt), col_sizes[i]));
+            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(int_to_str(pid->hard_link_cnt), col_sizes[i]));
             col_data += pi_list.col_str.last().data();
           }
           break;
         case 5: // mft record count
           if (pid->ntfs_attr) col_data += FAR_T("");
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(lpad(int_to_str(pid->mft_rec_cnt), col_sizes[i]));
+            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(int_to_str(pid->mft_rec_cnt), col_sizes[i]));
             col_data += pi_list.col_str.last().data();
           }
           break;
         case 6: // valid size
           if ((pid->stream_cnt == 0) && !pid->ntfs_attr) col_data += FAR_T("");
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(lpad(format_data_size(pid->valid_size, short_size_suffixes), col_sizes[i]));
+            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(format_data_size(pid->valid_size, short_size_suffixes), col_sizes[i]));
             col_data += pi_list.col_str.last().data();
           }
           break;
