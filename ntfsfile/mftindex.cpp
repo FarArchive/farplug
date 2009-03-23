@@ -251,7 +251,7 @@ void FilePanel::create_mft_index() {
   try {
     mft_index.usn_journal_id = journal_info.usn_journal_id;
     mft_index.next_usn = journal_info.next_usn;
-    mft_index.clear().extend(file_list.size());
+    mft_index.clear().extend(static_cast<unsigned>(file_list.size()));
     for (std::list<FileRecord>::const_iterator file_rec = file_list.begin(); file_rec != file_list.end(); file_rec++) mft_index += *file_rec;
     mft_index.sort<FileRecordCompare>();
   }
@@ -313,7 +313,7 @@ void FilePanel::update_mft_index_from_usn() {
       else i++;
     }
 
-    mft_index.extend(mft_index.size() + file_list.size());
+    mft_index.extend(mft_index.size() + static_cast<unsigned>(file_list.size()));
     for (std::list<FileRecord>::const_iterator file_rec = file_list.begin(); file_rec != file_list.end(); file_rec++) mft_index += *file_rec;
     mft_index.sort<FileRecordCompare>();
   }
