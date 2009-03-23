@@ -124,28 +124,28 @@
         <Feature Id="Align" Level="1" Title="Align" AllowAdvertise="no" Description="Text block formatter">
           <ComponentRef Id="Align.dll" />
           <ComponentRef Id="AlignEng.lng" />
-        </Feature>
-        <Feature Id="AlignRussian" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="AlignRus.lng" />
-        </Feature>
-        <Feature Id="AlignFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="Align.map" />
-        </Feature>
-        <Feature Id="AlignChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="changelog_3" />
+          <Feature Id="AlignRussian" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="AlignRus.lng" />
+          </Feature>
+          <Feature Id="AlignFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Align.map" />
+          </Feature>
+          <Feature Id="AlignChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="changelog_3" />
+          </Feature>
         </Feature>
         <Feature Id="AutoWrap" Level="1" Title="AutoWrap" AllowAdvertise="no" Description="Automatic line wrap">
           <ComponentRef Id="AutoWrap.dll" />
           <ComponentRef Id="WrapEng.lng" />
-        </Feature>
-        <Feature Id="AutoWrapRussian" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="WrapRus.lng" />
-        </Feature>
-        <Feature Id="AutoWrapFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="AutoWrap.map" />
-        </Feature>
-        <Feature Id="AutoWrapChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="changelog_4" />
+          <Feature Id="AutoWrapRussian" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="WrapRus.lng" />
+          </Feature>
+          <Feature Id="AutoWrapFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="AutoWrap.map" />
+          </Feature>
+          <Feature Id="AutoWrapChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="changelog_4" />
+          </Feature>
         </Feature>
         <Feature Id="Brackets" Level="1" Title="Brackets" AllowAdvertise="no" Description="Brackets matching">
           <ComponentRef Id="BrackDel.reg" />
@@ -153,63 +153,63 @@
           <ComponentRef Id="BrackEng.lng" />
           <ComponentRef Id="BrackEng.reg" />
           <ComponentRef Id="Brackets.dll" />
-        </Feature>
-        <Feature Id="BracketsRussian" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="BrackRus.hlf" />
-          <ComponentRef Id="BrackRus.lng" />
-          <ComponentRef Id="BrackRus.reg" />
-        </Feature>
-        <Feature Id="BracketsFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="Brackets.map" />
-        </Feature>
-        <Feature Id="BracketsChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="changelog_5" />
+          <Feature Id="BracketsRussian" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="BrackRus.hlf" />
+            <ComponentRef Id="BrackRus.lng" />
+            <ComponentRef Id="BrackRus.reg" />
+          </Feature>
+          <Feature Id="BracketsFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Brackets.map" />
+          </Feature>
+          <Feature Id="BracketsChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="changelog_5" />
+          </Feature>
         </Feature>
         <Feature Id="DrawLine" Level="1" Title="DrawLine" AllowAdvertise="no" Description="Pseudo-graphic lines drawing">
           <ComponentRef Id="DrawEng.hlf" />
           <ComponentRef Id="DrawEng.lng" />
           <ComponentRef Id="DrawLine.dll" />
-        </Feature>
-        <Feature Id="DrawLineRussian" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="DrawRus.hlf" />
-          <ComponentRef Id="DrawRus.lng" />
-        </Feature>
-        <Feature Id="DrawLineFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="DrawLine.map" />
-        </Feature>
-        <Feature Id="DrawLineChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="changelog_7" />
+          <Feature Id="DrawLineRussian" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="DrawRus.hlf" />
+            <ComponentRef Id="DrawRus.lng" />
+          </Feature>
+          <Feature Id="DrawLineFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="DrawLine.map" />
+          </Feature>
+          <Feature Id="DrawLineChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="changelog_7" />
+          </Feature>
         </Feature>
         <Feature Id="EditCase" Level="1" Title="EditCase" AllowAdvertise="no" Description="Text case conversion">
           <ComponentRef Id="ECaseEng.hlf" />
           <ComponentRef Id="ECaseEng.lng" />
           <ComponentRef Id="EditCase.dll" />
-        </Feature>
-        <Feature Id="EditCaseRussian" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="ECaseRus.hlf" />
-          <ComponentRef Id="ECaseRus.lng" />
-        </Feature>
-        <Feature Id="EditCaseFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="EditCase.map" />
-        </Feature>
-        <Feature Id="EditCaseChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="changelog_8" />
+          <Feature Id="EditCaseRussian" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="ECaseRus.hlf" />
+            <ComponentRef Id="ECaseRus.lng" />
+          </Feature>
+          <Feature Id="EditCaseFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="EditCase.map" />
+          </Feature>
+          <Feature Id="EditCaseChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="changelog_8" />
+          </Feature>
         </Feature>
       </Feature>
       <Feature Id="Compare" Level="1" Title="Compare" AllowAdvertise="no" Description="Advanced compare">
         <ComponentRef Id="CmpEng.hlf" />
         <ComponentRef Id="Compare.dll" />
         <ComponentRef Id="CompEng.lng" />
-      </Feature>
-      <Feature Id="CompareRussian" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="CmpRus.hlf" />
-        <ComponentRef Id="CompRus.lng" />
-      </Feature>
-      <Feature Id="CompareFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="Compare.map" />
-      </Feature>
-      <Feature Id="CompareChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="changelog_6" />
+        <Feature Id="CompareRussian" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="CmpRus.hlf" />
+          <ComponentRef Id="CompRus.lng" />
+        </Feature>
+        <Feature Id="CompareFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="Compare.map" />
+        </Feature>
+        <Feature Id="CompareChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_6" />
+        </Feature>
       </Feature>
       <Feature Id="EMenu" Level="1" Title="EMenu" AllowAdvertise="no" Description="Explorer context menu">
         <ComponentRef Id="EMenu.dll" />
@@ -219,46 +219,46 @@
         <ComponentRef Id="Hotkey.reg" />
         <ComponentRef Id="HotkeyClipboard.reg" />
         <ComponentRef Id="HotkeyProperties.reg" />
-      </Feature>
-      <Feature Id="EMenuRussian" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="EMenuRus.hlf" />
-        <ComponentRef Id="EMenuRus.lng" />
-      </Feature>
-      <Feature Id="EMenuFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="EMenu.map" />
-      </Feature>
-      <Feature Id="EMenuChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="changelog_9" />
+        <Feature Id="EMenuRussian" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="EMenuRus.hlf" />
+          <ComponentRef Id="EMenuRus.lng" />
+        </Feature>
+        <Feature Id="EMenuFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="EMenu.map" />
+        </Feature>
+        <Feature Id="EMenuChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_9" />
+        </Feature>
       </Feature>
       <Feature Id="FARCmds" Level="1" Title="FARCmds" AllowAdvertise="no" Description="Advanced commands">
         <ComponentRef Id="FARCmds.dll" />
         <ComponentRef Id="FARCmdsEng.hlf" />
         <ComponentRef Id="FARCmdsEng.lng" />
-      </Feature>
-      <Feature Id="FARCmdsRussian" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="FARCmdsRus.hlf" />
-        <ComponentRef Id="FARCmdsRus.lng" />
-      </Feature>
-      <Feature Id="FARCmdsFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="FARCmds.map" />
-      </Feature>
-      <Feature Id="FARCmdsChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="changelog_10" />
+        <Feature Id="FARCmdsRussian" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FARCmdsRus.hlf" />
+          <ComponentRef Id="FARCmdsRus.lng" />
+        </Feature>
+        <Feature Id="FARCmdsFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FARCmds.map" />
+        </Feature>
+        <Feature Id="FARCmdsChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_10" />
+        </Feature>
       </Feature>
       <Feature Id="FileCase" Level="1" Title="FileCase" AllowAdvertise="no" Description="File name case conversion">
         <ComponentRef Id="CaseEng.hlf" />
         <ComponentRef Id="CaseEng.lng" />
         <ComponentRef Id="FileCase.dll" />
-      </Feature>
-      <Feature Id="FileCaseRussian" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="CaseRus.hlf" />
-        <ComponentRef Id="CaseRus.lng" />
-      </Feature>
-      <Feature Id="FileCaseFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="FileCase.map" />
-      </Feature>
-      <Feature Id="FileCaseChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="changelog_11" />
+        <Feature Id="FileCaseRussian" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="CaseRus.hlf" />
+          <ComponentRef Id="CaseRus.lng" />
+        </Feature>
+        <Feature Id="FileCaseFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FileCase.map" />
+        </Feature>
+        <Feature Id="FileCaseChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_11" />
+        </Feature>
       </Feature>
       <Feature Id="FarFtp" Level="1" Title="FarFtp" AllowAdvertise="no" Description="FTP client">
         <ComponentRef Id="FarFtp.dll" />
@@ -273,60 +273,66 @@
         <ComponentRef Id="Progress_ZeMA.reg" />
         <Feature Id="ftpDirList" Level="1" Title="DirList" AllowAdvertise="no" Description="Directory listing parser">
           <ComponentRef Id="ftpDirList.fll" />
+          <Feature Id="ftpDirListFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="ftpDirList.map" />
+          </Feature>
         </Feature>
         <Feature Id="ftpNotify" Level="1" Title="Notify" AllowAdvertise="no" Description="File transfer notifications (notify.log)">
           <ComponentRef Id="ftpNotify.fll" />
           <ComponentRef Id="notify.log" />
+          <Feature Id="ftpNotifyFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="ftpNotify.map" />
+          </Feature>
         </Feature>
         <Feature Id="ftpProgress" Level="1" Title="Progress" AllowAdvertise="no" Description="Copy progress dialog">
           <ComponentRef Id="ftpProgress.fll" />
+          <Feature Id="ftpProgressFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="ftpProgress.map" />
+          </Feature>
         </Feature>
-      </Feature>
-      <Feature Id="FarFtpRussian" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="FtpCmds_rus.txt" />
-        <ComponentRef Id="FtpRus.hlf" />
-        <ComponentRef Id="FtpRus.lng" />
-        <ComponentRef Id="Notes_rus.txt" />
-        <ComponentRef Id="TechInfo_rus.reg" />
-      </Feature>
-      <Feature Id="FarFtpFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="FarFtp.map" />
-        <ComponentRef Id="ftpDirList.map" />
-        <ComponentRef Id="ftpNotify.map" />
-        <ComponentRef Id="ftpProgress.map" />
-      </Feature>
-      <Feature Id="FarFtpChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="changelog_12" />
+        <Feature Id="FarFtpRussian" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FtpCmds_rus.txt" />
+          <ComponentRef Id="FtpRus.hlf" />
+          <ComponentRef Id="FtpRus.lng" />
+          <ComponentRef Id="Notes_rus.txt" />
+          <ComponentRef Id="TechInfo_rus.reg" />
+        </Feature>
+        <Feature Id="FarFtpFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FarFtp.map" />
+        </Feature>
+        <Feature Id="FarFtpChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_12" />
+        </Feature>
       </Feature>
       <Feature Id="HlfViewer" Level="1" Title="HlfViewer" AllowAdvertise="no" Description="Help files (*.hlf) viewer">
         <ComponentRef Id="HlfViewer.dll" />
         <ComponentRef Id="HlfViewerEng.hlf" />
         <ComponentRef Id="HlfViewerEng.lng" />
-      </Feature>
-      <Feature Id="HlfViewerRussian" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="HlfViewerRus.hlf" />
-        <ComponentRef Id="HlfViewerRus.lng" />
-      </Feature>
-      <Feature Id="HlfViewerFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="HlfViewer.map" />
-      </Feature>
-      <Feature Id="HlfViewerChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="changelog_13" />
+        <Feature Id="HlfViewerRussian" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="HlfViewerRus.hlf" />
+          <ComponentRef Id="HlfViewerRus.lng" />
+        </Feature>
+        <Feature Id="HlfViewerFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="HlfViewer.map" />
+        </Feature>
+        <Feature Id="HlfViewerChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_13" />
+        </Feature>
       </Feature>
       <Feature Id="MacroView" Level="1" Title="MacroView" AllowAdvertise="no" Description="Macro browser and editor">
         <ComponentRef Id="MacroEng.hlf" />
         <ComponentRef Id="MacroEng.lng" />
         <ComponentRef Id="MacroView.dll" />
-      </Feature>
-      <Feature Id="MacroViewRussian" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="MacroRus.hlf" />
-        <ComponentRef Id="MacroRus.lng" />
-      </Feature>
-      <Feature Id="MacroViewFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="MacroView.map" />
-      </Feature>
-      <Feature Id="MacroViewChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="changelog_14" />
+        <Feature Id="MacroViewRussian" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="MacroRus.hlf" />
+          <ComponentRef Id="MacroRus.lng" />
+        </Feature>
+        <Feature Id="MacroViewFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="MacroView.map" />
+        </Feature>
+        <Feature Id="MacroViewChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_14" />
+        </Feature>
       </Feature>
       <Feature Id="MultiArc" Level="1" Title="MultiArc" AllowAdvertise="no" Description="Multiformat archive support">
         <ComponentRef Id="arceng.hlf" />
@@ -334,85 +340,105 @@
         <ComponentRef Id="MultiArc.dll" />
         <Feature Id="Ace" Level="1" Title="Ace" AllowAdvertise="no">
           <ComponentRef Id="Ace.fmt" />
+          <Feature Id="AceFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Ace.map" />
+          </Feature>
         </Feature>
         <Feature Id="Arc" Level="1" Title="Arc" AllowAdvertise="no">
           <ComponentRef Id="Arc.fmt" />
+          <Feature Id="ArcFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Arc.map" />
+          </Feature>
         </Feature>
         <Feature Id="Arj" Level="1" Title="Arj" AllowAdvertise="no">
           <ComponentRef Id="Arj.fmt" />
+          <Feature Id="ArjFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Arj.map" />
+          </Feature>
         </Feature>
         <Feature Id="Cab" Level="1" Title="Cab" AllowAdvertise="no">
           <ComponentRef Id="Cab.fmt" />
+          <Feature Id="CabFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Cab.map" />
+          </Feature>
         </Feature>
         <Feature Id="Custom" Level="1" Title="Custom" AllowAdvertise="no">
           <ComponentRef Id="Custom.fmt" />
           <ComponentRef Id="custom.ini" />
+          <Feature Id="CustomFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Custom.map" />
+          </Feature>
         </Feature>
         <Feature Id="Ha" Level="1" Title="Ha" AllowAdvertise="no">
           <ComponentRef Id="Ha.fmt" />
+          <Feature Id="HaFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Ha.map" />
+          </Feature>
         </Feature>
         <Feature Id="Lzh" Level="1" Title="Lzh" AllowAdvertise="no">
           <ComponentRef Id="Lzh.fmt" />
+          <Feature Id="LzhFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Lzh.map" />
+          </Feature>
         </Feature>
         <Feature Id="Rar" Level="1" Title="Rar" AllowAdvertise="no">
           <ComponentRef Id="Rar.fmt" />
+          <Feature Id="RarFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Rar.map" />
+          </Feature>
         </Feature>
         <Feature Id="TarGz" Level="1" Title="TarGz" AllowAdvertise="no">
           <ComponentRef Id="TarGz.fmt" />
+          <Feature Id="TarGzFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="TarGz.map" />
+          </Feature>
         </Feature>
         <Feature Id="Zip" Level="1" Title="Zip" AllowAdvertise="no">
           <ComponentRef Id="Zip.fmt" />
+          <Feature Id="ZipFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="Zip.map" />
+          </Feature>
         </Feature>
-      </Feature>
-      <Feature Id="MultiArcRussian" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="arcrus.hlf" />
-        <ComponentRef Id="arcrus.lng" />
-      </Feature>
-      <Feature Id="MultiArcFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="MultiArc.map" />
-        <ComponentRef Id="Ace.map" />
-        <ComponentRef Id="Arc.map" />
-        <ComponentRef Id="Arj.map" />
-        <ComponentRef Id="Cab.map" />
-        <ComponentRef Id="Custom.map" />
-        <ComponentRef Id="Ha.map" />
-        <ComponentRef Id="Lzh.map" />
-        <ComponentRef Id="Rar.map" />
-        <ComponentRef Id="TarGz.map" />
-        <ComponentRef Id="Zip.map" />
-      </Feature>
-      <Feature Id="MultiArcChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="changelog_15" />
+        <Feature Id="MultiArcRussian" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="arcrus.hlf" />
+          <ComponentRef Id="arcrus.lng" />
+        </Feature>
+        <Feature Id="MultiArcFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="MultiArc.map" />
+        </Feature>
+        <Feature Id="MultiArcChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_15" />
+        </Feature>
       </Feature>
       <Feature Id="Network" Level="1" Title="Network" AllowAdvertise="no" Description="Network browser">
         <ComponentRef Id="NetEng.hlf" />
         <ComponentRef Id="NetEng.lng" />
         <ComponentRef Id="Network.dll" />
-      </Feature>
-      <Feature Id="NetworkRussian" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="NetRus.hlf" />
-        <ComponentRef Id="NetRus.lng" />
-      </Feature>
-      <Feature Id="NetworkFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="Network.map" />
-      </Feature>
-      <Feature Id="NetworkChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="changelog_16" />
+        <Feature Id="NetworkRussian" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="NetRus.hlf" />
+          <ComponentRef Id="NetRus.lng" />
+        </Feature>
+        <Feature Id="NetworkFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="Network.map" />
+        </Feature>
+        <Feature Id="NetworkChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_16" />
+        </Feature>
       </Feature>
       <Feature Id="Proclist" Level="1" Title="Proclist" AllowAdvertise="no" Description="Windows process management">
         <ComponentRef Id="ProcEng.hlf" />
         <ComponentRef Id="ProcEng.lng" />
         <ComponentRef Id="Proclist.dll" />
-      </Feature>
-      <Feature Id="ProclistRussian" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="ProcRus.hlf" />
-        <ComponentRef Id="ProcRus.lng" />
-      </Feature>
-      <Feature Id="ProclistFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="Proclist.map" />
-      </Feature>
-      <Feature Id="ProclistChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="changelog_17" />
+        <Feature Id="ProclistRussian" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="ProcRus.hlf" />
+          <ComponentRef Id="ProcRus.lng" />
+        </Feature>
+        <Feature Id="ProclistFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="Proclist.map" />
+        </Feature>
+        <Feature Id="ProclistChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_17" />
+        </Feature>
       </Feature>
       <Feature Id="TmpPanel" Level="1" Title="TmpPanel" AllowAdvertise="no" Description="Temporary panel">
         <ComponentRef Id="disks.eng.temp" />
@@ -421,19 +447,19 @@
         <ComponentRef Id="TmpEng.hlf" />
         <ComponentRef Id="TmpEng.lng" />
         <ComponentRef Id="TmpPanel.dll" />
-      </Feature>
-      <Feature Id="TmpPanelRussian" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="disks.rus.temp" />
-        <ComponentRef Id="shortcuts.rus.reg" />
-        <ComponentRef Id="shortcuts.rus.temp" />
-        <ComponentRef Id="TmpRus.hlf" />
-        <ComponentRef Id="TmpRus.lng" />
-      </Feature>
-      <Feature Id="TmpPanelFExcept" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="TmpPanel.map" />
-      </Feature>
-      <Feature Id="TmpPanelChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="changelog_18" />
+        <Feature Id="TmpPanelRussian" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="disks.rus.temp" />
+          <ComponentRef Id="shortcuts.rus.reg" />
+          <ComponentRef Id="shortcuts.rus.temp" />
+          <ComponentRef Id="TmpRus.hlf" />
+          <ComponentRef Id="TmpRus.lng" />
+        </Feature>
+        <Feature Id="TmpPanelFExcept" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="TmpPanel.map" />
+        </Feature>
+        <Feature Id="TmpPanelChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changelog_18" />
+        </Feature>
       </Feature>
     </Feature>
     <?ifdef bundle ?>
@@ -446,14 +472,14 @@
         <ComponentRef Id="FILE_ID.DIZ_2" />
         <ComponentRef Id="history.txt_1" />
         <ComponentRef Id="readme.txt_2" />
-      </Feature>
-      <Feature Id="_7_ZipRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="_7_ZipRus.hlf" />
-        <ComponentRef Id="_7_ZipRus.lng" />
-        <ComponentRef Id="readme_ru.txt" />
-      </Feature>
-      <Feature Id="_7_ZipFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="_7_ZipFar.map" />
+        <Feature Id="_7_ZipRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="_7_ZipRus.hlf" />
+          <ComponentRef Id="_7_ZipRus.lng" />
+          <ComponentRef Id="readme_ru.txt" />
+        </Feature>
+        <Feature Id="_7_ZipFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="_7_ZipFar.map" />
+        </Feature>
       </Feature>
       <Feature Id="airbrush" Level="2" Title="AirBrush" AllowAdvertise="no" Description="Fast syntax highlighting">
         <ComponentRef Id="airbrush.dll" />
@@ -533,13 +559,13 @@
         <ComponentRef Id="KeyMacros.reg" />
         <ComponentRef Id="Uninstall.reg" />
         <ComponentRef Id="UninstallKeyMacros.reg" />
-      </Feature>
-      <Feature Id="AltHistoryRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="AltHistoryRus.hlf" />
-        <ComponentRef Id="AltHistoryRus.lng" />
-        <ComponentRef Id="ReadMeRus.txt" />
-        <ComponentRef Id="TechInfoRus.txt" />
-        <ComponentRef Id="WhatsNewRus.txt" />
+        <Feature Id="AltHistoryRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="AltHistoryRus.hlf" />
+          <ComponentRef Id="AltHistoryRus.lng" />
+          <ComponentRef Id="ReadMeRus.txt" />
+          <ComponentRef Id="TechInfoRus.txt" />
+          <ComponentRef Id="WhatsNewRus.txt" />
+        </Feature>
       </Feature>
       <Feature Id="AutoComplete" Level="2" Title="AutoComplete" AllowAdvertise="no" Description="Unix-like filename completion">
         <ComponentRef Id="cmpl_new.reg" />
@@ -643,13 +669,13 @@
         <ComponentRef Id="gray_pult.hrd" />
         <ComponentRef Id="mirror.hrd" />
         <ComponentRef Id="ocean.hrd" />
-      </Feature>
-      <Feature Id="ColorerRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="colorer.hlf" />
-        <ComponentRef Id="colorer.lng" />
-      </Feature>
-      <Feature Id="ColorerFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="colorer.map" />
+        <Feature Id="ColorerRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="colorer.hlf" />
+          <ComponentRef Id="colorer.lng" />
+        </Feature>
+        <Feature Id="ColorerFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="colorer.map" />
+        </Feature>
       </Feature>
       <Feature Id="dialogtools" Level="2" Title="DialogTools" AllowAdvertise="no" Description="Dialog Tools: Change Case, Open File Dialog, Paste Selection, Show Password, Search, Replace, Undo">
         <ComponentRef Id="dt.dll" />
@@ -744,49 +770,49 @@
           <ComponentRef Id="FarHintsCursors.hll" />
           <ComponentRef Id="FarHintsCursorsEng.lng" />
           <ComponentRef Id="Settings.reg_2" />
-        </Feature>
-        <Feature Id="FarHintsCursorsRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="FarHintsCursorsRus.lng" />
+          <Feature Id="FarHintsCursorsRussian" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="FarHintsCursorsRus.lng" />
+          </Feature>
         </Feature>
         <Feature Id="FarHintsFolders" Level="2" Title="Folder" AllowAdvertise="no">
           <ComponentRef Id="FarHintsFolders.hll" />
           <ComponentRef Id="FarHintsFoldersEng.lng" />
-        </Feature>
-        <Feature Id="FarHintsFoldersRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="FarHintsFoldersRus.lng" />
+          <Feature Id="FarHintsFoldersRussian" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="FarHintsFoldersRus.lng" />
+          </Feature>
         </Feature>
         <Feature Id="FarHintsImage" Level="2" Title="Image" AllowAdvertise="no">
           <ComponentRef Id="FarHintsImage.hll" />
           <ComponentRef Id="FarHintsImageEng.lng" />
           <ComponentRef Id="Settings.reg_3" />
-        </Feature>
-        <Feature Id="FarHintsImageRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="FarHintsImageRus.lng" />
+          <Feature Id="FarHintsImageRussian" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="FarHintsImageRus.lng" />
+          </Feature>
         </Feature>
         <Feature Id="FarHintsMP3" Level="2" Title="MP3" AllowAdvertise="no">
           <ComponentRef Id="FarHintsMP3.hll" />
           <ComponentRef Id="FarHintsMP3Eng.lng" />
-        </Feature>
-        <Feature Id="FarHintsMP3Russian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="FarHintsMP3Rus.lng" />
+          <Feature Id="FarHintsMP3Russian" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="FarHintsMP3Rus.lng" />
+          </Feature>
         </Feature>
         <Feature Id="FarHintsProcess" Level="2" Title="Process" AllowAdvertise="no">
           <ComponentRef Id="FarHintsProcess.hll" />
           <ComponentRef Id="FarHintsProcessEng.lng" />
-        </Feature>
-        <Feature Id="FarHintsProcessRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="FarHintsProcessRus.lng" />
+          <Feature Id="FarHintsProcessRussian" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="FarHintsProcessRus.lng" />
+          </Feature>
         </Feature>
         <Feature Id="FarHintsVerInfo" Level="2" Title="VerInfo" AllowAdvertise="no">
           <ComponentRef Id="FarHintsVerInfo.hll" />
           <ComponentRef Id="FarHintsVerInfoEng.lng" />
+          <Feature Id="FarHintsVerInfoRussian" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="FarHintsVerInfoRus.lng" />
+          </Feature>
         </Feature>
-        <Feature Id="FarHintsVerInfoRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="FarHintsVerInfoRus.lng" />
+        <Feature Id="FarHintsRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FarHintsRus.lng" />
         </Feature>
-      </Feature>
-      <Feature Id="FarHintsRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="FarHintsRus.lng" />
       </Feature>
       <Feature Id="FarMobile" Level="2" Title="FarMobile" AllowAdvertise="no" Description="Mobile Phone Interface">
         <ComponentRef Id="config.txt" />
@@ -828,12 +854,12 @@
         <ComponentRef Id="SvcEng.hlf" />
         <ComponentRef Id="SvcEng.lng" />
         <ComponentRef Id="whatsnew.txt_3" />
-      </Feature>
-      <Feature Id="FarSvcRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="README.RUS_1" />
-        <ComponentRef Id="SvcRus.hlf" />
-        <ComponentRef Id="SvcRus.lng" />
-        <ComponentRef Id="whatsnew.rus" />
+        <Feature Id="FarSvcRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="README.RUS_1" />
+          <ComponentRef Id="SvcRus.hlf" />
+          <ComponentRef Id="SvcRus.lng" />
+          <ComponentRef Id="whatsnew.rus" />
+        </Feature>
       </Feature>
       <Feature Id="FarTrans" Level="2" Title="FarTrans" AllowAdvertise="no" Description="Convert text files from one cyrillic codepage to another and change line endings">
         <ComponentRef Id="fartrans.dll" />
@@ -841,11 +867,11 @@
         <ComponentRef Id="readme.eng.txt" />
         <ComponentRef Id="TransEng.hlf" />
         <ComponentRef Id="TransEng.lng" />
-      </Feature>
-      <Feature Id="FarTransRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="readme.rus.txt_1" />
-        <ComponentRef Id="TransRus.hlf" />
-        <ComponentRef Id="TransRus.lng" />
+        <Feature Id="FarTransRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="readme.rus.txt_1" />
+          <ComponentRef Id="TransRus.hlf" />
+          <ComponentRef Id="TransRus.lng" />
+        </Feature>
       </Feature>
       <Feature Id="FileCopyEx" Level="2" Title="FileCopyEx" AllowAdvertise="no" Description="Fast file copy implementation">
         <ComponentRef Id="english.lng" />
@@ -856,16 +882,16 @@
         <ComponentRef Id="text.css" />
         <ComponentRef Id="dialogs.objd" />
         <ComponentRef Id="english.locd" />
-      </Feature>
-      <Feature Id="FileCopyExRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="Russian.hlf" />
-        <ComponentRef Id="russian.lng" />
-        <ComponentRef Id="history.rus.html" />
-        <ComponentRef Id="readme.rus.html" />
-        <ComponentRef Id="russian.locd" />
-      </Feature>
-      <Feature Id="FileCopyExFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="FileCopyEx.map" />
+        <Feature Id="FileCopyExRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="Russian.hlf" />
+          <ComponentRef Id="russian.lng" />
+          <ComponentRef Id="history.rus.html" />
+          <ComponentRef Id="readme.rus.html" />
+          <ComponentRef Id="russian.locd" />
+        </Feature>
+        <Feature Id="FileCopyExFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FileCopyEx.map" />
+        </Feature>
       </Feature>
       <Feature Id="FontMan" Level="2" Title="FontMan" AllowAdvertise="no" Description="Font manager">
         <ComponentRef Id="file_id.diz_14" />
@@ -875,9 +901,9 @@
         <ComponentRef Id="Readme.txt_7" />
         <ComponentRef Id="Samples.ini" />
         <ComponentRef Id="vssver.scc" />
-      </Feature>
-      <Feature Id="FontManRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="FontManRus.lng" />
+        <Feature Id="FontManRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="FontManRus.lng" />
+        </Feature>
       </Feature>
       <Feature Id="MailView" Level="2" Title="MailView" AllowAdvertise="no" Description="Mailbox and e-mail message viewer">
         <ComponentRef Id="COPYING_4" />
@@ -942,9 +968,9 @@
         <ComponentRef Id="MoreHistoryEng.lng" />
         <ComponentRef Id="Readme.txt_8" />
         <ComponentRef Id="Settings.reg_4" />
-      </Feature>
-      <Feature Id="MoreHistoryRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="MoreHistoryRus.lng" />
+        <Feature Id="MoreHistoryRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="MoreHistoryRus.lng" />
+        </Feature>
       </Feature>
       <Feature Id="Noisy" Level="2" Title="Noisy" AllowAdvertise="no" Description="Music player">
         <ComponentRef Id="bass.dll_1" />
@@ -980,10 +1006,10 @@
           <ComponentRef Id="________________.m3u" />
           <ComponentRef Id="__________.m3u_4" />
         </Feature>
-      </Feature>
-      <Feature Id="NoisyRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="NoisyRus.lng" />
-        <ComponentRef Id="NoisyRus.mnu" />
+        <Feature Id="NoisyRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="NoisyRus.lng" />
+          <ComponentRef Id="NoisyRus.mnu" />
+        </Feature>
       </Feature>
       <Feature Id="ntevent" Level="2" Title="NTEvent" AllowAdvertise="no" Description="List/backup/clear NT Event Logs">
         <ComponentRef Id="file_id.diz_29" />
@@ -1003,13 +1029,13 @@
         <ComponentRef Id="en.lng" />
         <ComponentRef Id="file_id.diz_6" />
         <ComponentRef Id="ntfsfile.dll" />
-      </Feature>
-      <Feature Id="ntfsfileRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="history_ru.txt_1" />
-        <ComponentRef Id="ru.hlf" />
-      </Feature>
-      <Feature Id="ntfsfileFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="ntfsfile.map" />
+        <Feature Id="ntfsfileRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="history_ru.txt_1" />
+          <ComponentRef Id="ru.hlf" />
+        </Feature>
+        <Feature Id="ntfsfileFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="ntfsfile.map" />
+        </Feature>
       </Feature>
       <Feature Id="Opera" Level="2" Title="Opera" AllowAdvertise="no" Description="Opera cache browser">
         <ComponentRef Id="file_id.diz_17" />
@@ -1018,9 +1044,9 @@
         <ComponentRef Id="operac4.hlf" />
         <ComponentRef Id="operac4Eng.lng" />
         <ComponentRef Id="readme.txt_10" />
-      </Feature>
-      <Feature Id="OperaRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="operac4Rus.lng" />
+        <Feature Id="OperaRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="operac4Rus.lng" />
+        </Feature>
       </Feature>
       <Feature Id="PEDITOR" Level="2" Title="PEditor" AllowAdvertise="no" Description="Portable executable (PE) file editor">
         <ComponentRef Id="FILE_ID.DIZ_7" />
@@ -1028,10 +1054,10 @@
         <ComponentRef Id="PEDITENG.LNG" />
         <ComponentRef Id="PEDITOR.dll" />
         <ComponentRef Id="WHATSNEW.TXT_4" />
-      </Feature>
-      <Feature Id="PEDITORRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="PEDITRUS.HLF" />
-        <ComponentRef Id="PEDITRUS.LNG" />
+        <Feature Id="PEDITORRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="PEDITRUS.HLF" />
+          <ComponentRef Id="PEDITRUS.LNG" />
+        </Feature>
       </Feature>
       <Feature Id="PicViewAdv" Level="2" Title="PicViewAdv" AllowAdvertise="no" Description="Image file viewer">
         <ComponentRef Id="COPYING_5" />
@@ -1115,9 +1141,9 @@
           <ComponentRef Id="in_ym.inp" />
           <ComponentRef Id="plugin.ini" />
         </Feature>
-      </Feature>
-      <Feature Id="qPlayExRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="qPlayEx2Rus.lng" />
+        <Feature Id="qPlayExRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="qPlayEx2Rus.lng" />
+        </Feature>
       </Feature>
       <Feature Id="Registry" Level="2" Title="Registry" AllowAdvertise="no" Description="Registry browser">
         <ComponentRef Id="FILE_ID.DIZ_8" />
@@ -1126,15 +1152,15 @@
         <ComponentRef Id="Registry.dll" />
         <ComponentRef Id="Registry.hlf" />
         <ComponentRef Id="WHATSNEW.TXT_5" />
-      </Feature>
-      <Feature Id="RegistryRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="README.RUS_2" />
-        <ComponentRef Id="RegRus.hlf" />
-        <ComponentRef Id="RegRus.lng" />
-      </Feature>
-      <Feature Id="RegistryItalian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="RegIta.Hlf" />
-        <ComponentRef Id="RegIta.Lng" />
+        <Feature Id="RegistryRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="README.RUS_2" />
+          <ComponentRef Id="RegRus.hlf" />
+          <ComponentRef Id="RegRus.lng" />
+        </Feature>
+        <Feature Id="RegistryItalian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="RegIta.Hlf" />
+          <ComponentRef Id="RegIta.Lng" />
+        </Feature>
       </Feature>
       <Feature Id="RESearch" Level="2" Title="RESearch" AllowAdvertise="no" Description="Regular expression search and replace">
         <ComponentRef Id="EditFind.reg" />
@@ -1150,10 +1176,10 @@
         <ComponentRef Id="RESearchEng.hlf" />
         <ComponentRef Id="RESearchEng.lng" />
         <ComponentRef Id="ViewFind.reg" />
-      </Feature>
-      <Feature Id="RESearchRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="RESearchRus.hlf" />
-        <ComponentRef Id="RESearchRus.lng" />
+        <Feature Id="RESearchRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="RESearchRus.hlf" />
+          <ComponentRef Id="RESearchRus.lng" />
+        </Feature>
       </Feature>
       <Feature Id="Resource" Level="2" Title="Resource" AllowAdvertise="no" Description="Portable executable (PE) resource browser">
         <ComponentRef Id="file_id.diz_10" />
@@ -1162,10 +1188,10 @@
         <ComponentRef Id="ResEng.hlf" />
         <ComponentRef Id="ResEng.lng" />
         <ComponentRef Id="Resource.dll" />
-      </Feature>
-      <Feature Id="ResourceRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="ResRus.hlf" />
-        <ComponentRef Id="ResRus.lng" />
+        <Feature Id="ResourceRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="ResRus.hlf" />
+          <ComponentRef Id="ResRus.lng" />
+        </Feature>
       </Feature>
       <Feature Id="TorrentView" Level="2" Title="TorrentView" AllowAdvertise="no" Description="Torrent file viewer">
         <ComponentRef Id="History.txt_10" />
@@ -1283,25 +1309,25 @@
         <ComponentRef Id="Settings.reg_6" />
         <ComponentRef Id="UCharMap.dll" />
         <ComponentRef Id="UCharMapEng.lng" />
-      </Feature>
-      <Feature Id="UCharMapRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="UCharMapRus.lng" />
+        <Feature Id="UCharMapRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="UCharMapRus.lng" />
+        </Feature>
       </Feature>
       <Feature Id="UnInstall" Level="2" Title="UnInstall" AllowAdvertise="no" Description="Browse and remove installed programs">
         <ComponentRef Id="File_ID.diz_11" />
         <ComponentRef Id="UnInstall.dll" />
         <ComponentRef Id="UnInstall_Eng.hlf" />
         <ComponentRef Id="UnInstall_Eng.lng" />
-      </Feature>
-      <Feature Id="UnInstallRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="ReadMe.Rus.txt_2" />
-        <ComponentRef Id="TechInfo.Rus.reg" />
-        <ComponentRef Id="UnInstall_Rus.hlf" />
-        <ComponentRef Id="UnInstall_Rus.lng" />
-        <ComponentRef Id="WhatsNew.Rus.txt" />
-      </Feature>
-      <Feature Id="UnInstallFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="UnInstall.map" />
+        <Feature Id="UnInstallRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="ReadMe.Rus.txt_2" />
+          <ComponentRef Id="TechInfo.Rus.reg" />
+          <ComponentRef Id="UnInstall_Rus.hlf" />
+          <ComponentRef Id="UnInstall_Rus.lng" />
+          <ComponentRef Id="WhatsNew.Rus.txt" />
+        </Feature>
+        <Feature Id="UnInstallFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="UnInstall.map" />
+        </Feature>
       </Feature>
       <Feature Id="userman" Level="2" Title="UserMan" AllowAdvertise="no" Description="System user manager">
         <ComponentRef Id="COPYING_6" />
@@ -1350,14 +1376,14 @@
         <ComponentRef Id="wmexplorer.dll" />
         <ComponentRef Id="wmexplorer_en.hlf" />
         <ComponentRef Id="wmexplorer_en.lng" />
-      </Feature>
-      <Feature Id="wmexplorerRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="history_ru.txt_2" />
-        <ComponentRef Id="wmexplorer_ru.hlf" />
-        <ComponentRef Id="wmexplorer_ru.lng" />
-      </Feature>
-      <Feature Id="wmexplorerFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="wmexplorer.map" />
+        <Feature Id="wmexplorerRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="history_ru.txt_2" />
+          <ComponentRef Id="wmexplorer_ru.hlf" />
+          <ComponentRef Id="wmexplorer_ru.lng" />
+        </Feature>
+        <Feature Id="wmexplorerFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="wmexplorer.map" />
+        </Feature>
       </Feature>
       <Feature Id="yac" Level="2" Title="yac" AllowAdvertise="no" Description="Command line completion">
         <ComponentRef Id="changelog_19" />
@@ -1372,10 +1398,10 @@
         <ComponentRef Id="net.reg" />
         <ComponentRef Id="reg.reg" />
         <ComponentRef Id="svn.reg" />
-      </Feature>
-      <Feature Id="yacRussian" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="yac_ru.hlf" />
-        <ComponentRef Id="yac_ru.lng" />
+        <Feature Id="yacRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="yac_ru.hlf" />
+          <ComponentRef Id="yac_ru.lng" />
+        </Feature>
       </Feature>
     </Feature>
     <?endif?>
