@@ -43,7 +43,7 @@ struct FilePanel::FileRecordCompare {
   }
 };
 
-void FilePanel::add_file_records(const FileInfo& file_info) {
+void FilePanel::add_file_records(std::list<FileRecord>& file_list, const FileInfo& file_info) {
   u64 data_size = 0;
   u64 nr_disk_size = 0;
   u64 valid_size = 0;
@@ -90,7 +90,7 @@ void FilePanel::add_file_records(const FileInfo& file_info) {
       rec.mft_rec_cnt = file_info.mft_rec_cnt;
       rec.ntfs_attr = false;
       rec.resident = fully_resident;
-      mft_index += rec;
+      file_list.push_back(rec);
     }
   }
 
@@ -141,7 +141,7 @@ void FilePanel::add_file_records(const FileInfo& file_info) {
             rec.mft_rec_cnt = 0;
             rec.ntfs_attr = true;
             rec.resident = attr.resident;
-            mft_index += rec;
+            file_list.push_back(rec);
           }
         }
       }
@@ -149,8 +149,7 @@ void FilePanel::add_file_records(const FileInfo& file_info) {
   }
 }
 
-void FilePanel::prepare_usn_journal() {
-  if (!g_file_panel_mode.use_usn_journal) return;
+FilePanel::JournalInfo FilePanel::prepare_usn_journal() {
   DWORD bytes_ret;
   USN_JOURNAL_DATA journal_data;
   if (!DeviceIoControl(volume.handle, FSCTL_QUERY_USN_JOURNAL, NULL, 0, &journal_data, sizeof(journal_data), &bytes_ret, NULL)) {
@@ -168,24 +167,27 @@ void FilePanel::prepare_usn_journal() {
     }
     else CHECK_SYS(false);
   }
-  usn_journal_id = journal_data.UsnJournalID;
-  next_usn = journal_data.NextUsn;
+  JournalInfo journal_info;
+  journal_info.usn_journal_id = journal_data.UsnJournalID;
+  journal_info.next_usn = journal_data.NextUsn;
+  return journal_info;
 }
 
 void FilePanel::delete_usn_journal() {
   if (!g_file_panel_mode.use_usn_journal || !g_file_panel_mode.delete_usn_journal) return;
-  if (usn_journal_id) {
+  if (mft_index.usn_journal_id) {
     DELETE_USN_JOURNAL_DATA delete_journal_data;
-    delete_journal_data.UsnJournalID = usn_journal_id;
+    delete_journal_data.UsnJournalID = mft_index.usn_journal_id;
     delete_journal_data.DeleteFlags = USN_DELETE_FLAG_DELETE;
     DWORD bytes_ret;
     DeviceIoControl(volume.handle, FSCTL_DELETE_USN_JOURNAL, &delete_journal_data, sizeof(delete_journal_data), NULL, 0, &bytes_ret, NULL);
-    usn_journal_id = 0;
+    mft_index.usn_journal_id = 0;
   }
 }
 
 void FilePanel::create_mft_index() {
-  prepare_usn_journal();
+  JournalInfo journal_info;
+  if (g_file_panel_mode.use_usn_journal) journal_info = prepare_usn_journal();
 
   class VolumeListProgress: public ProgressMonitor {
   protected:
@@ -212,7 +214,7 @@ void FilePanel::create_mft_index() {
   FileInfo file_info;
   file_info.volume = &volume;
   u64 max_file_index = file_info.load_base_file_rec(volume.mft_size / volume.file_rec_size - 1);
-  mft_index.clear().extend(static_cast<unsigned>(max_file_index + 1));
+  std::list<FileRecord> file_list;
   progress.max_file_index = max_file_index;
 
   if (g_file_panel_mode.backward_mft_scan) {
@@ -226,13 +228,8 @@ void FilePanel::create_mft_index() {
       file_index = file_info.load_base_file_rec(file_index);
 
       if (file_info.base_mft_rec()->base_mft_record == 0) {
-        try {
-          file_info.process_base_file_rec();
-        }
-        catch (...) {
-          continue;
-        }
-        add_file_records(file_info);
+        file_info.process_base_file_rec();
+        add_file_records(file_list, file_info);
         progress.count++;
       }
     }
@@ -244,45 +241,44 @@ void FilePanel::create_mft_index() {
       progress.update_ui();
 
       if ((file_index == file_info.load_base_file_rec(file_index)) && (file_info.base_mft_rec()->base_mft_record == 0)) {
-        try {
-          file_info.process_base_file_rec();
-        }
-        catch (...) {
-          continue;
-        }
-        add_file_records(file_info);
+        file_info.process_base_file_rec();
+        add_file_records(file_list, file_info);
         progress.count++;
       }
     }
   }
 
-  mft_index.sort<FileRecordCompare>();
-  mft_index.compact();
+  try {
+    mft_index.usn_journal_id = journal_info.usn_journal_id;
+    mft_index.next_usn = journal_info.next_usn;
+    mft_index.clear().extend(file_list.size());
+    for (std::list<FileRecord>::const_iterator file_rec = file_list.begin(); file_rec != file_list.end(); file_rec++) mft_index += *file_rec;
+    mft_index.sort<FileRecordCompare>();
+  }
+  catch (...) {
+    mft_index.invalidate();
+    throw;
+  }
 }
 
 void FilePanel::update_mft_index_from_usn() {
-  if (!g_file_panel_mode.use_usn_journal) return;
-
   READ_USN_JOURNAL_DATA read_usn_data;
-  read_usn_data.StartUsn = next_usn;
+  read_usn_data.StartUsn = mft_index.next_usn;
   read_usn_data.ReasonMask = 0xFFFFFFFF;
   read_usn_data.ReturnOnlyOnClose = FALSE;
   read_usn_data.Timeout = 0;
   read_usn_data.BytesToWaitFor = 0;
-  read_usn_data.UsnJournalID = usn_journal_id;
+  read_usn_data.UsnJournalID = mft_index.usn_journal_id;
 
   std::set<u64> upd_file_refs;
   Array<unsigned char> usn_buffer;
   const unsigned c_usn_buffer_size = 0x1000;
   while(true) {
     DWORD bytes_ret;
-    if (!DeviceIoControl(volume.handle, FSCTL_READ_USN_JOURNAL, &read_usn_data, sizeof(read_usn_data), usn_buffer.buf(c_usn_buffer_size), c_usn_buffer_size, &bytes_ret, NULL)) {
-      create_mft_index();
-      return;
-    }
+    CHECK_SYS(DeviceIoControl(volume.handle, FSCTL_READ_USN_JOURNAL, &read_usn_data, sizeof(read_usn_data), usn_buffer.buf(c_usn_buffer_size), c_usn_buffer_size, &bytes_ret, NULL));
     usn_buffer.set_size(bytes_ret);
     if (usn_buffer.size() < sizeof(USN)) break;
-    read_usn_data.StartUsn = next_usn = *reinterpret_cast<const USN*>(usn_buffer.data());
+    read_usn_data.StartUsn = *reinterpret_cast<const USN*>(usn_buffer.data());
     if (usn_buffer.size() == sizeof(USN)) break;
     unsigned pos = sizeof(USN);
     while (pos < usn_buffer.size()) {
@@ -293,33 +289,38 @@ void FilePanel::update_mft_index_from_usn() {
   }
   if (upd_file_refs.size() == 0) return;
 
-  unsigned i = 0;
-  while (i < mft_index.size()) {
-    if (upd_file_refs.count(mft_index[i].file_ref_num)) {
-      // "fast" remove
-      std::swap(mft_index.item(i), mft_index.last_item());
-      mft_index.remove(mft_index.size() - 1);
-    }
-    else i++;
-  }
-  mft_index.extend(static_cast<unsigned>(mft_index.size() + upd_file_refs.size()));
-
+  std::list<FileRecord> file_list;
   FileInfo file_info;
   file_info.volume = &volume;
   for (std::set<u64>::const_iterator file_index = upd_file_refs.begin(); file_index != upd_file_refs.end(); file_index++) {
     DBG_LOG(UnicodeString::format(L"mft_update_index(): %Lx", *file_index));
     if ((*file_index == file_info.load_base_file_rec(*file_index)) && (file_info.base_mft_rec()->base_mft_record == 0)) {
-      try {
-        file_info.process_base_file_rec();
-        add_file_records(file_info);
-      }
-      catch (...) {
-        continue;
-      }
+      file_info.process_base_file_rec();
+      add_file_records(file_list, file_info);
     }
   }
-  mft_index.sort<FileRecordCompare>();
-  mft_index.compact();
+
+  try {
+    mft_index.next_usn = read_usn_data.StartUsn;
+
+    unsigned i = 0;
+    while (i < mft_index.size()) {
+      if (upd_file_refs.count(mft_index[i].file_ref_num)) {
+        // "fast" remove
+        std::swap(mft_index.item(i), mft_index.last_item());
+        mft_index.remove(mft_index.size() - 1);
+      }
+      else i++;
+    }
+
+    mft_index.extend(mft_index.size() + file_list.size());
+    for (std::list<FileRecord>::const_iterator file_rec = file_list.begin(); file_rec != file_list.end(); file_rec++) mft_index += *file_rec;
+    mft_index.sort<FileRecordCompare>();
+  }
+  catch (...) {
+    mft_index.invalidate();
+    throw;
+  }
 }
 
 void FilePanel::mft_scan_dir(u64 parent_file_index, const UnicodeString& rel_path, std::list<PanelItemData>& pid_list, FileListProgress& progress) {
@@ -387,28 +388,29 @@ u64 FilePanel::mft_find_path(const UnicodeString& path) {
 }
 
 void FilePanel::toggle_mft_mode() {
-  mft_mode = !mft_mode;
-  if (mft_mode) {
+  if (!mft_mode) {
     current_dir = get_real_path(current_dir);
     if (current_dir.equal(current_dir.size() - 1, L':')) current_dir = add_trailing_slash(current_dir);
 #ifdef FARAPI17
     current_dir_oem = unicode_to_oem(current_dir);
 #endif // FARAPI17
     volume.open(extract_path_root(current_dir));
+    mft_index.invalidate();
     if (g_file_panel_mode.use_usn_journal && g_file_panel_mode.use_cache) {
       try {
         load_mft_index();
         update_mft_index_from_usn();
       }
       catch (...) {
-        mft_index.clear().compact();
       }
     }
     if (mft_index.size() == 0) create_mft_index();
     root_dir_ref_num = mft_find_root();
     mft_find_path(current_dir);
+    mft_mode = true;
   }
   else {
+    mft_mode = false;
     if (g_file_panel_mode.use_usn_journal && g_file_panel_mode.use_cache) {
       try {
         store_mft_index();
@@ -430,6 +432,8 @@ void FilePanel::reload_mft_all() {
 }
 
 void FilePanel::store_mft_index() {
+  if (mft_index.size() == 0) return;
+
   class Progress: public ProgressMonitor {
   protected:
     virtual void do_update_ui() {
@@ -449,7 +453,7 @@ void FilePanel::store_mft_index() {
   };
   Progress progress;
 
-  unsigned buffer_size = sizeof(usn_journal_id) + sizeof(next_usn) + sizeof(unsigned);
+  unsigned buffer_size = sizeof(mft_index.usn_journal_id) + sizeof(mft_index.next_usn) + sizeof(unsigned);
   unsigned file_record_size = sizeof(mft_index[0].file_ref_num) + sizeof(mft_index[0].parent_ref_num) + sizeof(mft_index[0].file_attr) + sizeof(mft_index[0].creation_time) + sizeof(mft_index[0].last_access_time) + sizeof(mft_index[0].last_write_time) + sizeof(mft_index[0].data_size) + sizeof(mft_index[0].disk_size) + sizeof(mft_index[0].valid_size) + sizeof(mft_index[0].fragment_cnt) + sizeof(mft_index[0].stream_cnt) + sizeof(mft_index[0].hard_link_cnt) + sizeof(mft_index[0].mft_rec_cnt) + sizeof(mft_index[0].ntfs_attr) + sizeof(mft_index[0].resident);
   buffer_size += file_record_size * mft_index.size();
   for (unsigned i = 0; i < mft_index.size(); i++) {
@@ -458,8 +462,8 @@ void FilePanel::store_mft_index() {
   Array<unsigned char> buffer;
   buffer.extend(buffer_size);
   #define ENCODE(var) buffer.add(reinterpret_cast<const unsigned char*>(&var), sizeof(var));
-  ENCODE(usn_journal_id);
-  ENCODE(next_usn);
+  ENCODE(mft_index.usn_journal_id);
+  ENCODE(mft_index.next_usn);
   unsigned count = mft_index.size();
   ENCODE(count);
   for (unsigned i = 0; i < mft_index.size(); i++) {
@@ -590,40 +594,46 @@ void FilePanel::load_mft_index() {
   progress.percent = 70;
   progress.update_ui();
 
-  #define DECODE(var) memcpy(&var, buffer.data() + pos, sizeof(var)); pos += sizeof(var);
-  unsigned pos = 0;
-  DECODE(usn_journal_id);
-  DECODE(next_usn);
-  unsigned count;
-  DECODE(count);
-  mft_index.clear().compact().extend(count);
-  FileRecord rec;
-  unsigned file_name_size;
-  for (unsigned i = 0; i < count; i++) {
-    progress.percent = 70 + i * 30 / count;
-    progress.update_ui();
+  try {
+    #define DECODE(var) memcpy(&var, buffer.data() + pos, sizeof(var)); pos += sizeof(var);
+    unsigned pos = 0;
+    DECODE(mft_index.usn_journal_id);
+    DECODE(mft_index.next_usn);
+    unsigned count;
+    DECODE(count);
+    mft_index.extend(count);
+    FileRecord rec;
+    unsigned file_name_size;
+    for (unsigned i = 0; i < count; i++) {
+      progress.percent = 70 + i * 30 / count;
+      progress.update_ui();
 
-    DECODE(rec.file_ref_num);
-    DECODE(rec.parent_ref_num);
-    DECODE(file_name_size);
-    rec.file_name = UnicodeString(reinterpret_cast<const wchar_t*>(buffer.data() + pos), file_name_size);
-    pos += file_name_size * sizeof(wchar_t);
-    DECODE(rec.file_attr);
-    DECODE(rec.creation_time);
-    DECODE(rec.last_access_time);
-    DECODE(rec.last_write_time);
-    DECODE(rec.data_size);
-    DECODE(rec.disk_size);
-    DECODE(rec.valid_size);
-    DECODE(rec.fragment_cnt);
-    DECODE(rec.stream_cnt);
-    DECODE(rec.hard_link_cnt);
-    DECODE(rec.mft_rec_cnt);
-    DECODE(rec.ntfs_attr);
-    DECODE(rec.resident);
-    mft_index += rec;
+      DECODE(rec.file_ref_num);
+      DECODE(rec.parent_ref_num);
+      DECODE(file_name_size);
+      rec.file_name = UnicodeString(reinterpret_cast<const wchar_t*>(buffer.data() + pos), file_name_size);
+      pos += file_name_size * sizeof(wchar_t);
+      DECODE(rec.file_attr);
+      DECODE(rec.creation_time);
+      DECODE(rec.last_access_time);
+      DECODE(rec.last_write_time);
+      DECODE(rec.data_size);
+      DECODE(rec.disk_size);
+      DECODE(rec.valid_size);
+      DECODE(rec.fragment_cnt);
+      DECODE(rec.stream_cnt);
+      DECODE(rec.hard_link_cnt);
+      DECODE(rec.mft_rec_cnt);
+      DECODE(rec.ntfs_attr);
+      DECODE(rec.resident);
+      mft_index += rec;
+    }
+    assert(pos == buffer_size);
   }
-  assert(pos == buffer_size);
+  catch (...) {
+    mft_index.invalidate();
+    throw;
+  }
 }
 
 UnicodeString FilePanel::get_mft_index_cache_name() {

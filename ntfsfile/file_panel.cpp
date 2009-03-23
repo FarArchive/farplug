@@ -97,7 +97,6 @@ FilePanel* FilePanel::open() {
   try {
     panel->flat_mode = false;
     panel->mft_mode = false;
-    panel->usn_journal_id = 0;
     panel->saved_state = save_state(INVALID_HANDLE_VALUE);
     if (g_file_panel_mode.default_mft_mode) {
       panel->current_dir = FARSTR_TO_UNICODE(panel->saved_state.directory);
@@ -140,7 +139,7 @@ void FilePanel::close() {
 void FilePanel::on_close() {
   if (g_file_panel_mode.use_usn_journal && g_file_panel_mode.use_cache) {
     try {
-      if (mft_index.size() != 0) store_mft_index();
+      store_mft_index();
     }
     catch (...) {
     }
@@ -572,7 +571,14 @@ void FilePanel::new_file_list(PluginPanelItem*& panel_items, int& item_num, bool
   FileListProgress progress;
   std::list<PanelItemData> pid_list;
   if (mft_mode) {
-    if (!search_mode) update_mft_index_from_usn();
+    if (g_file_panel_mode.use_usn_journal && !search_mode) {
+      try {
+        update_mft_index_from_usn();
+      }
+      catch (...) {
+        create_mft_index();
+      }
+    }
     mft_scan_dir(mft_find_path(current_dir), L"", pid_list, progress);
   }
   else scan_dir(current_dir, L"", pid_list, progress);
@@ -608,7 +614,14 @@ void FilePanel::change_directory(const UnicodeString& target_dir, bool search_mo
   }
   if (new_cur_dir.equal(new_cur_dir.size() - 1, L':')) new_cur_dir = add_trailing_slash(new_cur_dir);
   if (mft_mode) {
-    if (!search_mode) update_mft_index_from_usn();
+    if (g_file_panel_mode.use_usn_journal && !search_mode) {
+      try {
+        update_mft_index_from_usn();
+      }
+      catch (...) {
+        create_mft_index();
+      }
+    }
     mft_find_path(new_cur_dir);
     if (!search_mode) SetCurrentDirectoryW(new_cur_dir.data());
   }

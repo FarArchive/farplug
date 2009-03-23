@@ -106,12 +106,22 @@ private:
     bool resident;
   };
   struct FileRecordCompare;
-  ObjectArray<FileRecord> mft_index;
-  DWORDLONG usn_journal_id;
-  USN next_usn;
+  struct JournalInfo {
+    DWORDLONG usn_journal_id;
+    USN next_usn;
+    JournalInfo(): usn_journal_id(0) {
+    }
+  };
+  struct MftIndex: public ObjectArray<FileRecord>, public JournalInfo {
+    void invalidate() {
+      clear();
+      usn_journal_id = 0;
+    }
+  };
+  MftIndex mft_index;
   u64 root_dir_ref_num;
-  void add_file_records(const FileInfo& file_info);
-  void prepare_usn_journal();
+  void add_file_records(std::list<FileRecord>& file_list, const FileInfo& file_info);
+  JournalInfo prepare_usn_journal();
   void delete_usn_journal();
   void create_mft_index();
   void update_mft_index_from_usn();
