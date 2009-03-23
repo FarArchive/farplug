@@ -34,7 +34,23 @@ using namespace col;
 #include "log.h"
 #include "defragment.h"
 
-struct Totals {
+struct PluginStartupInfo g_far;
+struct FarStandardFunctions g_fsf;
+
+Array<unsigned char> g_colors;
+
+HINSTANCE g_h_module;
+
+struct CtrlIds {
+  unsigned linked;
+  unsigned link; // displays text from 'linked'
+  CtrlIds(): linked(-1) { // no linked control by default
+  }
+};
+
+const int c_update_time = 1;
+
+struct FileTotals {
   u64 unnamed_data_size;
   u64 named_data_size;
   u64 nr_data_size;
@@ -51,39 +67,42 @@ struct Totals {
   unsigned file_rp_cnt;
   unsigned dir_rp_cnt;
   unsigned err_cnt;
+  FileTotals() {
+    memset(this, 0, sizeof(*this));
+  }
 };
 
-struct CtrlIds {
-  unsigned linked;
-  unsigned link; // displays text from 'linked'
-};
-
-struct PluginStartupInfo g_far;
-struct FarStandardFunctions g_fsf;
-
-ObjectArray<UnicodeString> g_file_list;
-FileInfo g_file_info;
-ObjectArray<FileInfo> g_hard_links;
-NtfsVolume g_volume;
-Totals g_totals;
-HANDLE g_h_dlg;
-
-Array<FarDialogItem> g_dlg_items;
+struct FileAnalyzer {
+  ObjectArray<UnicodeString> file_list;
+  FileInfo file_info;
+  ObjectArray<FileInfo> hard_links;
+  NtfsVolume volume;
+  FileTotals totals;
+  HANDLE h_dlg;
+  Array<FarDialogItem> dlg_items;
 #ifdef FARAPI18
-ObjectArray<UnicodeString> g_dlg_text;
+  ObjectArray<UnicodeString> dlg_text;
 #endif
-Array<CHAR_INFO> g_dlg_ci;
-CtrlIds g_ctrl;
-
-HANDLE h_thread;
-HANDLE h_stop_event;
-
-const int c_update_time = 1;
-time_t g_update_timer = 0;
-
-Array<unsigned char> g_colors;
-
-HINSTANCE g_h_module;
+  Array<CHAR_INFO> dlg_ci;
+  CtrlIds ctrl;
+  HANDLE h_thread;
+  HANDLE h_stop_event;
+  time_t update_timer;
+  void display_file_info(bool partial = false);
+  void update_totals(const FileInfo& file_info, bool hard_link);
+  void process_file(FileInfo& file_info, bool full_info);
+  void process_recursive(const UnicodeString& dir_name);
+  void process();
+  static unsigned __stdcall th_proc(void* param);
+  LONG_PTR dialog_handler(int msg, int param1, LONG_PTR param2);
+  static LONG_PTR WINAPI dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2);
+  FileAnalyzer(): h_dlg(NULL), h_thread(NULL), h_stop_event(NULL), update_timer(0) {
+  }
+  ~FileAnalyzer() {
+    if (h_stop_event) CloseHandle(h_stop_event);
+    if (h_thread) CloseHandle(h_thread);
+  }
+};
 
 Array<CHAR_INFO> str_to_char_info(const FarStr& str) {
   Array<CHAR_INFO> out;
@@ -120,20 +139,7 @@ unsigned fmt_char_cnt(const UnicodeString& str) {
   return cnt;
 }
 
-LONG_PTR WINAPI dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2);
-
-void display_file_info(bool partial = false) {
-  HANDLE h_dlg = g_h_dlg;
-  const ObjectArray<UnicodeString>& file_list = g_file_list;
-  const FileInfo& file_info = g_file_info;
-  const Totals& totals = g_totals;
-  Array<FarDialogItem>& dlg_items = g_dlg_items;
-#ifdef FARAPI18
-  ObjectArray<UnicodeString>& dlg_text = g_dlg_text;
-#endif
-  Array<CHAR_INFO>& dlg_ci = g_dlg_ci;
-  CtrlIds& ctrl = g_ctrl;
-
+void FileAnalyzer::display_file_info(bool partial) {
   const UnicodeString empty_str;
 
   /* flag - show size summary for directories / multiple files */
@@ -703,24 +709,19 @@ void display_file_info(bool partial = false) {
   }
   else {
 #ifdef FARAPI17
-    g_far.DialogEx(g_far.ModuleNumber, -1, -1, dlg_width, dlg_height, "metadata", (FarDialogItem*) dlg_items.data(), dlg_items.size(), 0, 0, dlg_proc, 0);
+    g_far.DialogEx(g_far.ModuleNumber, -1, -1, dlg_width, dlg_height, "metadata", (FarDialogItem*) dlg_items.data(), dlg_items.size(), 0, 0, dlg_proc, reinterpret_cast<LONG_PTR>(this));
 #endif // FARAPI17
 #ifdef FARAPI18
-    int res = -1;
-    HANDLE h = g_far.DialogInit(g_far.ModuleNumber, -1, -1, dlg_width, dlg_height, L"metadata", (FarDialogItem*) dlg_items.data(), dlg_items.size(), 0, 0, dlg_proc, 0);
+    HANDLE h = g_far.DialogInit(g_far.ModuleNumber, -1, -1, dlg_width, dlg_height, L"metadata", (FarDialogItem*) dlg_items.data(), dlg_items.size(), 0, 0, dlg_proc, reinterpret_cast<LONG_PTR>(this));
     if (h != INVALID_HANDLE_VALUE) {
-      res = g_far.DialogRun(h);
+      g_far.DialogRun(h);
       g_far.DialogFree(h);
     }
-    dlg_text.clear();
 #endif // FARAPI18
-    dlg_items.clear();
-    dlg_ci.clear();
   }
 }
 
-void update_totals(const FileInfo& file_info, bool hard_link) {
-  Totals& totals = g_totals;
+void FileAnalyzer::update_totals(const FileInfo& file_info, bool hard_link) {
   if (file_info.reparse && file_info.directory) totals.dir_rp_cnt++;
   else if (file_info.directory) totals.dir_cnt++;
   else if (hard_link) totals.hl_cnt++;
@@ -761,8 +762,7 @@ void update_totals(const FileInfo& file_info, bool hard_link) {
   }
 }
 
-void process_file(FileInfo& file_info, bool full_info) {
-  NtfsVolume& volume = g_volume;
+void FileAnalyzer::process_file(FileInfo& file_info, bool full_info) {
   BY_HANDLE_FILE_INFORMATION h_file_info;
   HANDLE h_file = CreateFileW(long_path(file_info.file_name).data(), FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_POSIX_SEMANTICS, NULL);
   if (h_file == INVALID_HANDLE_VALUE) FAIL(SystemError());
@@ -781,16 +781,16 @@ void process_file(FileInfo& file_info, bool full_info) {
   file_info.volume = &volume;
 
   if (file_info.hard_link_cnt > 1) {
-    unsigned idx = g_hard_links.bsearch(file_info);
+    unsigned idx = hard_links.bsearch(file_info);
     if (idx != -1) {
-      update_totals(g_hard_links[idx], true);
+      update_totals(hard_links[idx], true);
     }
     else {
       file_info.process_file(file_ref_num);
       if (full_info) file_info.find_full_paths();
       update_totals(file_info, false);
-      g_hard_links += file_info;
-      g_hard_links.sort();
+      hard_links += file_info;
+      hard_links.sort();
     }
   }
   else {
@@ -800,10 +800,7 @@ void process_file(FileInfo& file_info, bool full_info) {
   }
 }
 
-void process_recursive(const UnicodeString& dir_name) {
-  const NtfsVolume& volume = g_volume;
-  Totals& totals = g_totals;
-
+void FileAnalyzer::process_recursive(const UnicodeString& dir_name) {
   try {
     bool root_dir = dir_name.last() == L'\\';
     WIN32_FIND_DATAW find_data;
@@ -831,9 +828,9 @@ void process_recursive(const UnicodeString& dir_name) {
         }
 
         time_t ctime = time(NULL);
-        if (ctime > g_update_timer + c_update_time) {
+        if (ctime > update_timer + c_update_time) {
           display_file_info(true);
-          g_update_timer = ctime;
+          update_timer = ctime;
         }
       }
     }
@@ -909,30 +906,34 @@ void WINAPI FAR_EXPORT(GetPluginInfo)(struct PluginInfo *pi) {
   pi->CommandPrefix = c_command_prefix;
 }
 
-unsigned __stdcall th_proc(void*) {
+void FileAnalyzer::process() {
+  if (file_info.directory && !file_info.reparse) {
+    process_recursive(file_info.file_name);
+  }
+  for (unsigned i = 1; i < file_list.size(); i++) {
+    FileInfo fi;
+    fi.file_name = file_list[i];
+    try {
+      process_file(fi, false);
+      if (fi.directory && !fi.reparse) {
+        process_recursive(fi.file_name);
+      }
+    }
+    catch (Error&) {
+      totals.err_cnt++;
+    }
+    time_t ctime = time(NULL);
+    if (ctime > update_timer + c_update_time) {
+      display_file_info(true);
+      update_timer = ctime;
+    }
+  }
+  display_file_info();
+}
+
+unsigned __stdcall FileAnalyzer::th_proc(void* param) {
   try {
-    if (g_file_info.directory && !g_file_info.reparse) {
-      process_recursive(g_file_info.file_name);
-    }
-    for (unsigned i = 1; i < g_file_list.size(); i++) {
-      FileInfo file_info;
-      file_info.file_name = g_file_list[i];
-      try {
-        process_file(file_info, false);
-        if (file_info.directory && !file_info.reparse) {
-          process_recursive(file_info.file_name);
-        }
-      }
-      catch (Error&) {
-        g_totals.err_cnt++;
-      }
-      time_t ctime = time(NULL);
-      if (ctime > g_update_timer + c_update_time) {
-        display_file_info(true);
-        g_update_timer = ctime;
-      }
-    }
-    display_file_info();
+    reinterpret_cast<FileAnalyzer*>(param)->process();
   }
   catch (Error& e) {
     error_dlg(e);
@@ -941,17 +942,18 @@ unsigned __stdcall th_proc(void*) {
   return TRUE;
 }
 
-LONG_PTR WINAPI dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
-  BEGIN_ERROR_HANDLER;
+LONG_PTR FileAnalyzer::dialog_handler(int msg, int param1, LONG_PTR param2) {
   const MOUSE_EVENT_RECORD* mouse_evt = (const MOUSE_EVENT_RECORD*) param2;
   /* do we need background processing? */
-  bool bg_proc = (g_file_info.directory && !g_file_info.reparse) || (g_file_list.size() > 1);
+  bool bg_proc = (file_info.directory && !file_info.reparse) || (file_list.size() > 1);
   if (msg == DN_INITDIALOG) {
-    g_h_dlg = h_dlg;
     NOFAIL(display_file_info());
     if (bg_proc) {
+      h_stop_event = CreateEvent(NULL, TRUE, FALSE, NULL);
+      CHECK_SYS(h_stop_event != NULL);
       unsigned th_id;
-      h_thread = (HANDLE) _beginthreadex(NULL, 0, th_proc, NULL, 0, &th_id);
+      h_thread = (HANDLE) _beginthreadex(NULL, 0, th_proc, this, 0, &th_id);
+      CHECK_SYS(h_thread != NULL);
     }
     return TRUE;
   }
@@ -959,7 +961,6 @@ LONG_PTR WINAPI dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
     if (bg_proc) {
       SetEvent(h_stop_event);
       if (WaitForSingleObject(h_thread, 0) == WAIT_OBJECT_0) {
-        CloseHandle(h_thread);
         return TRUE;
       }
       else return FALSE;
@@ -971,20 +972,20 @@ LONG_PTR WINAPI dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
     ((msg == DN_KEY) && (param2 == KEY_ENTER))) {
 
     unsigned ctrl_id = param1;
-    if ((g_dlg_items[ctrl_id].Type == DI_EDIT) || (g_dlg_items[ctrl_id].Type == DI_FIXEDIT)) {
-      if (ctrl_id == g_ctrl.linked) {
-        g_ctrl.linked = -1;
+    if ((dlg_items[ctrl_id].Type == DI_EDIT) || (dlg_items[ctrl_id].Type == DI_FIXEDIT)) {
+      if (ctrl_id == ctrl.linked) {
+        ctrl.linked = -1;
         NOFAIL(display_file_info());
       }
-      else if (ctrl_id == g_ctrl.link) {
+      else if (ctrl_id == ctrl.link) {
         FarStr file_name;
-        unsigned len = (unsigned) g_far.SendDlgMessage(h_dlg, DM_GETTEXTLENGTH, g_ctrl.link, 0);
-        g_far.SendDlgMessage(h_dlg, DM_GETTEXTPTR, g_ctrl.link, (LONG_PTR) file_name.buf(len));
+        unsigned len = (unsigned) g_far.SendDlgMessage(h_dlg, DM_GETTEXTLENGTH, ctrl.link, 0);
+        g_far.SendDlgMessage(h_dlg, DM_GETTEXTPTR, ctrl.link, (LONG_PTR) file_name.buf(len));
         file_name.set_size(len);
         if (panel_go_to_file(file_name)) g_far.SendDlgMessage(h_dlg, DM_CLOSE, -1, 0);
       }
       else {
-        g_ctrl.linked = ctrl_id;
+        ctrl.linked = ctrl_id;
         NOFAIL(display_file_info());
       }
       return TRUE;
@@ -996,6 +997,13 @@ LONG_PTR WINAPI dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
     return TRUE;
   }
   else return g_far.DefDlgProc(h_dlg, msg, param1, param2);
+}
+
+LONG_PTR WINAPI FileAnalyzer::dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
+  BEGIN_ERROR_HANDLER;
+  FileAnalyzer* fa = reinterpret_cast<FileAnalyzer*>(g_far.SendDlgMessage(h_dlg, DM_GETDLGDATA, 0, 0));
+  fa->h_dlg = h_dlg;
+  return fa->dialog_handler(msg, param1, param2);
   END_ERROR_HANDLER(;,;);
   return g_far.DefDlgProc(h_dlg, msg, param1, param2);
 }
@@ -1133,35 +1141,13 @@ FileType get_file_type(const UnicodeString& file_name) {
 }
 
 /* show file information dialog */
-void plugin_show_metadata() {
-  try {
-    g_volume.open(extract_path_root(get_real_path(extract_file_dir(g_file_list[0]))));
-    try {
-      g_file_info.file_name = g_file_list[0];
-      g_file_info.attr_list.clear();
-      g_file_info.file_name_list.clear();
-      g_hard_links.clear();
-      memset(&g_totals, 0, sizeof(g_totals));
-      process_file(g_file_info, true);
-      try {
-        h_stop_event = CreateEvent(NULL, TRUE, FALSE, NULL);
-        if (h_stop_event == NULL) FAIL(SystemError());
-        try {
-          g_h_dlg = NULL;
-          g_ctrl.linked = -1; // no linked control by default
-          display_file_info();
-        }
-        finally (CloseHandle(h_stop_event));
-      }
-      finally (
-        g_file_info.attr_list.clear();
-        g_file_info.file_name_list.clear();
-        g_hard_links.clear();
-      );
-    }
-    finally (g_volume.close());
-  }
-  finally (g_file_list.clear());
+void plugin_show_metadata(const ObjectArray<UnicodeString>& file_list) {
+  FileAnalyzer fa;
+  fa.file_list = file_list;
+  fa.volume.open(extract_path_root(get_real_path(extract_file_dir(file_list[0]))));
+  fa.file_info.file_name = file_list[0];
+  fa.process_file(fa.file_info, true);
+  fa.display_file_info();
 }
 
 void plugin_process_contents(const ObjectArray<UnicodeString>& file_list) {
@@ -1193,13 +1179,15 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
   g_far.AdvControl(g_far.ModuleNumber, ACTL_GETARRAYCOLOR, g_colors.buf(colors_size));
   g_colors.set_size(colors_size);
 
+  ObjectArray<UnicodeString> file_list;
+
   if (OpenFrom == OPEN_COMMANDLINE) {
     UnicodeString prefix;
-    if (file_list_from_cmdline(FARSTR_TO_UNICODE((const FarCh*) item), g_file_list, prefix)) {
-      if (prefix == L"nfi") plugin_show_metadata();
-      else if (prefix == L"nfc") plugin_process_contents(g_file_list);
+    if (file_list_from_cmdline(FARSTR_TO_UNICODE((const FarCh*) item), file_list, prefix)) {
+      if (prefix == L"nfi") plugin_show_metadata(file_list);
+      else if (prefix == L"nfc") plugin_process_contents(file_list);
       else if (prefix == L"defrag") {
-        defragment(g_file_list, Log());
+        defragment(file_list, Log());
         far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
         far_control_int(PANEL_PASSIVE, FCTL_UPDATEANOTHERPANEL, 1);
         far_control_ptr(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, NULL);
@@ -1222,12 +1210,11 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
     int item_idx = far_menu(far_get_msg(MSG_PLUGIN_NAME), menu_items, FAR_T("plugin_menu"));
 
     if (item_idx == 0) {
-      if (file_list_from_panel(g_file_list, active_panel != NULL)) {
-        plugin_show_metadata();
+      if (file_list_from_panel(file_list, active_panel != NULL)) {
+        plugin_show_metadata(file_list);
       }
     }
     else if (item_idx == 1) {
-      ObjectArray<UnicodeString> file_list;
       if (file_list_from_panel(file_list, active_panel != NULL)) {
         plugin_process_contents(file_list);
       }
@@ -1338,13 +1325,14 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
     PluginPanelItem* ppi = far_get_panel_item(panel, pi.CurrentItem, pi);
     if (!ppi) return false;
     if ((ppi->FindData.dwFileAttributes & FILE_ATTR_DIRECTORY) == 0) return FALSE;
+    ObjectArray<UnicodeString> file_list;
     if (FAR_STRCMP(FAR_FILE_NAME(ppi->FindData), FAR_T("..")) == 0) { // current directory selected
-      g_file_list = panel->get_current_dir();
+      file_list = panel->get_current_dir();
     }
     else {
-      g_file_list = get_unicode_file_path(*ppi, add_trailing_slash(panel->get_current_dir()), true);
+      file_list = get_unicode_file_path(*ppi, add_trailing_slash(panel->get_current_dir()), true);
     }
-    plugin_show_metadata();
+    plugin_show_metadata(file_list);
   }
   else if ((Key == 'R') && (ControlState == PKF_CONTROL)) {
     if (!g_file_panel_mode.use_usn_journal) panel->reload_mft();
