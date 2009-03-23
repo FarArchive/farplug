@@ -267,10 +267,6 @@
         <ComponentRef Id="FtpEng.lng" />
         <ComponentRef Id="Notes.txt" />
         <ComponentRef Id="TechInfo.reg" />
-        <ComponentRef Id="Progress_FarCopy.reg" />
-        <ComponentRef Id="Progress_JM.reg" />
-        <ComponentRef Id="Progress_Wesha.reg" />
-        <ComponentRef Id="Progress_ZeMA.reg" />
         <Feature Id="ftpDirList" Level="1" Title="DirList" AllowAdvertise="no" Description="Directory listing parser">
           <ComponentRef Id="ftpDirList.fll" />
           <Feature Id="ftpDirListFExcept" Level="1" Display="hidden" AllowAdvertise="no">
@@ -286,6 +282,10 @@
         </Feature>
         <Feature Id="ftpProgress" Level="1" Title="Progress" AllowAdvertise="no" Description="Copy progress dialog">
           <ComponentRef Id="ftpProgress.fll" />
+          <ComponentRef Id="Progress_FarCopy.reg" />
+          <ComponentRef Id="Progress_JM.reg" />
+          <ComponentRef Id="Progress_Wesha.reg" />
+          <ComponentRef Id="Progress_ZeMA.reg" />
           <Feature Id="ftpProgressFExcept" Level="1" Display="hidden" AllowAdvertise="no">
             <ComponentRef Id="ftpProgress.map" />
           </Feature>
