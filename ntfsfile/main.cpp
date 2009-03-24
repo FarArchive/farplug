@@ -1205,8 +1205,11 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
     menu_items += far_get_msg(MSG_MENU_CONTENT);
     menu_items += far_get_msg(active_panel == NULL ? MSG_MENU_PANEL_ON : MSG_MENU_PANEL_OFF);
     menu_items += far_get_msg(MSG_MENU_DEFRAGMENT);
-    if (active_panel != NULL) menu_items += far_get_msg(active_panel->flat_mode ? MSG_MENU_FLAT_MODE_OFF : MSG_MENU_FLAT_MODE_ON);
-    if (active_panel != NULL) menu_items += far_get_msg(active_panel->mft_mode ? MSG_MENU_MFT_MODE_OFF : MSG_MENU_MFT_MODE_ON);
+    if (active_panel) {
+      menu_items += far_get_msg(active_panel->flat_mode ? MSG_MENU_FLAT_MODE_OFF : MSG_MENU_FLAT_MODE_ON);
+      menu_items += far_get_msg(active_panel->mft_mode ? MSG_MENU_MFT_MODE_OFF : MSG_MENU_MFT_MODE_ON);
+      if (active_panel->mft_mode) menu_items += far_get_msg(MSG_MENU_SHOW_TOTALS);
+    }
     int item_idx = far_menu(far_get_msg(MSG_PLUGIN_NAME), menu_items, FAR_T("plugin_menu"));
 
     if (item_idx == 0) {
@@ -1246,6 +1249,20 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
     else if (item_idx == 5) {
       active_panel->toggle_mft_mode();
       far_control_int(active_panel, FCTL_UPDATEPANEL, 1);
+    }
+    else if (item_idx == 6) {
+      if (file_list_from_panel(file_list, true)) {
+        FilePanel::Totals totals = active_panel->mft_get_totals(file_list);
+        UnicodeString msg;
+        msg.add(far_get_msg(MSG_SHOW_TOTALS_TITLE)).add(L"\n");
+        msg.add_fmt(far_get_msg(MSG_SHOW_TOTALS_DATA_SIZE).data(), &format_data_size(totals.data_size, size_suffixes), totals.data_size).add(L"\n");
+        msg.add_fmt(far_get_msg(MSG_SHOW_TOTALS_DISK_SIZE).data(), &format_data_size(totals.disk_size, size_suffixes), totals.disk_size).add(L"\n");
+        msg.add_fmt(far_get_msg(MSG_SHOW_TOTALS_FRAGMENTS).data(), totals.fragment_cnt, totals.fragment_cnt / (totals.file_cnt + totals.dir_cnt)).add(L"\n");
+        msg.add_fmt(far_get_msg(MSG_SHOW_TOTALS_FILES).data(), totals.file_cnt, totals.hl_cnt, totals.file_rp_cnt).add(L"\n");
+        msg.add_fmt(far_get_msg(MSG_SHOW_TOTALS_DIRS).data(), totals.dir_cnt, totals.dir_rp_cnt).add(L"\n");
+        msg.add(far_get_msg(MSG_BUTTON_OK));
+        far_message(msg, 1, FMSG_LEFTALIGN);
+      }
     }
   }
   END_ERROR_HANDLER(return handle, return INVALID_HANDLE_VALUE);
@@ -1317,22 +1334,6 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
   FilePanel* panel = (FilePanel*) hPlugin;
   if ((Key == VK_F24) && (ControlState == (PKF_CONTROL | PKF_ALT | PKF_SHIFT))) {
     panel->apply_saved_state();
-  }
-  else if ((Key == VK_F3) && (ControlState == 0)) {
-    PanelInfo pi;
-    if (!far_control_ptr(panel, FCTL_GETPANELINFO, &pi)) return FALSE;
-    if ((pi.CurrentItem < 0) || (pi.CurrentItem >= pi.ItemsNumber)) return FALSE;
-    PluginPanelItem* ppi = far_get_panel_item(panel, pi.CurrentItem, pi);
-    if (!ppi) return false;
-    if ((ppi->FindData.dwFileAttributes & FILE_ATTR_DIRECTORY) == 0) return FALSE;
-    ObjectArray<UnicodeString> file_list;
-    if (FAR_STRCMP(FAR_FILE_NAME(ppi->FindData), FAR_T("..")) == 0) { // current directory selected
-      file_list = panel->get_current_dir();
-    }
-    else {
-      file_list = get_unicode_file_path(*ppi, add_trailing_slash(panel->get_current_dir()), true);
-    }
-    plugin_show_metadata(file_list);
   }
   else if ((Key == 'R') && (ControlState == PKF_CONTROL)) {
     if (!g_file_panel_mode.use_usn_journal) panel->reload_mft();

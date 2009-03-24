@@ -34,6 +34,7 @@ menu.flat_mode.on = Flat m&ode
 menu.flat_mode.off = Normal m&ode
 menu.mft_mode.on = MFT &index on
 menu.mft_mode.off = MFT &index off
+menu.show_totals = Show &totals
 
 # File panel
 file_panel.read_dir.progress.title = Reading directory...
@@ -159,6 +160,14 @@ defrag.progress.analyze = Analyzing volume
 defrag.progress.files = Processed %u files from %u total
 defrag.progress.console.title = {%Lu%%} Defragmenting...
 defrag.errors = Some files were not defragmented because of errors. See log for details.
+
+# Show totals
+show_totals.title = File totals
+show_totals.data_size = Size of data streams: %S (%Lu)
+show_totals.disk_size = Size on disk: %S (%Lu)
+show_totals.fragments = Excess fragments: %Lu (%Lu per file)
+show_totals.files = Files: %u (%u hard links; %u symbolic links)
+show_totals.dirs = Directories: %u (%u symbolic links)
 
 # Error log
 log.title = Error Log

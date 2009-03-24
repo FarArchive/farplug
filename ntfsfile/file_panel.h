@@ -150,6 +150,20 @@ public:
   void toggle_mft_mode();
   void reload_mft();
   static void reload_mft_all();
+  struct Totals {
+    u64 data_size;
+    u64 disk_size;
+    u64 fragment_cnt;
+    unsigned file_cnt;
+    unsigned dir_cnt;
+    unsigned hl_cnt;
+    unsigned file_rp_cnt;
+    unsigned dir_rp_cnt;
+    Totals() {
+      memset(this, 0, sizeof(*this));
+    }
+  };
+  Totals mft_get_totals(const ObjectArray<UnicodeString>& file_list);
 };
 
 bool show_file_panel_mode_dialog(FilePanelMode& mode);

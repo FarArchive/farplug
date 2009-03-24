@@ -3,6 +3,7 @@
 
 #include <list>
 #include <set>
+#include <map>
 #include <algorithm>
 
 #include "lzo/lzo1x.h"
@@ -254,6 +255,7 @@ void FilePanel::create_mft_index() {
     mft_index.clear().extend(static_cast<unsigned>(file_list.size()));
     for (std::list<FileRecord>::const_iterator file_rec = file_list.begin(); file_rec != file_list.end(); file_rec++) mft_index += *file_rec;
     mft_index.sort<FileRecordCompare>();
+    root_dir_ref_num = mft_find_root();
   }
   catch (...) {
     mft_index.invalidate();
@@ -316,6 +318,7 @@ void FilePanel::update_mft_index_from_usn() {
     mft_index.extend(mft_index.size() + static_cast<unsigned>(file_list.size()));
     for (std::list<FileRecord>::const_iterator file_rec = file_list.begin(); file_rec != file_list.end(); file_rec++) mft_index += *file_rec;
     mft_index.sort<FileRecordCompare>();
+    root_dir_ref_num = mft_find_root();
   }
   catch (...) {
     mft_index.invalidate();
@@ -405,7 +408,6 @@ void FilePanel::toggle_mft_mode() {
       }
     }
     if (mft_index.size() == 0) create_mft_index();
-    root_dir_ref_num = mft_find_root();
     mft_find_path(current_dir);
     mft_mode = true;
   }
@@ -646,4 +648,59 @@ UnicodeString FilePanel::get_mft_index_cache_name() {
   CHECK_SYS(cache_dir_size != 0);
   cache_dir.set_size(cache_dir_size - 1);
   return add_trailing_slash(cache_dir) + get_volume_guid(volume.name) + L".ntfsfile";
+}
+
+FilePanel::Totals FilePanel::mft_get_totals(const ObjectArray<UnicodeString>& file_list) {
+  std::set<u64> file_set;
+  for (unsigned i = 0; i < file_list.size(); i++) {
+    file_set.insert(mft_find_path(file_list[i]));
+  }
+
+  std::map<u64, unsigned> file_ptrs;
+  Array<bool> tmp_array;
+  bool* untested = tmp_array.buf(mft_index.size());
+
+  // find $BadClus
+  FileRecord fr;
+  fr.parent_ref_num = root_dir_ref_num;
+  fr.file_name = L"$BadClus";
+  unsigned bad_clus_ref_num = mft_index.bsearch<FileRecordCompare>(fr);
+
+  for (unsigned i = 0; i < mft_index.size(); i++) {
+    if (mft_index[i].ntfs_attr) untested[i] = false; // do not count streams
+    else if (i == bad_clus_ref_num) untested[i] = false; // do not count $BadClus
+    else if (file_set.count(mft_index[i].file_ref_num)) {
+      file_ptrs.insert(std::pair<u64, unsigned>(mft_index[i].file_ref_num, i));
+      untested[i] = false;
+    }
+    else untested[i] = true;
+  }
+
+  while (true) {
+    unsigned size = file_ptrs.size();
+    for (unsigned i = 0; i < mft_index.size(); i++) {
+      if (untested[i] && file_ptrs.count(mft_index[i].parent_ref_num)) {
+        untested[i] = false;
+        file_ptrs.insert(std::pair<u64, unsigned>(mft_index[i].file_ref_num, i));
+      }
+    }
+    if (size == file_ptrs.size()) break; // no change in size -> all files are found
+  }
+
+  Totals totals;
+  for (std::map<u64, unsigned>::const_iterator i = file_ptrs.begin(); i != file_ptrs.end(); i++) {
+    totals.data_size += mft_index[i->second].data_size;
+    totals.disk_size += mft_index[i->second].disk_size;
+    totals.fragment_cnt += mft_index[i->second].fragment_cnt;
+    if (mft_index[i->second].file_attr & FILE_ATTRIBUTE_DIRECTORY) {
+      totals.dir_cnt++;
+      if (mft_index[i->second].file_attr & FILE_ATTRIBUTE_REPARSE_POINT) totals.dir_rp_cnt++;
+    }
+    else {
+      totals.file_cnt++;
+      if (mft_index[i->second].file_attr & FILE_ATTRIBUTE_REPARSE_POINT) totals.file_rp_cnt++;
+    }
+    if (mft_index[i->second].hard_link_cnt > 1) totals.hl_cnt++;
+  }
+  return totals;
 }
