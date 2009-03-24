@@ -89,8 +89,7 @@ void FilePanel::add_file_records(std::list<FileRecord>& file_list, const FileInf
       rec.stream_cnt = stream_cnt;
       rec.hard_link_cnt = hard_link_cnt;
       rec.mft_rec_cnt = file_info.mft_rec_cnt;
-      rec.ntfs_attr = false;
-      rec.resident = fully_resident;
+      rec.set_flags(false, fully_resident);
       file_list.push_back(rec);
     }
   }
@@ -140,8 +139,7 @@ void FilePanel::add_file_records(std::list<FileRecord>& file_list, const FileInf
             rec.stream_cnt = 0;
             rec.hard_link_cnt = 0;
             rec.mft_rec_cnt = 0;
-            rec.ntfs_attr = true;
-            rec.resident = attr.resident;
+            rec.set_flags(true, attr.resident);
             file_list.push_back(rec);
           }
         }
@@ -356,8 +354,8 @@ void FilePanel::mft_scan_dir(u64 parent_file_index, const UnicodeString& rel_pat
     pid.hard_link_cnt = file_rec.hard_link_cnt;
     pid.mft_rec_cnt = file_rec.mft_rec_cnt;
     pid.error = false;
-    pid.ntfs_attr = file_rec.ntfs_attr;
-    pid.resident = file_rec.resident;
+    pid.ntfs_attr = file_rec.ntfs_attr();
+    pid.resident = file_rec.resident();
     pid_list.push_back(pid);
 
     progress.count++;
@@ -433,6 +431,8 @@ void FilePanel::reload_mft_all() {
   for (unsigned i = 0; i < g_file_panels.size(); i++) g_file_panels[i]->reload_mft();
 }
 
+const u8 c_cache_version = 0;
+
 void FilePanel::store_mft_index() {
   if (mft_index.size() == 0) return;
 
@@ -455,8 +455,8 @@ void FilePanel::store_mft_index() {
   };
   Progress progress;
 
-  unsigned buffer_size = sizeof(mft_index.usn_journal_id) + sizeof(mft_index.next_usn) + sizeof(unsigned);
-  unsigned file_record_size = sizeof(mft_index[0].file_ref_num) + sizeof(mft_index[0].parent_ref_num) + sizeof(mft_index[0].file_attr) + sizeof(mft_index[0].creation_time) + sizeof(mft_index[0].last_access_time) + sizeof(mft_index[0].last_write_time) + sizeof(mft_index[0].data_size) + sizeof(mft_index[0].disk_size) + sizeof(mft_index[0].valid_size) + sizeof(mft_index[0].fragment_cnt) + sizeof(mft_index[0].stream_cnt) + sizeof(mft_index[0].hard_link_cnt) + sizeof(mft_index[0].mft_rec_cnt) + sizeof(mft_index[0].ntfs_attr) + sizeof(mft_index[0].resident);
+  u32 buffer_size = sizeof(mft_index.usn_journal_id) + sizeof(mft_index.next_usn) + sizeof(unsigned);
+  unsigned file_record_size = sizeof(mft_index[0].file_ref_num) + sizeof(mft_index[0].parent_ref_num) + sizeof(mft_index[0].file_attr) + sizeof(mft_index[0].creation_time) + sizeof(mft_index[0].last_access_time) + sizeof(mft_index[0].last_write_time) + sizeof(mft_index[0].data_size) + sizeof(mft_index[0].disk_size) + sizeof(mft_index[0].valid_size) + sizeof(mft_index[0].fragment_cnt) + sizeof(mft_index[0].mft_rec_cnt) + sizeof(mft_index[0].stream_cnt) + sizeof(mft_index[0].hard_link_cnt) + sizeof(mft_index[0].flags);
   buffer_size += file_record_size * mft_index.size();
   for (unsigned i = 0; i < mft_index.size(); i++) {
     buffer_size += sizeof(unsigned) + mft_index[i].file_name.size() * sizeof(mft_index[i].file_name[0]);
@@ -485,16 +485,15 @@ void FilePanel::store_mft_index() {
     ENCODE(mft_index[i].disk_size);
     ENCODE(mft_index[i].valid_size);
     ENCODE(mft_index[i].fragment_cnt);
+    ENCODE(mft_index[i].mft_rec_cnt);
     ENCODE(mft_index[i].stream_cnt);
     ENCODE(mft_index[i].hard_link_cnt);
-    ENCODE(mft_index[i].mft_rec_cnt);
-    ENCODE(mft_index[i].ntfs_attr);
-    ENCODE(mft_index[i].resident);
+    ENCODE(mft_index[i].flags);
   }
   assert(buffer.size() == buffer_size);
 
   Array<unsigned char> comp_buffer;
-  unsigned comp_buffer_size = buffer.size() + buffer.size() / 16 + 64 + 3;
+  u32 comp_buffer_size = buffer.size() + buffer.size() / 16 + 64 + 3;
   comp_buffer.extend(comp_buffer_size);
   Array<unsigned char> comp_work_buffer;
   comp_work_buffer.extend(LZO1X_1_MEM_COMPRESS);
@@ -506,7 +505,8 @@ void FilePanel::store_mft_index() {
   progress.percent = 70;
   progress.update_ui();
 
-  lzo_uint32 header_checksum = lzo_crc32(0, reinterpret_cast<const lzo_bytep>(&buffer_size), sizeof(buffer_size));
+  lzo_uint32 header_checksum = lzo_crc32(0, reinterpret_cast<const lzo_bytep>(&c_cache_version), sizeof(c_cache_version));
+  header_checksum = lzo_crc32(header_checksum, reinterpret_cast<const lzo_bytep>(&buffer_size), sizeof(buffer_size));
   header_checksum = lzo_crc32(header_checksum, reinterpret_cast<const lzo_bytep>(&comp_buffer_size), sizeof(comp_buffer_size));
   lzo_uint32 comp_buffer_checksum = lzo_crc32(0, comp_buffer.data(), comp_buffer.size());
 
@@ -518,6 +518,7 @@ void FilePanel::store_mft_index() {
   CHECK_SYS(SetFilePointer(h_file, 0, NULL, FILE_BEGIN) != INVALID_SET_FILE_POINTER);
   DWORD bw;
   CHECK_SYS(WriteFile(h_file, &header_checksum, sizeof(header_checksum), &bw, NULL));
+  CHECK_SYS(WriteFile(h_file, &c_cache_version, sizeof(c_cache_version), &bw, NULL));
   CHECK_SYS(WriteFile(h_file, &buffer_size, sizeof(buffer_size), &bw, NULL));
   CHECK_SYS(WriteFile(h_file, &comp_buffer_size, sizeof(comp_buffer_size), &bw, NULL));
   CHECK_SYS(WriteFile(h_file, &comp_buffer_checksum, sizeof(comp_buffer_checksum), &bw, NULL));
@@ -548,24 +549,30 @@ void FilePanel::load_mft_index() {
   Progress progress;
 
   const wchar_t* c_corrupted_msg = L"Corrupted cache file";
+  const wchar_t* c_wrong_version_msg = L"Wrong cache file version";
   HANDLE h_file = CreateFileW(get_mft_index_cache_name().data(), FILE_READ_DATA, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   CLEAN(HANDLE, h_file, CloseHandle(h_file));
 
-  unsigned buffer_size;
-  unsigned comp_buffer_size;
+  u8 cache_version;
+  u32 buffer_size;
+  u32 comp_buffer_size;
   lzo_uint32 saved_header_checksum, saved_comp_buffer_checksum;
   DWORD br;
   CHECK_SYS(ReadFile(h_file, &saved_header_checksum, sizeof(saved_header_checksum), &br, NULL));
   if (br != sizeof(saved_header_checksum)) FAIL(MsgError(c_corrupted_msg));
+  CHECK_SYS(ReadFile(h_file, &cache_version, sizeof(cache_version), &br, NULL));
+  if (br != sizeof(cache_version)) FAIL(MsgError(c_corrupted_msg));
   CHECK_SYS(ReadFile(h_file, &buffer_size, sizeof(buffer_size), &br, NULL));
   if (br != sizeof(buffer_size)) FAIL(MsgError(c_corrupted_msg));
   CHECK_SYS(ReadFile(h_file, &comp_buffer_size, sizeof(comp_buffer_size), &br, NULL));
   if (br != sizeof(comp_buffer_size)) FAIL(MsgError(c_corrupted_msg));
 
-  lzo_uint32 header_checksum = lzo_crc32(0, reinterpret_cast<const lzo_bytep>(&buffer_size), sizeof(buffer_size));
+  lzo_uint32 header_checksum = lzo_crc32(0, reinterpret_cast<const lzo_bytep>(&cache_version), sizeof(cache_version));
+  header_checksum = lzo_crc32(header_checksum, reinterpret_cast<const lzo_bytep>(&buffer_size), sizeof(buffer_size));
   header_checksum = lzo_crc32(header_checksum, reinterpret_cast<const lzo_bytep>(&comp_buffer_size), sizeof(comp_buffer_size));
   if (header_checksum != saved_header_checksum) FAIL(MsgError(c_corrupted_msg));
+  if (cache_version != c_cache_version) FAIL(MsgError(c_wrong_version_msg));
 
   CHECK_SYS(ReadFile(h_file, &saved_comp_buffer_checksum, sizeof(saved_comp_buffer_checksum), &br, NULL));
   if (br != sizeof(saved_comp_buffer_checksum)) FAIL(MsgError(c_corrupted_msg));
@@ -623,14 +630,14 @@ void FilePanel::load_mft_index() {
       DECODE(rec.disk_size);
       DECODE(rec.valid_size);
       DECODE(rec.fragment_cnt);
+      DECODE(rec.mft_rec_cnt);
       DECODE(rec.stream_cnt);
       DECODE(rec.hard_link_cnt);
-      DECODE(rec.mft_rec_cnt);
-      DECODE(rec.ntfs_attr);
-      DECODE(rec.resident);
+      DECODE(rec.flags);
       mft_index += rec;
     }
     assert(pos == buffer_size);
+    root_dir_ref_num = mft_find_root();
   }
   catch (...) {
     mft_index.invalidate();
@@ -667,7 +674,7 @@ FilePanel::Totals FilePanel::mft_get_totals(const ObjectArray<UnicodeString>& fi
   unsigned bad_clus_ref_num = mft_index.bsearch<FileRecordCompare>(fr);
 
   for (unsigned i = 0; i < mft_index.size(); i++) {
-    if (mft_index[i].ntfs_attr) untested[i] = false; // do not count streams
+    if (mft_index[i].ntfs_attr()) untested[i] = false; // do not count streams
     else if (i == bad_clus_ref_num) untested[i] = false; // do not count $BadClus
     else if (file_set.count(mft_index[i].file_ref_num)) {
       file_ptrs.insert(std::pair<u64, unsigned>(mft_index[i].file_ref_num, i));

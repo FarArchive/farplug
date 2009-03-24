@@ -98,12 +98,14 @@ private:
     u64 data_size;
     u64 disk_size;
     u64 valid_size;
-    unsigned fragment_cnt;
-    unsigned stream_cnt;
-    unsigned hard_link_cnt;
-    unsigned mft_rec_cnt;
-    bool ntfs_attr;
-    bool resident;
+    u32 fragment_cnt;
+    u32 mft_rec_cnt;
+    u16 stream_cnt;
+    u16 hard_link_cnt;
+    u8 flags;
+    bool ntfs_attr() const { return (flags & 1) != 0; }
+    bool resident() const { return (flags & 2) != 0; }
+    void set_flags(bool ntfs_attr, bool resident) { flags = (ntfs_attr ? 1 : 0) | (resident ? 2 : 0); }
   };
   struct FileRecordCompare;
   struct JournalInfo {
