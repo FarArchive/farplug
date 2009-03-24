@@ -684,7 +684,7 @@ FilePanel::Totals FilePanel::mft_get_totals(const ObjectArray<UnicodeString>& fi
   }
 
   while (true) {
-    unsigned size = file_ptrs.size();
+    size_t size = file_ptrs.size();
     for (unsigned i = 0; i < mft_index.size(); i++) {
       if (untested[i] && file_ptrs.count(mft_index[i].parent_ref_num)) {
         untested[i] = false;
