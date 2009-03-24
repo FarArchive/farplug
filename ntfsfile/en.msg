@@ -166,7 +166,7 @@ show_totals.title = File totals
 show_totals.data_size = Size of data streams: %S (%Lu)
 show_totals.disk_size = Size on disk: %S (%Lu)
 show_totals.fragments = Excess fragments: %Lu (%Lu per file)
-show_totals.files = Files: %u (%u hard links; %u symbolic links)
+show_totals.files = Files: %u (%u have hard links; %u symbolic links)
 show_totals.dirs = Directories: %u (%u symbolic links)
 
 # Error log
