@@ -2837,6 +2837,29 @@
           </Component>
         </Directory>
       </Directory>
+      <Directory Id="winscp" Name="winscp">
+        <Component Id="licence" Guid="{708DC46E-E79F-4D2A-922F-C8388F24A18C}">
+          <File Id="licence" Name="licence" KeyPath="yes" Source="$(var.bundle)\winscp\licence" />
+        </Component>
+        <Component Id="pageant.exe" Guid="{C49E9DC2-764B-4C70-8F2F-4BC28E76ADE7}">
+          <File Id="pageant.exe" Name="pageant.exe" KeyPath="yes" Source="$(var.bundle)\winscp\pageant.exe" />
+        </Component>
+        <Component Id="putty.exe" Guid="{DA798C7F-B66D-4C88-B90C-04147F6A046E}">
+          <File Id="putty.exe" Name="putty.exe" KeyPath="yes" Source="$(var.bundle)\winscp\putty.exe" />
+        </Component>
+        <Component Id="puttygen.exe" Guid="{2D41C784-8517-48AA-8627-F802EEF14852}">
+          <File Id="puttygen.exe" Name="puttygen.exe" KeyPath="yes" Source="$(var.bundle)\winscp\puttygen.exe" />
+        </Component>
+        <Component Id="readme_3" Guid="{9D8851DD-1729-461B-A14E-FBABF519B19C}">
+          <File Id="readme_3" Name="readme" KeyPath="yes" Source="$(var.bundle)\winscp\readme" />
+        </Component>
+        <Component Id="WinSCP.dll" Guid="{1960E910-A374-4AB9-B84B-4D3E7065D42C}">
+          <File Id="WinSCP.dll" Name="WinSCP.dll" KeyPath="yes" Source="$(var.bundle)\winscp\WinSCP.dll" />
+        </Component>
+        <Component Id="WinSCP.lng" Guid="{4C1D3C6B-6534-4E7A-A2FC-356F1EB935A2}">
+          <File Id="WinSCP.lng" Name="WinSCP.lng" KeyPath="yes" Source="$(var.bundle)\winscp\WinSCP.lng" />
+        </Component>
+      </Directory>
     </Directory>
     <?endif?>
   </Directory>

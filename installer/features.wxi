@@ -1370,6 +1370,17 @@
           <ComponentRef Id="Visualizer.map" />
         </Feature>
       </Feature>
+      <Feature Id="WinSCP" Level="2" Title="WinSCP" AllowAdvertise="no" Description="SFTP and FTP client">
+        <ComponentRef Id="licence" />
+        <ComponentRef Id="readme_3" />
+        <ComponentRef Id="WinSCP.dll" />
+        <ComponentRef Id="WinSCP.lng" />
+        <Feature Id="PuTTY" Level="2" Title="PuTTY" AllowAdvertise="no" Description="SSH and telnet client">
+          <ComponentRef Id="pageant.exe" />
+          <ComponentRef Id="putty.exe" />
+          <ComponentRef Id="puttygen.exe" />
+        </Feature>
+      </Feature>
       <Feature Id="wmexplorer" Level="2" Title="WMExplorer" AllowAdvertise="no" Description="Manage files on Windows Mobile based PDA/SmartPhone via ActiveSync">
         <ComponentRef Id="file_id.diz_12" />
         <ComponentRef Id="history_en.txt" />
