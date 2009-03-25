@@ -1,6 +1,6 @@
 diff -ruN fardev/build.mak fardev-patched/build.mak
 --- fardev/build.mak	1970-01-01 02:00:00.000000000 +0200
-+++ fardev-patched/build.mak	2009-03-24 21:54:06.593750000 +0200
++++ fardev-patched/build.mak	2009-03-25 20:53:54.515625000 +0200
 @@ -0,0 +1,13 @@
 +all:
 +  cd unicode_far
@@ -17,7 +17,7 @@ diff -ruN fardev/build.mak fardev-patched/build.mak
 +  unicode_far\tools\m4 -P -I unicode_far installer\installer.mak.m4 > installer.mak
 diff -ruN fardev/docs/ClearPluginsCache.bat fardev-patched/docs/ClearPluginsCache.bat
 --- fardev/docs/ClearPluginsCache.bat	2007-10-27 17:22:24.199038000 +0300
-+++ fardev-patched/docs/ClearPluginsCache.bat	2009-03-24 21:54:06.593750000 +0200
++++ fardev-patched/docs/ClearPluginsCache.bat	2009-03-25 20:53:54.531250000 +0200
 @@ -1,7 +1,4 @@
  @echo off
  rem This batch file cleared the Plugin Cache
@@ -29,7 +29,7 @@ diff -ruN fardev/docs/ClearPluginsCache.bat fardev-patched/docs/ClearPluginsCach
 +reg delete HKCU\Software\Far2\PluginsCache /f
 diff -ruN fardev/docs/RestoreSettings.bat fardev-patched/docs/RestoreSettings.bat
 --- fardev/docs/RestoreSettings.bat	2007-10-27 17:22:24.199038000 +0300
-+++ fardev-patched/docs/RestoreSettings.bat	2009-03-24 21:54:06.593750000 +0200
++++ fardev-patched/docs/RestoreSettings.bat	2009-03-25 20:53:54.531250000 +0200
 @@ -2,17 +2,13 @@
  rem    This batch file restores Far settings from previously saved
  rem    files FarSave1.reg and FarSave2.reg to the registry
@@ -57,7 +57,7 @@ diff -ruN fardev/docs/RestoreSettings.bat fardev-patched/docs/RestoreSettings.ba
 +:end
 diff -ruN fardev/docs/SaveSettings.bat fardev-patched/docs/SaveSettings.bat
 --- fardev/docs/SaveSettings.bat	2007-10-27 17:22:24.199038000 +0300
-+++ fardev-patched/docs/SaveSettings.bat	2009-03-24 21:54:06.609375000 +0200
++++ fardev-patched/docs/SaveSettings.bat	2009-03-25 20:53:54.546875000 +0200
 @@ -2,5 +2,5 @@
  rem    This batch file saves Far settings from the registry
  rem    to files FarSave1.reg and FarSave2.reg
@@ -68,7 +68,7 @@ diff -ruN fardev/docs/SaveSettings.bat fardev-patched/docs/SaveSettings.bat
 +reg export HKLM\Software\Far2 FarSave2.reg
 diff -ruN fardev/plugins/makefile_vc_def_inc fardev-patched/plugins/makefile_vc_def_inc
 --- fardev/plugins/makefile_vc_def_inc	2009-01-12 16:40:22.552676000 +0200
-+++ fardev-patched/plugins/makefile_vc_def_inc	2009-03-24 21:54:06.609375000 +0200
++++ fardev-patched/plugins/makefile_vc_def_inc	2009-03-25 20:53:54.546875000 +0200
 @@ -127,27 +127,27 @@
  NOWIN98=/OPT:NOWIN98
  !endif
@@ -121,7 +121,7 @@ diff -ruN fardev/plugins/makefile_vc_def_inc fardev-patched/plugins/makefile_vc_
  CPP_DEBUG=/Z7
 diff -ruN fardev/plugins/tmppanel/TmpClass.cpp fardev-patched/plugins/tmppanel/TmpClass.cpp
 --- fardev/plugins/tmppanel/TmpClass.cpp	2009-02-24 01:24:39.118043000 +0200
-+++ fardev-patched/plugins/tmppanel/TmpClass.cpp	2009-03-24 21:54:06.609375000 +0200
++++ fardev-patched/plugins/tmppanel/TmpClass.cpp	2009-03-25 20:53:54.546875000 +0200
 @@ -153,6 +153,17 @@
  #undef _NAME
  }
@@ -172,7 +172,7 @@ diff -ruN fardev/plugins/tmppanel/TmpClass.cpp fardev-patched/plugins/tmppanel/T
    }
 diff -ruN fardev/plugins/tmppanel/TmpMix.cpp fardev-patched/plugins/tmppanel/TmpMix.cpp
 --- fardev/plugins/tmppanel/TmpMix.cpp	2009-02-24 01:24:39.118043000 +0200
-+++ fardev-patched/plugins/tmppanel/TmpMix.cpp	2009-03-24 21:54:06.609375000 +0200
++++ fardev-patched/plugins/tmppanel/TmpMix.cpp	2009-03-25 20:53:54.546875000 +0200
 @@ -49,10 +49,10 @@
  #ifdef UNICODE
        if (Items[I].FindData.lpwszFileName)
@@ -186,9 +186,21 @@ diff -ruN fardev/plugins/tmppanel/TmpMix.cpp fardev-patched/plugins/tmppanel/Tmp
  #endif
      }
      free (Items);
+diff -ruN fardev/unicode_far/filelist.cpp fardev-patched/unicode_far/filelist.cpp
+--- fardev/unicode_far/filelist.cpp	2009-03-15 10:21:50.875089000 +0200
++++ fardev-patched/unicode_far/filelist.cpp	2009-03-25 20:52:06.671875000 +0200
+@@ -857,7 +857,7 @@
+             {
+               CtrlObject->Plugins.GetOpenPluginInfo(hPlugin,&Info);
+             }
+-            if (PanelMode!=PLUGIN_PANEL || (Info.Flags & OPIF_REALNAMES))
++            if (PanelMode!=PLUGIN_PANEL)
+               CreateFullPathName(CurPtr->strName,CurPtr->strShortName,CurPtr->FileAttr, strFileName, Key==KEY_CTRLALTF);
+             else
+             {
 diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cpp
 --- fardev/unicode_far/findfile.cpp	2009-03-24 18:51:41.443871000 +0200
-+++ fardev-patched/unicode_far/findfile.cpp	2009-03-24 21:58:20.984375000 +0200
++++ fardev-patched/unicode_far/findfile.cpp	2009-03-25 19:04:26.156250000 +0200
 @@ -909,8 +909,8 @@
    wchar_t *lpFileName = xf_wcsdup (PanelItem->FindData.lpwszFileName);
    wchar_t *lpFileNameShort = xf_wcsdup (PanelItem->FindData.lpwszAlternateFileName);
@@ -214,6 +226,15 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
        xf_free (lpwszFileName);
  
        if ( !StrCmp (lpFileNameToFind, Item.FindData.lpwszFileName) &&
+@@ -1045,7 +1045,7 @@
+       if(Param2 == KEY_LEFT || Param2 == KEY_RIGHT || Param2 == KEY_NUMPAD4 || Param2 == KEY_NUMPAD6)
+         FindPositionChanged = TRUE;
+ 
+-      // некторые спец.клавиши всеже отбработаем.
++      // Ќекоторые спец.клавиши все-же обработаем.
+       if(Param2 == KEY_CTRLALTSHIFTPRESS || Param2 == KEY_ALTF9)
+       {
+         IsProcessAssignMacroKey--;
 @@ -1700,8 +1700,7 @@
        string strFileName=FindList[FindExitIndex]->FindData.strFileName;
        Panel *FindPanel=CtrlObject->Cp()->ActivePanel;
@@ -451,7 +472,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
 -}
 diff -ruN fardev/unicode_far/findfile.hpp fardev-patched/unicode_far/findfile.hpp
 --- fardev/unicode_far/findfile.hpp	2008-12-27 17:00:42.004272000 +0200
-+++ fardev-patched/unicode_far/findfile.hpp	2009-03-24 21:54:06.609375000 +0200
++++ fardev-patched/unicode_far/findfile.hpp	2009-03-25 20:53:54.546875000 +0200
 @@ -96,8 +96,6 @@
      static int GetPluginFile(DWORD ArcIndex, struct PluginPanelItem *PanelItem,
                               const wchar_t *DestPath, string &strResultName);
@@ -463,7 +484,7 @@ diff -ruN fardev/unicode_far/findfile.hpp fardev-patched/unicode_far/findfile.hp
  
 diff -ruN fardev/unicode_far/flupdate.cpp fardev-patched/unicode_far/flupdate.cpp
 --- fardev/unicode_far/flupdate.cpp	2009-02-15 19:41:26.542517000 +0200
-+++ fardev-patched/unicode_far/flupdate.cpp	2009-03-24 21:54:06.625000000 +0200
++++ fardev-patched/unicode_far/flupdate.cpp	2009-03-25 20:53:54.562500000 +0200
 @@ -724,10 +724,6 @@
  
      //memset(CurListData,0,sizeof(*CurListData));
@@ -477,7 +498,7 @@ diff -ruN fardev/unicode_far/flupdate.cpp fardev-patched/unicode_far/flupdate.cp
      if ((Info.Flags & OPIF_USESORTGROUPS)/* && (CurListData->FileAttr & FILE_ATTRIBUTE_DIRECTORY)==0*/)
 diff -ruN fardev/unicode_far/makefile_vc fardev-patched/unicode_far/makefile_vc
 --- fardev/unicode_far/makefile_vc	2009-03-13 16:22:32.128182000 +0200
-+++ fardev-patched/unicode_far/makefile_vc	2009-03-24 21:54:06.625000000 +0200
++++ fardev-patched/unicode_far/makefile_vc	2009-03-25 20:53:54.562500000 +0200
 @@ -281,25 +281,25 @@
  	/D "_CRT_NONSTDC_NO_DEPRECATE"\
  	/D "_CRT_NON_CONFORMING_SWPRINTFS"
