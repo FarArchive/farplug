@@ -64,16 +64,19 @@ void ResizeDialog(HANDLE hDlg) {
   #define MAXITEMS (csbiInfo.dwSize.Y-7)
   int s = ((ListSize>0) && (ListSize<MAXITEMS) ? ListSize : (ListSize>0 ? MAXITEMS : 0));
   #undef MAXITEMS
-  SMALL_RECT pos = { 2, 1, csbiInfo.dwSize.X - 7, s + 2 };
-  Info.SendDlgMessage(hDlg,DM_SETITEMPOSITION,LIST_BOX,reinterpret_cast<LONG_PTR>(&pos));
-
-  COORD coord;
-  coord.X = csbiInfo.dwSize.X - 4;
-  coord.Y = s + 4;
-  Info.SendDlgMessage(hDlg,DM_RESIZEDIALOG,0,reinterpret_cast<LONG_PTR>(&coord));
-  coord.X = -1;
-  coord.Y = -1;
-  Info.SendDlgMessage(hDlg,DM_MOVEDIALOG,TRUE,reinterpret_cast<LONG_PTR>(&coord));
+  SMALL_RECT NewPos = { 2, 1, csbiInfo.dwSize.X - 7, s + 2 };
+  SMALL_RECT OldPos;
+  Info.SendDlgMessage(hDlg,DM_GETITEMPOSITION,LIST_BOX,reinterpret_cast<LONG_PTR>(&OldPos));
+  if (NewPos.Right!=OldPos.Right || NewPos.Bottom!=OldPos.Bottom) {
+    COORD coord;
+    coord.X = csbiInfo.dwSize.X - 4;
+    coord.Y = s + 4;
+    Info.SendDlgMessage(hDlg,DM_RESIZEDIALOG,0,reinterpret_cast<LONG_PTR>(&coord));
+    coord.X = -1;
+    coord.Y = -1;
+    Info.SendDlgMessage(hDlg,DM_MOVEDIALOG,TRUE,reinterpret_cast<LONG_PTR>(&coord));
+    Info.SendDlgMessage(hDlg,DM_SETITEMPOSITION,LIST_BOX,reinterpret_cast<LONG_PTR>(&NewPos));
+  }
 }
 
 static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
