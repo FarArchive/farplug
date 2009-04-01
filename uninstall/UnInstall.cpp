@@ -13,7 +13,6 @@
 #include "uninstall.hpp"
 
 #ifdef FARAPI18
-#  define GetMinFarVersion GetMinFarVersionW
 #  define SetStartupInfo SetStartupInfoW
 #  define GetPluginInfo GetPluginInfoW
 #  define OpenPlugin OpenPluginW
@@ -22,11 +21,16 @@
 #ifdef FARAPI17
 int WINAPI GetMinFarVersion(void)
 {
-  return MAKEFARVERSION(1,70,1282);
+  return MAKEFARVERSION(1,75,2555);
 }
 #endif
 #ifdef FARAPI18
-int WINAPI GetMinFarVersionW(void) {
+int WINAPI GetMinFarVersion(void)
+{
+  return FARMANAGERVERSION;
+}
+int WINAPI GetMinFarVersionW(void)
+{
   return FARMANAGERVERSION;
 }
 #endif
@@ -58,7 +62,7 @@ void WINAPI GetPluginInfo(struct PluginInfo *Info)
 void ResizeDialog(HANDLE hDlg) {
   GetConsoleScreenBufferInfo(hStdout, &csbiInfo);
   #define MAXITEMS (csbiInfo.dwSize.Y-7)
-  int s = ((newCount>0) && (newCount<MAXITEMS) ? newCount : (newCount>0 ? MAXITEMS : 0));
+  int s = ((ListSize>0) && (ListSize<MAXITEMS) ? ListSize : (ListSize>0 ? MAXITEMS : 0));
   #undef MAXITEMS
   SMALL_RECT pos = { 2, 1, csbiInfo.dwSize.X - 7, s + 2 };
   Info.SendDlgMessage(hDlg,DM_SETITEMPOSITION,LIST_BOX,reinterpret_cast<LONG_PTR>(&pos));
@@ -77,7 +81,6 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
   static TCHAR Filter[MAX_PATH];
   static TCHAR spFilter[MAX_PATH];
   static FarListTitles ListTitle;
-  static TCHAR tmpData[MAX_PATH];
 
   switch(Msg)
   {
@@ -91,58 +94,34 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
 
     case DMU_UPDATE:
     {
-      TCHAR tmpString[MAX_PATH];
-      int ListPos = static_cast<int>(Info.SendDlgMessage(hDlg,DM_LISTGETCURPOS,LIST_BOX,0));
-      if (ListPos == -1)
-        ListPos = 0;
-      lstrcpy(tmpString, p[ListPos].SubKeyName);
+      int OldPos = static_cast<int>(Info.SendDlgMessage(hDlg,DM_LISTGETCURPOS,LIST_BOX,0));
+
       if (Param1)
         UpDateInfo();
 
-      int newCurPos = -1;
-
-      FSF.qsort(p, nCount, sizeof(KeyInfo), CompareEntries);
-
-      newCount = 0;
-      int equalFromFirstLetter = -1;
+      ListSize = 0;
+      int NewPos = -1;
       for (int i=0;i<nCount;i++)
       {
-        lstrcpy(tmpData,p[i].Keys[DisplayName]);
-        if (strstri(tmpData,Filter)) //без учета регистра в OEM кодировке
+        const TCHAR* DispName = p[i].Keys[DisplayName];
+        if (strstri(DispName,Filter)) //без учета регистра в OEM кодировке
         {
-          tmpKI = p[i];
-          p[i] = p[newCount];
-          p[newCount] = tmpKI;
+          FLI[i].Flags &= ~LIF_HIDDEN;
           //без учета регистра - а кодировка ANSI
-          if (lstrcmpi(tmpString, p[newCount].SubKeyName) == 0)
-            newCurPos = newCount;
-          if (equalFromFirstLetter == -1 && strstri(tmpData,Filter) == tmpData)
-            equalFromFirstLetter = newCount;
-          newCount++;
+          if (NewPos == -1 && strstri(DispName,Filter) == DispName)
+            NewPos = i;
+          ListSize++;
         }
-      }
-
-      if (equalFromFirstLetter != -1) //если найдено совпадение с начала слова
-        newCurPos = equalFromFirstLetter;
-      if (Param1) //тут другая логика - фильтр не изменился, главное сохранить позицию
-        newCurPos = -1;
-
-      if (newCurPos == -1) //если ничего не найдено или Param1 == TRUE
-      {
-        if (ListPos < newCount)
-          newCurPos = ListPos;
         else
-          newCurPos = newCount - 1;
+          FLI[i].Flags |= LIF_HIDDEN;
       }
-
-      FLI = (FarListItem *) realloc(FLI, sizeof(FarListItem) * newCount);
-      ZeroMemory(FLI, sizeof(FarListItem) * newCount);
-      UpDateInfoProc();
+      if (NewPos == -1) NewPos = OldPos;
 
       Info.SendDlgMessage(hDlg,DM_ENABLEREDRAW,FALSE,0);
 
       Info.SendDlgMessage(hDlg,DM_LISTSET,LIST_BOX,reinterpret_cast<LONG_PTR>(&FL));
-      FSF.sprintf(spFilter,GetMsg(MFilter),Filter,newCount,nCount);
+
+      FSF.sprintf(spFilter,GetMsg(MFilter),Filter,ListSize,nCount);
       ListTitle.Title = spFilter;
       ListTitle.TitleLen = lstrlen(spFilter);
       Info.SendDlgMessage(hDlg,DM_LISTSETTITLES,LIST_BOX,reinterpret_cast<LONG_PTR>(&ListTitle));
@@ -150,7 +129,7 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
       ResizeDialog(hDlg);
 
       struct FarListPos FLP;
-      FLP.SelectPos = newCurPos;
+      FLP.SelectPos = NewPos;
       FLP.TopPos = -1;
       Info.SendDlgMessage(hDlg,DM_LISTSETCURPOS,LIST_BOX,reinterpret_cast<LONG_PTR>(&FLP));
 
@@ -202,7 +181,7 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
       {
         case KEY_F8:
         {
-          if (newCount)
+          if (ListSize)
           {
             TCHAR DlgText[MAX_PATH];
             FSF.sprintf(DlgText, GetMsg(MConfirm), p[Info.SendDlgMessage(hDlg,DM_LISTGETCURPOS,LIST_BOX,NULL)].Keys[DisplayName]);
@@ -224,7 +203,7 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
         case KEY_ENTER:
         case KEY_SHIFTENTER:
         {
-          if (newCount) {
+          if (ListSize) {
             int pos = static_cast<int>(Info.SendDlgMessage(hDlg,DM_LISTGETCURPOS,LIST_BOX,NULL));
             if (((Param2==KEY_ENTER) && Opt.EnterFunction) || ((Param2==KEY_SHIFTENTER) && !Opt.EnterFunction)) {
               ExecuteEntry(pos, true);
@@ -245,7 +224,7 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
           if (bufP)
           {
             lstrcpy(bufData,bufP);
-            FSF.DeleteBuffer(reinterpret_cast<char*>(bufP));
+            FSF.DeleteBuffer(bufP);
             unQuote(bufData);
             FSF.LStrlwr(bufData);
             for (int i = lstrlen(bufData); i >= 1; i--)
@@ -272,7 +251,7 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
 
         case KEY_F3:
         {
-          if (newCount)
+          if (ListSize)
           {
             DisplayEntry(static_cast<int>(Info.SendDlgMessage(hDlg,DM_LISTGETCURPOS,LIST_BOX,NULL)));
             Info.SendDlgMessage(hDlg,DM_REDRAW,NULL,NULL);
@@ -344,14 +323,9 @@ HANDLE WINAPI OpenPlugin(int /*OpenFrom*/, INT_PTR /*Item*/)
 
   hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
   UpDateInfo();
-  FSF.qsort(p, nCount, sizeof(KeyInfo), CompareEntries);
-  newCount = nCount;
-
-  FLI = (FarListItem *) realloc(FLI, sizeof(FarListItem) * newCount);
-  ZeroMemory(FLI, sizeof(FarListItem) * newCount);
 
   DialogItems[0].Type = DI_LISTBOX;
-  DialogItems[0].Flags = DIF_LISTWRAPMODE|DIF_LISTAUTOHIGHLIGHT|DIF_LISTNOAMPERSAND;
+  DialogItems[0].Flags = DIF_LISTNOAMPERSAND;
   DialogItems[0].X1 = 2;
   DialogItems[0].Y1 = 1;
 

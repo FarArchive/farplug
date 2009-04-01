@@ -54,12 +54,12 @@ int DrawMessage(int nType, int n, char *msg, ...)
   return result;
 }
 
-TCHAR * strstri(TCHAR *s, const TCHAR *c)
+const TCHAR * strstri(const TCHAR *s, const TCHAR *c)
 {
   if (c)
   {
     int l = lstrlen(c);
-    for (TCHAR *p = s ; *p ; p++)
+    for (const TCHAR *p = s ; *p ; p++)
       if (FSF.LStrnicmp(p, c, l) == 0)
         return p;
   }

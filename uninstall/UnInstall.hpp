@@ -42,9 +42,10 @@ struct RegKeyPath {
   { HKEY_CURRENT_USER, _T("SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall") },
   { HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall") },
 };
-int nCount, newCount;
+int nCount;
 FarList FL;
-FarListItem * FLI = NULL;
+FarListItem* FLI = NULL;
+int ListSize;
 HANDLE hStdout;
 CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
 
@@ -58,7 +59,7 @@ struct KeyInfo
   RegKeyPath RegKey;
   TCHAR SubKeyName[MAX_PATH];
   bool WindowsInstaller;
-} *p = NULL, tmpKI;
+} *p = NULL;
 
 bool ValidGuid(const TCHAR* guid) {
   const unsigned c_max_guid_len = 38;
@@ -276,43 +277,6 @@ int __cdecl CompareEntries(const void* item1, const void* item2)
 }
 
 #define EMPTYSTR _T("  ")
-void UpDateInfoProc()
-{
-  FL.ItemsNumber = newCount;
-  FL.Items = FLI;
-
-  for (int i=0;i<newCount;i++)
-  {
-#ifdef FARAPI17
-    lstrcpy(FLI[i].Text,EMPTYSTR);
-    lstrcat(FLI[i].Text,p[i].Keys[DisplayName]);
-#endif
-#ifdef FARAPI18
-    lstrcpy(p[i].ListItem,EMPTYSTR);
-    lstrcat(p[i].ListItem,p[i].Keys[DisplayName]);
-    FLI[i].Text = p[i].ListItem;
-#endif
-  }
-
-  TCHAR c = '\0';
-  TCHAR * pStr;
-  unsigned l;
-  for (int i=0; i<newCount; i++)
-  {
-    if (FSF.LUpper(FLI[i].Text[lstrlen(EMPTYSTR)]) != c)
-    {
-      pStr = const_cast<TCHAR*>(&(FLI[i].Text[lstrlen(EMPTYSTR)]));
-      l = lstrlen(pStr);
-      memmove(pStr+1,pStr,(l+1)*sizeof(TCHAR));
-      *pStr = '&';
-      c = FSF.LUpper(FLI[i].Text[lstrlen(EMPTYSTR) + 1]);
-      pStr -= lstrlen(EMPTYSTR);
-      *pStr = c;
-    }
-  }
-}
-#undef EMPTYSTR
-
 #define JUMPREALLOC 50
 //Обновление информации
 void UpDateInfo(void)
@@ -354,8 +318,41 @@ void UpDateInfo(void)
     RegCloseKey(hKey);
   }
   p = (KeyInfo *) realloc(p, sizeof(KeyInfo) * nCount);
+  FSF.qsort(p, nCount, sizeof(KeyInfo), CompareEntries);
+
+  FLI = (FarListItem *) realloc(FLI, sizeof(FarListItem) * nCount);
+  ZeroMemory(FLI, sizeof(FarListItem) * nCount);
+
+  FL.ItemsNumber = nCount;
+  FL.Items = FLI;
+
+  TCHAR FirstChar[4];
+  FirstChar[0] = _T('&');
+  FirstChar[1] = 0;
+  FirstChar[2] = _T(' ');
+  FirstChar[3] = 0;
+  for (int i=0;i<nCount;i++)
+  {
+#ifdef FARAPI18
+    FLI[i].Text = p[i].ListItem;
+#endif
+    TCHAR* text = const_cast<TCHAR*>(FLI[i].Text);
+
+    if (FirstChar[1] != FSF.LUpper(p[i].Keys[DisplayName][0]))
+    {
+      FirstChar[1] = FSF.LUpper(p[i].Keys[DisplayName][0]);
+      lstrcpy(text, FirstChar);
+    }
+    else
+      lstrcpy(text, EMPTYSTR);
+
+    lstrcat(text, p[i].Keys[DisplayName]);
+  }
+
+  ListSize = nCount;
 }
 #undef JUMPREALLOC
+#undef EMPTYSTR
 
 //-------------------------------------------------------------------
 
