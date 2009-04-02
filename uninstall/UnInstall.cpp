@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <objbase.h>
-#include <stdio.h>
 #include <tchar.h>
+#include <strsafe.h>
 #include "plugin.hpp"
 #include "memory.h"
 #define realloc my_realloc
@@ -41,8 +41,8 @@ void WINAPI SetStartupInfo(const struct PluginStartupInfo *psInfo)
   FSF = *psInfo->FSF;
   Info.FSF = &FSF;
   InitHeap();
-  lstrcpy(PluginRootKey,Info.RootKey);
-  lstrcat(PluginRootKey,_T("\\UnInstall"));
+  StringCchCopy(PluginRootKey,ARRAYSIZE(PluginRootKey),Info.RootKey);
+  StringCchCat(PluginRootKey,ARRAYSIZE(PluginRootKey),_T("\\UnInstall"));
   ReadRegistry();
 }
 
@@ -142,7 +142,7 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
 
     case DN_INITDIALOG:
     {
-      lstrcpy(Filter,_T(""));
+      StringCchCopy(Filter,ARRAYSIZE(Filter),_T(""));
       ListTitle.Bottom = const_cast<TCHAR*>(GetMsg(MBottomLine));
       ListTitle.BottomLen = lstrlen(GetMsg(MBottomLine));
 
@@ -186,7 +186,7 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
         {
           if (ListSize)
           {
-            TCHAR DlgText[MAX_PATH];
+            TCHAR DlgText[MAX_PATH + 200];
             FSF.sprintf(DlgText, GetMsg(MConfirm), p[Info.SendDlgMessage(hDlg,DM_LISTGETCURPOS,LIST_BOX,NULL)].Keys[DisplayName]);
             if (EMessage((const TCHAR * const *) DlgText, 0, 2) == 0)
             {
@@ -226,7 +226,7 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
           static TCHAR bufData[MAX_PATH];
           if (bufP)
           {
-            lstrcpy(bufData,bufP);
+            StringCchCopy(bufData,ARRAYSIZE(bufData),bufP);
             FSF.DeleteBuffer(bufP);
             unQuote(bufData);
             FSF.LStrlwr(bufData);
@@ -246,7 +246,7 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
         {
           if (lstrlen(Filter) > 0)
           {
-            lstrcpy(Filter,_T(""));
+            StringCchCopy(Filter,ARRAYSIZE(Filter),_T(""));
             Info.SendDlgMessage(hDlg,DMU_UPDATE,0,0);
           }
         }

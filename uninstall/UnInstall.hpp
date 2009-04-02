@@ -81,10 +81,10 @@ bool FillReg(KeyInfo & key, TCHAR * Buf, RegKeyPath & RegKey)
   DWORD bufSize;
 
   key.RegKey = RegKey;
-  lstrcpy(key.SubKeyName, Buf);
-  lstrcpy(fullN,key.RegKey.Path);
-  lstrcat(fullN,_T("\\"));
-  lstrcat(fullN,key.SubKeyName);
+  StringCchCopy(key.SubKeyName,ARRAYSIZE(key.SubKeyName),Buf);
+  StringCchCopy(fullN,ARRAYSIZE(fullN),key.RegKey.Path);
+  StringCchCat(fullN,ARRAYSIZE(fullN),_T("\\"));
+  StringCchCat(fullN,ARRAYSIZE(fullN),key.SubKeyName);
   if (RegOpenKeyEx(key.RegKey.Root, fullN, 0, KEY_READ, &userKey) != ERROR_SUCCESS)
     return FALSE;
   key.WindowsInstaller = (RegQueryValueEx(userKey,_T("WindowsInstaller"),0,NULL,NULL,NULL) == ERROR_SUCCESS) && ValidGuid(key.SubKeyName);
@@ -92,6 +92,7 @@ bool FillReg(KeyInfo & key, TCHAR * Buf, RegKeyPath & RegKey)
   {
     bufSize = MAX_PATH * sizeof(TCHAR);
     ExitCode = RegQueryValueEx(userKey,HelpTopics[i],0,&regType,(LPBYTE)key.Keys[i],&bufSize);
+    key.Keys[i][ARRAYSIZE(key.Keys[i]) - 1] = 0;
     if (ExitCode != ERROR_SUCCESS || lstrcmp(key.Keys[i],_T("")) == 0)
     {
       if ((i == UninstallString && !key.WindowsInstaller) || i == DisplayName)
@@ -99,7 +100,7 @@ bool FillReg(KeyInfo & key, TCHAR * Buf, RegKeyPath & RegKey)
         RegCloseKey(userKey);
         return FALSE;
       }
-      lstrcpy(key.Keys[i],_T(""));
+      StringCchCopy(key.Keys[i],ARRAYSIZE(key.Keys[i]),_T(""));
       key.Avail[i] = FALSE;
     }
     else
@@ -236,10 +237,10 @@ bool ExecuteEntry(int Sel, bool WaitEnd)
 
   TCHAR cmd_line[MAX_PATH];
   if (p[Sel].WindowsInstaller) {
-    lstrcpy(cmd_line, _T("msiexec /x"));
-    lstrcat(cmd_line, p[Sel].SubKeyName);
+    StringCchCopy(cmd_line, ARRAYSIZE(cmd_line), _T("msiexec /x"));
+    StringCchCat(cmd_line, ARRAYSIZE(cmd_line), p[Sel].SubKeyName);
   }
-  else lstrcpy(cmd_line, p[Sel].Keys[UninstallString]);
+  else StringCchCopy(cmd_line, ARRAYSIZE(cmd_line), p[Sel].Keys[UninstallString]);
 
   hScreen = Info.SaveScreen(0,0,-1,-1); //Это необходимо сделать, т.к. после запущенных программ нужно обновить окно ФАРа
   BOOL ifCreate = CreateProcess   // Start the child process.
@@ -319,8 +320,9 @@ void UpDateInfo(void)
     if (RegQueryInfoKey(hKey,NULL,NULL,NULL,&cSubKeys,NULL,NULL,NULL,NULL,NULL,NULL,NULL) != ERROR_SUCCESS)
       continue;
 
-    for (fEnumIndex=0, bufSize = sizeof(Buf); fEnumIndex<cSubKeys; fEnumIndex++, bufSize = sizeof(Buf))
+    for (fEnumIndex=0; fEnumIndex<cSubKeys; fEnumIndex++)
     {
+      bufSize = sizeof(Buf);
       if (RegEnumKeyEx(hKey, fEnumIndex, Buf, &bufSize, NULL, NULL, NULL, &ftLastWrite) != ERROR_SUCCESS)
         continue;
       if (nCount+1 > nRealCount)
@@ -355,7 +357,11 @@ void UpDateInfo(void)
   FirstChar[3] = 0;
   for (int i=0;i<nCount;i++)
   {
+#ifdef FARAPI17
+    size_t MaxSize = ARRAYSIZE(FLI[i].Text);
+#endif
 #ifdef FARAPI18
+    size_t MaxSize = ARRAYSIZE(p[i].ListItem);
     FLI[i].Text = p[i].ListItem;
 #endif
     TCHAR* text = const_cast<TCHAR*>(FLI[i].Text);
@@ -363,12 +369,12 @@ void UpDateInfo(void)
     if (FirstChar[1] != FSF.LUpper(p[i].Keys[DisplayName][0]))
     {
       FirstChar[1] = FSF.LUpper(p[i].Keys[DisplayName][0]);
-      lstrcpy(text, FirstChar);
+      StringCchCopy(text, MaxSize, FirstChar);
     }
     else
-      lstrcpy(text, EMPTYSTR);
+      StringCchCopy(text, MaxSize, EMPTYSTR);
 
-    lstrcat(text, p[i].Keys[DisplayName]);
+    StringCchCopy(text, MaxSize, p[i].Keys[DisplayName]);
   }
 
   ListSize = nCount;

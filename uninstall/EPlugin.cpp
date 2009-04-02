@@ -42,8 +42,8 @@ int DrawMessage(int nType, int n, char *msg, ...)
   va_start(ap, msg);
   while ((arg = va_arg(ap,TCHAR*))!= NULL)
   {
-    lstrcat(string,arg);
-    lstrcat(string,_T("\n"));
+    StringCchCat(string, total+1, arg);
+    StringCchCat(string, total+1, _T("\n"));
   }
   va_end(ap);
 

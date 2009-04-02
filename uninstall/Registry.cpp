@@ -48,11 +48,13 @@ int GetRegKey(HKEY hRoot,TCHAR *Key,TCHAR *ValueName,TCHAR *ValueData,TCHAR *Def
 {
   HKEY hKey=OpenRegKey(hRoot,Key);
   DWORD Type;
-  int ExitCode=RegQueryValueEx(hKey,ValueName,0,&Type,(LPBYTE)ValueData,&DataSize);
+  DWORD Size = DataSize * sizeof(TCHAR);
+  int ExitCode=RegQueryValueEx(hKey,ValueName,0,&Type,(LPBYTE)ValueData,&Size);
+  ValueData[DataSize - 1] = 0;
   RegCloseKey(hKey);
   if (hKey==NULL || ExitCode!=ERROR_SUCCESS)
   {
-    lstrcpy(ValueData,Default);
+    StringCchCopy(ValueData,DataSize,Default);
     return(FALSE);
   }
   return(TRUE);
@@ -107,9 +109,9 @@ int GetRegKey(HKEY hRoot,TCHAR *Key,TCHAR *ValueName,BYTE *ValueData,BYTE *Defau
 void DeleteRegKey(HKEY hRoot,TCHAR *Key)
 {
   TCHAR FullKeyName[512];
-  lstrcpy(FullKeyName,PluginRootKey);
-  lstrcat(FullKeyName,(Key && *Key ? _T("\\"):_T("")));
-  lstrcat(FullKeyName,Key);
+  StringCchCopy(FullKeyName,ARRAYSIZE(FullKeyName),PluginRootKey);
+  StringCchCat(FullKeyName,ARRAYSIZE(FullKeyName),(Key && *Key ? _T("\\"):_T("")));
+  StringCchCat(FullKeyName,ARRAYSIZE(FullKeyName),Key);
   RegDeleteKey(hRoot,FullKeyName);
 }
 
@@ -120,9 +122,9 @@ HKEY CreateRegKey(HKEY hRoot,TCHAR *Key)
   HKEY hKey;
   DWORD Disposition;
   TCHAR FullKeyName[512];
-  lstrcpy(FullKeyName,PluginRootKey);
-  lstrcat(FullKeyName,(Key && *Key ? _T("\\"):_T("")));
-  lstrcat(FullKeyName,Key);
+  StringCchCopy(FullKeyName,ARRAYSIZE(FullKeyName),PluginRootKey);
+  StringCchCat(FullKeyName,ARRAYSIZE(FullKeyName),(Key && *Key ? _T("\\"):_T("")));
+  StringCchCat(FullKeyName,ARRAYSIZE(FullKeyName),Key);
   if(RegCreateKeyEx(hRoot,FullKeyName,0,NULL,0,KEY_WRITE,NULL,
                  &hKey,&Disposition) != ERROR_SUCCESS)
     hKey=NULL;
@@ -135,9 +137,9 @@ HKEY OpenRegKey(HKEY hRoot,TCHAR *Key)
 {
   HKEY hKey;
   TCHAR FullKeyName[512];
-  lstrcpy(FullKeyName,PluginRootKey);
-  lstrcat(FullKeyName,(Key && *Key ? _T("\\"):_T("")));
-  lstrcat(FullKeyName,Key);
+  StringCchCopy(FullKeyName,ARRAYSIZE(FullKeyName),PluginRootKey);
+  StringCchCat(FullKeyName,ARRAYSIZE(FullKeyName),(Key && *Key ? _T("\\"):_T("")));
+  StringCchCat(FullKeyName,ARRAYSIZE(FullKeyName),Key);
   if (RegOpenKeyEx(hRoot,FullKeyName,0,KEY_QUERY_VALUE,&hKey)!=ERROR_SUCCESS)
     return(NULL);
   return(hKey);
