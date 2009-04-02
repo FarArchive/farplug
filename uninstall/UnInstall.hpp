@@ -109,6 +109,28 @@ bool FillReg(KeyInfo & key, TCHAR * Buf, RegKeyPath & RegKey)
   return TRUE;
 }
 
+#ifdef FARAPI17
+#define DM_GETDLGITEMSHORT DM_GETDLGITEM
+#endif
+
+LONG_PTR WINAPI EntryDlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
+{
+  switch(Msg)
+  {
+    case DN_INITDIALOG:
+    {
+      FarDialogItem item;
+      for (unsigned id = 0; Info.SendDlgMessage(hDlg, DM_GETDLGITEMSHORT, id, reinterpret_cast<LONG_PTR>(&item)); id++)
+      {
+        if (item.Type == DI_EDIT)
+          Info.SendDlgMessage(hDlg, DM_EDITUNCHANGEDFLAG, id, 0);
+      }
+    }
+    break;
+  }
+  return Info.DefDlgProc(hDlg,Msg,Param1,Param2);
+}
+
 //заполнение пункта диалога
 void FillDialog(FarDialogItem & DialogItem, int Type, int X1, int Y1, int X2, int Y2,
                 int Flags, int nData)
@@ -190,10 +212,10 @@ void DisplayEntry(int Sel)
   }
   FillDialog(DialogItems[0], DI_DOUBLEBOX, 3, 1, sx + 4, sy + 2, 0, MUninstallEntry);
 #ifdef FARAPI17
-  Info.Dialog(Info.ModuleNumber, -1, -1, sx + 8, sy + 4, NULL, DialogItems, di_cnt);
+  Info.DialogEx(Info.ModuleNumber, -1, -1, sx + 8, sy + 4, NULL, DialogItems, di_cnt, 0, 0, EntryDlgProc, 0);
 #endif
 #ifdef FARAPI18
-  HANDLE h_dlg = Info.DialogInit(Info.ModuleNumber, -1, -1, sx + 8, sy + 4, NULL, DialogItems, di_cnt, 0, 0, NULL, 0);
+  HANDLE h_dlg = Info.DialogInit(Info.ModuleNumber, -1, -1, sx + 8, sy + 4, NULL, DialogItems, di_cnt, 0, 0, EntryDlgProc, 0);
   if (h_dlg != INVALID_HANDLE_VALUE) {
     Info.DialogRun(h_dlg);
     Info.DialogFree(h_dlg);
