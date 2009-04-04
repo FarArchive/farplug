@@ -373,7 +373,7 @@ public:
         if (dsize != 0) ::memmove(b->data() + pos, b->data() + pos + dsize, (b->size - pos) * sizeof(Item));
         throw;
       }
-      for (IdxSz i = 0; i < size; i++) clean_item(b->data() + pos + dsize + i);
+      for (i = 0; i < size; i++) clean_item(b->data() + pos + dsize + i);
       if (size != 0) ::memmove(b->data() + pos + dsize, b->data() + pos + dsize + size, (b->size - pos - size) * sizeof(Item));
 #else /* __A_OBJECT__ */
       if ((d >= b->data()) && (d < b->data() + b->size)) { /* true if we copy data from self */
@@ -982,12 +982,14 @@ private:
           assert(!flag_plus_sign);
           assert(!flag_add_blank);
           assert(!flag_alt_form);
-          Item ch = (Item) va_arg(ap, int);
+          Item c = (Item) va_arg(ap, int);
           if (precision == (unsigned) -1) precision = 1;
           ch_val.extend(precision);
-          for (unsigned i = 0; i < precision; i++) ch_val += ch;
+          Item* ch_val_buf = ch_val.buf();
+          for (unsigned i = 0; i < precision; i++) ch_val_buf[i] = c;
+          ch_val.set_size(precision);
           value = ch_val.data();
-          value_len = precision;
+          value_len = ch_val.size();
         }
         /* unsigned integer */
         else if ((ch == 'u') || (ch == 'i') || (ch == 'x') || (ch == 'b') || (ch == 'p')) {
@@ -1077,7 +1079,11 @@ private:
           value = &ch;
           value_len = 1;
         }
-        else assert(false);
+        else {
+          assert(false);
+          value = &ch;
+          value_len = 1;
+        }
 
         /* pad to width */
         if (value_len < width) {
