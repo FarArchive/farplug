@@ -68,13 +68,11 @@ const TCHAR * strstri(const TCHAR *s, const TCHAR *c)
 
 TCHAR * strnstri(TCHAR *s, const TCHAR *c, int n)
 {
-  static TCHAR tmpString[MAX_PATH];
   if (c)
   {
-    lstrcpyn(tmpString,c,n+1);
-    int l = lstrlen(tmpString);
+    int l = min(lstrlen(c), n);
     for (TCHAR *p = s ; *p ; p++)
-      if (FSF.LStrnicmp(p, tmpString, l) == 0)
+      if (FSF.LStrnicmp(p, c, l) == 0)
         return p;
   }
   return NULL;

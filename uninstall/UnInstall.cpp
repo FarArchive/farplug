@@ -56,7 +56,7 @@ void WINAPI GetPluginInfo(struct PluginInfo *Info)
     Info -> Flags |= PF_EDITOR;
   if (Opt.WhereWork & 1)
     Info -> Flags |= PF_VIEWER;
-  Info -> PluginMenuStringsNumber = sizeofa(PluginMenuStrings);
+  Info -> PluginMenuStringsNumber = ARRAYSIZE(PluginMenuStrings);
 }
 
 void ResizeDialog(HANDLE hDlg) {
@@ -304,7 +304,7 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
           COL_MENUHIGHLIGHT,COL_MENUBOX,COL_MENUSELECTEDTEXT,
           COL_MENUSELECTEDHIGHLIGHT,COL_MENUSCROLLBAR,COL_MENUDISABLEDTEXT
         };
-        int Count = sizeofa(ColorIndex);
+        int Count = ARRAYSIZE(ColorIndex);
         if (Count > Colors->ColorCount)
           Count = Colors->ColorCount;
         for (int i=0;i<Count;i++)
@@ -333,10 +333,10 @@ HANDLE WINAPI OpenPlugin(int /*OpenFrom*/, INT_PTR /*Item*/)
   DialogItems[0].Y1 = 1;
 
 #ifdef FARAPI17
-  Info.DialogEx(Info.ModuleNumber,-1,-1,0,0,"Contents",DialogItems,sizeofa(DialogItems),0,0,DlgProc,0);
+  Info.DialogEx(Info.ModuleNumber,-1,-1,0,0,"Contents",DialogItems,ARRAYSIZE(DialogItems),0,0,DlgProc,0);
 #endif
 #ifdef FARAPI18
-  HANDLE h_dlg = Info.DialogInit(Info.ModuleNumber,-1,-1,0,0,L"Contents",DialogItems,sizeofa(DialogItems),0,0,DlgProc,0);
+  HANDLE h_dlg = Info.DialogInit(Info.ModuleNumber,-1,-1,0,0,L"Contents",DialogItems,ARRAYSIZE(DialogItems),0,0,DlgProc,0);
   if (h_dlg != INVALID_HANDLE_VALUE) {
     Info.DialogRun(h_dlg);
     Info.DialogFree(h_dlg);

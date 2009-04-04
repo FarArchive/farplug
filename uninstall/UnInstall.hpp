@@ -31,8 +31,7 @@ enum
   InstallDate
 };
 
-#define sizeofa(array) (sizeof(array)/sizeof(array[0]))
-const int KeysCount = sizeofa(HelpTopics);
+const int KeysCount = ARRAYSIZE(HelpTopics);
 struct RegKeyPath {
   HKEY Root;
   const TCHAR* Path;
@@ -265,7 +264,8 @@ bool ExecuteEntry(int Sel, bool WaitEnd)
   }
 
   TCHAR SaveTitle[MAX_PATH];
-  GetConsoleTitle(SaveTitle,sizeof(SaveTitle));
+  GetConsoleTitle(SaveTitle,ARRAYSIZE(SaveTitle));
+  SaveTitle[ARRAYSIZE(SaveTitle) - 1] = 0;
   SetConsoleTitle(cmd_line);
 
   if (WaitEnd) // Wait until child process exits.
@@ -313,7 +313,7 @@ void UpDateInfo(void)
   int nRealCount = 0;
 
   nCount = 0;
-  for (int i=0;i<sizeofa(UninstKeys);i++)
+  for (int i=0;i<ARRAYSIZE(UninstKeys);i++)
   {
     if (RegOpenKeyEx(UninstKeys[i].Root, UninstKeys[i].Path, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
       continue;
@@ -322,7 +322,7 @@ void UpDateInfo(void)
 
     for (fEnumIndex=0; fEnumIndex<cSubKeys; fEnumIndex++)
     {
-      bufSize = sizeof(Buf);
+      bufSize = ARRAYSIZE(Buf);
       if (RegEnumKeyEx(hKey, fEnumIndex, Buf, &bufSize, NULL, NULL, NULL, &ftLastWrite) != ERROR_SUCCESS)
         continue;
       if (nCount+1 > nRealCount)
