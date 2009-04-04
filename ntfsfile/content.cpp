@@ -1202,8 +1202,7 @@ void compress_files(const ObjectArray<UnicodeString>& file_list, CompressionStat
   st.est_size = st.est_file_cnt = st.est_dir_cnt = st.est_reparse_cnt = st.est_err_cnt = 0;
 
   // estimate total file size
-  unsigned i;
-  for (i = 0; i < file_list.size(); i++) {
+  for (unsigned i = 0; i < file_list.size(); i++) {
     const UnicodeString& file_name = file_list[i];
     DWORD fattr = GetFileAttributesW(file_name.data());
     if (fattr == INVALID_FILE_ATTRIBUTES) {

@@ -1231,7 +1231,6 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
       }
     }
     else if (item_idx == 3) {
-      ObjectArray<UnicodeString> file_list;
       if (file_list_from_panel(file_list, active_panel != NULL)) {
         Log log;
         defragment(file_list, log);

@@ -313,7 +313,7 @@ void NtfsVolume::open(const UnicodeString& volume_name) {
     DWORD vlm_comp_len;
     DWORD flags;
     wchar_t vlm_fs[MAX_PATH];
-    CHECK_SYS(GetVolumeInformationW(add_trailing_slash(name).data(), vlm_label, sizeof(vlm_label), &serial, &vlm_comp_len, &flags, vlm_fs, sizeof(vlm_fs)));
+    CHECK_SYS(GetVolumeInformationW(add_trailing_slash(name).data(), vlm_label, ARRAYSIZE(vlm_label), &serial, &vlm_comp_len, &flags, vlm_fs, ARRAYSIZE(vlm_fs)));
 
     CHECK(_wcsicmp(vlm_fs, L"NTFS") == 0, L"Only NTFS volumes are supported");
 

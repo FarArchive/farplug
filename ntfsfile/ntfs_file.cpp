@@ -159,7 +159,7 @@ Array<FileInfo::DataRun> FileInfo::decode_data_runs(const Array<u8>& ntfs_file_r
     for (i = 0; i + 1 < off_l; i++) {
       off |= static_cast<u64>(data_runs[idx++]) << (i * 8);
     }
-    off |= static_cast<s8>(data_runs[idx++]) << (i * 8);
+    off |= static_cast<s64>(static_cast<s8>(data_runs[idx++])) << (i * 8);
     lcn = lcn + off;
     data_run_list += DataRun(lcn, len);
   }
