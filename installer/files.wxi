@@ -2858,6 +2858,160 @@
         <File Id="WinSCP.lng" Name="WinSCP.lng" KeyPath="yes" Source="$(var.bundle)\winscp\WinSCP.lng" />
       </Component>
     </Directory>
+    <Directory Id="newarc" Name="newarc">
+      <Component Id="changes" Guid="{50041632-6068-4045-821C-BD87C765618D}">
+        <File Id="changes" Name="changes" KeyPath="yes" Source="$(var.bundle)\newarc\changes" />
+      </Component>
+      <Component Id="newarc.dll" Guid="{E352529C-351F-40FC-BF07-F80B8FBD5F87}">
+        <File Id="newarc.dll" Name="newarc.dll" KeyPath="yes" Source="$(var.bundle)\newarc\newarc.dll" />
+      </Component>
+      <Component Id="newarc.English.lng" Guid="{9CE07E25-734C-430E-8B8C-0FBBBCF2B53F}">
+        <File Id="newarc.English.lng" Name="newarc.English.lng" KeyPath="yes" Source="$(var.bundle)\newarc\newarc.English.lng" />
+      </Component>
+      <Component Id="newarc.map" Guid="{54F0D8BB-F522-4D01-B323-EC443E7E59DD}">
+        <File Id="newarc.map" Name="newarc.map" KeyPath="yes" Source="$(var.bundle)\newarc\newarc.map" />
+      </Component>
+      <Component Id="newarc.Russian.lng" Guid="{524BC522-D928-4762-BC83-6B2E4B8595DF}">
+        <File Id="newarc.Russian.lng" Name="newarc.Russian.lng" KeyPath="yes" Source="$(var.bundle)\newarc\newarc.Russian.lng" />
+      </Component>
+      <Directory Id="plugins_5" Name="plugins">
+        <Component Id="ace.map_2" Guid="{526CD1A9-BE3B-4045-B064-17FAF4C38CCD}">
+          <File Id="ace.map_2" Name="ace.map" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\ace.map" />
+        </Component>
+        <Component Id="ace.module" Guid="{4BD2FEE3-72DD-41A3-B93F-C18AD39CE060}">
+          <File Id="ace.module" Name="ace.module" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\ace.module" />
+        </Component>
+        <Component Id="bzip2.dll" Guid="{6C65BDE9-0DFC-4E8F-B48A-477C9AE8A8D2}">
+          <File Id="bzip2.dll" Name="bzip2.dll" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\bzip2.dll" />
+        </Component>
+        <Component Id="rar.map_2" Guid="{B91FC909-0CA4-4231-BD53-3E38E5F56FEB}">
+          <File Id="rar.map_2" Name="rar.map" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\rar.map" />
+        </Component>
+        <Component Id="rar.module" Guid="{1D0CA381-D211-4751-B62E-9705E6F0A5F0}">
+          <File Id="rar.module" Name="rar.module" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\rar.module" />
+        </Component>
+        <Component Id="targz.map_2" Guid="{51663DC9-F0DA-47B7-A2F2-65C27EE430A9}">
+          <File Id="targz.map_2" Name="targz.map" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\targz.map" />
+        </Component>
+        <Component Id="targz.module" Guid="{E82185F1-B279-4FF9-842B-AE8813E22483}">
+          <File Id="targz.module" Name="targz.module" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\targz.module" />
+        </Component>
+        <Component Id="UNACEV2.DLL" Guid="{9B2D788B-34C9-4026-8FD2-8EC227838D54}">
+          <File Id="UNACEV2.DLL" Name="UNACEV2.DLL" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\UNACEV2.DLL" />
+        </Component>
+        <Component Id="unrar.dll" Guid="{B9D6ECFC-C995-4CE0-BE48-E4F5BD74FE95}">
+          <File Id="unrar.dll" Name="unrar.dll" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\unrar.dll" />
+        </Component>
+        <Component Id="zip.map_2" Guid="{D9F5D4D3-34A2-4B3D-9C63-3A292DC1CFF4}">
+          <File Id="zip.map_2" Name="zip.map" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\zip.map" />
+        </Component>
+        <Component Id="zip.module" Guid="{609780E3-C450-4167-8DED-E5745BA83DE3}">
+          <File Id="zip.module" Name="zip.module" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\zip.module" />
+        </Component>
+        <Component Id="zlib.dll" Guid="{A69E3A1A-1169-4AC4-93C6-48FFA9B17D13}">
+          <File Id="zlib.dll" Name="zlib.dll" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\zlib.dll" />
+        </Component>
+        <Directory Id="_7z.all" Name="7z.all">
+          <Component Id="_7z_all.map" Guid="{7ED5A344-5717-4E80-84D3-6A0EC7377FDC}">
+            <File Id="_7z_all.map" Name="7z_all.map" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\7z.all\7z_all.map" />
+          </Component>
+          <Component Id="_7z_all.module" Guid="{F82BB11D-D751-4752-9290-B2994FF15A9A}">
+            <File Id="_7z_all.module" Name="7z_all.module" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\7z.all\7z_all.module" />
+          </Component>
+          <Directory Id="Formats_3" Name="Formats">
+            <Component Id="_7z.dll_2" Guid="{FE530B81-E22D-4904-9183-ADFD92C96A18}">
+              <File Id="_7z.dll_2" Name="7z.dll" KeyPath="yes" Source="$(var.bundle)\7-zip\7z.dll" />
+            </Component>
+          </Directory>
+        </Directory>
+        <Directory Id="ma" Name="ma">
+          <Component Id="ma.map" Guid="{ACD23845-6616-4FF8-9188-E6B8200DEBF4}">
+            <File Id="ma.map" Name="ma.map" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\ma\ma.map" />
+          </Component>
+          <Component Id="ma.module" Guid="{5FBA4C48-532C-4DF7-A45C-2DF8F4B59C07}">
+            <File Id="ma.module" Name="ma.module" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\ma\ma.module" />
+          </Component>
+          <Directory Id="Formats_4" Name="Formats">
+            <Component Id="Ace.fmt_2" Guid="{ED6E8237-7183-4523-B53F-04DBB00192AA}">
+              <File Id="Ace.fmt_2" Name="Ace.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Ace.fmt" />
+            </Component>
+            <Component Id="Ace.map_3" Guid="{BD623D70-A2CD-49E7-AD27-6626B54AA644}">
+              <File Id="Ace.map_3" Name="Ace.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Ace.map" />
+            </Component>
+            <Component Id="Arc.fmt_2" Guid="{3A84531D-E0AD-4D6B-90CD-E440FC3ACC00}">
+              <File Id="Arc.fmt_2" Name="Arc.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Arc.fmt" />
+            </Component>
+            <Component Id="Arc.map_2" Guid="{BFE58031-A50F-40CC-AAD1-13EC749FE473}">
+              <File Id="Arc.map_2" Name="Arc.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Arc.map" />
+            </Component>
+            <Component Id="Arj.fmt_2" Guid="{8A9E3988-69F6-42FB-904C-19A4C3F037D4}">
+              <File Id="Arj.fmt_2" Name="Arj.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Arj.fmt" />
+            </Component>
+            <Component Id="Arj.map_2" Guid="{8B922559-6E34-4F91-9655-85D3E2016BE9}">
+              <File Id="Arj.map_2" Name="Arj.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Arj.map" />
+            </Component>
+            <Component Id="Cab.fmt_2" Guid="{61F28047-FF82-4605-97CB-C34A9FEB8CAE}">
+              <File Id="Cab.fmt_2" Name="Cab.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Cab.fmt" />
+            </Component>
+            <Component Id="Cab.map_2" Guid="{75162CBD-904F-46AE-A71C-5CE31A451136}">
+              <File Id="Cab.map_2" Name="Cab.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Cab.map" />
+            </Component>
+            <Component Id="Custom.fmt_2" Guid="{4D529CF5-EC71-4A50-9422-F227BC13EEDA}">
+              <File Id="Custom.fmt_2" Name="Custom.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Custom.fmt" />
+            </Component>
+            <Component Id="custom.ini_2" Guid="{F1472D12-EE3F-422F-82CF-0E8D0A8D12D9}">
+              <File Id="custom.ini_2" Name="custom.ini" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\custom.ini" />
+            </Component>
+            <Component Id="Custom.map_2" Guid="{BBB1157D-382B-4D17-A017-94D7400901BA}">
+              <File Id="Custom.map_2" Name="Custom.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Custom.map" />
+            </Component>
+            <Component Id="Ha.fmt_2" Guid="{14407350-3CEA-4427-9161-EBC47ED2984A}">
+              <File Id="Ha.fmt_2" Name="Ha.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Ha.fmt" />
+            </Component>
+            <Component Id="Ha.map_2" Guid="{4B95D8DA-EB85-4ABA-800D-8CC54739C102}">
+              <File Id="Ha.map_2" Name="Ha.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Ha.map" />
+            </Component>
+            <Component Id="Lzh.fmt_2" Guid="{F90E14D6-D867-4D3E-B3D8-4BF21BC7F60C}">
+              <File Id="Lzh.fmt_2" Name="Lzh.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Lzh.fmt" />
+            </Component>
+            <Component Id="Lzh.map_2" Guid="{AF28798A-C4C4-475F-81E2-6504116AF214}">
+              <File Id="Lzh.map_2" Name="Lzh.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Lzh.map" />
+            </Component>
+            <Component Id="Rar.fmt_2" Guid="{2A4C5A1D-81BC-49D6-8540-0A1DA9F71100}">
+              <File Id="Rar.fmt_2" Name="Rar.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Rar.fmt" />
+            </Component>
+            <Component Id="Rar.map_3" Guid="{40D0B851-8457-4545-8FB2-2EF946FC154D}">
+              <File Id="Rar.map_3" Name="Rar.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Rar.map" />
+            </Component>
+            <Component Id="TarGz.fmt_2" Guid="{F9726426-6F38-4CC4-8311-F44B52F59D7D}">
+              <File Id="TarGz.fmt_2" Name="TarGz.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\TarGz.fmt" />
+            </Component>
+            <Component Id="TarGz.map_3" Guid="{6106F54B-863A-43DA-8EAE-A0DF0A9B35BA}">
+              <File Id="TarGz.map_3" Name="TarGz.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\TarGz.map" />
+            </Component>
+            <Component Id="Zip.fmt_2" Guid="{B3402712-C196-4FFB-9D49-C880F5F7B1EC}">
+              <File Id="Zip.fmt_2" Name="Zip.fmt" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Zip.fmt" />
+            </Component>
+            <Component Id="Zip.map_3" Guid="{7E1ED643-FF4C-4D7A-9BF3-6E1FBF2CB917}">
+              <File Id="Zip.map_3" Name="Zip.map" KeyPath="yes" Source="plugins\multiarc\final.$(var.Suffix).vc\Formats\Zip.map" />
+            </Component>
+          </Directory>
+        </Directory>
+        <Directory Id="wcx" Name="wcx">
+          <Component Id="wcx.map" Guid="{0DC4E8C1-87E2-4843-8F22-555017D79537}">
+            <File Id="wcx.map" Name="wcx.map" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\wcx\wcx.map" />
+          </Component>
+          <Component Id="wcx.module" Guid="{8E2AB7DB-E9A0-4F74-B742-F436720178B5}">
+            <File Id="wcx.module" Name="wcx.module" KeyPath="yes" Source="$(var.bundle)\newarc\plugins\wcx\wcx.module" />
+          </Component>
+          <Directory Id="Formats_5" Name="Formats">
+            <Component Id="Formats_5" Guid="{9195FBFB-015D-49CD-844D-F742F461CCDB}" KeyPath="yes">
+              <CreateFolder />
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
     <?endif?>
   </Directory>
 </Include>

@@ -973,6 +973,129 @@
           <ComponentRef Id="MoreHistoryRus.lng" />
         </Feature>
       </Feature>
+      <Feature Id="NewArc" Level="2" Title="NewArc" AllowAdvertise="no" Description="Multiformat archive support">
+        <ComponentRef Id="newarc.dll" />
+        <ComponentRef Id="newarc.English.lng" />
+        <Feature Id="NewArc7Zip" Level="2" Title="7-Zip" AllowAdvertise="no">
+          <ComponentRef Id="_7z_all.module" />
+          <ComponentRef Id="_7z.dll_2" />
+          <Feature Id="NewArc7ZipFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="_7z_all.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="NewArcAce" Level="2" Title="Ace" AllowAdvertise="no">
+          <ComponentRef Id="ace.module" />
+          <ComponentRef Id="UNACEV2.DLL" />
+          <Feature Id="NewArcAceFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="ace.map_2" />
+          </Feature>
+        </Feature>
+        <Feature Id="NewArcMA" Level="2" Title="MA" AllowAdvertise="no" Description="Support for MultiArc FMT modules">
+          <ComponentRef Id="ma.module" />
+          <Feature Id="NewArcMAFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="ma.map" />
+          </Feature>
+          <Feature Id="NewArcMAAce" Level="2" Title="Ace" AllowAdvertise="no">
+            <ComponentRef Id="Ace.fmt_2" />
+            <Feature Id="NewArcMAAceFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+              <ComponentRef Id="Ace.map_3" />
+            </Feature>
+          </Feature>
+          <Feature Id="NewArcMAArc" Level="2" Title="Arc" AllowAdvertise="no">
+            <ComponentRef Id="Arc.fmt_2" />
+            <Feature Id="NewArcMAArcFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+              <ComponentRef Id="Arc.map_2" />
+            </Feature>
+          </Feature>
+          <Feature Id="NewArcMAArj" Level="2" Title="Arj" AllowAdvertise="no">
+            <ComponentRef Id="Arj.fmt_2" />
+            <Feature Id="NewArcMAArjFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+              <ComponentRef Id="Arj.map_2" />
+            </Feature>
+          </Feature>
+          <Feature Id="NewArcMACab" Level="2" Title="Cab" AllowAdvertise="no">
+            <ComponentRef Id="Cab.fmt_2" />
+            <Feature Id="NewArcMACabFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+              <ComponentRef Id="Cab.map_2" />
+            </Feature>
+          </Feature>
+          <Feature Id="NewArcMACustom" Level="2" Title="Custom" AllowAdvertise="no">
+            <ComponentRef Id="Custom.fmt_2" />
+            <ComponentRef Id="custom.ini_2" />
+            <Feature Id="NewArcMACustomFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+              <ComponentRef Id="Custom.map_2" />
+            </Feature>
+          </Feature>
+          <Feature Id="NewArcMAHa" Level="2" Title="Ha" AllowAdvertise="no">
+            <ComponentRef Id="Ha.fmt_2" />
+            <Feature Id="NewArcMAHaFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+              <ComponentRef Id="Ha.map_2" />
+            </Feature>
+          </Feature>
+          <Feature Id="NewArcMALzh" Level="2" Title="Lzh" AllowAdvertise="no">
+            <ComponentRef Id="Lzh.fmt_2" />
+            <Feature Id="NewArcMALzhFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+              <ComponentRef Id="Lzh.map_2" />
+            </Feature>
+          </Feature>
+          <Feature Id="NewArcMARar" Level="2" Title="Rar" AllowAdvertise="no">
+            <ComponentRef Id="Rar.fmt_2" />
+            <Feature Id="NewArcMARarFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+              <ComponentRef Id="Rar.map_3" />
+            </Feature>
+          </Feature>
+          <Feature Id="NewArcMATarGz" Level="2" Title="TarGz" AllowAdvertise="no">
+            <ComponentRef Id="TarGz.fmt_2" />
+            <Feature Id="NewArcMATarGzFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+              <ComponentRef Id="TarGz.map_3" />
+            </Feature>
+          </Feature>
+          <Feature Id="NewArcMAZip" Level="2" Title="Zip" AllowAdvertise="no">
+            <ComponentRef Id="Zip.fmt_2" />
+            <Feature Id="NewArcMAZipFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+              <ComponentRef Id="Zip.map_3" />
+            </Feature>
+          </Feature>
+        </Feature>
+        <Feature Id="NewArcRar" Level="2" Title="Rar" AllowAdvertise="no">
+          <ComponentRef Id="rar.module" />
+          <ComponentRef Id="unrar.dll" />
+          <Feature Id="NewArcRarFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="rar.map_2" />
+          </Feature>
+        </Feature>
+        <Feature Id="NewArcTarGz" Level="2" Title="TarGz" AllowAdvertise="no">
+          <ComponentRef Id="targz.module" />
+          <ComponentRef Id="bzip2.dll" />
+          <ComponentRef Id="zlib.dll" />
+          <Feature Id="NewArcTarGzFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="targz.map_2" />
+          </Feature>
+        </Feature>
+        <Feature Id="NewArcZip" Level="2" Title="Zip" AllowAdvertise="no">
+          <ComponentRef Id="zip.module" />
+          <ComponentRef Id="zlib.dll" />
+          <Feature Id="NewArcZipFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="zip.map_2" />
+          </Feature>
+        </Feature>
+        <Feature Id="NewArcWcx" Level="2" Title="Wcx" AllowAdvertise="no" Description="Support for Total Commander WCX modules">
+          <ComponentRef Id="wcx.module" />
+          <ComponentRef Id="Formats_5" />
+          <Feature Id="NewArcWcxFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="wcx.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="NewArcRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="newarc.Russian.lng" />
+        </Feature>
+        <Feature Id="NewArcFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="newarc.map" />
+        </Feature>
+        <Feature Id="NewArcChangelogs" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="changes" />
+        </Feature>
+      </Feature>
       <Feature Id="Noisy" Level="2" Title="Noisy" AllowAdvertise="no" Description="Music player">
         <ComponentRef Id="bass.dll_1" />
         <ComponentRef Id="file_id.diz_16" />

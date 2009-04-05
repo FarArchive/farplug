@@ -164,6 +164,26 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("drgndrop", "FExcept");
   UPDATE_FEATURE("true_tpl", "Russian");
   UPDATE_FEATURE("true_tpl", "FExcept");
+  UPDATE_FEATURE("NewArc7Zip", "FExcept");
+  UPDATE_FEATURE("NewArcAce", "FExcept");
+  UPDATE_FEATURE("NewArcMA", "FExcept");
+  UPDATE_FEATURE("NewArcMAAce", "FExcept");
+  UPDATE_FEATURE("NewArcMAArc", "FExcept");
+  UPDATE_FEATURE("NewArcMAArj", "FExcept");
+  UPDATE_FEATURE("NewArcMACab", "FExcept");
+  UPDATE_FEATURE("NewArcMACustom", "FExcept");
+  UPDATE_FEATURE("NewArcMAHa", "FExcept");
+  UPDATE_FEATURE("NewArcMALzh", "FExcept");
+  UPDATE_FEATURE("NewArcMARar", "FExcept");
+  UPDATE_FEATURE("NewArcMATarGz", "FExcept");
+  UPDATE_FEATURE("NewArcMAZip", "FExcept");
+  UPDATE_FEATURE("NewArcRar", "FExcept");
+  UPDATE_FEATURE("NewArcTarGz", "FExcept");
+  UPDATE_FEATURE("NewArcZip", "FExcept");
+  UPDATE_FEATURE("NewArcWcx", "FExcept");
+  UPDATE_FEATURE("NewArc", "Russian");
+  UPDATE_FEATURE("NewArc", "FExcept");
+  UPDATE_FEATURE("NewArc", "Changelogs");
 #endif
   return ERROR_SUCCESS;
 }
