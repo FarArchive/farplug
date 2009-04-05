@@ -93,13 +93,14 @@
         <ComponentRef Id="AltEnter_ANSI.reg" />
         <ComponentRef Id="ConEmu.dll" />
         <ComponentRef Id="ConEmuPlugin_en.lng" />
-        <ComponentRef Id="F14.reg" />
-        <ComponentRef Id="F14_ANSI.reg" />
         <Feature Id="ConEmuPluginRussian" Level="2" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="ConEmuPlugin_ru.lng" />
         </Feature>
       </Feature>
-      <Feature Id="ConMan" Level="2" Display="expand" Title="ConMan" AllowAdvertise="no" Description="Console manager">
+      <Feature Id="ConEmuAutoRun" Level="2" Title="Autorun" AllowAdvertise="no" Description="Script to configure ConEmu to run automatically when cmd.exe is started">
+        <ComponentRef Id="cmd_autorun.cmd" />
+      </Feature>
+      <Feature Id="ConMan" Level="2" Title="ConMan" AllowAdvertise="no" Description="Console manager">
         <ComponentRef Id="conman.dll" />
         <ComponentRef Id="hook.dll" />
         <ComponentRef Id="infis.dll" />

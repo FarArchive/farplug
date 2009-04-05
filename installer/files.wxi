@@ -79,6 +79,9 @@
   <Component Id="infis.dll" Guid="{6CFE36E1-0AAE-4055-9D00-E81EA3F6F654}">
     <File Id="infis.dll" Name="infis.dll" KeyPath="yes" Source="$(var.bundle)\conman\infis.dll" />
   </Component>
+  <Component Id="cmd_autorun.cmd" Guid="{75B4C0B6-574A-413E-B6A1-DE77E2D41D1C}">
+    <File Id="cmd_autorun.cmd" Name="cmd_autorun.cmd" KeyPath="yes" Source="$(var.bundle)\conemu\cmd_autorun.cmd" />
+  </Component>
   <?endif?>
   <Directory Id="docs" Name="docs">
     <Directory Id="eng" Name="eng">
@@ -1779,12 +1782,6 @@
       </Component>
       <Component Id="ConEmuPlugin_ru.lng" Guid="{B17DE9A1-2EAC-4DC2-BA5E-3BF02900D5B1}">
         <File Id="ConEmuPlugin_ru.lng" Name="ConEmuPlugin_ru.lng" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\ConEmuPlugin_ru.lng" />
-      </Component>
-      <Component Id="F14.reg" Guid="{5DFE7754-779C-4330-95DF-0E8107DBBCB7}">
-        <File Id="F14.reg" Name="F14.reg" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\F14.reg" />
-      </Component>
-      <Component Id="F14_ANSI.reg" Guid="{9F3EF3BE-2ADD-4D38-8843-928374D58A78}">
-        <File Id="F14_ANSI.reg" Name="F14_ANSI.reg" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\F14_ANSI.reg" />
       </Component>
     </Directory>
     <Directory Id="airbrush" Name="airbrush">
