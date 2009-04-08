@@ -374,7 +374,7 @@ void UpDateInfo(void)
     else
       StringCchCopy(text, MaxSize, EMPTYSTR);
 
-    StringCchCopy(text, MaxSize, p[i].Keys[DisplayName]);
+    StringCchCat(text, MaxSize, p[i].Keys[DisplayName]);
   }
 
   ListSize = nCount;
