@@ -126,8 +126,8 @@
       <Component Id="Readme.txt" Guid="{672C2ADF-5A38-420D-8E32-82E2D7E6125E}">
         <File Id="Readme.txt" Name="Readme.txt" KeyPath="yes" Source="misc\fexcept\Readme.txt" />
       </Component>
-      <Component Id="SetFarExceptionHandlerW.reg" Guid="{F434E8DF-F397-4592-AE6D-865DDFA375CB}">
-        <File Id="SetFarExceptionHandlerW.reg" Name="SetFarExceptionHandlerW.reg" KeyPath="yes" Source="misc\fexcept\SetFarExceptionHandlerW.reg" />
+      <Component Id="SetFarExceptionHandler.reg" Guid="{FE691CF9-9D43-453A-9590-BEAD2A60B740}">
+        <File Id="SetFarExceptionHandler.reg" Name="SetFarExceptionHandler.reg" KeyPath="yes" Source="misc\fexcept\final.$(var.Suffix)W.vc\SetFarExceptionHandler.reg" />
       </Component>
     </Directory>
     <Directory Id="rus" Name="rus">

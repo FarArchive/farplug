@@ -53,7 +53,7 @@
     </Feature>
     <Feature Id="DocsFExcept" Level="1" Display="hidden" AllowAdvertise="no">
       <ComponentRef Id="Readme.txt" />
-      <ComponentRef Id="SetFarExceptionHandlerW.reg" />
+      <ComponentRef Id="SetFarExceptionHandler.reg" />
     </Feature>
     <Feature Id="ChangelogsFExcept" Level="1" Display="hidden" AllowAdvertise="no">
       <ComponentRef Id="changelog_2" />
