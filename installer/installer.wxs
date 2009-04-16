@@ -1,14 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<?define Product="FAR Manager $(var.Version)" ?>
+<?define Product="FAR Manager" ?>
 <?define Manufacturer="Eugene Roshal & FAR Group" ?>
 <?define UpgradeCode="45ab8d55-86a1-44f1-8e0a-1890fa69ba2b" ?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Product Id="*" Language="1033" Codepage="1251" Name="$(var.Product)" Version="$(var.Version)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
-    <Package Id="*" Platform="$(var.Platform)" Compressed="yes" Manufacturer="$(var.Manufacturer)" Description="$(var.Product)" InstallerVersion="150"/>
+    <Package Id="*" Platform="$(var.Platform)" Compressed="yes" Manufacturer="$(var.Manufacturer)" Description="$(var.Product) $(var.Version)" InstallerVersion="150"/>
     <Property Id="INSTALLDIR">
       <RegistrySearch Id="InstallDir" Root="HKLM" Key="Software\Far2" Name="InstallDir" Type="raw"/>
     </Property>
     <Property Id="REINSTALLMODE" Value="ams"/>
+    <Property Id="ALLUSERS" Value="1"/>
     <Media Id="1" Cabinet="far.cab" EmbedCab="yes"/>
     <Condition Message="$(var.Product) requires Windows 2000 or above."><![CDATA[NOT Version9X AND (VersionNT>=500)]]></Condition>
     <Binary Id="CustomActions.dll" SourceFile="CustomActions.dll"/>
@@ -38,13 +39,9 @@
           <Component Id="ClearPluginsCache" Guid="cfc3ab7b-fecc-4fce-b178-98f82afb9bac">
             <RemoveRegistryKey Root="HKCU" Key="Software\Far2\PluginsCache" Action="removeOnInstall"/>
           </Component>
-          <?ifdef bundle ?>
-          <Component Id="ConMan.lnk" Guid="01f85c2c-9f1d-4d93-8465-833a85382373">
-            <Shortcut Id="ConMan.lnk" Name="ConMan.lnk" Target="[INSTALLDIR]\ConEmu.exe" Arguments="/ConMan /cmd Far" WorkingDirectory="INSTALLDIR"/>
-          </Component>
-          <?endif?>
         </Directory>
       </Directory>
+      <?include shortcuts.wxi ?>
     </Directory>
     <?include features.wxi ?>
     <Upgrade Id="$(var.UpgradeCode)">
@@ -61,5 +58,7 @@
     </InstallExecuteSequence>
     <UIRef Id="MyWixUI_FeatureTree"/>
     <UIRef Id="WixUI_ErrorProgressText"/>
+    <Icon Id="Far.ico" SourceFile="unicode_far\Far.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="Far.ico"/>
   </Product>
 </Wix>

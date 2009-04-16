@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Include>
-  <Feature Id="Complete" Level="1" Title="FAR Manager" Display="expand" Absent="disallow" AllowAdvertise="no" ConfigurableDirectory="INSTALLDIR">
-    <Feature Id="Far" Level="1" Title="Base Files" Absent="disallow" AllowAdvertise="no" Description="FAR Manager executable, English help and language file">
-      <ComponentRef Id="InstallDir" />
-      <ComponentRef Id="ClearPluginsCache" />
-      <ComponentRef Id="ClearPluginsCache.bat" />
-      <ComponentRef Id="Far.exe" />
-      <ComponentRef Id="FarEng.hlf" />
-      <ComponentRef Id="FarEng.lng" />
-      <ComponentRef Id="File_id.diz" />
-      <ComponentRef Id="LICENSE" />
-      <ComponentRef Id="README_EN" />
-      <ComponentRef Id="RestoreSettings.bat" />
-      <ComponentRef Id="SaveSettings.bat" />
-    </Feature>
+  <Feature Id="Far" Level="1" Title="FAR Manager" Display="expand" Absent="disallow" AllowAdvertise="no" ConfigurableDirectory="INSTALLDIR">
+    <ComponentRef Id="InstallDir" />
+    <ComponentRef Id="ClearPluginsCache" />
+    <ComponentRef Id="ClearPluginsCache.bat" />
+    <ComponentRef Id="Far.exe" />
+    <ComponentRef Id="FarEng.hlf" />
+    <ComponentRef Id="FarEng.lng" />
+    <ComponentRef Id="File_id.diz" />
+    <ComponentRef Id="LICENSE" />
+    <ComponentRef Id="README_EN" />
+    <ComponentRef Id="RestoreSettings.bat" />
+    <ComponentRef Id="SaveSettings.bat" />
     <Feature Id="Docs" Level="1" Title="Documentation" AllowAdvertise="no" Description="Tech info, FAQ, What's new, etc.">
       <ComponentRef Id="Arc.Support.txt_1" />
       <ComponentRef Id="Bug.Report.txt_1" />
@@ -78,6 +76,22 @@
         <ComponentRef Id="FarPol.lng" />
       </Feature>
     </Feature>
+    <Feature Id="FarShortcuts" Level="2" Title="Shortcuts" AllowAdvertise="no">
+      <Feature Id="FarProgramsShortcut" Level="2" Title="Programs" AllowAdvertise="no">
+        <ComponentRef Id="FarProgramsShortcut" />
+        <ComponentRef Id="UninstallProduct" />
+        <ComponentRef Id="Scripts" />
+      </Feature>
+      <Feature Id="FarDesktopShortcut" Level="2" Title="Desktop" AllowAdvertise="no">
+        <ComponentRef Id="FarDesktopShortcut" />
+      </Feature>
+      <Feature Id="FarStartMenuShortcut" Level="2" Title="Start menu" AllowAdvertise="no">
+        <ComponentRef Id="FarStartMenuShortcut" />
+      </Feature>
+      <Feature Id="FarQuickLaunchShortcut" Level="2" Title="Quick launch" AllowAdvertise="no">
+        <ComponentRef Id="FarQuickLaunchShortcut" />
+      </Feature>
+    </Feature>
     <?ifdef bundle ?>
     <Feature Id="ConEmu" Level="2" Title="ConEmu" AllowAdvertise="no" Description="Console emulator">
       <ComponentRef Id="ConEmu.exe" />
@@ -100,6 +114,21 @@
       <Feature Id="ConEmuAutoRun" Level="2" Title="Autorun" AllowAdvertise="no" Description="Script to configure ConEmu to run automatically when cmd.exe is started">
         <ComponentRef Id="cmd_autorun.cmd" />
       </Feature>
+      <Feature Id="ConEmuShortcuts" Level="2" Title="Shortcuts" AllowAdvertise="no">
+        <Feature Id="ConEmuProgramsShortcut" Level="2" Title="Programs" AllowAdvertise="no">
+          <ComponentRef Id="ConEmuProgramsShortcut" />
+          <ComponentRef Id="UninstallProduct" />
+        </Feature>
+        <Feature Id="ConEmuDesktopShortcut" Level="2" Title="Desktop" AllowAdvertise="no">
+          <ComponentRef Id="ConEmuDesktopShortcut" />
+        </Feature>
+        <Feature Id="ConEmuStartMenuShortcut" Level="2" Title="Start menu" AllowAdvertise="no">
+          <ComponentRef Id="ConEmuStartMenuShortcut" />
+        </Feature>
+        <Feature Id="ConEmuQuickLaunchShortcut" Level="2" Title="Quick launch" AllowAdvertise="no">
+          <ComponentRef Id="ConEmuQuickLaunchShortcut" />
+        </Feature>
+      </Feature>
       <Feature Id="ConMan" Level="2" Title="ConMan" AllowAdvertise="no" Description="Console manager">
         <ComponentRef Id="conman.dll" />
         <ComponentRef Id="hook.dll" />
@@ -113,9 +142,23 @@
         <ComponentRef Id="print_codes.exe" />
         <ComponentRef Id="ReadMe.eng_2" />
         <ComponentRef Id="win_key.reg" />
-        <ComponentRef Id="ConMan.lnk" />
         <Feature Id="ConManRussian" Level="2" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="ReadMe.rus_3" />
+        </Feature>
+        <Feature Id="ConManShortcuts" Level="2" Title="Shortcuts" AllowAdvertise="no">
+          <Feature Id="ConManProgramsShortcut" Level="2" Title="Programs" AllowAdvertise="no">
+            <ComponentRef Id="ConManProgramsShortcut" />
+            <ComponentRef Id="UninstallProduct" />
+          </Feature>
+          <Feature Id="ConManDesktopShortcut" Level="2" Title="Desktop" AllowAdvertise="no">
+            <ComponentRef Id="ConManDesktopShortcut" />
+          </Feature>
+          <Feature Id="ConManStartMenuShortcut" Level="2" Title="Start menu" AllowAdvertise="no">
+            <ComponentRef Id="ConManStartMenuShortcut" />
+          </Feature>
+          <Feature Id="ConManQuickLaunchShortcut" Level="2" Title="Quick launch" AllowAdvertise="no">
+            <ComponentRef Id="ConManQuickLaunchShortcut" />
+          </Feature>
         </Feature>
       </Feature>
     </Feature>
