@@ -9,7 +9,6 @@
       <RegistrySearch Id="InstallDir" Root="HKLM" Key="Software\Far2" Name="InstallDir" Type="raw"/>
     </Property>
     <Property Id="REINSTALLMODE" Value="ams"/>
-    <Property Id="ALLUSERS" Value="1"/>
     <Media Id="1" Cabinet="far.cab" EmbedCab="yes"/>
     <Condition Message="$(var.Product) requires Windows 2000 or above."><![CDATA[NOT Version9X AND (VersionNT>=500)]]></Condition>
     <Binary Id="CustomActions.dll" SourceFile="CustomActions.dll"/>
