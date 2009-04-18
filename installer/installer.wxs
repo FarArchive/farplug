@@ -10,6 +10,9 @@
     </Property>
     <Property Id="REINSTALLMODE" Value="ams"/>
     <Media Id="1" Cabinet="far.cab" EmbedCab="yes"/>
+    <?ifdef bundle ?>
+    <Media Id="2" Cabinet="bundle.cab" EmbedCab="yes"/>
+    <?endif?>
     <Condition Message="$(var.Product) requires Windows 2000 or above."><![CDATA[NOT Version9X AND (VersionNT>=500)]]></Condition>
     <Binary Id="CustomActions.dll" SourceFile="CustomActions.dll"/>
     <CustomAction Id="UpdateFeatureState" BinaryKey="CustomActions.dll" DllEntry="UpdateFeatureState"/>
