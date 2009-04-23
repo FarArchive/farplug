@@ -103,8 +103,8 @@
         <ComponentRef Id="WhatsNew_ConEmu.txt" />
       </Feature>
       <Feature Id="ConEmuPlugin" Level="2" Title="Plugin" AllowAdvertise="no">
-        <ComponentRef Id="AltEnter.reg" />
-        <ComponentRef Id="AltEnter_ANSI.reg" />
+        <ComponentRef Id="AltEnter_Exec.reg" />
+        <ComponentRef Id="AltEnter_Props.reg" />
         <ComponentRef Id="ConEmu.dll" />
         <ComponentRef Id="ConEmuPlugin_en.lng" />
         <Feature Id="ConEmuPluginRussian" Level="2" Display="hidden" AllowAdvertise="no">
