@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Include>
+  <?ifdef bundle ?>
   <Component Id="AltHistoryHotKey" Guid="9f775923-7ad9-4a79-b0a6-5470507b8cfe">
     <RegistryKey Root="HKCU" Key="Software\Far2\PluginHotkeys\plugins/althistory/AltHistory.dll" Action="createAndRemoveOnUninstall">
       <RegistryValue Name="Hotkey" Value="H" Type="string" KeyPath="yes" />
@@ -96,4 +97,5 @@
       <RegistryValue Name="Description" Value="Standard history: next command" Type="string" />
     </RegistryKey>
   </Component>
+  <?endif?>
 </Include>
