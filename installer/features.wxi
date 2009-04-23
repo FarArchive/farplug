@@ -610,6 +610,22 @@
           <ComponentRef Id="TechInfoRus.txt" />
           <ComponentRef Id="WhatsNewRus.txt" />
         </Feature>
+        <Feature Id="AltHistoryIntegration" Level="2" Title="Integration" AllowAdvertise="no" Description="Replace standard history using keyboard macros">
+          <ComponentRef Id="AltHistoryHotKey" />
+          <ComponentRef Id="AltHistoryShellAltF8" />
+          <ComponentRef Id="AltHistoryShellAltF11" />
+          <ComponentRef Id="AltHistoryShellAltF12" />
+          <ComponentRef Id="AltHistoryShellCtrlE" />
+          <ComponentRef Id="AltHistoryShellCtrlEnd" />
+          <ComponentRef Id="AltHistoryShellCtrlX" />
+          <ComponentRef Id="AltHistoryShellCtrlSpace" />
+          <ComponentRef Id="AltHistoryShellCtrlAltF8" />
+          <ComponentRef Id="AltHistoryShellCtrlAltF11" />
+          <ComponentRef Id="AltHistoryShellCtrlAltF12" />
+          <ComponentRef Id="AltHistoryShellCtrlAltE" />
+          <ComponentRef Id="AltHistoryShellCtrlAltEnd" />
+          <ComponentRef Id="AltHistoryShellCtrlAltX" />
+        </Feature>
       </Feature>
       <Feature Id="AutoComplete" Level="2" Title="AutoComplete" AllowAdvertise="no" Description="Unix-like filename completion">
         <ComponentRef Id="cmpl_new.reg" />

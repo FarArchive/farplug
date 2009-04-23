@@ -8,7 +8,7 @@
     <Property Id="INSTALLDIR">
       <RegistrySearch Id="InstallDir" Root="HKLM" Key="Software\Far2" Name="InstallDir" Type="raw"/>
     </Property>
-    <Property Id="REINSTALLMODE" Value="ams"/>
+    <Property Id="REINSTALLMODE" Value="amus"/>
     <Media Id="1" Cabinet="far.cab" EmbedCab="yes"/>
     <?ifdef bundle ?>
     <Media Id="2" Cabinet="bundle.cab" EmbedCab="yes"/>
@@ -44,6 +44,7 @@
         </Directory>
       </Directory>
       <?include shortcuts.wxi ?>
+      <?include registry.wxi ?>
     </Directory>
     <?include features.wxi ?>
     <Upgrade Id="$(var.UpgradeCode)">
