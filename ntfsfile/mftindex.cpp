@@ -403,6 +403,7 @@ void FilePanel::toggle_mft_mode() {
         update_mft_index_from_usn();
       }
       catch (...) {
+        mft_index.invalidate();
       }
     }
     if (mft_index.size() == 0) create_mft_index();
