@@ -262,6 +262,25 @@ void FilePanel::create_mft_index() {
 }
 
 void FilePanel::update_mft_index_from_usn() {
+  class Progress: public ProgressMonitor {
+  protected:
+    virtual void do_update_ui() {
+      const unsigned c_client_xs = 60;
+      ObjectArray<UnicodeString> lines;
+      unsigned len1 = static_cast<unsigned>(current * c_client_xs / total);
+      if (len1 > c_client_xs) len1 = c_client_xs;
+      unsigned len2 = c_client_xs - len1;
+      lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
+      draw_text_box(far_get_msg(MSG_FILE_PANEL_UPDATE_CACHE_PROGRESS_TITLE), lines, c_client_xs);
+      SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_UPDATE_CACHE_PROGRESS_CONSOLE_TITLE).data(), static_cast<unsigned>(current * 100 / total)).data());
+    }
+  public:
+    u64 current, total;
+    Progress(): ProgressMonitor(true), current(0) {
+    }
+  };
+  Progress progress;
+
   READ_USN_JOURNAL_DATA read_usn_data;
   read_usn_data.StartUsn = mft_index.next_usn;
   read_usn_data.ReasonMask = 0xFFFFFFFF;
@@ -289,11 +308,14 @@ void FilePanel::update_mft_index_from_usn() {
   }
   if (upd_file_refs.size() == 0) return;
 
+  progress.total = upd_file_refs.size();
   std::list<FileRecord> file_list;
   FileInfo file_info;
   file_info.volume = &volume;
   for (std::set<u64>::const_iterator file_index = upd_file_refs.begin(); file_index != upd_file_refs.end(); file_index++) {
     DBG_LOG(UnicodeString::format(L"mft_update_index(): %Lx", *file_index));
+    progress.current++;
+    progress.update_ui();
     if ((*file_index == file_info.load_base_file_rec(*file_index)) && (file_info.base_mft_rec()->base_mft_record == 0)) {
       file_info.process_base_file_rec();
       add_file_records(file_list, file_info);
