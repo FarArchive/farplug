@@ -97,5 +97,31 @@
       <RegistryValue Name="Description" Value="Standard history: next command" Type="string" />
     </RegistryKey>
   </Component>
+  <Component Id="EMenuHotKey" Guid="4148f67e-c346-4031-8eca-d9bac8082fd1">
+    <RegistryKey Root="HKCU" Key="Software\Far2\PluginHotkeys\plugins/emenu/EMenu.dll" Action="createAndRemoveOnUninstall">
+      <RegistryValue Name="Hotkey" Value="E" Type="string" KeyPath="yes" />
+    </RegistryKey>
+  </Component>
+  <Component Id="EMenuSettings" Guid="07b92832-263c-44c1-bfee-da3dfca34550">
+    <RegistryKey Root="HKCU" Key="Software\Far2\Plugins\RightClick" Action="createAndRemoveOnUninstall">
+      <RegistryValue Name="GuiPos" Value="0" Type="integer" KeyPath="yes" />
+      <RegistryValue Name="UseGUI" Value="1" Type="integer" />
+      <RegistryValue Name="WaitToContinue" Value="0" Type="integer" />
+    </RegistryKey>
+  </Component>
+  <Component Id="EMenuShellApps" Guid="10667c79-b40f-492a-a8d4-c6e7f8ce1231">
+    <RegistryKey Root="HKCU" Key="Software\Far2\KeyMacros\Shell\Apps" Action="createAndRemoveOnUninstall">
+      <RegistryValue Name="Sequence" Value="F11 E Enter" Type="string" KeyPath="yes" />
+      <RegistryValue Name="DisableOutput" Value="1" Type="integer" />
+      <RegistryValue Name="Description" Value="Explorer context menu" Type="string" />
+    </RegistryKey>
+  </Component>
+  <Component Id="EMenuShellMsRClick" Guid="4a66cb85-2bdd-4770-ac5d-f5b2989824bf">
+    <RegistryKey Root="HKCU" Key="Software\Far2\KeyMacros\Shell\MsRClick" Action="createAndRemoveOnUninstall">
+      <RegistryValue Name="Sequence" Value="$MMode 1 MsLClick $MMode 1 F11 E Enter" Type="string" KeyPath="yes" />
+      <RegistryValue Name="DisableOutput" Value="1" Type="integer" />
+      <RegistryValue Name="Description" Value="Explorer context menu" Type="string" />
+    </RegistryKey>
+  </Component>
   <?endif?>
 </Include>

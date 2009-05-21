@@ -273,6 +273,12 @@
         <Feature Id="EMenuChangelogs" Level="1" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="changelog_9" />
         </Feature>
+        <Feature Id="EMenuIntegration" Level="2" Title="Integration" AllowAdvertise="no" Description="Invoke GUI context menu with right click or Apps key">
+          <ComponentRef Id="EMenuHotKey" />
+          <ComponentRef Id="EMenuSettings" />
+          <ComponentRef Id="EMenuShellApps" />
+          <ComponentRef Id="EMenuShellMsRClick" />
+        </Feature>
       </Feature>
       <Feature Id="FARCmds" Level="1" Title="FARCmds" AllowAdvertise="no" Description="Advanced commands">
         <ComponentRef Id="FARCmds.dll" />
