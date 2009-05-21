@@ -1801,6 +1801,18 @@
         <File Id="file_id.diz_20" Name="file_id.diz" KeyPath="yes" Source="$(var.bundle)\airbrush\file_id.diz" DiskId="2" />
       </Component>
       <Directory Id="Formats_2" Name="Formats">
+        <Component Id="armgnuasm.fmt" Guid="3A32EADD-4884-4E29-93A8-E7C1E0F6F3E5">
+          <File Id="armgnuasm.fmt" Name="armgnuasm.fmt" KeyPath="yes" Source="$(var.bundle)\airbrush\Formats\armgnuasm.fmt" DiskId="2" />
+        </Component>
+        <Component Id="armgnuasm.map" Guid="DBE270F8-09BA-4B7F-9D78-F13307511BC0">
+          <File Id="armgnuasm.map" Name="armgnuasm.map" KeyPath="yes" Source="$(var.bundle)\airbrush\Formats\armgnuasm.map" DiskId="2" />
+        </Component>
+        <Component Id="awk.fmt" Guid="3987D032-9562-4705-8852-78D518C954D3">
+          <File Id="awk.fmt" Name="awk.fmt" KeyPath="yes" Source="$(var.bundle)\airbrush\Formats\awk.fmt" DiskId="2" />
+        </Component>
+        <Component Id="awk.map" Guid="FF5602CD-4D3D-44D3-8899-C0CC942F48CF">
+          <File Id="awk.map" Name="awk.map" KeyPath="yes" Source="$(var.bundle)\airbrush\Formats\awk.map" DiskId="2" />
+        </Component>
         <Component Id="c.fmt" Guid="979BEFA8-302F-4609-B925-FAA28EF22D9F">
           <File Id="c.fmt" Name="c.fmt" KeyPath="yes" Source="$(var.bundle)\airbrush\Formats\c.fmt" DiskId="2" />
         </Component>

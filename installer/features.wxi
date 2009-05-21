@@ -539,6 +539,18 @@
         <Feature Id="airbrushFExcept" Level="2" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="airbrush.map" />
         </Feature>
+        <Feature Id="armgnuasm.fmt" Level="2" Title="armgnuasm" AllowAdvertise="no" Description="ARM assembler (GNU style)">
+          <ComponentRef Id="armgnuasm.fmt" />
+          <Feature Id="armgnuasm.fmtFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="armgnuasm.map" />
+          </Feature>
+        </Feature>
+        <Feature Id="awk.fmt" Level="2" Title="awk" AllowAdvertise="no">
+          <ComponentRef Id="awk.fmt" />
+          <Feature Id="awk.fmtFExcept" Level="2" Display="hidden" AllowAdvertise="no">
+            <ComponentRef Id="awk.map" />
+          </Feature>
+        </Feature>
         <Feature Id="c.fmt" Level="2" Title="c/c++" AllowAdvertise="no">
           <ComponentRef Id="c.fmt" />
           <Feature Id="c.fmtFExcept" Level="2" Display="hidden" AllowAdvertise="no">

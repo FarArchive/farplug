@@ -123,6 +123,8 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("ConEmuPlugin", "Russian");
   UPDATE_FEATURE("ConMan", "Russian");
   UPDATE_FEATURE("airbrush", "FExcept");
+  UPDATE_FEATURE("armgnuasm.fmt", "FExcept");
+  UPDATE_FEATURE("awk.fmt", "FExcept");
   UPDATE_FEATURE("c.fmt", "FExcept");
   UPDATE_FEATURE("html.fmt", "FExcept");
   UPDATE_FEATURE("pas.fmt", "FExcept");
