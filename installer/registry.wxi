@@ -97,6 +97,7 @@
       <RegistryValue Name="Description" Value="Standard history: next command" Type="string" />
     </RegistryKey>
   </Component>
+  <?endif?>
   <Component Id="EMenuHotKey" Guid="4148f67e-c346-4031-8eca-d9bac8082fd1">
     <RegistryKey Root="HKCU" Key="Software\Far2\PluginHotkeys\plugins/emenu/EMenu.dll" Action="createAndRemoveOnUninstall">
       <RegistryValue Name="Hotkey" Value="E" Type="string" KeyPath="yes" />
@@ -123,5 +124,4 @@
       <RegistryValue Name="Description" Value="Explorer context menu" Type="string" />
     </RegistryKey>
   </Component>
-  <?endif?>
 </Include>
