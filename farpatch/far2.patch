@@ -1,6 +1,6 @@
 diff -ruN fardev/build.mak fardev-patched/build.mak
 --- fardev/build.mak	1970-01-01 02:00:00.000000000 +0200
-+++ fardev-patched/build.mak	2009-04-10 04:29:40.125000000 +0300
++++ fardev-patched/build.mak	2009-05-28 00:54:29.421250000 +0300
 @@ -0,0 +1,13 @@
 +all:
 +  cd unicode_far
@@ -17,7 +17,7 @@ diff -ruN fardev/build.mak fardev-patched/build.mak
 +  unicode_far\tools\m4 -P -I unicode_far installer\installer.mak.m4 > installer.mak
 diff -ruN fardev/docs/ClearPluginsCache.bat fardev-patched/docs/ClearPluginsCache.bat
 --- fardev/docs/ClearPluginsCache.bat	2007-10-27 17:22:24.199038000 +0300
-+++ fardev-patched/docs/ClearPluginsCache.bat	2009-04-10 04:29:40.140625000 +0300
++++ fardev-patched/docs/ClearPluginsCache.bat	2009-05-28 00:54:29.436875000 +0300
 @@ -1,7 +1,4 @@
  @echo off
  rem This batch file cleared the Plugin Cache
@@ -29,7 +29,7 @@ diff -ruN fardev/docs/ClearPluginsCache.bat fardev-patched/docs/ClearPluginsCach
 +reg delete HKCU\Software\Far2\PluginsCache /f
 diff -ruN fardev/docs/RestoreSettings.bat fardev-patched/docs/RestoreSettings.bat
 --- fardev/docs/RestoreSettings.bat	2007-10-27 17:22:24.199038000 +0300
-+++ fardev-patched/docs/RestoreSettings.bat	2009-04-10 04:29:40.156250000 +0300
++++ fardev-patched/docs/RestoreSettings.bat	2009-05-28 00:54:29.436875000 +0300
 @@ -2,17 +2,13 @@
  rem    This batch file restores Far settings from previously saved
  rem    files FarSave1.reg and FarSave2.reg to the registry
@@ -57,7 +57,7 @@ diff -ruN fardev/docs/RestoreSettings.bat fardev-patched/docs/RestoreSettings.ba
 +:end
 diff -ruN fardev/docs/SaveSettings.bat fardev-patched/docs/SaveSettings.bat
 --- fardev/docs/SaveSettings.bat	2007-10-27 17:22:24.199038000 +0300
-+++ fardev-patched/docs/SaveSettings.bat	2009-04-10 04:29:40.156250000 +0300
++++ fardev-patched/docs/SaveSettings.bat	2009-05-28 00:54:29.436875000 +0300
 @@ -2,5 +2,5 @@
  rem    This batch file saves Far settings from the registry
  rem    to files FarSave1.reg and FarSave2.reg
@@ -68,7 +68,7 @@ diff -ruN fardev/docs/SaveSettings.bat fardev-patched/docs/SaveSettings.bat
 +reg export HKLM\Software\Far2 FarSave2.reg
 diff -ruN fardev/plugins/makefile_vc_def_inc fardev-patched/plugins/makefile_vc_def_inc
 --- fardev/plugins/makefile_vc_def_inc	2009-01-12 16:40:22.552676000 +0200
-+++ fardev-patched/plugins/makefile_vc_def_inc	2009-04-10 04:29:40.156250000 +0300
++++ fardev-patched/plugins/makefile_vc_def_inc	2009-05-28 00:54:29.436875000 +0300
 @@ -127,27 +127,27 @@
  NOWIN98=/OPT:NOWIN98
  !endif
@@ -121,7 +121,7 @@ diff -ruN fardev/plugins/makefile_vc_def_inc fardev-patched/plugins/makefile_vc_
  CPP_DEBUG=/Z7
 diff -ruN fardev/plugins/tmppanel/TmpClass.cpp fardev-patched/plugins/tmppanel/TmpClass.cpp
 --- fardev/plugins/tmppanel/TmpClass.cpp	2009-04-08 02:40:49.545164000 +0300
-+++ fardev-patched/plugins/tmppanel/TmpClass.cpp	2009-04-10 04:29:40.156250000 +0300
++++ fardev-patched/plugins/tmppanel/TmpClass.cpp	2009-05-28 00:54:29.436875000 +0300
 @@ -153,6 +153,17 @@
  #undef _NAME
  }
@@ -172,7 +172,7 @@ diff -ruN fardev/plugins/tmppanel/TmpClass.cpp fardev-patched/plugins/tmppanel/T
    }
 diff -ruN fardev/plugins/tmppanel/TmpMix.cpp fardev-patched/plugins/tmppanel/TmpMix.cpp
 --- fardev/plugins/tmppanel/TmpMix.cpp	2009-02-24 01:24:39.118043000 +0200
-+++ fardev-patched/plugins/tmppanel/TmpMix.cpp	2009-04-10 04:29:40.156250000 +0300
++++ fardev-patched/plugins/tmppanel/TmpMix.cpp	2009-05-28 00:54:29.436875000 +0300
 @@ -49,10 +49,10 @@
  #ifdef UNICODE
        if (Items[I].FindData.lpwszFileName)
@@ -187,9 +187,9 @@ diff -ruN fardev/plugins/tmppanel/TmpMix.cpp fardev-patched/plugins/tmppanel/Tmp
      }
      free (Items);
 diff -ruN fardev/unicode_far/filelist.cpp fardev-patched/unicode_far/filelist.cpp
---- fardev/unicode_far/filelist.cpp	2009-04-07 19:05:52.411125000 +0300
-+++ fardev-patched/unicode_far/filelist.cpp	2009-04-10 04:24:38.578125000 +0300
-@@ -859,7 +859,7 @@
+--- fardev/unicode_far/filelist.cpp	2009-05-27 18:55:10.296166000 +0300
++++ fardev-patched/unicode_far/filelist.cpp	2009-05-28 00:54:29.452500000 +0300
+@@ -891,7 +891,7 @@
              {
                CtrlObject->Plugins.GetOpenPluginInfo(hPlugin,&Info);
              }
@@ -198,7 +198,7 @@ diff -ruN fardev/unicode_far/filelist.cpp fardev-patched/unicode_far/filelist.cp
                CreateFullPathName(CurPtr->strName,CurPtr->strShortName,CurPtr->FileAttr, strFileName, Key==KEY_CTRLALTF);
              else
              {
-@@ -3383,7 +3383,7 @@
+@@ -3429,7 +3429,7 @@
      if(FillPathName)
      {
  
@@ -208,9 +208,73 @@ diff -ruN fardev/unicode_far/filelist.cpp fardev-patched/unicode_far/filelist.cp
          /* $ 14.02.2002 IS
             ".." в текущем каталоге обработаем как имя текущего каталога
 diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cpp
---- fardev/unicode_far/findfile.cpp	2009-04-07 19:05:52.411125000 +0300
-+++ fardev-patched/unicode_far/findfile.cpp	2009-04-10 04:29:40.171875000 +0300
-@@ -969,8 +969,8 @@
+--- fardev/unicode_far/findfile.cpp	2009-05-27 21:05:18.219657000 +0300
++++ fardev-patched/unicode_far/findfile.cpp	2009-05-28 01:22:19.093125000 +0300
+@@ -560,44 +560,36 @@
+ 
+ void SetPluginDirectory(const wchar_t *DirName,HANDLE hPlugin,bool UpdatePanel=false)
+ {
+-  /* $ 19.01.2003 KM
+-     Восстановлю поведение до 4 беты. Если в DirName есть
+-     символ '\x1' значит это путь из плагина. Таким образом
+-     легче определить плагиновые пути и, соответственно,
+-     сделать правильный переход.
+-  */
+ 	if(DirName && *DirName)
+ 	{
+-		wchar_t PathSeparator=L'\\';
+-		string strName = DirName;
+-		if(strName.Contains(L'\x1'))
+-			PathSeparator=L'\x1';
+-		LPWSTR StartName=strName.GetBuffer(),EndName;
+-		while((EndName=wcschr(StartName,PathSeparator))!=NULL)
++		string strName(DirName);
++		wchar_t* DirPtr = strName.GetBuffer();
++		wchar_t* NamePtr = (wchar_t*) PointToName(DirPtr);
++		if (NamePtr != DirPtr)
+ 		{
+-			*EndName=0;
+-			// RereadPlugin
++			*(NamePtr-1) = 0;
++
++			if (*DirPtr)
++				CtrlObject->Plugins.SetDirectory(hPlugin,DirPtr,0);
++			else
+ 			{
+-				int FileCount=0;
+-				PluginPanelItem *PanelData=NULL;
+-				if(CtrlObject->Plugins.GetFindData(hPlugin,&PanelData,&FileCount,OPM_FIND))
+-				{
+-					CtrlObject->Plugins.FreeFindData(hPlugin,PanelData,FileCount);
+-				}
++				// change to root directory only if not already there
++				// otherwise plugin may close
++				struct OpenPluginInfo Info;
++				CtrlObject->Cp()->ActivePanel->GetOpenPluginInfo(&Info);
++				if (wcscmp(Info.CurDir, L"\\") != 0)
++					CtrlObject->Plugins.SetDirectory(hPlugin,L"\\",0);
+ 			}
+-			CtrlObject->Plugins.SetDirectory(hPlugin,StartName,OPM_FIND);
+-			StartName=EndName+1;
+ 		}
++
+ 		// Отрисуем панель при необходимости.
+-		if(UpdatePanel)
++		if (UpdatePanel)
+ 		{
+ 			CtrlObject->Cp()->ActivePanel->Update(UPDATE_KEEP_SELECTION);
+-			if(!CtrlObject->Cp()->ActivePanel->GoToFile(StartName))
+-			{
+-				CtrlObject->Cp()->ActivePanel->GoToFile(DirName);
+-			}
++			CtrlObject->Cp()->ActivePanel->GoToFile(NamePtr);
+ 			CtrlObject->Cp()->ActivePanel->Show();
+ 		}
++
+ 		//strName.ReleaseBuffer(); Не надо. Строка все ровно удаляется, лишний вызов StrLength.
+ 	}
+ }
+@@ -930,8 +922,8 @@
    wchar_t *lpFileName = xf_wcsdup (PanelItem->FindData.lpwszFileName);
    wchar_t *lpFileNameShort = xf_wcsdup (PanelItem->FindData.lpwszAlternateFileName);
  
@@ -221,7 +285,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
  
    if ( CtrlObject->Plugins.GetFindData (
        hPlugin,
-@@ -985,11 +985,11 @@
+@@ -946,11 +938,11 @@
        PluginPanelItem Item = *pItem;
  
        wchar_t *lpwszFileName = xf_wcsdup(NullToEmpty(pItem->FindData.lpwszFileName));
@@ -235,96 +299,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
        xf_free (lpwszFileName);
  
        if ( !StrCmp (lpFileNameToFind, Item.FindData.lpwszFileName) &&
-@@ -1105,7 +1105,7 @@
-       if(Param2 == KEY_LEFT || Param2 == KEY_RIGHT || Param2 == KEY_NUMPAD4 || Param2 == KEY_NUMPAD6)
-         FindPositionChanged = TRUE;
- 
--      // некторые спец.клавиши всеже отбработаем.
-+      // Некоторые спец.клавиши все-же обработаем.
-       if(Param2 == KEY_CTRLALTSHIFTPRESS || Param2 == KEY_ALTF9)
-       {
-         IsProcessAssignMacroKey--;
-@@ -1760,8 +1760,7 @@
-       string strFileName=FindList[FindExitIndex]->FindData.strFileName;
-       Panel *FindPanel=CtrlObject->Cp()->ActivePanel;
- 
--      if ((FindList[FindExitIndex]->ArcIndex != LIST_INDEX_NONE) &&
--          (!(ArcList[FindList[FindExitIndex]->ArcIndex]->Flags & OPIF_REALNAMES)))
-+      if (FindList[FindExitIndex]->ArcIndex != LIST_INDEX_NONE)
-       {
-         HANDLE hPlugin = ArcList[FindList[FindExitIndex]->ArcIndex]->hPlugin;
-         if (hPlugin == INVALID_HANDLE_VALUE)
-@@ -1792,7 +1791,7 @@
-               SearchMode==FFSEARCH_ALL ||
-               SearchMode==FFSEARCH_ALL_BUTNETWORK ||
-               SearchMode==FFSEARCH_INPATH)
--            CtrlObject->Plugins.SetDirectory(hPlugin,L"\\",OPM_FIND);
-+            CtrlObject->Plugins.SetDirectory(hPlugin,L"\\",0);
- 
-           SetPluginDirectory(strFileName,hPlugin,TRUE);
-         }
-@@ -1863,43 +1862,32 @@
- 
- void FindFiles::SetPluginDirectory(const wchar_t *DirName,HANDLE hPlugin,int UpdatePanel)
- {
--  string strName;
--  wchar_t *StartName,*EndName;
--  int IsPluginDir;
--
--  /* $ 19.01.2003 KM
--     Восстановлю поведение до 4 беты. Если в DirName есть
--     символ '\x1' значит это путь из плагина. Таким образом
--     легче определить плагиновые пути и, соответственно,
--     сделать правильный переход.
--  */
--  strName = DirName;
--  if ( strName.GetLength() > 0 )
--    IsPluginDir=strName.Contains(L'\x1')?TRUE:FALSE;
--  else
--    IsPluginDir=FALSE;
--
--  StartName = strName.GetBuffer();
--  while(IsPluginDir?(EndName=wcschr(StartName,L'\x1'))!=NULL:(EndName=wcschr(StartName,L'\\'))!=NULL)
-+  string strName(DirName);
-+  wchar_t* DirPtr = strName.GetBuffer();
-+  wchar_t* NamePtr = (wchar_t*) PointToName(DirPtr);
-+  if (NamePtr != DirPtr)
-   {
--    *EndName=0;
--    // RereadPlugin
-+    *(NamePtr-1) = 0;
-+
-+    if (*DirPtr)
-+      CtrlObject->Plugins.SetDirectory(hPlugin,DirPtr,0);
-+    else
-     {
--      int FileCount=0;
--      PluginPanelItem *PanelData=NULL;
--      if (CtrlObject->Plugins.GetFindData(hPlugin,&PanelData,&FileCount,OPM_FIND))
--        CtrlObject->Plugins.FreeFindData(hPlugin,PanelData,FileCount);
-+      // change to root directory only if not already there
-+      // otherwise plugin may close
-+      struct OpenPluginInfo Info;
-+      CtrlObject->Cp()->ActivePanel->GetOpenPluginInfo(&Info);
-+      if (wcscmp(Info.CurDir, L"\\") != 0) { 
-+        CtrlObject->Plugins.SetDirectory(hPlugin,L"\\",0);
-+      }
-     }
--    CtrlObject->Plugins.SetDirectory(hPlugin,StartName,OPM_FIND);
--    StartName=EndName+1;
-   }
- 
-   //   Отрисуем панель при необходимости.
-   if (UpdatePanel)
-   {
-     CtrlObject->Cp()->ActivePanel->Update(UPDATE_KEEP_SELECTION);
--    if (!CtrlObject->Cp()->ActivePanel->GoToFile(StartName))
--      CtrlObject->Cp()->ActivePanel->GoToFile(DirName);
-+    CtrlObject->Cp()->ActivePanel->GoToFile(NamePtr);
-     CtrlObject->Cp()->ActivePanel->Show();
-   }
- 
-@@ -2207,21 +2195,28 @@
+@@ -1315,21 +1307,28 @@
          break;
        string strSearchFileName;
        int RemoveTemp=FALSE;
@@ -365,7 +340,35 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
        }
        else
        {
-@@ -2356,8 +2351,6 @@
+@@ -1424,7 +1423,7 @@
+       if(Param2 == KEY_LEFT || Param2 == KEY_RIGHT || Param2 == KEY_NUMPAD4 || Param2 == KEY_NUMPAD6)
+         FindPositionChanged = TRUE;
+ 
+-      // некторые спец.клавиши всеже отбработаем.
++      // Некоторые спец.клавиши все-же обработаем.
+       if(Param2 == KEY_CTRLALTSHIFTPRESS || Param2 == KEY_ALTF9)
+       {
+         IsProcessAssignMacroKey--;
+@@ -2083,8 +2082,7 @@
+ 					string strFileName=FindList[FindExitIndex]->FindData.strFileName;
+ 					Panel *FindPanel=CtrlObject->Cp()->ActivePanel;
+ 
+-					if ((FindList[FindExitIndex]->ArcIndex != LIST_INDEX_NONE) &&
+-							(!(ArcList[FindList[FindExitIndex]->ArcIndex]->Flags & OPIF_REALNAMES)))
++					if (FindList[FindExitIndex]->ArcIndex != LIST_INDEX_NONE)
+ 					{
+ 						HANDLE hPlugin = ArcList[FindList[FindExitIndex]->ArcIndex]->hPlugin;
+ 						if (hPlugin == INVALID_HANDLE_VALUE)
+@@ -2113,7 +2111,7 @@
+ 									SearchMode==FFSEARCH_ALL ||
+ 									SearchMode==FFSEARCH_ALL_BUTNETWORK ||
+ 									SearchMode==FFSEARCH_INPATH)
+-								CtrlObject->Plugins.SetDirectory(hPlugin,L"\\",OPM_FIND);
++								CtrlObject->Plugins.SetDirectory(hPlugin,L"\\",0);
+ 
+ 							SetPluginDirectory(strFileName,hPlugin,TRUE);
+ 						}
+@@ -2619,8 +2617,6 @@
    string strPathName;
    strPathName = FullName;
  
@@ -374,7 +377,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
    CutToSlash(strPathName);
  
    if ( strPathName.IsEmpty() )
-@@ -2764,7 +2757,8 @@
+@@ -2738,7 +2734,8 @@
      struct OpenPluginInfo Info;
      CtrlObject->Plugins.GetOpenPluginInfo(hPlugin,&Info);
      strSaveDir = Info.CurDir;
@@ -384,7 +387,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
      WaitForSingleObject(hPluginMutex,INFINITE);
      if (SearchMode==FFSEARCH_ROOT ||
          SearchMode==FFSEARCH_ALL ||
-@@ -2850,15 +2844,9 @@
+@@ -2827,15 +2824,9 @@
        string strFullName;
        if (StrCmp(strCurName,L".")==0 || TestParentFolderName(strCurName))
          continue;
@@ -403,7 +406,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
  
        /* $ 30.09.2003 KM
          Отфильтруем файлы не попадающие в действующий фильтр
-@@ -2874,7 +2862,6 @@
+@@ -2851,7 +2842,6 @@
            statusCS.Enter();
  
            strFindMessage = strFullName;
@@ -411,7 +414,7 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
            FindMessageReady=TRUE;
  
            statusCS.Leave();
-@@ -2904,28 +2891,29 @@
+@@ -2881,28 +2871,29 @@
          WaitForSingleObject(hPluginMutex,INFINITE);
  
  				size_t pos;
@@ -422,9 +425,10 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
  
            strPluginSearchPath += strCurName;
 -          strPluginSearchPath += L"\x1";
-+          strPluginSearchPath += L"\\";
-           ScanPluginTree(hPlugin, Flags);
+-          ScanPluginTree(hDlg,hPlugin, Flags);
 -          if (strPluginSearchPath.RPos(pos,L'\x1'))
++          strPluginSearchPath += L"\\";
++          ScanPluginTree(hDlg, hPlugin, Flags);
 +          if (strPluginSearchPath.RPos(pos,L'\\'))
              strPluginSearchPath.SetLength(pos);
 +          if (strPluginSearchPath.RPos(pos,L'\\'))
@@ -454,47 +458,18 @@ diff -ruN fardev/unicode_far/findfile.cpp fardev-patched/unicode_far/findfile.cp
      }
    }
    CtrlObject->Plugins.FreeFindData(hPlugin,PanelData,ItemCount);
-@@ -3179,24 +3167,3 @@
- 
-   return strSearchFromRoot;
- }
--
--wchar_t *FindFiles::RemovePseudoBackSlash(wchar_t *FileName)
--{
--	for (int i=0;FileName[i]!=0;i++)
--	{
--		if (FileName[i]==L'\x1')
--			FileName[i]=L'\\';
--	}
--	return FileName;
--}
--
--string &FindFiles::RemovePseudoBackSlash(string &strFileName)
--{
--	wchar_t *lpwszFileName = strFileName.GetBuffer ();
--
--	RemovePseudoBackSlash (lpwszFileName);
--
--	strFileName.ReleaseBuffer ();
--
--	return strFileName;
--}
-diff -ruN fardev/unicode_far/findfile.hpp fardev-patched/unicode_far/findfile.hpp
---- fardev/unicode_far/findfile.hpp	2008-12-27 17:00:42.004272000 +0200
-+++ fardev-patched/unicode_far/findfile.hpp	2009-04-10 04:29:40.203125000 +0300
-@@ -96,8 +96,6 @@
-     static int GetPluginFile(DWORD ArcIndex, struct PluginPanelItem *PanelItem,
-                              const wchar_t *DestPath, string &strResultName);
-     static string &PrepareDriveNameStr(string &strSearchFromRoot,size_t sz);
--    static wchar_t *RemovePseudoBackSlash(wchar_t *FileName);
--    static string &RemovePseudoBackSlash(string &strFileName);
- 
-   public:
- 
 diff -ruN fardev/unicode_far/flupdate.cpp fardev-patched/unicode_far/flupdate.cpp
---- fardev/unicode_far/flupdate.cpp	2009-04-08 18:17:15.926046000 +0300
-+++ fardev-patched/unicode_far/flupdate.cpp	2009-04-10 04:29:40.203125000 +0300
-@@ -728,10 +728,6 @@
+--- fardev/unicode_far/flupdate.cpp	2009-05-24 16:47:07.418109000 +0300
++++ fardev-patched/unicode_far/flupdate.cpp	2009-05-28 01:29:58.249375000 +0300
+@@ -267,6 +267,7 @@
+ 	bool bDotSeen=false, bTwoDotsSeen=false;
+ 	bool bCurDirRoot=IsLocalRootPath(strCurDir)?true:false;
+ 
++	if (!Done)
+ 	{
+ 		string strTemp(NTPath(strCurDir).Str);
+ 		DWORD dw;
+@@ -771,10 +772,6 @@
  
      //memset(CurListData,0,sizeof(*CurListData));
      PluginToFileListItem(CurPanelData,CurListData);
@@ -506,9 +481,9 @@ diff -ruN fardev/unicode_far/flupdate.cpp fardev-patched/unicode_far/flupdate.cp
  
      if ((Info.Flags & OPIF_USESORTGROUPS)/* && (CurListData->FileAttr & FILE_ATTRIBUTE_DIRECTORY)==0*/)
 diff -ruN fardev/unicode_far/makefile_vc fardev-patched/unicode_far/makefile_vc
---- fardev/unicode_far/makefile_vc	2009-03-28 16:37:58.836909000 +0200
-+++ fardev-patched/unicode_far/makefile_vc	2009-04-10 04:29:40.218750000 +0300
-@@ -282,25 +282,25 @@
+--- fardev/unicode_far/makefile_vc	2009-05-24 16:47:07.418109000 +0300
++++ fardev-patched/unicode_far/makefile_vc	2009-05-28 00:54:29.468125000 +0300
+@@ -289,25 +289,25 @@
  	/D "_CRT_NONSTDC_NO_DEPRECATE"\
  	/D "_CRT_NON_CONFORMING_SWPRINTFS"
  
@@ -540,7 +515,7 @@ diff -ruN fardev/unicode_far/makefile_vc fardev-patched/unicode_far/makefile_vc
  ULINK_FLAGS=-Tpe+
  
  !elseif "$(OUTDIR)" == "Release.IA64.vc"
-@@ -308,14 +308,14 @@
+@@ -315,14 +315,14 @@
  USEDEBUG=NDEBUG
  
  CPP_PROJ=$(CPP_PROJ_COMMON) $(CPP_PROJ_RELEASE) /GS- /GR- /Zp8
@@ -557,7 +532,7 @@ diff -ruN fardev/unicode_far/makefile_vc fardev-patched/unicode_far/makefile_vc
  ULINK_FLAGS=-Tpe+ -v
  
  !elseif "$(OUTDIR)" == "Debug.IA64.vc"
-@@ -323,14 +323,14 @@
+@@ -330,14 +330,14 @@
  USEDEBUG=_DEBUG
  
  CPP_PROJ=$(CPP_PROJ_COMMON) $(CPP_PROJ_DEBUG) /GS- /GR-
