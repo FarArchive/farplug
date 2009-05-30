@@ -3,8 +3,8 @@
   <Component Id="changelog_1" Guid="ADF29786-9420-4C48-8AF7-BF859575E2F1">
     <File Id="changelog_1" Name="changelog" KeyPath="yes" Source="unicode_far\changelog" />
   </Component>
-  <Component Id="ClearPluginsCache.bat" Guid="3B8C9811-B7BB-4A1F-919B-5B108D5F104E">
-    <File Id="ClearPluginsCache.bat" Name="ClearPluginsCache.bat" KeyPath="yes" Source="docs\ClearPluginsCache.bat" />
+  <Component Id="ClearPluginsCache.cmd" Guid="FE75F105-C37F-4873-88AB-9A6AD3D44C40">
+    <File Id="ClearPluginsCache.cmd" Name="ClearPluginsCache.cmd" KeyPath="yes" Source="docs\ClearPluginsCache.cmd" />
   </Component>
   <Component Id="demangle.dll" Guid="1190DBF4-4F0A-4BC6-832C-6E51A798D052">
     <File Id="demangle$(var.Suffix).dll" Name="demangle$(var.Suffix).dll" KeyPath="yes" Source="misc\fexcept\final.$(var.Suffix)W.vc\demangle$(var.Suffix).dll" />
@@ -60,11 +60,11 @@
   <Component Id="README_RU" Guid="D1DCD1E9-E12A-4CCC-B2DA-561D7FFFE6CF">
     <File Id="README_RU" Name="README-RU" KeyPath="yes" Source="unicode_far\README-RU" />
   </Component>
-  <Component Id="RestoreSettings.bat" Guid="619248C3-0E3A-4DA8-A12C-931A48A19560">
-    <File Id="RestoreSettings.bat" Name="RestoreSettings.bat" KeyPath="yes" Source="docs\RestoreSettings.bat" />
+  <Component Id="RestoreSettings.cmd" Guid="ABC2E21E-A416-44F2-8445-DBD72B1589F5">
+    <File Id="RestoreSettings.cmd" Name="RestoreSettings.cmd" KeyPath="yes" Source="docs\RestoreSettings.cmd" />
   </Component>
-  <Component Id="SaveSettings.bat" Guid="5E825C9F-ADDA-4B51-AF00-5AF2350711A3">
-    <File Id="SaveSettings.bat" Name="SaveSettings.bat" KeyPath="yes" Source="docs\SaveSettings.bat" />
+  <Component Id="SaveSettings.cmd" Guid="ED8C5DFA-7BB1-4883-AFEA-D2AF966E207F">
+    <File Id="SaveSettings.cmd" Name="SaveSettings.cmd" KeyPath="yes" Source="docs\SaveSettings.cmd" />
   </Component>
   <?ifdef bundle ?>
   <Component Id="ConEmu.exe" Guid="CFC879BD-2BCB-4B72-B6E1-D63CC6EB910B">

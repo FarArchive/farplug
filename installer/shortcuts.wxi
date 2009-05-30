@@ -10,9 +10,9 @@
       </Component>
       <Directory Id="Scripts" Name="Scripts">
         <Component Id="Scripts" Guid="cecaeb40-1824-4959-8b01-598e0185ada3">
-          <Shortcut Id="SaveSettings" Name="Save settings" Target="[INSTALLDIR]\SaveSettings.bat" WorkingDirectory="INSTALLDIR"/>
-          <Shortcut Id="RestoreSettings" Name="Restore settings" Target="[INSTALLDIR]\RestoreSettings.bat" WorkingDirectory="INSTALLDIR"/>
-          <Shortcut Id="ClearPluginsCache" Name="Clear plugins cache" Target="[INSTALLDIR]\ClearPluginsCache.bat" WorkingDirectory="INSTALLDIR"/>
+          <Shortcut Id="SaveSettings" Name="Save settings" Target="[INSTALLDIR]\SaveSettings.cmd" WorkingDirectory="INSTALLDIR"/>
+          <Shortcut Id="RestoreSettings" Name="Restore settings" Target="[INSTALLDIR]\RestoreSettings.cmd" WorkingDirectory="INSTALLDIR"/>
+          <Shortcut Id="ClearPluginsCache" Name="Clear plugins cache" Target="[INSTALLDIR]\ClearPluginsCache.cmd" WorkingDirectory="INSTALLDIR"/>
         </Component>
       </Directory>
       <?ifdef bundle ?>
