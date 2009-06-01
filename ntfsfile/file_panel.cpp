@@ -706,6 +706,7 @@ private:
   int cache_dir_lbl_id;
   int cache_dir_ctrl_id;
   int flat_mode_auto_off_ctrl_id;
+  int use_std_sort_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -729,6 +730,7 @@ private:
       dlg->mode.backward_mft_scan = dlg->get_check(dlg->backward_mft_scan_ctrl_id);
       dlg->mode.cache_dir = dlg->get_text(dlg->cache_dir_ctrl_id);
       dlg->mode.flat_mode_auto_off = dlg->get_check(dlg->flat_mode_auto_off_ctrl_id);
+      dlg->mode.use_std_sort = dlg->get_check(dlg->use_std_sort_ctrl_id);
     }
     else if ((msg == DN_BTNCLICK) && (param1 == dlg->show_streams_ctrl_id)) {
       dlg->enable(dlg->show_main_stream_ctrl_id, param2 != 0);
@@ -799,13 +801,19 @@ public:
     }
     sort_mode_ctrl_id = combo_box(items, mode.custom_sort_mode, 30, max_size + 1, DIF_DROPDOWNLIST);
     new_line();
-    use_highlighting_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_HIGHLIGHTING), mode.use_highlighting);
-    new_line();
     default_mft_mode_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_DEFAULT_MFT_MODE), mode.default_mft_mode);
     spacer(2);
     backward_mft_scan_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_BACKWARD_MFT_SCAN), mode.backward_mft_scan);
     new_line();
+    separator();
+    new_line();
+    label(far_get_msg(MSG_FILE_PANEL_FLAT_MODE_PARAMS));
+    new_line();
     flat_mode_auto_off_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_FLAT_MODE_AUTO_OFF), mode.flat_mode_auto_off);
+    new_line();
+    use_highlighting_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_HIGHLIGHTING), mode.use_highlighting);
+    new_line();
+    use_std_sort_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_STD_SORT), mode.use_std_sort);
     new_line();
     separator();
     new_line();

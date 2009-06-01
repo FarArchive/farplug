@@ -1343,7 +1343,8 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
 }
 
 int WINAPI FAR_EXPORT(Compare)(HANDLE hPlugin, const struct PluginPanelItem *Item1, const struct PluginPanelItem *Item2, unsigned int Mode) {
-  if (Mode == SM_NAME) return FAR_STRCMP(FAR_FILE_NAME(Item1->FindData), FAR_FILE_NAME(Item2->FindData));
+  FilePanel* panel = (FilePanel*) hPlugin;
+  if (!g_file_panel_mode.use_std_sort && panel->flat_mode && (Mode == SM_NAME)) return FAR_STRCMP(FAR_FILE_NAME(Item1->FindData), FAR_FILE_NAME(Item2->FindData));
   else return -2;
 }
 

@@ -161,6 +161,7 @@ void load_plugin_options() {
   g_file_panel_mode.backward_mft_scan = get_bool_option(L"FilePanelBackwardMftScan", true);
   g_file_panel_mode.cache_dir = get_str_option(L"FilePanelCacheDir", L"%TEMP%");
   g_file_panel_mode.flat_mode_auto_off = get_bool_option(L"FilePanelFlatModeAutoOff", false);
+  g_file_panel_mode.use_std_sort = get_bool_option(L"FilePanelUseStdSort", false);
 };
 
 void store_plugin_options() {
@@ -188,4 +189,5 @@ void store_plugin_options() {
   set_bool_option(L"FilePanelBackwardMftScan", g_file_panel_mode.backward_mft_scan);
   set_str_option(L"FilePanelCacheDir", g_file_panel_mode.cache_dir);
   set_bool_option(L"FilePanelFlatModeAutoOff", g_file_panel_mode.flat_mode_auto_off);
+  set_bool_option(L"FilePanelUseStdSort", g_file_panel_mode.use_std_sort);
 }

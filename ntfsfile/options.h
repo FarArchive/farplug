@@ -28,6 +28,7 @@ struct FilePanelMode {
   bool default_mft_mode;
   bool backward_mft_scan;
   bool flat_mode_auto_off;
+  bool use_std_sort;
   UnicodeString cache_dir;
 };
 
