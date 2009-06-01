@@ -102,7 +102,9 @@ FilePanel* FilePanel::open() {
       panel->current_dir = FARSTR_TO_UNICODE(panel->saved_state.directory);
       panel->toggle_mft_mode();
     }
-    panel->change_directory(FARSTR_TO_UNICODE(panel->saved_state.directory), false);
+    else {
+      panel->change_directory(FARSTR_TO_UNICODE(panel->saved_state.directory), false);
+    }
     // signal to restore selection & current item after panel is created
     DWORD key = KEY_F24 | KEY_CTRL | KEY_ALT | KEY_SHIFT;
     KeySequence ks = { KSFLAGS_DISABLEOUTPUT, 1, &key };
