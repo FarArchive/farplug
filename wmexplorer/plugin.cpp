@@ -388,7 +388,7 @@ int WINAPI FAR_EXPORT(SetDirectory)(HANDLE hPlugin, const FarCh *Dir, int OpMode
     FilePath fp_dir(FAR_DECODE_PATH(Dir));
     FilePath current_dir(plugin->current_dir);
     bool parent_dir = FAR_STRCMP(Dir, FAR_T("..")) == 0;
-    if (current_dir.is_root_path() && (parent_dir || (FAR_STRCMP(Dir, FAR_T("\\")) == 0))) {
+    if (current_dir.is_root_path() && parent_dir) {
       if (g_plugin_options.exit_on_dot_dot) far_control_ptr(plugin, FCTL_CLOSEPLUGIN, NULL);
       return TRUE;
     }
