@@ -79,9 +79,6 @@
   <Component Id="infis.dll" Guid="6CFE36E1-0AAE-4055-9D00-E81EA3F6F654">
     <File Id="infis.dll" Name="infis.dll" KeyPath="yes" Source="$(var.bundle)\conman\infis.dll" DiskId="2" />
   </Component>
-  <Component Id="cmd_autorun.cmd" Guid="75B4C0B6-574A-413E-B6A1-DE77E2D41D1C">
-    <File Id="cmd_autorun.cmd" Name="cmd_autorun.cmd" KeyPath="yes" Source="$(var.bundle)\conemu\cmd_autorun.cmd" DiskId="2" />
-  </Component>
   <?endif?>
   <Directory Id="docs" Name="docs">
     <Directory Id="eng" Name="eng">
@@ -1768,11 +1765,11 @@
       </Directory>
     </Directory>
     <Directory Id="conemu_2" Name="conemu">
-      <Component Id="AltEnter_Exec.reg" Guid="83FEE187-D89F-4C44-8192-2A72D121BD13">
-        <File Id="AltEnter_Exec.reg" Name="AltEnter_Exec.reg" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\AltEnter_Exec.reg" DiskId="2" />
+      <Component Id="AltEnter.reg" Guid="A63E0695-93AD-4BC2-9577-863921DDB221">
+        <File Id="AltEnter.reg" Name="AltEnter.reg" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\AltEnter.reg" DiskId="2" />
       </Component>
-      <Component Id="AltEnter_Props.reg" Guid="A97A295C-29B3-4F9A-AC5E-372F175CA68D">
-        <File Id="AltEnter_Props.reg" Name="AltEnter_Props.reg" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\AltEnter_Props.reg" DiskId="2" />
+      <Component Id="AltEnter_ANSI.reg" Guid="5D3B7442-AB5B-4374-8545-4F32C72FD0D2">
+        <File Id="AltEnter_ANSI.reg" Name="AltEnter_ANSI.reg" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\AltEnter_ANSI.reg" DiskId="2" />
       </Component>
       <Component Id="ConEmu.dll" Guid="96E7EE7C-711B-4C07-8454-8D136DD8EEB3">
         <File Id="ConEmu.dll" Name="ConEmu.dll" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\ConEmu.dll" DiskId="2" />

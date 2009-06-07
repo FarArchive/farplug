@@ -103,16 +103,13 @@
         <ComponentRef Id="WhatsNew_ConEmu.txt" />
       </Feature>
       <Feature Id="ConEmuPlugin" Level="2" Title="Plugin" AllowAdvertise="no">
-        <ComponentRef Id="AltEnter_Exec.reg" />
-        <ComponentRef Id="AltEnter_Props.reg" />
+        <ComponentRef Id="AltEnter.reg" />
+        <ComponentRef Id="AltEnter_ANSI.reg" />
         <ComponentRef Id="ConEmu.dll" />
         <ComponentRef Id="ConEmuPlugin_en.lng" />
         <Feature Id="ConEmuPluginRussian" Level="2" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="ConEmuPlugin_ru.lng" />
         </Feature>
-      </Feature>
-      <Feature Id="ConEmuAutoRun" Level="2" Title="Autorun" AllowAdvertise="no" Description="Script to configure ConEmu to run automatically when cmd.exe is started">
-        <ComponentRef Id="cmd_autorun.cmd" />
       </Feature>
       <Feature Id="ConEmuShortcuts" Level="2" Title="Shortcuts" AllowAdvertise="no">
         <Feature Id="ConEmuProgramsShortcut" Level="2" Title="Programs" AllowAdvertise="no">
