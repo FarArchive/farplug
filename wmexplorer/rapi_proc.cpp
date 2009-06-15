@@ -152,7 +152,7 @@ void init_if_needed() {
       osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
       CHECK_API(GetVersionEx(&osver) != 0);
       HRESULT hr;
-      if (osver.dwMajorVersion >= 6) { // Vista
+      if ((osver.dwMajorVersion == 6) && (osver.dwMinorVersion == 0)) { // Vista
         hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
         if (hr == RPC_E_CHANGED_MODE) FAIL(MsgError(far_get_msg(MSG_ERR_COM_MODEL)));
       }
