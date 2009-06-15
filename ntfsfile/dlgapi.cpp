@@ -581,21 +581,19 @@ unsigned FarDialog::get_list_pos(unsigned ctrl_id) {
 
 void FarDialog::set_color(unsigned ctrl_id, unsigned char color) {
 #ifdef FARAPI17
-  FarDialogItem dlg_item;
-  g_far.SendDlgMessage(h_dlg, DM_GETDLGITEM, index[ctrl_id], (LONG_PTR) &dlg_item);
-  dlg_item.Flags &= ~DIF_COLORMASK;
-  dlg_item.Flags |= DIF_SETCOLOR | color;
-  g_far.SendDlgMessage(h_dlg, DM_SETDLGITEM, index[ctrl_id], (LONG_PTR) &dlg_item);
+  FarDialogItem buf;
+  FarDialogItem* dlg_item = &buf;
 #endif // FARAPI17
 #ifdef FARAPI18
-  FarDialogItem* dlg_item = (FarDialogItem*) g_far.SendDlgMessage(h_dlg, DM_GETDLGITEM, index[ctrl_id], 0);
-  if (dlg_item != NULL) {
-    dlg_item->Flags &= ~DIF_COLORMASK;
-    dlg_item->Flags |= DIF_SETCOLOR | color;
-    g_far.SendDlgMessage(h_dlg, DM_SETDLGITEM, index[ctrl_id], (LONG_PTR) dlg_item);
-    g_far.SendDlgMessage(h_dlg, DM_FREEDLGITEM, 0, (LONG_PTR) dlg_item);
-  }
+  Array<unsigned char> buf;
+  unsigned size = static_cast<unsigned>(g_far.SendDlgMessage(h_dlg, DM_GETDLGITEM, index[ctrl_id], NULL));
+  buf.extend(size).set_size(size);
+  FarDialogItem* dlg_item = reinterpret_cast<FarDialogItem*>(buf.buf());
 #endif // FARAPI18
+  g_far.SendDlgMessage(h_dlg, DM_GETDLGITEM, index[ctrl_id], reinterpret_cast<LONG_PTR>(dlg_item));
+  dlg_item->Flags &= ~DIF_COLORMASK;
+  dlg_item->Flags |= DIF_SETCOLOR | color;
+  g_far.SendDlgMessage(h_dlg, DM_SETDLGITEM, index[ctrl_id], reinterpret_cast<LONG_PTR>(dlg_item));
 }
 
 void FarDialog::set_focus(unsigned ctrl_id) {
