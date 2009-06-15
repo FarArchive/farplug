@@ -38,10 +38,8 @@ struct RegKeyPath {
 } UninstKeys[] = {
   { HKEY_CURRENT_USER, _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall") },
   { HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall") },
-  { HKEY_CURRENT_USER, _T("SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall") },
-  { HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall") },
 };
-int nCount;
+int nCount, nRealCount;
 FarList FL;
 FarListItem* FLI = NULL;
 int ListSize;
@@ -56,6 +54,7 @@ struct KeyInfo
 #endif
   bool Avail[KeysCount];
   RegKeyPath RegKey;
+  REGSAM RegView;
   TCHAR SubKeyName[MAX_PATH];
   bool WindowsInstaller;
 } *p = NULL;
@@ -71,7 +70,7 @@ bool ValidGuid(const TCHAR* guid) {
 }
 
 //чтение реестра
-bool FillReg(KeyInfo & key, TCHAR * Buf, RegKeyPath & RegKey)
+bool FillReg(KeyInfo& key, TCHAR* Buf, RegKeyPath& RegKey, REGSAM RegView)
 {
   HKEY userKey;
   DWORD regType;
@@ -80,11 +79,12 @@ bool FillReg(KeyInfo & key, TCHAR * Buf, RegKeyPath & RegKey)
   DWORD bufSize;
 
   key.RegKey = RegKey;
+  key.RegView = RegView;
   StringCchCopy(key.SubKeyName,ARRAYSIZE(key.SubKeyName),Buf);
   StringCchCopy(fullN,ARRAYSIZE(fullN),key.RegKey.Path);
   StringCchCat(fullN,ARRAYSIZE(fullN),_T("\\"));
   StringCchCat(fullN,ARRAYSIZE(fullN),key.SubKeyName);
-  if (RegOpenKeyEx(key.RegKey.Root, fullN, 0, KEY_READ, &userKey) != ERROR_SUCCESS)
+  if (RegOpenKeyEx(key.RegKey.Root, fullN, 0, KEY_READ | RegView, &userKey) != ERROR_SUCCESS)
     return FALSE;
   key.WindowsInstaller = (RegQueryValueEx(userKey,_T("WindowsInstaller"),0,NULL,NULL,NULL) == ERROR_SUCCESS) && ValidGuid(key.SubKeyName);
   for (int i=0;i<KeysCount;i++)
@@ -284,13 +284,26 @@ bool ExecuteEntry(int Sel, bool WaitEnd)
   return TRUE;
 }
 
-void DeleteEntry(int Sel)
+typedef WINADVAPI LSTATUS (APIENTRY *FRegDeleteKeyExA)(__in HKEY hKey, __in LPCSTR lpSubKey, __in REGSAM samDesired, __reserved DWORD Reserved);
+typedef WINADVAPI LSTATUS (APIENTRY *FRegDeleteKeyExW)(__in HKEY hKey, __in LPCWSTR lpSubKey, __in REGSAM samDesired, __reserved DWORD Reserved);
+
+bool DeleteEntry(int Sel)
 {
+  HMODULE h_mod = LoadLibrary(_T("advapi32.dll"));
+  FRegDeleteKeyExA RegDeleteKeyExA = reinterpret_cast<FRegDeleteKeyExA>(GetProcAddress(h_mod, "RegDeleteKeyExA"));
+  FRegDeleteKeyExW RegDeleteKeyExW = reinterpret_cast<FRegDeleteKeyExW>(GetProcAddress(h_mod, "RegDeleteKeyExW"));
+  FreeLibrary(h_mod);
+
   HKEY userKey;
-  RegOpenKeyEx(p[Sel].RegKey.Root, p[Sel].RegKey.Path, 0, KEY_SET_VALUE, &userKey);
-  if (RegDeleteKey(userKey, p[Sel].SubKeyName) != ERROR_SUCCESS)
-    DrawMessage(FMSG_WARNING, 1, "%s",GetMsg(MPlugIn),GetMsg(MDelRegErr),GetMsg(MOK),NULL);
+  LONG ret = RegOpenKeyEx(p[Sel].RegKey.Root, p[Sel].RegKey.Path, 0, DELETE | p[Sel].RegView, &userKey);
+  if (ret != ERROR_SUCCESS) return false;
+  if (RegDeleteKeyEx)
+    ret = RegDeleteKeyEx(userKey, p[Sel].SubKeyName, p[Sel].RegView, 0);
+  else
+    ret = RegDeleteKey(userKey, p[Sel].SubKeyName);
   RegCloseKey(userKey);
+  if (ret != ERROR_SUCCESS) return false;
+  return true;
 }
 
 //сравнить строки
@@ -299,47 +312,69 @@ int __cdecl CompareEntries(const void* item1, const void* item2)
   return FSF.LStricmp(reinterpret_cast<const KeyInfo*>(item1)->Keys[DisplayName], reinterpret_cast<const KeyInfo*>(item2)->Keys[DisplayName]);
 }
 
-#define EMPTYSTR _T("  ")
 #define JUMPREALLOC 50
+void EnumKeys(RegKeyPath& RegKey, REGSAM RegView = 0) {
+  HKEY hKey;
+  if (RegOpenKeyEx(RegKey.Root, RegKey.Path, 0, KEY_READ | RegView, &hKey) != ERROR_SUCCESS)
+    return;
+  DWORD cSubKeys;
+  if (RegQueryInfoKey(hKey,NULL,NULL,NULL,&cSubKeys,NULL,NULL,NULL,NULL,NULL,NULL,NULL) != ERROR_SUCCESS)
+    return;
+
+  TCHAR Buf[MAX_PATH];
+  for (DWORD fEnumIndex=0; fEnumIndex<cSubKeys; fEnumIndex++)
+  {
+    DWORD bufSize = ARRAYSIZE(Buf);
+    FILETIME ftLastWrite;
+    if (RegEnumKeyEx(hKey, fEnumIndex, Buf, &bufSize, NULL, NULL, NULL, &ftLastWrite) != ERROR_SUCCESS)
+      return;
+    if (nCount >= nRealCount)
+    {
+      nRealCount += JUMPREALLOC;
+      p = (KeyInfo *) realloc(p, sizeof(KeyInfo) * nRealCount);
+    }
+    if (FillReg(p[nCount], Buf, RegKey, RegView))
+    {
+#ifdef FARAPI17
+      CharToOem(p[nCount].Keys[DisplayName], p[nCount].Keys[DisplayName]);
+      CharToOem(p[nCount].Keys[UninstallString], p[nCount].Keys[UninstallString]);
+#endif
+      nCount++;
+    }
+  }
+  RegCloseKey(hKey);
+}
+#undef JUMPREALLOC
+
+typedef WINBASEAPI VOID (WINAPI *FGetNativeSystemInfo)(__out LPSYSTEM_INFO lpSystemInfo);
+
+#define EMPTYSTR _T("  ")
 //Обновление информации
 void UpDateInfo(void)
 {
-  DWORD fEnumIndex;
-  FILETIME ftLastWrite;
-  DWORD bufSize;
-  HKEY hKey;
-  TCHAR Buf[MAX_PATH];
-  DWORD cSubKeys;
-  int nRealCount = 0;
+  HMODULE h_mod = LoadLibrary(_T("kernel32.dll"));
+  FGetNativeSystemInfo GetNativeSystemInfo = reinterpret_cast<FGetNativeSystemInfo>(GetProcAddress(h_mod, "GetNativeSystemInfo"));
+  FreeLibrary(h_mod);
+  bool is_os_x64 = false;
+  if (GetNativeSystemInfo)
+  {
+    SYSTEM_INFO si;
+    GetNativeSystemInfo(&si);
+    is_os_x64 = si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64;
+  }
 
-  nCount = 0;
+  nCount = nRealCount = 0;
   for (int i=0;i<ARRAYSIZE(UninstKeys);i++)
   {
-    if (RegOpenKeyEx(UninstKeys[i].Root, UninstKeys[i].Path, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
-      continue;
-    if (RegQueryInfoKey(hKey,NULL,NULL,NULL,&cSubKeys,NULL,NULL,NULL,NULL,NULL,NULL,NULL) != ERROR_SUCCESS)
-      continue;
-
-    for (fEnumIndex=0; fEnumIndex<cSubKeys; fEnumIndex++)
+    if (is_os_x64)
     {
-      bufSize = ARRAYSIZE(Buf);
-      if (RegEnumKeyEx(hKey, fEnumIndex, Buf, &bufSize, NULL, NULL, NULL, &ftLastWrite) != ERROR_SUCCESS)
-        continue;
-      if (nCount+1 > nRealCount)
-      {
-        nRealCount += JUMPREALLOC;
-        p = (KeyInfo *) realloc(p, sizeof(KeyInfo) * nRealCount);
-      }
-      if (FillReg(p[nCount], Buf, UninstKeys[i]))
-      {
-#ifdef FARAPI17
-        CharToOem(p[nCount].Keys[DisplayName], p[nCount].Keys[DisplayName]);
-        CharToOem(p[nCount].Keys[UninstallString], p[nCount].Keys[UninstallString]);
-#endif
-        nCount++;
-      }
+      EnumKeys(UninstKeys[i], KEY_WOW64_64KEY);
+      EnumKeys(UninstKeys[i], KEY_WOW64_32KEY);
     }
-    RegCloseKey(hKey);
+    else
+    {
+      EnumKeys(UninstKeys[i]);
+    }
   }
   p = (KeyInfo *) realloc(p, sizeof(KeyInfo) * nCount);
   FSF.qsort(p, nCount, sizeof(KeyInfo), CompareEntries);
@@ -379,7 +414,6 @@ void UpDateInfo(void)
 
   ListSize = nCount;
 }
-#undef JUMPREALLOC
 #undef EMPTYSTR
 
 //-------------------------------------------------------------------
