@@ -1598,7 +1598,7 @@
         <ComponentRef Id="changelog_19" />
         <ComponentRef Id="readme_2" />
         <ComponentRef Id="setmacros.cmd" />
-        <ComponentRef Id="yac32W.dll" />
+        <ComponentRef Id="yac.dll" />
         <ComponentRef Id="yac_en.hlf" />
         <ComponentRef Id="yac_en.lng" />
         <ComponentRef Id="cl.reg" />

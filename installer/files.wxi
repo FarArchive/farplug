@@ -1728,8 +1728,8 @@
       <Component Id="setmacros.cmd" Guid="43227558-91BC-4214-B724-239E1626A8E0">
         <File Id="setmacros.cmd" Name="setmacros.cmd" KeyPath="yes" Source="$(var.bundle)\yac\setmacros.cmd" DiskId="2" />
       </Component>
-      <Component Id="yac32W.dll" Guid="835234C2-C093-43D5-B666-20F163693F9B">
-        <File Id="yac32W.dll" Name="yac32W.dll" KeyPath="yes" Source="$(var.bundle)\yac\yac32W.dll" DiskId="2" />
+      <Component Id="yac.dll" Guid="835234C2-C093-43D5-B666-20F163693F9B">
+        <File Id="yac.dll" Name="yac.dll" KeyPath="yes" Source="$(var.bundle)\yac\yac.dll" DiskId="2" />
       </Component>
       <Component Id="yac_en.hlf" Guid="E16117AE-54D4-4770-A79B-D6289841C7F6">
         <File Id="yac_en.hlf" Name="yac_en.hlf" KeyPath="yes" Source="$(var.bundle)\yac\yac_en.hlf" DiskId="2" />
