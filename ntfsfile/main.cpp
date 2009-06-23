@@ -1331,10 +1331,13 @@ int WINAPI FAR_EXPORT(Configure)(int ItemNumber) {
 int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlState) {
   BEGIN_ERROR_HANDLER;
   FilePanel* panel = (FilePanel*) hPlugin;
+#ifdef FARAPI17
   if ((Key == VK_F24) && (ControlState == (PKF_CONTROL | PKF_ALT | PKF_SHIFT))) {
     panel->apply_saved_state();
   }
-  else if ((Key == 'R') && (ControlState == PKF_CONTROL)) {
+  else
+#endif
+  if ((Key == 'R') && (ControlState == PKF_CONTROL)) {
     if (!g_file_panel_mode.use_usn_journal) panel->reload_mft();
     return FALSE;
   }
@@ -1347,6 +1350,17 @@ int WINAPI FAR_EXPORT(Compare)(HANDLE hPlugin, const struct PluginPanelItem *Ite
   if (!g_file_panel_mode.use_std_sort && panel->flat_mode && (Mode == SM_NAME)) return FAR_STRCMP(FAR_FILE_NAME(Item1->FindData), FAR_FILE_NAME(Item2->FindData));
   else return -2;
 }
+
+#ifdef FARAPI18
+int WINAPI ProcessSynchroEventW(int Event, void* Param) {
+  BEGIN_ERROR_HANDLER;
+  if (Event == SE_COMMONSYNCHRO) {
+    FilePanel* panel = (FilePanel*) Param;
+    panel->apply_saved_state();
+  }
+  END_ERROR_HANDLER(return 0, return 0);
+}
+#endif
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
   if (fdwReason == DLL_PROCESS_ATTACH) {

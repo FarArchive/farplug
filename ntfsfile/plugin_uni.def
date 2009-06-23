@@ -13,3 +13,4 @@ EXPORTS
   ConfigureW
   ProcessKeyW
   CompareW
+  ProcessSynchroEventW

@@ -106,9 +106,14 @@ FilePanel* FilePanel::open() {
       panel->change_directory(FARSTR_TO_UNICODE(panel->saved_state.directory), false);
     }
     // signal to restore selection & current item after panel is created
+#ifdef FARAPI17
     DWORD key = KEY_F24 | KEY_CTRL | KEY_ALT | KEY_SHIFT;
     KeySequence ks = { KSFLAGS_DISABLEOUTPUT, 1, &key };
     g_far.AdvControl(g_far.ModuleNumber, ACTL_POSTKEYSEQUENCE, &ks);
+#endif
+#ifdef FARAPI18
+    g_far.AdvControl(g_far.ModuleNumber, ACTL_SYNCHRO, panel);
+#endif
     g_file_panels += panel;
   }
   catch (...) {
