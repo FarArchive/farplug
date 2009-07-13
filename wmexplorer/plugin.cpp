@@ -899,6 +899,9 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
             if ((options.attr_and != 0xFFFFFFFF) || (options.attr_or != 0)) {
               UnicodeString file_name;
               UnicodeString path;
+#ifdef FARAPI18
+              g_far.Control(hPlugin, FCTL_BEGINSELECTION, 0, 0);
+#endif
               try {
                 PluginPanelItem* ppi = far_get_selected_panel_item(hPlugin, 0, panel_info);
                 bool sel_flag = (ppi->Flags & PPIF_SELECTED) != 0;
@@ -927,6 +930,7 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
 #endif
 #ifdef FARAPI18
               finally (
+                g_far.Control(hPlugin, FCTL_ENDSELECTION, 0, 0);
                 far_control_int(hPlugin, FCTL_UPDATEPANEL, 1);
                 far_control_ptr(hPlugin, FCTL_REDRAWPANEL, NULL);
               );
