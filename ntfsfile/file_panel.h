@@ -13,17 +13,24 @@ struct PluginItemList: public Array<PluginPanelItem> {
 
 struct CompositeFileName {
   FarStr long_name;
+  // short_name is needed only for correct handling of Unicode file names in Far 1.x
+#ifdef FARAPI17
   FarStr short_name;
+#endif
   CompositeFileName() {
   }
-  explicit CompositeFileName(const FAR_FIND_DATA& find_data): long_name(FAR_FILE_NAME(find_data)), short_name(FAR_SHORT_FILE_NAME(find_data)) {
+  explicit CompositeFileName(const FAR_FIND_DATA& find_data): long_name(FAR_FILE_NAME(find_data))
+#ifdef FARAPI17
+  , short_name(FAR_SHORT_FILE_NAME(find_data))
+#endif
+  {
   }
   bool operator==(const FAR_FIND_DATA& find_data) const {
-    return operator==(CompositeFileName(find_data));
-  }
-  bool operator==(const CompositeFileName& file_name) const {
-    if ((short_name.size() != 0) && (file_name.short_name.size() != 0)) return short_name == file_name.short_name;
-    else return long_name == file_name.long_name;
+#ifdef FARAPI17
+    if (short_name.size() && *FAR_SHORT_FILE_NAME(find_data)) return short_name == FAR_SHORT_FILE_NAME(find_data);
+    else
+#endif
+    return long_name == FAR_FILE_NAME(find_data);
   }
 };
 

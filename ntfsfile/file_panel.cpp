@@ -60,6 +60,20 @@ PanelState save_state(HANDLE h_panel) {
         if (ppi->Flags & PPIF_SELECTED) state.selected_files += CompositeFileName(ppi->FindData);
       }
     }
+    struct Compare {
+      int operator()(const CompositeFileName& item1, const CompositeFileName& item2) {
+        int res = item1.long_name.compare(item2.long_name);
+#ifdef FARAPI17
+        if (res == 0) {
+          if (item1.short_name.size() && item2.short_name.size()) return item1.short_name.compare(item2.short_name);
+          else return 0;
+        }
+        else
+#endif
+        return res;
+      }
+    };
+    state.selected_files.sort<Compare>();
   }
   return state;
 }
@@ -75,15 +89,26 @@ void restore_state(HANDLE h_panel, const PanelState& state) {
       for (int i = 0; i < pi.ItemsNumber; i++) {
         PluginPanelItem* ppi = far_get_panel_item(h_panel, i, pi);
         if (ppi) {
-          for (unsigned j = 0; j < state.selected_files.size(); j++) {
-            if (state.selected_files[j] == ppi->FindData) {
+          struct Compare {
+            int operator()(const FAR_FIND_DATA& find_data, const CompositeFileName& file_name) {
+              int res = file_name.long_name.compare(FAR_FILE_NAME(find_data));
 #ifdef FARAPI17
-              ppi->Flags |= PPIF_SELECTED;
+              if (res == 0) {
+                if (file_name.short_name.size() && *FAR_SHORT_FILE_NAME(find_data)) return -file_name.short_name.compare(FAR_SHORT_FILE_NAME(find_data));
+                else return 0;
+              }
+              else
+#endif
+              return -res;
+            }
+          };
+          if (state.selected_files.bsearch<Compare, FAR_FIND_DATA>(ppi->FindData) != -1) {
+#ifdef FARAPI17
+            ppi->Flags |= PPIF_SELECTED;
 #endif
 #ifdef FARAPI18
-              g_far.Control(h_panel, FCTL_SETSELECTION, i, TRUE);
+            g_far.Control(h_panel, FCTL_SETSELECTION, i, TRUE);
 #endif
-            }
           }
         }
       }
