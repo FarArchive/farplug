@@ -66,28 +66,42 @@ PanelState save_state(HANDLE h_panel) {
 
 void restore_state(HANDLE h_panel, const PanelState& state) {
   PanelInfo pi;
+  if (state.selected_files.size()) {
+    if (far_control_ptr(h_panel, FCTL_GETPANELINFO, &pi)) {
+#ifdef FARAPI18
+      g_far.Control(h_panel, FCTL_BEGINSELECTION, 0, 0);
+      CLEAN(HANDLE, h_panel, g_far.Control(h_panel, FCTL_ENDSELECTION, 0, 0));
+#endif
+      for (int i = 0; i < pi.ItemsNumber; i++) {
+        PluginPanelItem* ppi = far_get_panel_item(h_panel, i, pi);
+        if (ppi) {
+          for (unsigned j = 0; j < state.selected_files.size(); j++) {
+            if (state.selected_files[j] == ppi->FindData) {
+#ifdef FARAPI17
+              ppi->Flags |= PPIF_SELECTED;
+#endif
+#ifdef FARAPI18
+              g_far.Control(h_panel, FCTL_SETSELECTION, i, TRUE);
+#endif
+            }
+          }
+        }
+      }
+#ifdef FARAPI17
+      g_far.Control(h_panel, FCTL_SETSELECTION, &pi);
+#endif
+    }
+  }
   if (far_control_ptr(h_panel, FCTL_GETPANELINFO, &pi)) {
     PanelRedrawInfo pri;
+    memset(&pri, 0, sizeof(pri));
     for (int i = 0; i < pi.ItemsNumber; i++) {
       PluginPanelItem* ppi = far_get_panel_item(h_panel, i, pi);
       if (ppi) {
-        for (unsigned j = 0; j < state.selected_files.size(); j++) {
-          if (state.selected_files[j] == ppi->FindData) {
-#ifdef FARAPI17
-            ppi->Flags |= PPIF_SELECTED;
-#endif
-#ifdef FARAPI18
-            g_far.Control(h_panel, FCTL_SETSELECTION, i, TRUE);
-#endif
-          }
-        }
         if (state.current_file == ppi->FindData) pri.CurrentItem = i;
         if (state.top_panel_file == ppi->FindData) pri.TopPanelItem = i;
       }
     }
-#ifdef FARAPI17
-    g_far.Control(h_panel, FCTL_SETSELECTION, &pi);
-#endif
     far_control_ptr(h_panel, FCTL_REDRAWPANEL, &pri);
   }
 }
