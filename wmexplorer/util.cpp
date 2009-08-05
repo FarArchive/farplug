@@ -137,7 +137,7 @@ UnicodeString fit_str(const UnicodeString& path, unsigned size) {
 UnicodeString center(const UnicodeString& str, unsigned width) {
   if (str.size() >= width) return str;
   unsigned lpad = (width - str.size()) / 2;
-  unsigned rpad = width - lpad;
+  unsigned rpad = width - str.size() - lpad;
   return UnicodeString::format(L"%.*c%S%.*c", lpad, ' ', &str, rpad, ' ');
 }
 
