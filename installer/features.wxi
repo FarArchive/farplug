@@ -92,74 +92,6 @@
         <ComponentRef Id="FarQuickLaunchShortcut" />
       </Feature>
     </Feature>
-    <?ifdef bundle ?>
-    <Feature Id="ConEmu" Level="2" Title="ConEmu" AllowAdvertise="no" Description="Console emulator">
-      <ComponentRef Id="ConEmu.exe" />
-      <Feature Id="DocsConEmu" Level="2" Display="hidden" AllowAdvertise="no">
-        <ComponentRef Id="About_ConEmu.txt" />
-        <ComponentRef Id="FAQ_ConEmu.txt" />
-        <ComponentRef Id="License_ConEmu.txt" />
-        <ComponentRef Id="Settings_ConEmu.reg" />
-        <ComponentRef Id="WhatsNew_ConEmu.txt" />
-      </Feature>
-      <Feature Id="ConEmuPlugin" Level="2" Title="Plugin" AllowAdvertise="no">
-        <ComponentRef Id="AltEnter.reg" />
-        <ComponentRef Id="AltEnter_ANSI.reg" />
-        <ComponentRef Id="ConEmu.dll" />
-        <ComponentRef Id="ConEmuPlugin_en.lng" />
-        <Feature Id="ConEmuPluginRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="ConEmuPlugin_ru.lng" />
-        </Feature>
-      </Feature>
-      <Feature Id="ConEmuShortcuts" Level="2" Title="Shortcuts" AllowAdvertise="no">
-        <Feature Id="ConEmuProgramsShortcut" Level="2" Title="Programs" AllowAdvertise="no">
-          <ComponentRef Id="ConEmuProgramsShortcut" />
-          <ComponentRef Id="UninstallProduct" />
-        </Feature>
-        <Feature Id="ConEmuDesktopShortcut" Level="2" Title="Desktop" AllowAdvertise="no">
-          <ComponentRef Id="ConEmuDesktopShortcut" />
-        </Feature>
-        <Feature Id="ConEmuStartMenuShortcut" Level="2" Title="Start menu" AllowAdvertise="no">
-          <ComponentRef Id="ConEmuStartMenuShortcut" />
-        </Feature>
-        <Feature Id="ConEmuQuickLaunchShortcut" Level="2" Title="Quick launch" AllowAdvertise="no">
-          <ComponentRef Id="ConEmuQuickLaunchShortcut" />
-        </Feature>
-      </Feature>
-      <Feature Id="ConMan" Level="2" Title="ConMan" AllowAdvertise="no" Description="Console manager">
-        <ComponentRef Id="conman.dll" />
-        <ComponentRef Id="hook.dll" />
-        <ComponentRef Id="infis.dll" />
-        <ComponentRef Id="alt_key.reg" />
-        <ComponentRef Id="changelog.txt" />
-        <ComponentRef Id="config.hta" />
-        <ComponentRef Id="ctrlalt.reg" />
-        <ComponentRef Id="default.reg" />
-        <ComponentRef Id="License.txt" />
-        <ComponentRef Id="print_codes.exe" />
-        <ComponentRef Id="ReadMe.eng_2" />
-        <ComponentRef Id="win_key.reg" />
-        <Feature Id="ConManRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="ReadMe.rus_3" />
-        </Feature>
-        <Feature Id="ConManShortcuts" Level="2" Title="Shortcuts" AllowAdvertise="no">
-          <Feature Id="ConManProgramsShortcut" Level="2" Title="Programs" AllowAdvertise="no">
-            <ComponentRef Id="ConManProgramsShortcut" />
-            <ComponentRef Id="UninstallProduct" />
-          </Feature>
-          <Feature Id="ConManDesktopShortcut" Level="2" Title="Desktop" AllowAdvertise="no">
-            <ComponentRef Id="ConManDesktopShortcut" />
-          </Feature>
-          <Feature Id="ConManStartMenuShortcut" Level="2" Title="Start menu" AllowAdvertise="no">
-            <ComponentRef Id="ConManStartMenuShortcut" />
-          </Feature>
-          <Feature Id="ConManQuickLaunchShortcut" Level="2" Title="Quick launch" AllowAdvertise="no">
-            <ComponentRef Id="ConManQuickLaunchShortcut" />
-          </Feature>
-        </Feature>
-      </Feature>
-    </Feature>
-    <?endif?>
     <Feature Id="Plugins" Level="1" Display="expand" Title="Plugins" AllowAdvertise="no" Description="Standard plugins">
       <Feature Id="Editor" Level="1" Title="Editor" AllowAdvertise="no" Description="Editor plugins">
         <Feature Id="Align" Level="1" Title="Align" AllowAdvertise="no" Description="Text block formatter">
@@ -642,19 +574,6 @@
           <ComponentRef Id="AltHistoryShellCtrlAltX" />
         </Feature>
       </Feature>
-      <Feature Id="AutoComplete" Level="2" Title="AutoComplete" AllowAdvertise="no" Description="Unix-like filename completion">
-        <ComponentRef Id="cmpl_new.reg" />
-        <ComponentRef Id="compleng.hlf" />
-        <ComponentRef Id="compleng.lng" />
-        <ComponentRef Id="complete.dll" />
-        <ComponentRef Id="complete.reg" />
-        <ComponentRef Id="WhatsNew.eng" />
-        <Feature Id="completeRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="complrus.hlf" />
-          <ComponentRef Id="complrus.lng" />
-          <ComponentRef Id="WhatsNew.rus_2" />
-        </Feature>
-      </Feature>
       <Feature Id="bcopy" Level="2" Title="bcopy" AllowAdvertise="no" Description="Background copy">
         <ComponentRef Id="bcopy.dll" />
         <ComponentRef Id="bcopy.hlf" />
@@ -758,25 +677,6 @@
         <Feature Id="dialogtoolsFExcept" Level="2" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="dt.map" />
         </Feature>
-      </Feature>
-      <Feature Id="drgndrop" Level="2" Title="Drag'n'drop" AllowAdvertise="no" Description="Drag and drop operations between FAR manager and GUI-based applications">
-        <ComponentRef Id="dndeng.lng" />
-        <ComponentRef Id="drgndrop.dll" />
-        <ComponentRef Id="drgndrop.hook" />
-        <ComponentRef Id="holder.dnd" />
-        <Feature Id="drgndropRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="dndrus.lng" />
-        </Feature>
-        <Feature Id="drgndropFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="drgndrop.map" />
-        </Feature>
-      </Feature>
-      <Feature Id="DVDPanel" Level="2" Title="DVDPanel" AllowAdvertise="no" Description="Burn CD/DVD using external tools: NeroCmd, ImgBurn">
-        <ComponentRef Id="DVDPanel.dll" />
-        <ComponentRef Id="DVDPanel.hlf" />
-        <ComponentRef Id="History.txt_4" />
-        <ComponentRef Id="NeroErrors.txt" />
-        <ComponentRef Id="ReadMe.txt_5" />
       </Feature>
       <Feature Id="EditCmpl" Level="2" Title="EditCmpl" AllowAdvertise="no" Description="Word completion in editor">
         <ComponentRef Id="ECmplEng.hlf" />
@@ -1035,18 +935,6 @@
           </Feature>
         </Feature>
       </Feature>
-      <Feature Id="MoreHistory" Level="2" Title="MoreHistory" AllowAdvertise="no" Description="Enhanced version of standard folder history">
-        <ComponentRef Id="file_id.diz_15" />
-        <ComponentRef Id="History.txt_6" />
-        <ComponentRef Id="MoreHistory.dll" />
-        <ComponentRef Id="MoreHistory.hlf" />
-        <ComponentRef Id="MoreHistoryEng.lng" />
-        <ComponentRef Id="Readme.txt_8" />
-        <ComponentRef Id="Settings.reg_4" />
-        <Feature Id="MoreHistoryRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="MoreHistoryRus.lng" />
-        </Feature>
-      </Feature>
       <Feature Id="NewArc" Level="2" Title="NewArc" AllowAdvertise="no" Description="Multiformat archive support">
         <ComponentRef Id="newarc.dll" />
         <ComponentRef Id="newarc.English.lng" />
@@ -1170,45 +1058,6 @@
           <ComponentRef Id="changes" />
         </Feature>
       </Feature>
-      <Feature Id="Noisy" Level="2" Title="Noisy" AllowAdvertise="no" Description="Music player">
-        <ComponentRef Id="bass.dll_1" />
-        <ComponentRef Id="file_id.diz_16" />
-        <ComponentRef Id="History.txt_7" />
-        <ComponentRef Id="Hotkeys.reg_1" />
-        <ComponentRef Id="Macro.reg" />
-        <ComponentRef Id="Noisy.exe" />
-        <ComponentRef Id="NoisyCmd.txt" />
-        <ComponentRef Id="NoisyEng.lng" />
-        <ComponentRef Id="NoisyEng.mnu" />
-        <ComponentRef Id="NoisyFar.dll" />
-        <ComponentRef Id="NoisyRus.hlf" />
-        <ComponentRef Id="Readme.txt_9" />
-        <ComponentRef Id="Settings.reg_5" />
-        <ComponentRef Id="tags.dll" />
-        <Feature Id="WinNoisy" Level="2" Title="WinNoisy" AllowAdvertise="no" Description="GUI controller application">
-          <ComponentRef Id="WinNoisy.exe" />
-        </Feature>
-        <Feature Id="RadioLinks" Level="2" Title="Radio links" AllowAdvertise="no" Description="Predefined links to Internet radio stations">
-          <ComponentRef Id="BEST_FM.m3u" />
-          <ComponentRef Id="D_FM.m3u" />
-          <ComponentRef Id="Love______.m3u" />
-          <ComponentRef Id="___________.m3u" />
-          <ComponentRef Id="__________.m3u_1" />
-          <ComponentRef Id="______ULTRA.m3u" />
-          <ComponentRef Id="__________.m3u_2" />
-          <ComponentRef Id="__________.m3u_3" />
-          <ComponentRef Id="____________.m3u_1" />
-          <ComponentRef Id="____________.m3u_2" />
-          <ComponentRef Id="________.m3u" />
-          <ComponentRef Id="_____________.m3u" />
-          <ComponentRef Id="________________.m3u" />
-          <ComponentRef Id="__________.m3u_4" />
-        </Feature>
-        <Feature Id="NoisyRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="NoisyRus.lng" />
-          <ComponentRef Id="NoisyRus.mnu" />
-        </Feature>
-      </Feature>
       <Feature Id="ntevent" Level="2" Title="NTEvent" AllowAdvertise="no" Description="List/backup/clear NT Event Logs">
         <ComponentRef Id="file_id.diz_29" />
         <ComponentRef Id="ntevent.dll" />
@@ -1235,17 +1084,6 @@
           <ComponentRef Id="ntfsfile.map" />
         </Feature>
       </Feature>
-      <Feature Id="Opera" Level="2" Title="Opera" AllowAdvertise="no" Description="Opera cache browser">
-        <ComponentRef Id="file_id.diz_17" />
-        <ComponentRef Id="History.txt_8" />
-        <ComponentRef Id="operac4.dll" />
-        <ComponentRef Id="operac4.hlf" />
-        <ComponentRef Id="operac4Eng.lng" />
-        <ComponentRef Id="readme.txt_10" />
-        <Feature Id="OperaRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="operac4Rus.lng" />
-        </Feature>
-      </Feature>
       <Feature Id="PEDITOR" Level="2" Title="PEditor" AllowAdvertise="no" Description="Portable executable (PE) file editor">
         <ComponentRef Id="FILE_ID.DIZ_7" />
         <ComponentRef Id="PEDITENG.HLF" />
@@ -1257,46 +1095,14 @@
           <ComponentRef Id="PEDITRUS.LNG" />
         </Feature>
       </Feature>
-      <Feature Id="PicViewAdv" Level="2" Title="PicViewAdv" AllowAdvertise="no" Description="Image file viewer">
-        <ComponentRef Id="COPYING_5" />
-        <ComponentRef Id="file_id.diz_30" />
-        <ComponentRef Id="history.txt_17" />
-        <ComponentRef Id="libgfl220.dll" />
-        <ComponentRef Id="PicViewAdv.dll" />
-        <ComponentRef Id="PicViewAdv.lng" />
-        <ComponentRef Id="readme.txt_17" />
-        <Feature Id="PicViewAdvFExcept" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="PicViewAdv.map" />
-        </Feature>
-      </Feature>
-      <Feature Id="PPCBrowser" Level="2" Title="PPCBrowser" AllowAdvertise="no" Description="Control Windows Mobile based device via ActiveSync">
-        <ComponentRef Id="PPCBrowser.dll" />
-        <ComponentRef Id="PPCBrowser.hlf" />
-        <ComponentRef Id="PPCBrowserEng.lng" />
-        <ComponentRef Id="ReadMe.txt_18" />
-        <ComponentRef Id="WhatsNew.txt_9" />
-        <Feature Id="PPCBrowserRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="PPCBrowserRus.lng" />
-        </Feature>
-        <Feature Id="control.module" Level="2" Title="Control" AllowAdvertise="no" Description="Direct input from PC keyboard">
-          <ComponentRef Id="control.module" />
-        </Feature>
-        <Feature Id="desktop.module" Level="2" Title="Desktop" AllowAdvertise="no" Description="Desktop screenshot">
-          <ComponentRef Id="desktop.module" />
-        </Feature>
-        <Feature Id="files.module" Level="2" Title="Files" AllowAdvertise="no" Description="Manage files">
-          <ComponentRef Id="files.module" />
-        </Feature>
-        <Feature Id="pim.module" Level="2" Title="PIM" AllowAdvertise="no" Description="Manage tasks, contacts and calendar">
-          <ComponentRef Id="pim.ini" />
-          <ComponentRef Id="pim.module" />
-        </Feature>
-        <Feature Id="registry.module" Level="2" Title="Registry" AllowAdvertise="no" Description="Registry browser">
-          <ComponentRef Id="registry.module" />
-        </Feature>
-        <Feature Id="windows.module" Level="2" Title="Windows" AllowAdvertise="no" Description="Manage windows">
-          <ComponentRef Id="windows.ini" />
-          <ComponentRef Id="windows.module" />
+      <Feature Id="pictureview" Level="2" Title="PictureView" AllowAdvertise="no" Description="Graphic file format viewer">
+        <ComponentRef Id="_0PictureView.dll" />
+        <ComponentRef Id="BMP.pvd" />
+        <ComponentRef Id="PictureView_en.lng" />
+        <ComponentRef Id="Readme.txt_21" />
+        <Feature Id="pictureviewRussian" Level="2" Display="hidden" AllowAdvertise="no">
+          <ComponentRef Id="PictureView_ru.hlf" />
+          <ComponentRef Id="PictureView_ru.lng" />
         </Feature>
       </Feature>
       <Feature Id="qPlayEx" Level="2" Title="qPlayEx" AllowAdvertise="no" Description="Music player">
@@ -1355,10 +1161,6 @@
           <ComponentRef Id="RegRus.hlf" />
           <ComponentRef Id="RegRus.lng" />
         </Feature>
-        <Feature Id="RegistryItalian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="RegIta.Hlf" />
-          <ComponentRef Id="RegIta.Lng" />
-        </Feature>
       </Feature>
       <Feature Id="RESearch" Level="2" Title="RESearch" AllowAdvertise="no" Description="Regular expression search and replace">
         <ComponentRef Id="EditFind.reg" />
@@ -1390,13 +1192,6 @@
           <ComponentRef Id="ResRus.hlf" />
           <ComponentRef Id="ResRus.lng" />
         </Feature>
-      </Feature>
-      <Feature Id="TorrentView" Level="2" Title="TorrentView" AllowAdvertise="no" Description="Torrent file viewer">
-        <ComponentRef Id="History.txt_10" />
-        <ComponentRef Id="ReadMe.txt_12" />
-        <ComponentRef Id="Torrent.hlf" />
-        <ComponentRef Id="TorrentEng.lng" />
-        <ComponentRef Id="TorrentU.dll" />
       </Feature>
       <Feature Id="true_tpl" Level="2" Title="True Template" AllowAdvertise="no" Description="Smart indent and macro expansion">
         <ComponentRef Id="file_id.diz_33" />

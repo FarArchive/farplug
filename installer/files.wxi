@@ -66,20 +66,6 @@
   <Component Id="SaveSettings.cmd" Guid="ED8C5DFA-7BB1-4883-AFEA-D2AF966E207F">
     <File Id="SaveSettings.cmd" Name="SaveSettings.cmd" KeyPath="yes" Source="docs\SaveSettings.cmd" />
   </Component>
-  <?ifdef bundle ?>
-  <Component Id="ConEmu.exe" Guid="CFC879BD-2BCB-4B72-B6E1-D63CC6EB910B">
-    <File Id="ConEmu.exe" Name="ConEmu.exe" KeyPath="yes" Source="$(var.bundle)\conemu\ConEmu.exe" DiskId="2" />
-  </Component>
-  <Component Id="conman.dll" Guid="C68456C2-098C-4157-9597-74469990FFD2">
-    <File Id="conman.dll" Name="conman.dll" KeyPath="yes" Source="$(var.bundle)\conman\conman.dll" DiskId="2" />
-  </Component>
-  <Component Id="hook.dll" Guid="B6A0F5B9-0C01-4745-9EDE-4EED99A32866">
-    <File Id="hook.dll" Name="hook.dll" KeyPath="yes" Source="$(var.bundle)\conman\hook.dll" DiskId="2" />
-  </Component>
-  <Component Id="infis.dll" Guid="6CFE36E1-0AAE-4055-9D00-E81EA3F6F654">
-    <File Id="infis.dll" Name="infis.dll" KeyPath="yes" Source="$(var.bundle)\conman\infis.dll" DiskId="2" />
-  </Component>
-  <?endif?>
   <Directory Id="docs" Name="docs">
     <Directory Id="eng" Name="eng">
       <Component Id="Arc.Support.txt_1" Guid="7EDCFDD7-2B04-4218-B231-5B52218B88DB">
@@ -162,60 +148,7 @@
         <File Id="WhatsNew.txt_2" Name="WhatsNew.txt" KeyPath="yes" Source="docs\RUS\WhatsNew.txt" />
       </Component>
     </Directory>
-    <?ifdef bundle ?>
-    <Directory Id="conemu_1" Name="conemu">
-      <Component Id="About_ConEmu.txt" Guid="8CB995E3-BAD9-45EB-BE03-B661116F32E7">
-        <File Id="About_ConEmu.txt" Name="About-ConEmu.txt" KeyPath="yes" Source="$(var.bundle)\conemu\About-ConEmu.txt" DiskId="2" />
-      </Component>
-      <Component Id="FAQ_ConEmu.txt" Guid="56828627-96B0-483A-9F04-E780864B59E5">
-        <File Id="FAQ_ConEmu.txt" Name="FAQ-ConEmu.txt" KeyPath="yes" Source="$(var.bundle)\conemu\FAQ-ConEmu.txt" DiskId="2" />
-      </Component>
-      <Component Id="License_ConEmu.txt" Guid="8CC72804-4B2B-40D6-B8F7-36FD6C854FFA">
-        <File Id="License_ConEmu.txt" Name="License-ConEmu.txt" KeyPath="yes" Source="$(var.bundle)\conemu\License-ConEmu.txt" DiskId="2" />
-      </Component>
-      <Component Id="Settings_ConEmu.reg" Guid="674C89C5-099F-4170-A4B0-FF612F8F3627">
-        <File Id="Settings_ConEmu.reg" Name="Settings-ConEmu.reg" KeyPath="yes" Source="$(var.bundle)\conemu\Settings-ConEmu.reg" DiskId="2" />
-      </Component>
-      <Component Id="WhatsNew_ConEmu.txt" Guid="ABFC47E9-B333-40CD-809F-2EF3E789BC1B">
-        <File Id="WhatsNew_ConEmu.txt" Name="WhatsNew-ConEmu.txt" KeyPath="yes" Source="$(var.bundle)\conemu\WhatsNew-ConEmu.txt" DiskId="2" />
-      </Component>
-    </Directory>
-    <?endif?>
   </Directory>
-  <?ifdef bundle ?>
-  <Directory Id="conman" Name="conman">
-    <Component Id="alt_key.reg" Guid="54896DBB-2C70-4E6F-AD0A-7F9B4E4344D3">
-      <File Id="alt_key.reg" Name="alt_key.reg" KeyPath="yes" Source="$(var.bundle)\conman\alt_key.reg" DiskId="2" />
-    </Component>
-    <Component Id="changelog.txt" Guid="EA331469-7A43-4434-992E-E4855E1C7E73">
-      <File Id="changelog.txt" Name="changelog.txt" KeyPath="yes" Source="$(var.bundle)\conman\changelog.txt" DiskId="2" />
-    </Component>
-    <Component Id="config.hta" Guid="A336EF04-06E0-4CED-AA5C-132E2CCF9FEF">
-      <File Id="config.hta" Name="config.hta" KeyPath="yes" Source="$(var.bundle)\conman\config.hta" DiskId="2" />
-    </Component>
-    <Component Id="ctrlalt.reg" Guid="AA11C95A-0568-4BDC-8237-D68A7435E6CA">
-      <File Id="ctrlalt.reg" Name="ctrlalt.reg" KeyPath="yes" Source="$(var.bundle)\conman\ctrlalt.reg" DiskId="2" />
-    </Component>
-    <Component Id="default.reg" Guid="2A9EDE09-E80C-431A-9376-6ABE03D1A6CD">
-      <File Id="default.reg" Name="default.reg" KeyPath="yes" Source="$(var.bundle)\conman\default.reg" DiskId="2" />
-    </Component>
-    <Component Id="License.txt" Guid="D6040161-09D5-416A-8637-41ACA3A67EE7">
-      <File Id="License.txt" Name="License.txt" KeyPath="yes" Source="$(var.bundle)\conman\License.txt" DiskId="2" />
-    </Component>
-    <Component Id="print_codes.exe" Guid="3382F552-4D77-4B34-A479-CB28A45BB05A">
-      <File Id="print_codes.exe" Name="print_codes.exe" KeyPath="yes" Source="$(var.bundle)\conman\print_codes.exe" DiskId="2" />
-    </Component>
-    <Component Id="ReadMe.eng_2" Guid="3B3AD788-1BB6-44B5-9F10-5A36D8BE9F95">
-      <File Id="ReadMe.eng_2" Name="ReadMe.eng" KeyPath="yes" Source="$(var.bundle)\conman\ReadMe.eng" DiskId="2" />
-    </Component>
-    <Component Id="ReadMe.rus_3" Guid="B5886EF7-FCD5-4C88-A127-264B04E57F01">
-      <File Id="ReadMe.rus_3" Name="ReadMe.rus" KeyPath="yes" Source="$(var.bundle)\conman\ReadMe.rus" DiskId="2" />
-    </Component>
-    <Component Id="win_key.reg" Guid="B518E183-B812-4C92-9CC8-497219269203">
-      <File Id="win_key.reg" Name="win_key.reg" KeyPath="yes" Source="$(var.bundle)\conman\win_key.reg" DiskId="2" />
-    </Component>
-  </Directory>
-  <?endif?>
   <Directory Id="plugins" Name="plugins">
     <Directory Id="align" Name="align">
       <Component Id="Align.dll" Guid="A669EA64-3010-44F1-9205-8FF925D8D733">
@@ -1104,12 +1037,6 @@
       <Component Id="Registry.hlf" Guid="F96BF149-4626-4199-AD21-37BFC8FADC9A">
         <File Id="Registry.hlf" Name="Registry.hlf" KeyPath="yes" Source="$(var.bundle)\registry\Registry.hlf" DiskId="2" />
       </Component>
-      <Component Id="RegIta.Hlf" Guid="141689F2-D2CB-453F-90A4-A5B8F0D09B38">
-        <File Id="RegIta.Hlf" Name="RegIta.Hlf" KeyPath="yes" Source="$(var.bundle)\registry\RegIta.Hlf" DiskId="2" />
-      </Component>
-      <Component Id="RegIta.Lng" Guid="E303B077-B116-4BDB-9E5C-E02223B6EDF7">
-        <File Id="RegIta.Lng" Name="RegIta.Lng" KeyPath="yes" Source="$(var.bundle)\registry\RegIta.Lng" DiskId="2" />
-      </Component>
       <Component Id="RegRus.hlf" Guid="EDD5D789-7483-4A49-8896-CC15C1A8CBC5">
         <File Id="RegRus.hlf" Name="RegRus.hlf" KeyPath="yes" Source="$(var.bundle)\registry\RegRus.hlf" DiskId="2" />
       </Component>
@@ -1254,23 +1181,6 @@
         <File Id="wmexplorer_ru.lng" Name="wmexplorer_ru.lng" KeyPath="yes" Source="$(var.bundle)\wmexplorer\wmexplorer_ru.lng" DiskId="2" />
       </Component>
     </Directory>
-    <Directory Id="dvdpanel" Name="dvdpanel">
-      <Component Id="DVDPanel.dll" Guid="864861B2-F98F-4463-AC62-526CDEF6D227">
-        <File Id="DVDPanel.dll" Name="DVDPanel.dll" KeyPath="yes" Source="$(var.bundle)\dvdpanel\DVDPanel.dll" DiskId="2" />
-      </Component>
-      <Component Id="DVDPanel.hlf" Guid="66597535-0906-4614-8F55-E8B3BAFFD3BA">
-        <File Id="DVDPanel.hlf" Name="DVDPanel.hlf" KeyPath="yes" Source="$(var.bundle)\dvdpanel\DVDPanel.hlf" DiskId="2" />
-      </Component>
-      <Component Id="History.txt_4" Guid="63D9719C-3E47-40EB-AE9F-15F4EDE2D471">
-        <File Id="History.txt_4" Name="History.txt" KeyPath="yes" Source="$(var.bundle)\dvdpanel\History.txt" DiskId="2" />
-      </Component>
-      <Component Id="NeroErrors.txt" Guid="CD33CC4D-64CE-403F-8935-EC1767170708">
-        <File Id="NeroErrors.txt" Name="NeroErrors.txt" KeyPath="yes" Source="$(var.bundle)\dvdpanel\NeroErrors.txt" DiskId="2" />
-      </Component>
-      <Component Id="ReadMe.txt_5" Guid="3A97406D-BA3F-4734-AB2D-DA166FFB8B15">
-        <File Id="ReadMe.txt_5" Name="ReadMe.txt" KeyPath="yes" Source="$(var.bundle)\dvdpanel\ReadMe.txt" DiskId="2" />
-      </Component>
-    </Directory>
     <Directory Id="farhints" Name="farhints">
       <Component Id="FarHints.dll" Guid="4DD3DAE7-367E-4F98-B5B7-92CD27375B8F">
         <File Id="FarHints.dll" Name="FarHints.dll" KeyPath="yes" Source="$(var.bundle)\farhints\FarHints.dll" DiskId="2" />
@@ -1406,152 +1316,6 @@
         <File Id="vssver.scc" Name="vssver.scc" KeyPath="yes" Source="$(var.bundle)\fontman\vssver.scc" DiskId="2" />
       </Component>
     </Directory>
-    <Directory Id="morehistory" Name="morehistory">
-      <Component Id="file_id.diz_15" Guid="9FB52831-88B6-4DE6-8C3C-DD3E34156515">
-        <File Id="file_id.diz_15" Name="file_id.diz" KeyPath="yes" Source="$(var.bundle)\morehistory\file_id.diz" DiskId="2" />
-      </Component>
-      <Component Id="History.txt_6" Guid="B75F765B-544F-483E-B8B2-437D8A65C768">
-        <File Id="History.txt_6" Name="History.txt" KeyPath="yes" Source="$(var.bundle)\morehistory\History.txt" DiskId="2" />
-      </Component>
-      <Component Id="MoreHistory.dll" Guid="9E4DD188-331D-43C0-9073-B7FF2D28FE51">
-        <File Id="MoreHistory.dll" Name="MoreHistory.dll" KeyPath="yes" Source="$(var.bundle)\morehistory\MoreHistory.dll" DiskId="2" />
-      </Component>
-      <Component Id="MoreHistory.hlf" Guid="2FDD3AB1-5C4F-4056-9648-CAA2E813E303">
-        <File Id="MoreHistory.hlf" Name="MoreHistory.hlf" KeyPath="yes" Source="$(var.bundle)\morehistory\MoreHistory.hlf" DiskId="2" />
-      </Component>
-      <Component Id="MoreHistoryEng.lng" Guid="908C08A9-DCE9-415B-954B-2B799B3D3F16">
-        <File Id="MoreHistoryEng.lng" Name="MoreHistoryEng.lng" KeyPath="yes" Source="$(var.bundle)\morehistory\MoreHistoryEng.lng" DiskId="2" />
-      </Component>
-      <Component Id="MoreHistoryRus.lng" Guid="9135AD73-6C89-4156-8092-DDFB82F2071C">
-        <File Id="MoreHistoryRus.lng" Name="MoreHistoryRus.lng" KeyPath="yes" Source="$(var.bundle)\morehistory\MoreHistoryRus.lng" DiskId="2" />
-      </Component>
-      <Component Id="Readme.txt_8" Guid="CADEA7CF-5FDD-4399-A877-598E8C03FED8">
-        <File Id="Readme.txt_8" Name="Readme.txt" KeyPath="yes" Source="$(var.bundle)\morehistory\Readme.txt" DiskId="2" />
-      </Component>
-      <Component Id="Settings.reg_4" Guid="9AD67FCA-D8BF-4907-BFDE-FF4EA30B9234">
-        <File Id="Settings.reg_4" Name="Settings.reg" KeyPath="yes" Source="$(var.bundle)\morehistory\Settings.reg" DiskId="2" />
-      </Component>
-    </Directory>
-    <Directory Id="noisy" Name="noisy">
-      <Component Id="bass.dll_1" Guid="B22A92C6-9439-4CDC-B203-0CE25FF2097D">
-        <File Id="bass.dll_1" Name="bass.dll" KeyPath="yes" Source="$(var.bundle)\noisy\bass.dll" DiskId="2" />
-      </Component>
-      <Component Id="file_id.diz_16" Guid="7F4E09A7-9529-4FD2-B84D-69357BF29BE5">
-        <File Id="file_id.diz_16" Name="file_id.diz" KeyPath="yes" Source="$(var.bundle)\noisy\file_id.diz" DiskId="2" />
-      </Component>
-      <Component Id="History.txt_7" Guid="2FB5FFD7-9867-4D03-8037-AF7E1EF9CF56">
-        <File Id="History.txt_7" Name="History.txt" KeyPath="yes" Source="$(var.bundle)\noisy\History.txt" DiskId="2" />
-      </Component>
-      <Component Id="Hotkeys.reg_1" Guid="CD7BFC73-8127-4840-8F92-747C3D7FF8CE">
-        <File Id="Hotkeys.reg_1" Name="Hotkeys.reg" KeyPath="yes" Source="$(var.bundle)\noisy\Hotkeys.reg" DiskId="2" />
-      </Component>
-      <Component Id="Macro.reg" Guid="07255FC6-6992-4358-852C-09EA4F6FD222">
-        <File Id="Macro.reg" Name="Macro.reg" KeyPath="yes" Source="$(var.bundle)\noisy\Macro.reg" DiskId="2" />
-      </Component>
-      <Component Id="Noisy.exe" Guid="A78326D0-621E-43AC-A892-5DF91F29B887">
-        <File Id="Noisy.exe" Name="Noisy.exe" KeyPath="yes" Source="$(var.bundle)\noisy\Noisy.exe" DiskId="2" />
-      </Component>
-      <Component Id="NoisyCmd.txt" Guid="8A7BB394-5722-4247-8ECE-79759D044580">
-        <File Id="NoisyCmd.txt" Name="NoisyCmd.txt" KeyPath="yes" Source="$(var.bundle)\noisy\NoisyCmd.txt" DiskId="2" />
-      </Component>
-      <Component Id="NoisyEng.lng" Guid="0DC0D113-06C8-447B-B12F-0061E0C7B22A">
-        <File Id="NoisyEng.lng" Name="NoisyEng.lng" KeyPath="yes" Source="$(var.bundle)\noisy\NoisyEng.lng" DiskId="2" />
-      </Component>
-      <Component Id="NoisyEng.mnu" Guid="2A657709-FA48-434D-A232-5416790CAF48">
-        <File Id="NoisyEng.mnu" Name="NoisyEng.mnu" KeyPath="yes" Source="$(var.bundle)\noisy\NoisyEng.mnu" DiskId="2" />
-      </Component>
-      <Component Id="NoisyFar.dll" Guid="E7AFC544-54CE-4FE2-BEC0-9F1C960662E5">
-        <File Id="NoisyFar.dll" Name="NoisyFar.dll" KeyPath="yes" Source="$(var.bundle)\noisy\NoisyFar.dll" DiskId="2" />
-      </Component>
-      <Component Id="NoisyRus.hlf" Guid="AE30829C-DA28-414B-94AC-871FA42F34F8">
-        <File Id="NoisyRus.hlf" Name="NoisyRus.hlf" KeyPath="yes" Source="$(var.bundle)\noisy\NoisyRus.hlf" DiskId="2" />
-      </Component>
-      <Component Id="NoisyRus.lng" Guid="630264AB-8088-44E9-A9B6-EC0011A7273D">
-        <File Id="NoisyRus.lng" Name="NoisyRus.lng" KeyPath="yes" Source="$(var.bundle)\noisy\NoisyRus.lng" DiskId="2" />
-      </Component>
-      <Component Id="NoisyRus.mnu" Guid="8DA81831-F1D6-47D7-9BAD-4A7E73DDBC73">
-        <File Id="NoisyRus.mnu" Name="NoisyRus.mnu" KeyPath="yes" Source="$(var.bundle)\noisy\NoisyRus.mnu" DiskId="2" />
-      </Component>
-      <Component Id="Readme.txt_9" Guid="ED4A69B7-4F7A-4941-B400-BE6673F0DE57">
-        <File Id="Readme.txt_9" Name="Readme.txt" KeyPath="yes" Source="$(var.bundle)\noisy\Readme.txt" DiskId="2" />
-      </Component>
-      <Component Id="Settings.reg_5" Guid="BB8A3104-27C4-40BD-B848-F0D296393F1D">
-        <File Id="Settings.reg_5" Name="Settings.reg" KeyPath="yes" Source="$(var.bundle)\noisy\Settings.reg" DiskId="2" />
-      </Component>
-      <Component Id="tags.dll" Guid="7E04398C-DFE3-4D0F-AA92-6ED6D0AA9E3B">
-        <File Id="tags.dll" Name="tags.dll" KeyPath="yes" Source="$(var.bundle)\noisy\tags.dll" DiskId="2" />
-      </Component>
-      <Component Id="WinNoisy.exe" Guid="09750A13-9E0D-473E-892B-79C320DA77E8">
-        <File Id="WinNoisy.exe" Name="WinNoisy.exe" KeyPath="yes" Source="$(var.bundle)\noisy\WinNoisy.exe" DiskId="2" />
-      </Component>
-      <Directory Id="Radio" Name="Radio">
-        <Component Id="BEST_FM.m3u" Guid="A88E7D60-FC3F-4F6A-9722-12EC1B0FC480">
-          <File Id="BEST_FM.m3u" Name="BEST FM.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\BEST FM.m3u" DiskId="2" />
-        </Component>
-        <Component Id="D_FM.m3u" Guid="20474582-CCB7-4407-9E3C-65337105BB51">
-          <File Id="D_FM.m3u" Name="D-FM.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\D-FM.m3u" DiskId="2" />
-        </Component>
-        <Component Id="Love______.m3u" Guid="2E0CC1E2-548E-4143-BB16-BFD5EB876F3C">
-          <File Id="Love______.m3u" Name="Love Радио.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\Love Радио.m3u" DiskId="2" />
-        </Component>
-        <Component Id="___________.m3u" Guid="8B690BA2-3E3B-4C04-AB4F-E1353C68DA27">
-          <File Id="___________.m3u" Name="Европа Плюс.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\Европа Плюс.m3u" DiskId="2" />
-        </Component>
-        <Component Id="__________.m3u_1" Guid="97DF9CFE-4A7F-4C72-BF86-75884B250FF1">
-          <File Id="__________.m3u_1" Name="Наше Радио.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\Наше Радио.m3u" DiskId="2" />
-        </Component>
-        <Component Id="______ULTRA.m3u" Guid="847A1E6A-F086-48B5-A75F-BA007C349A8C">
-          <File Id="______ULTRA.m3u" Name="Радио ULTRA.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\Радио ULTRA.m3u" DiskId="2" />
-        </Component>
-        <Component Id="__________.m3u_2" Guid="79BABA9F-80BC-4DCF-B1B0-A309843A5AE6">
-          <File Id="__________.m3u_2" Name="Радио Маяк.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\Радио Маяк.m3u" DiskId="2" />
-        </Component>
-        <Component Id="__________.m3u_3" Guid="D4A56FD7-4EF0-4A43-B5D1-994CD3B79116">
-          <File Id="__________.m3u_3" Name="Радио РОКС.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\Радио РОКС.m3u" DiskId="2" />
-        </Component>
-        <Component Id="____________.m3u_1" Guid="CCA03290-F993-46FA-B317-6A4709DB951A">
-          <File Id="____________.m3u_1" Name="Радио Шансон.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\Радио Шансон.m3u" DiskId="2" />
-        </Component>
-        <Component Id="____________.m3u_2" Guid="1AF97BC8-7590-44AC-8424-75663EAB5603">
-          <File Id="____________.m3u_2" Name="Радио Юность.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\Радио Юность.m3u" DiskId="2" />
-        </Component>
-        <Component Id="________.m3u" Guid="CCD93AF2-8AD6-4E47-BE62-F26CD90A3917">
-          <File Id="________.m3u" Name="Ретро ФМ.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\Ретро ФМ.m3u" DiskId="2" />
-        </Component>
-        <Component Id="_____________.m3u" Guid="A67B74B3-79A3-48B4-87CE-69F9C626E768">
-          <File Id="_____________.m3u" Name="Русское Радио.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\Русское Радио.m3u" DiskId="2" />
-        </Component>
-        <Component Id="________________.m3u" Guid="4325D838-1777-498D-92E5-02AC6A97330F">
-          <File Id="________________.m3u" Name="Серебряный дождь.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\Серебряный дождь.m3u" DiskId="2" />
-        </Component>
-        <Component Id="__________.m3u_4" Guid="047EE7C3-0CE4-4225-856A-7372028833B4">
-          <File Id="__________.m3u_4" Name="Эхо Москвы.m3u" KeyPath="yes" Source="$(var.bundle)\noisy\Radio\Эхо Москвы.m3u" DiskId="2" />
-        </Component>
-      </Directory>
-    </Directory>
-    <Directory Id="opera" Name="opera">
-      <Component Id="file_id.diz_17" Guid="F72D568E-2D36-49AA-AF1F-61CCFA856CE8">
-        <File Id="file_id.diz_17" Name="file_id.diz" KeyPath="yes" Source="$(var.bundle)\opera\file_id.diz" DiskId="2" />
-      </Component>
-      <Component Id="History.txt_8" Guid="8F54007E-604D-4165-ABA5-422991ED2FBB">
-        <File Id="History.txt_8" Name="History.txt" KeyPath="yes" Source="$(var.bundle)\opera\History.txt" DiskId="2" />
-      </Component>
-      <Component Id="operac4.dll" Guid="2E160507-ECE8-48E2-9144-5EEB31271D04">
-        <File Id="operac4.dll" Name="operac4.dll" KeyPath="yes" Source="$(var.bundle)\opera\operac4.dll" DiskId="2" />
-      </Component>
-      <Component Id="operac4.hlf" Guid="F773A778-CF0D-4795-BC9B-2671282A98E3">
-        <File Id="operac4.hlf" Name="operac4.hlf" KeyPath="yes" Source="$(var.bundle)\opera\operac4.hlf" DiskId="2" />
-      </Component>
-      <Component Id="operac4Eng.lng" Guid="195FC04A-8514-4E14-9F9E-184F5E7E9756">
-        <File Id="operac4Eng.lng" Name="operac4Eng.lng" KeyPath="yes" Source="$(var.bundle)\opera\operac4Eng.lng" DiskId="2" />
-      </Component>
-      <Component Id="operac4Rus.lng" Guid="4B7AFFE0-C87D-4065-818E-C26DF3C3D27A">
-        <File Id="operac4Rus.lng" Name="operac4Rus.lng" KeyPath="yes" Source="$(var.bundle)\opera\operac4Rus.lng" DiskId="2" />
-      </Component>
-      <Component Id="readme.txt_10" Guid="36BD8CAC-2ACB-4398-8FA6-3BA4CDA6A62B">
-        <File Id="readme.txt_10" Name="readme.txt" KeyPath="yes" Source="$(var.bundle)\opera\readme.txt" DiskId="2" />
-      </Component>
-    </Directory>
     <Directory Id="qplayex" Name="qplayex">
       <Component Id="file_id.diz_18" Guid="336B17A1-3FE5-403E-9B0B-D82FAAF24DAD">
         <File Id="file_id.diz_18" Name="file_id.diz" KeyPath="yes" Source="$(var.bundle)\qplayex\file_id.diz" DiskId="2" />
@@ -1678,23 +1442,6 @@
         </Component>
       </Directory>
     </Directory>
-    <Directory Id="torrent" Name="torrent">
-      <Component Id="History.txt_10" Guid="0E5C16DA-A8EA-44DE-BA3E-3D890AD8CA0D">
-        <File Id="History.txt_10" Name="History.txt" KeyPath="yes" Source="$(var.bundle)\torrent\History.txt" DiskId="2" />
-      </Component>
-      <Component Id="ReadMe.txt_12" Guid="D3E3DE01-BCF5-44B6-9329-F114AB7A4BF7">
-        <File Id="ReadMe.txt_12" Name="ReadMe.txt" KeyPath="yes" Source="$(var.bundle)\torrent\ReadMe.txt" DiskId="2" />
-      </Component>
-      <Component Id="Torrent.hlf" Guid="EED71EEC-5608-4A4D-9254-94CEECE95F32">
-        <File Id="Torrent.hlf" Name="Torrent.hlf" KeyPath="yes" Source="$(var.bundle)\torrent\Torrent.hlf" DiskId="2" />
-      </Component>
-      <Component Id="TorrentEng.lng" Guid="2F0FE4B7-6862-4DA6-B960-08CF640508A9">
-        <File Id="TorrentEng.lng" Name="TorrentEng.lng" KeyPath="yes" Source="$(var.bundle)\torrent\TorrentEng.lng" DiskId="2" />
-      </Component>
-      <Component Id="TorrentU.dll" Guid="B99D969F-B10E-4EBA-8C2A-93DB62AA4EA8">
-        <File Id="TorrentU.dll" Name="TorrentU.dll" KeyPath="yes" Source="$(var.bundle)\torrent\TorrentU.dll" DiskId="2" />
-      </Component>
-    </Directory>
     <Directory Id="ucharmap" Name="ucharmap">
       <Component Id="file_id.diz_19" Guid="180089CF-65F4-4091-86B2-A2A0364CB60A">
         <File Id="file_id.diz_19" Name="file_id.diz" KeyPath="yes" Source="$(var.bundle)\ucharmap\file_id.diz" DiskId="2" />
@@ -1763,23 +1510,6 @@
           <File Id="svn.reg" Name="svn.reg" KeyPath="yes" Source="$(var.bundle)\yac\context\svn.reg" DiskId="2" />
         </Component>
       </Directory>
-    </Directory>
-    <Directory Id="conemu_2" Name="conemu">
-      <Component Id="AltEnter.reg" Guid="A63E0695-93AD-4BC2-9577-863921DDB221">
-        <File Id="AltEnter.reg" Name="AltEnter.reg" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\AltEnter.reg" DiskId="2" />
-      </Component>
-      <Component Id="AltEnter_ANSI.reg" Guid="5D3B7442-AB5B-4374-8545-4F32C72FD0D2">
-        <File Id="AltEnter_ANSI.reg" Name="AltEnter_ANSI.reg" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\AltEnter_ANSI.reg" DiskId="2" />
-      </Component>
-      <Component Id="ConEmu.dll" Guid="96E7EE7C-711B-4C07-8454-8D136DD8EEB3">
-        <File Id="ConEmu.dll" Name="ConEmu.dll" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\ConEmu.dll" DiskId="2" />
-      </Component>
-      <Component Id="ConEmuPlugin_en.lng" Guid="B1B5F857-F5E6-4CC6-B63C-938948640072">
-        <File Id="ConEmuPlugin_en.lng" Name="ConEmuPlugin_en.lng" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\ConEmuPlugin_en.lng" DiskId="2" />
-      </Component>
-      <Component Id="ConEmuPlugin_ru.lng" Guid="B17DE9A1-2EAC-4DC2-BA5E-3BF02900D5B1">
-        <File Id="ConEmuPlugin_ru.lng" Name="ConEmuPlugin_ru.lng" KeyPath="yes" Source="$(var.bundle)\conemu\plugins\ConEmu\ConEmuPlugin_ru.lng" DiskId="2" />
-      </Component>
     </Directory>
     <Directory Id="airbrush" Name="airbrush">
       <Component Id="airbrush.dll" Guid="C65577D3-4489-4F37-8BB0-A09775E50D65">
@@ -2340,78 +2070,6 @@
         <File Id="nteventr.lng" Name="nteventr.lng" KeyPath="yes" Source="$(var.bundle)\ntevent\nteventr.lng" DiskId="2" />
       </Component>
     </Directory>
-    <Directory Id="picviewadv" Name="picviewadv">
-      <Component Id="COPYING_5" Guid="4260CB24-E456-4198-8D97-BD42882EA473">
-        <File Id="COPYING_5" Name="COPYING" KeyPath="yes" Source="$(var.bundle)\picviewadv\COPYING" DiskId="2" />
-      </Component>
-      <Component Id="file_id.diz_30" Guid="830E7E13-91B2-43F7-BC30-D1E541FE8392">
-        <File Id="file_id.diz_30" Name="file_id.diz" KeyPath="yes" Source="$(var.bundle)\picviewadv\file_id.diz" DiskId="2" />
-      </Component>
-      <Component Id="history.txt_17" Guid="356F3834-1DB2-476E-85D0-F896D463625A">
-        <File Id="history.txt_17" Name="history.txt" KeyPath="yes" Source="$(var.bundle)\picviewadv\history.txt" DiskId="2" />
-      </Component>
-      <Component Id="libgfl220.dll" Guid="2C56928C-6C67-4747-BFE8-3D23560093EA">
-        <File Id="libgfl220.dll" Name="libgfl220.dll" KeyPath="yes" Source="$(var.bundle)\picviewadv\libgfl220.dll" DiskId="2" />
-      </Component>
-      <Component Id="PicViewAdv.dll" Guid="5938D7FC-7FCD-44DE-BE8E-500AA99AEFDD">
-        <File Id="PicViewAdv.dll" Name="PicViewAdv.dll" KeyPath="yes" Source="$(var.bundle)\picviewadv\PicViewAdv.dll" DiskId="2" />
-      </Component>
-      <Component Id="PicViewAdv.lng" Guid="9D1163AC-4967-4190-B3E0-C1F02E56E641">
-        <File Id="PicViewAdv.lng" Name="PicViewAdv.lng" KeyPath="yes" Source="$(var.bundle)\picviewadv\PicViewAdv.lng" DiskId="2" />
-      </Component>
-      <Component Id="PicViewAdv.map" Guid="C1FBC57B-9062-44EC-A096-C807EC42E2F8">
-        <File Id="PicViewAdv.map" Name="PicViewAdv.map" KeyPath="yes" Source="$(var.bundle)\picviewadv\PicViewAdv.map" DiskId="2" />
-      </Component>
-      <Component Id="readme.txt_17" Guid="10843A2D-29BB-4F93-BEDD-67949C697027">
-        <File Id="readme.txt_17" Name="readme.txt" KeyPath="yes" Source="$(var.bundle)\picviewadv\readme.txt" DiskId="2" />
-      </Component>
-    </Directory>
-    <Directory Id="ppcbrowser" Name="ppcbrowser">
-      <Component Id="PPCBrowser.dll" Guid="E7372071-3110-414F-9F14-95DE79166354">
-        <File Id="PPCBrowser.dll" Name="PPCBrowser.dll" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\PPCBrowser.dll" DiskId="2" />
-      </Component>
-      <Component Id="PPCBrowser.hlf" Guid="1C718798-EB86-4484-9284-2C5460DE8044">
-        <File Id="PPCBrowser.hlf" Name="PPCBrowser.hlf" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\PPCBrowser.hlf" DiskId="2" />
-      </Component>
-      <Component Id="PPCBrowserEng.lng" Guid="253087FD-D91A-420A-AEF8-F59EC7709143">
-        <File Id="PPCBrowserEng.lng" Name="PPCBrowserEng.lng" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\PPCBrowserEng.lng" DiskId="2" />
-      </Component>
-      <Component Id="PPCBrowserRus.lng" Guid="08E5A9EA-C5EA-4A3F-A930-C0413FED4338">
-        <File Id="PPCBrowserRus.lng" Name="PPCBrowserRus.lng" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\PPCBrowserRus.lng" DiskId="2" />
-      </Component>
-      <Component Id="ReadMe.txt_18" Guid="2F88B094-27BC-4E43-AF71-D8F8E7FFA851">
-        <File Id="ReadMe.txt_18" Name="ReadMe.txt" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\ReadMe.txt" DiskId="2" />
-      </Component>
-      <Component Id="WhatsNew.txt_9" Guid="F8CAF9E7-160D-4D59-B3AD-7C1672339597">
-        <File Id="WhatsNew.txt_9" Name="WhatsNew.txt" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\WhatsNew.txt" DiskId="2" />
-      </Component>
-      <Directory Id="Modules" Name="Modules">
-        <Component Id="control.module" Guid="351AE2FF-E030-48BF-88D3-FDD5834FAB82">
-          <File Id="control.module" Name="control.module" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\Modules\control.module" DiskId="2" />
-        </Component>
-        <Component Id="desktop.module" Guid="A33C7A94-577B-4CB7-B6D9-1245304CFB82">
-          <File Id="desktop.module" Name="desktop.module" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\Modules\desktop.module" DiskId="2" />
-        </Component>
-        <Component Id="files.module" Guid="EC08CA9C-C059-4035-80E0-3CD80E568FD0">
-          <File Id="files.module" Name="files.module" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\Modules\files.module" DiskId="2" />
-        </Component>
-        <Component Id="pim.ini" Guid="E0EA5ABE-C827-4168-9BFE-4F8E07EC8AE2">
-          <File Id="pim.ini" Name="pim.ini" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\Modules\pim.ini" DiskId="2" />
-        </Component>
-        <Component Id="pim.module" Guid="685246F2-92E3-4293-9BFE-F26391FABF74">
-          <File Id="pim.module" Name="pim.module" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\Modules\pim.module" DiskId="2" />
-        </Component>
-        <Component Id="registry.module" Guid="5BB18235-5526-43FD-837C-79D6F2B8B74D">
-          <File Id="registry.module" Name="registry.module" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\Modules\registry.module" DiskId="2" />
-        </Component>
-        <Component Id="windows.ini" Guid="7DCD892C-67CE-449D-9BF4-CBA94118A7E4">
-          <File Id="windows.ini" Name="windows.ini" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\Modules\windows.ini" DiskId="2" />
-        </Component>
-        <Component Id="windows.module" Guid="2B4D0491-5D81-4704-98EF-46E3D423C4A4">
-          <File Id="windows.module" Name="windows.module" KeyPath="yes" Source="$(var.bundle)\ppcbrowser\Modules\windows.module" DiskId="2" />
-        </Component>
-      </Directory>
-    </Directory>
     <Directory Id="userman" Name="userman">
       <Component Id="COPYING_6" Guid="53FDD219-FB75-42DF-A259-DFD4F4F14C7D">
         <File Id="COPYING_6" Name="COPYING" KeyPath="yes" Source="$(var.bundle)\userman\COPYING" DiskId="2" />
@@ -2497,55 +2155,6 @@
       </Component>
       <Component Id="Visualizer.map" Guid="D01B1601-FB8F-465D-A4F6-33D5F70D62FC">
         <File Id="Visualizer.map" Name="Visualizer.map" KeyPath="yes" Source="$(var.bundle)\visualizer\Visualizer.map" DiskId="2" />
-      </Component>
-    </Directory>
-    <Directory Id="complete" Name="complete">
-      <Component Id="cmpl_new.reg" Guid="F4008942-2B64-495D-A877-4367BA43283D">
-        <File Id="cmpl_new.reg" Name="cmpl_new.reg" KeyPath="yes" Source="$(var.bundle)\complete\cmpl_new.reg" DiskId="2" />
-      </Component>
-      <Component Id="compleng.hlf" Guid="97F0119D-AEA9-4BB2-AC17-FDE191EA6955">
-        <File Id="compleng.hlf" Name="compleng.hlf" KeyPath="yes" Source="$(var.bundle)\complete\compleng.hlf" DiskId="2" />
-      </Component>
-      <Component Id="compleng.lng" Guid="86B0C632-B1C1-47BC-A020-E0A463A3AF18">
-        <File Id="compleng.lng" Name="compleng.lng" KeyPath="yes" Source="$(var.bundle)\complete\compleng.lng" DiskId="2" />
-      </Component>
-      <Component Id="complete.dll" Guid="0D1648BF-5221-4A9C-AF84-871568731778">
-        <File Id="complete.dll" Name="complete.dll" KeyPath="yes" Source="$(var.bundle)\complete\complete.dll" DiskId="2" />
-      </Component>
-      <Component Id="complete.reg" Guid="3C62B482-532B-426A-93F5-201B138E60D5">
-        <File Id="complete.reg" Name="complete.reg" KeyPath="yes" Source="$(var.bundle)\complete\complete.reg" DiskId="2" />
-      </Component>
-      <Component Id="complrus.hlf" Guid="1061FC37-5B30-432D-8299-FD24F249D87A">
-        <File Id="complrus.hlf" Name="complrus.hlf" KeyPath="yes" Source="$(var.bundle)\complete\complrus.hlf" DiskId="2" />
-      </Component>
-      <Component Id="complrus.lng" Guid="5145F473-38C1-4A64-89AF-0C6E4A48EB9A">
-        <File Id="complrus.lng" Name="complrus.lng" KeyPath="yes" Source="$(var.bundle)\complete\complrus.lng" DiskId="2" />
-      </Component>
-      <Component Id="WhatsNew.eng" Guid="FC334EEF-97E2-4AFF-A3B6-1DAC0CF739C8">
-        <File Id="WhatsNew.eng" Name="WhatsNew.eng" KeyPath="yes" Source="$(var.bundle)\complete\WhatsNew.eng" DiskId="2" />
-      </Component>
-      <Component Id="WhatsNew.rus_2" Guid="21D3AA2E-985E-4135-933B-07F3389D9805">
-        <File Id="WhatsNew.rus_2" Name="WhatsNew.rus" KeyPath="yes" Source="$(var.bundle)\complete\WhatsNew.rus" DiskId="2" />
-      </Component>
-    </Directory>
-    <Directory Id="drgndrop" Name="drgndrop">
-      <Component Id="dndeng.lng" Guid="B88E0535-05ED-4C7E-A018-28BAB339F641">
-        <File Id="dndeng.lng" Name="dndeng.lng" KeyPath="yes" Source="$(var.bundle)\drgndrop\dndeng.lng" DiskId="2" />
-      </Component>
-      <Component Id="dndrus.lng" Guid="482F6CC9-4D70-443C-A7EF-ACEA82862924">
-        <File Id="dndrus.lng" Name="dndrus.lng" KeyPath="yes" Source="$(var.bundle)\drgndrop\dndrus.lng" DiskId="2" />
-      </Component>
-      <Component Id="drgndrop.dll" Guid="BC31C4A6-A75C-4FAE-8AA2-73BF41D80D8E">
-        <File Id="drgndrop.dll" Name="drgndrop.dll" KeyPath="yes" Source="$(var.bundle)\drgndrop\drgndrop.dll" DiskId="2" />
-      </Component>
-      <Component Id="drgndrop.hook" Guid="AD427526-6545-404A-993B-20CD09051C52">
-        <File Id="drgndrop.hook" Name="drgndrop.hook" KeyPath="yes" Source="$(var.bundle)\drgndrop\drgndrop.hook" DiskId="2" />
-      </Component>
-      <Component Id="drgndrop.map" Guid="375BF434-D912-4346-B6FC-5DDDBCBB3174">
-        <File Id="drgndrop.map" Name="drgndrop.map" KeyPath="yes" Source="$(var.bundle)\drgndrop\drgndrop.map" DiskId="2" />
-      </Component>
-      <Component Id="holder.dnd" Guid="8B6060ED-1D21-4612-A42F-B8E8D4377AB3">
-        <File Id="holder.dnd" Name="holder.dnd" KeyPath="yes" Source="$(var.bundle)\drgndrop\holder.dnd" DiskId="2" />
       </Component>
     </Directory>
     <Directory Id="true_tpl" Name="true-tpl">
@@ -3020,6 +2629,26 @@
           </Directory>
         </Directory>
       </Directory>
+    </Directory>
+    <Directory Id="pictureview" Name="pictureview">
+      <Component Id="_0PictureView.dll" Guid="9E634A43-888C-4776-BE9B-10B518BD8D17">
+        <File Id="_0PictureView.dll" KeyPath="yes" Source="$(var.bundle)\pictureview\0PictureView.dll" />
+      </Component>
+      <Component Id="BMP.pvd" Guid="0405EF42-6EBA-467D-9DBB-5E18CD94D9E5">
+        <File Id="BMP.pvd" KeyPath="yes" Source="$(var.bundle)\pictureview\BMP.pvd" />
+      </Component>
+      <Component Id="PictureView_en.lng" Guid="92CCE058-F768-403C-BE13-F66496B799A0">
+        <File Id="PictureView_en.lng" KeyPath="yes" Source="$(var.bundle)\pictureview\PictureView_en.lng" />
+      </Component>
+      <Component Id="PictureView_ru.hlf" Guid="188C1BFF-137D-47BE-BA09-E7002AF482EB">
+        <File Id="PictureView_ru.hlf" KeyPath="yes" Source="$(var.bundle)\pictureview\PictureView_ru.hlf" />
+      </Component>
+      <Component Id="PictureView_ru.lng" Guid="EA08CB0A-F696-49CE-989E-07389CE0082F">
+        <File Id="PictureView_ru.lng" KeyPath="yes" Source="$(var.bundle)\pictureview\PictureView_ru.lng" />
+      </Component>
+      <Component Id="Readme.txt_21" Guid="C5DA6328-2CA5-42AB-89F2-13F697C6999A">
+        <File Id="Readme.txt_21" KeyPath="yes" Source="$(var.bundle)\pictureview\Readme.txt" />
+      </Component>
     </Directory>
     <?endif?>
   </Directory>

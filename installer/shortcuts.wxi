@@ -15,41 +15,17 @@
           <Shortcut Id="ClearPluginsCache" Name="Clear plugins cache" Target="[INSTALLDIR]\ClearPluginsCache.cmd" WorkingDirectory="INSTALLDIR"/>
         </Component>
       </Directory>
-      <?ifdef bundle ?>
-      <Component Id="ConEmuProgramsShortcut" Guid="57b6a648-f97f-4686-a35f-0a6b6d016e67">
-        <Shortcut Id="ConEmuProgramsShortcut" Name="ConEmu" Target="[INSTALLDIR]\ConEmu.exe" WorkingDirectory="INSTALLDIR"/>
-      </Component>
-      <Component Id="ConManProgramsShortcut" Guid="01f85c2c-9f1d-4d93-8465-833a85382373">
-        <Shortcut Id="ConManProgramsShortcut" Name="ConMan" Target="[INSTALLDIR]\ConEmu.exe" Arguments="/ConMan /cmd Far" WorkingDirectory="INSTALLDIR"/>
-      </Component>
-      <?endif?>
     </Directory>
   </Directory>
   <Directory Id="DesktopFolder">
     <Component Id="FarDesktopShortcut" Guid="4f1473c2-0e00-43b1-af4b-b9998b01f95e">
       <Shortcut Id="FarDesktopShortcut" Name="$(var.Product)" Target="[INSTALLDIR]\Far.exe" WorkingDirectory="INSTALLDIR"/>
     </Component>
-    <?ifdef bundle ?>
-    <Component Id="ConEmuDesktopShortcut" Guid="ed58f868-2b46-426d-8fbe-03db117ded27">
-      <Shortcut Id="ConEmuDesktopShortcut" Name="ConEmu" Target="[INSTALLDIR]\ConEmu.exe" WorkingDirectory="INSTALLDIR"/>
-    </Component>
-    <Component Id="ConManDesktopShortcut" Guid="f35354d2-6889-4d6d-9d65-3b76e8fdd11a">
-      <Shortcut Id="ConManDesktopShortcut" Name="ConMan" Target="[INSTALLDIR]\ConEmu.exe" Arguments="/ConMan /cmd Far" WorkingDirectory="INSTALLDIR"/>
-    </Component>
-    <?endif?>
   </Directory>
   <Directory Id="StartMenuFolder">
     <Component Id="FarStartMenuShortcut" Guid="eac18761-c3db-4f43-ac9a-b966374e4bb2">
       <Shortcut Id="FarStartMenuShortcut" Name="$(var.Product)" Target="[INSTALLDIR]\Far.exe" WorkingDirectory="INSTALLDIR"/>
     </Component>
-    <?ifdef bundle ?>
-    <Component Id="ConEmuStartMenuShortcut" Guid="4851c87c-4ad5-499f-8f19-2fdaf32cc58b">
-      <Shortcut Id="ConEmuStartMenuShortcut" Name="ConEmu" Target="[INSTALLDIR]\ConEmu.exe" WorkingDirectory="INSTALLDIR"/>
-    </Component>
-    <Component Id="ConManStartMenuShortcut" Guid="fa32c0b0-1887-4d7a-8791-d542c330a1a5">
-      <Shortcut Id="ConManStartMenuShortcut" Name="ConMan" Target="[INSTALLDIR]\ConEmu.exe" Arguments="/ConMan /cmd Far" WorkingDirectory="INSTALLDIR"/>
-    </Component>
-    <?endif?>
   </Directory>
   <Directory Id="AppDataFolder">
     <Directory Id="Microsoft" Name="Microsoft">
@@ -58,14 +34,6 @@
           <Component Id="FarQuickLaunchShortcut" Guid="f21c177f-fca2-456e-9983-a3b9c55b33fc">
             <Shortcut Id="FarQuickLaunchShortcut" Name="$(var.Product)" Target="[INSTALLDIR]\Far.exe" WorkingDirectory="INSTALLDIR"/>
           </Component>
-          <?ifdef bundle ?>
-          <Component Id="ConEmuQuickLaunchShortcut" Guid="85dba5f9-4fe9-4296-b426-c7f5ccf1c051">
-            <Shortcut Id="ConEmuQuickLaunchShortcut" Name="ConEmu" Target="[INSTALLDIR]\ConEmu.exe" WorkingDirectory="INSTALLDIR"/>
-          </Component>
-          <Component Id="ConManQuickLaunchShortcut" Guid="28e2003a-9794-48d8-a341-5c1aff1777a5">
-            <Shortcut Id="ConManQuickLaunchShortcut" Name="ConMan" Target="[INSTALLDIR]\ConEmu.exe" Arguments="/ConMan /cmd Far" WorkingDirectory="INSTALLDIR"/>
-          </Component>
-          <?endif?>
         </Directory>
       </Directory>
     </Directory>

@@ -98,7 +98,6 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("ntfsfile", "FExcept");
   UPDATE_FEATURE("PEDITOR", "Russian");
   UPDATE_FEATURE("Registry", "Russian");
-  if (MsiSetFeatureState(h_install, "RegistryItalian", INSTALLSTATE_ABSENT) != ERROR_SUCCESS) return ERROR_INSTALL_FAILURE;
   UPDATE_FEATURE("RESearch", "Russian");
   UPDATE_FEATURE("Resource", "Russian");
   UPDATE_FEATURE("UnInstall", "Russian");
@@ -113,15 +112,9 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("FarHintsProcess", "Russian");
   UPDATE_FEATURE("FarHintsVerInfo", "Russian");
   UPDATE_FEATURE("FontMan", "Russian");
-  UPDATE_FEATURE("MoreHistory", "Russian");
-  UPDATE_FEATURE("Noisy", "Russian");
-  UPDATE_FEATURE("Opera", "Russian");
   UPDATE_FEATURE("qPlayEx", "Russian");
   UPDATE_FEATURE("UCharMap", "Russian");
   UPDATE_FEATURE("yac", "Russian");
-  UPDATE_FEATURE("Docs", "ConEmu");
-  UPDATE_FEATURE("ConEmuPlugin", "Russian");
-  UPDATE_FEATURE("ConMan", "Russian");
   UPDATE_FEATURE("airbrush", "FExcept");
   UPDATE_FEATURE("armgnuasm.fmt", "FExcept");
   UPDATE_FEATURE("awk.fmt", "FExcept");
@@ -155,15 +148,10 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("Unix.mvp", "FExcept");
   UPDATE_FEATURE("ntevent", "Russian");
   UPDATE_FEATURE("ntevent", "FExcept");
-  UPDATE_FEATURE("PicViewAdv", "FExcept");
-  UPDATE_FEATURE("PPCBrowser", "Russian");
   UPDATE_FEATURE("userman", "FExcept");
   UPDATE_FEATURE("VisRen", "Russian");
   UPDATE_FEATURE("VisRen", "FExcept");
   UPDATE_FEATURE("Visualizer", "FExcept");
-  UPDATE_FEATURE("complete", "Russian");
-  UPDATE_FEATURE("drgndrop", "Russian");
-  UPDATE_FEATURE("drgndrop", "FExcept");
   UPDATE_FEATURE("true_tpl", "Russian");
   UPDATE_FEATURE("true_tpl", "FExcept");
   UPDATE_FEATURE("NewArc7Zip", "FExcept");
@@ -186,6 +174,7 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("NewArc", "Russian");
   UPDATE_FEATURE("NewArc", "FExcept");
   UPDATE_FEATURE("NewArc", "Changelogs");
+  UPDATE_FEATURE("pictureview", "Russian");
 #endif
   return ERROR_SUCCESS;
 }
