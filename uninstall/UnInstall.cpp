@@ -299,17 +299,12 @@ static LONG_PTR WINAPI DlgProc(HANDLE hDlg,int Msg,int Param1,LONG_PTR Param2)
       if (Param1 == LIST_BOX)
       {
         FarListColors *Colors = (FarListColors *)Param2;
-        int ColorIndex[] =
-        {
-          COL_MENUBOX,COL_MENUBOX,COL_MENUTITLE,COL_MENUTEXT,
-          COL_MENUHIGHLIGHT,COL_MENUBOX,COL_MENUSELECTEDTEXT,
-          COL_MENUSELECTEDHIGHLIGHT,COL_MENUSCROLLBAR,COL_MENUDISABLEDTEXT
-        };
+        int ColorIndex[] = { COL_MENUBOX, COL_MENUBOX, COL_MENUTITLE, COL_MENUTEXT, COL_MENUHIGHLIGHT, COL_MENUBOX, COL_MENUSELECTEDTEXT, COL_MENUSELECTEDHIGHLIGHT, COL_MENUSCROLLBAR, COL_MENUDISABLEDTEXT, COL_MENUARROWS, COL_MENUARROWSSELECTED, COL_MENUARROWSDISABLED };
         int Count = ARRAYSIZE(ColorIndex);
         if (Count > Colors->ColorCount)
           Count = Colors->ColorCount;
-        for (int i=0;i<Count;i++)
-          Colors->Colors[i] = static_cast<BYTE>(Info.AdvControl(Info.ModuleNumber,ACTL_GETCOLOR,(void *)(ColorIndex[i])));
+        for (int i = 0; i < Count; i++)
+          Colors->Colors[i] = static_cast<BYTE>(Info.AdvControl(Info.ModuleNumber, ACTL_GETCOLOR, reinterpret_cast<void *>(ColorIndex[i])));
         return TRUE;
       }
     break;
