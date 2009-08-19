@@ -1084,17 +1084,6 @@
           <ComponentRef Id="ntfsfile.map" />
         </Feature>
       </Feature>
-      <Feature Id="PEDITOR" Level="2" Title="PEditor" AllowAdvertise="no" Description="Portable executable (PE) file editor">
-        <ComponentRef Id="FILE_ID.DIZ_7" />
-        <ComponentRef Id="PEDITENG.HLF" />
-        <ComponentRef Id="PEDITENG.LNG" />
-        <ComponentRef Id="PEDITOR.dll" />
-        <ComponentRef Id="WHATSNEW.TXT_4" />
-        <Feature Id="PEDITORRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="PEDITRUS.HLF" />
-          <ComponentRef Id="PEDITRUS.LNG" />
-        </Feature>
-      </Feature>
       <Feature Id="pictureview" Level="2" Title="PictureView" AllowAdvertise="no" Description="Graphic file format viewer">
         <ComponentRef Id="_0PictureView.dll" />
         <ComponentRef Id="BMP.pvd" />
@@ -1179,18 +1168,6 @@
         <Feature Id="RESearchRussian" Level="2" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="RESearchRus.hlf" />
           <ComponentRef Id="RESearchRus.lng" />
-        </Feature>
-      </Feature>
-      <Feature Id="Resource" Level="2" Title="Resource" AllowAdvertise="no" Description="Portable executable (PE) resource browser">
-        <ComponentRef Id="file_id.diz_10" />
-        <ComponentRef Id="History.txt_3" />
-        <ComponentRef Id="readme.txt_4" />
-        <ComponentRef Id="ResEng.hlf" />
-        <ComponentRef Id="ResEng.lng" />
-        <ComponentRef Id="Resource.dll" />
-        <Feature Id="ResourceRussian" Level="2" Display="hidden" AllowAdvertise="no">
-          <ComponentRef Id="ResRus.hlf" />
-          <ComponentRef Id="ResRus.lng" />
         </Feature>
       </Feature>
       <Feature Id="true_tpl" Level="2" Title="True Template" AllowAdvertise="no" Description="Smart indent and macro expansion">
@@ -1388,6 +1365,21 @@
         <Feature Id="wmexplorerFExcept" Level="2" Display="hidden" AllowAdvertise="no">
           <ComponentRef Id="wmexplorer.map" />
         </Feature>
+      </Feature>
+      <Feature Id="x_browse" Level="2" Title="EXE Browser" AllowAdvertise="no" Description="Executable file structure browser">
+        <ComponentRef Id="cadt.dl" />
+        <ComponentRef Id="history.txt_20" />
+        <ComponentRef Id="readme.txt_22" />
+        <ComponentRef Id="todo.txt_1" />
+        <ComponentRef Id="x_browse.dll" />
+        <ComponentRef Id="x_browse.eng.hlf" />
+        <ComponentRef Id="x_browse.eng.lng" />
+        <ComponentRef Id="x_browse.ini" />
+        <ComponentRef Id="history.txt_21" />
+        <ComponentRef Id="pe.ebm" />
+        <ComponentRef Id="pe.english.lng" />
+        <ComponentRef Id="readme.txt_23" />
+        <ComponentRef Id="todo.txt_2" />
       </Feature>
       <Feature Id="yac" Level="2" Title="yac" AllowAdvertise="no" Description="Command line completion">
         <ComponentRef Id="changelog_19" />

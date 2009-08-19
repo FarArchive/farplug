@@ -96,10 +96,8 @@ UINT __stdcall UpdateFeatureState(MSIHANDLE h_install) {
   UPDATE_FEATURE("FileCopyEx", "FExcept");
   UPDATE_FEATURE("ntfsfile", "Russian");
   UPDATE_FEATURE("ntfsfile", "FExcept");
-  UPDATE_FEATURE("PEDITOR", "Russian");
   UPDATE_FEATURE("Registry", "Russian");
   UPDATE_FEATURE("RESearch", "Russian");
-  UPDATE_FEATURE("Resource", "Russian");
   UPDATE_FEATURE("UnInstall", "Russian");
   UPDATE_FEATURE("UnInstall", "FExcept");
   UPDATE_FEATURE("wmexplorer", "Russian");

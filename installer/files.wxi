@@ -995,29 +995,6 @@
         <File Id="ru.hlf" Name="ru.hlf" KeyPath="yes" Source="$(var.bundle)\ntfsfile\ru.hlf" DiskId="2" />
       </Component>
     </Directory>
-    <Directory Id="peditor" Name="peditor">
-      <Component Id="FILE_ID.DIZ_7" Guid="9D6BBE0A-7F50-4396-BAC3-2F6C78CD6CB6">
-        <File Id="FILE_ID.DIZ_7" Name="FILE_ID.DIZ" KeyPath="yes" Source="$(var.bundle)\peditor\FILE_ID.DIZ" DiskId="2" />
-      </Component>
-      <Component Id="PEDITENG.HLF" Guid="A31B279F-D049-41D7-8ED9-954DB3854319">
-        <File Id="PEDITENG.HLF" Name="PEDITENG.HLF" KeyPath="yes" Source="$(var.bundle)\peditor\PEDITENG.HLF" DiskId="2" />
-      </Component>
-      <Component Id="PEDITENG.LNG" Guid="C77FF0F4-97BC-4678-AA78-202994C417C8">
-        <File Id="PEDITENG.LNG" Name="PEDITENG.LNG" KeyPath="yes" Source="$(var.bundle)\peditor\PEDITENG.LNG" DiskId="2" />
-      </Component>
-      <Component Id="PEDITOR.dll" Guid="42726490-B3AC-4AFC-B577-04669A39EB7C">
-        <File Id="PEDITOR.dll" Name="PEDITOR.dll" KeyPath="yes" Source="$(var.bundle)\peditor\PEDITOR.dll" DiskId="2" />
-      </Component>
-      <Component Id="PEDITRUS.HLF" Guid="FE8AB89E-2320-4A91-B417-86EC1FB8DA4D">
-        <File Id="PEDITRUS.HLF" Name="PEDITRUS.HLF" KeyPath="yes" Source="$(var.bundle)\peditor\PEDITRUS.HLF" DiskId="2" />
-      </Component>
-      <Component Id="PEDITRUS.LNG" Guid="853E5187-4A13-467B-98BF-310618D71279">
-        <File Id="PEDITRUS.LNG" Name="PEDITRUS.LNG" KeyPath="yes" Source="$(var.bundle)\peditor\PEDITRUS.LNG" DiskId="2" />
-      </Component>
-      <Component Id="WHATSNEW.TXT_4" Guid="8A499BE0-FA4E-481D-8905-0F0E5F12693C">
-        <File Id="WHATSNEW.TXT_4" Name="WHATSNEW.TXT" KeyPath="yes" Source="$(var.bundle)\peditor\WHATSNEW.TXT" DiskId="2" />
-      </Component>
-    </Directory>
     <Directory Id="registry" Name="registry">
       <Component Id="FILE_ID.DIZ_8" Guid="A8FDD228-5B6E-45D8-A456-95304E97D4CC">
         <File Id="FILE_ID.DIZ_8" Name="FILE_ID.DIZ" KeyPath="yes" Source="$(var.bundle)\registry\FILE_ID.DIZ" DiskId="2" />
@@ -1092,32 +1069,6 @@
       </Component>
       <Component Id="ViewFind.reg" Guid="E4A8D310-144E-4FE8-B844-2282BBB3DDEF">
         <File Id="ViewFind.reg" Name="ViewFind.reg" KeyPath="yes" Source="$(var.bundle)\research\ViewFind.reg" DiskId="2" />
-      </Component>
-    </Directory>
-    <Directory Id="resource_2" Name="resource">
-      <Component Id="file_id.diz_10" Guid="6CCB39FA-BDC2-45E0-B492-2EF18D8AE5C7">
-        <File Id="file_id.diz_10" Name="file_id.diz" KeyPath="yes" Source="$(var.bundle)\resource\file_id.diz" DiskId="2" />
-      </Component>
-      <Component Id="History.txt_3" Guid="48FFC7D1-96DA-4679-9A1B-3DE13AB4C4BD">
-        <File Id="History.txt_3" Name="History.txt" KeyPath="yes" Source="$(var.bundle)\resource\History.txt" DiskId="2" />
-      </Component>
-      <Component Id="readme.txt_4" Guid="9CEAD447-B255-47A1-BA8D-EBF66148E37D">
-        <File Id="readme.txt_4" Name="readme.txt" KeyPath="yes" Source="$(var.bundle)\resource\readme.txt" DiskId="2" />
-      </Component>
-      <Component Id="ResEng.hlf" Guid="539A5ACB-4D92-4F0C-B755-E2C04E172420">
-        <File Id="ResEng.hlf" Name="ResEng.hlf" KeyPath="yes" Source="$(var.bundle)\resource\ResEng.hlf" DiskId="2" />
-      </Component>
-      <Component Id="ResEng.lng" Guid="65042090-82EC-45A9-BFDE-A2B683CDCCD8">
-        <File Id="ResEng.lng" Name="ResEng.lng" KeyPath="yes" Source="$(var.bundle)\resource\ResEng.lng" DiskId="2" />
-      </Component>
-      <Component Id="Resource.dll" Guid="EE8CA59E-04E5-4A6E-9D8F-3275B07E83DD">
-        <File Id="Resource.dll" Name="Resource.dll" KeyPath="yes" Source="$(var.bundle)\resource\Resource.dll" DiskId="2" />
-      </Component>
-      <Component Id="ResRus.hlf" Guid="4C8802C7-A3E2-4144-AAE1-19A8B89C046C">
-        <File Id="ResRus.hlf" Name="ResRus.hlf" KeyPath="yes" Source="$(var.bundle)\resource\ResRus.hlf" DiskId="2" />
-      </Component>
-      <Component Id="ResRus.lng" Guid="E76CBE40-4B1D-4AA2-93BD-0F2FD56820B2">
-        <File Id="ResRus.lng" Name="ResRus.lng" KeyPath="yes" Source="$(var.bundle)\resource\ResRus.lng" DiskId="2" />
       </Component>
     </Directory>
     <Directory Id="uninstall" Name="uninstall">
@@ -2632,23 +2583,68 @@
     </Directory>
     <Directory Id="pictureview" Name="pictureview">
       <Component Id="_0PictureView.dll" Guid="9E634A43-888C-4776-BE9B-10B518BD8D17">
-        <File Id="_0PictureView.dll" KeyPath="yes" Source="$(var.bundle)\pictureview\0PictureView.dll" />
+        <File Id="_0PictureView.dll" KeyPath="yes" Source="$(var.bundle)\pictureview\0PictureView.dll" DiskId="2" />
       </Component>
       <Component Id="BMP.pvd" Guid="0405EF42-6EBA-467D-9DBB-5E18CD94D9E5">
-        <File Id="BMP.pvd" KeyPath="yes" Source="$(var.bundle)\pictureview\BMP.pvd" />
+        <File Id="BMP.pvd" KeyPath="yes" Source="$(var.bundle)\pictureview\BMP.pvd" DiskId="2" />
       </Component>
       <Component Id="PictureView_en.lng" Guid="92CCE058-F768-403C-BE13-F66496B799A0">
-        <File Id="PictureView_en.lng" KeyPath="yes" Source="$(var.bundle)\pictureview\PictureView_en.lng" />
+        <File Id="PictureView_en.lng" KeyPath="yes" Source="$(var.bundle)\pictureview\PictureView_en.lng" DiskId="2" />
       </Component>
       <Component Id="PictureView_ru.hlf" Guid="188C1BFF-137D-47BE-BA09-E7002AF482EB">
-        <File Id="PictureView_ru.hlf" KeyPath="yes" Source="$(var.bundle)\pictureview\PictureView_ru.hlf" />
+        <File Id="PictureView_ru.hlf" KeyPath="yes" Source="$(var.bundle)\pictureview\PictureView_ru.hlf" DiskId="2" />
       </Component>
       <Component Id="PictureView_ru.lng" Guid="EA08CB0A-F696-49CE-989E-07389CE0082F">
-        <File Id="PictureView_ru.lng" KeyPath="yes" Source="$(var.bundle)\pictureview\PictureView_ru.lng" />
+        <File Id="PictureView_ru.lng" KeyPath="yes" Source="$(var.bundle)\pictureview\PictureView_ru.lng" DiskId="2" />
       </Component>
       <Component Id="Readme.txt_21" Guid="C5DA6328-2CA5-42AB-89F2-13F697C6999A">
-        <File Id="Readme.txt_21" KeyPath="yes" Source="$(var.bundle)\pictureview\Readme.txt" />
+        <File Id="Readme.txt_21" KeyPath="yes" Source="$(var.bundle)\pictureview\Readme.txt" DiskId="2" />
       </Component>
+    </Directory>
+    <Directory Id="x_browse" Name="x_browse">
+      <Component Id="cadt.dl" Guid="C0B46AAE-88DC-41A9-A427-AA9406DE407C">
+        <File Id="cadt.dl" KeyPath="yes" Source="$(var.bundle)\x_browse\cadt.dl" DiskId="2" />
+      </Component>
+      <Component Id="history.txt_20" Guid="899E3B12-E843-4AE8-9E88-4B06D0A93E42">
+        <File Id="history.txt_20" KeyPath="yes" Source="$(var.bundle)\x_browse\history.txt" DiskId="2" />
+      </Component>
+      <Component Id="readme.txt_22" Guid="21F28DF7-98F8-4D01-98AE-7E72DECFF6D5">
+        <File Id="readme.txt_22" KeyPath="yes" Source="$(var.bundle)\x_browse\readme.txt" DiskId="2" />
+      </Component>
+      <Component Id="todo.txt_1" Guid="506E437F-59D6-4135-8959-A74E12259AE9">
+        <File Id="todo.txt_1" KeyPath="yes" Source="$(var.bundle)\x_browse\todo.txt" DiskId="2" />
+      </Component>
+      <Component Id="x_browse.dll" Guid="E27426D3-4F80-4F25-B3E6-918CAD467D0E">
+        <File Id="x_browse.dll" KeyPath="yes" Source="$(var.bundle)\x_browse\x_browse.dll" DiskId="2" />
+      </Component>
+      <Component Id="x_browse.eng.hlf" Guid="2793DEC9-69F7-464E-BBF9-6A627D375A3C">
+        <File Id="x_browse.eng.hlf" KeyPath="yes" Source="$(var.bundle)\x_browse\x_browse.eng.hlf" DiskId="2" />
+      </Component>
+      <Component Id="x_browse.eng.lng" Guid="5AD7C705-F316-48DF-90DE-F0FF88623BB9">
+        <File Id="x_browse.eng.lng" KeyPath="yes" Source="$(var.bundle)\x_browse\x_browse.eng.lng" DiskId="2" />
+      </Component>
+      <Component Id="x_browse.ini" Guid="FF797BBA-DB20-465B-88C1-8F9A655E47CB">
+        <File Id="x_browse.ini" Name="x_browse.ini-sample" KeyPath="yes" Source="$(var.bundle)\x_browse\x_browse.ini" DiskId="2" />
+      </Component>
+      <Directory Id="modules" Name="modules">
+        <Directory Id="pe" Name="pe">
+          <Component Id="history.txt_21" Guid="8DDA3E5C-D918-437B-AFCD-8FAE692B08A6">
+            <File Id="history.txt_21" KeyPath="yes" Source="$(var.bundle)\x_browse\modules\pe\history.txt" DiskId="2" />
+          </Component>
+          <Component Id="pe.ebm" Guid="4ACBDB6F-C5C0-4BF0-8C69-FE3C203A1065">
+            <File Id="pe.ebm" KeyPath="yes" Source="$(var.bundle)\x_browse\modules\pe\pe.ebm" DiskId="2" />
+          </Component>
+          <Component Id="pe.english.lng" Guid="D25A0C20-16A5-476A-8BCC-71582EF689FA">
+            <File Id="pe.english.lng" KeyPath="yes" Source="$(var.bundle)\x_browse\modules\pe\pe.english.lng" DiskId="2" />
+          </Component>
+          <Component Id="readme.txt_23" Guid="886275F9-FB8D-42AA-9245-687C6583B170">
+            <File Id="readme.txt_23" KeyPath="yes" Source="$(var.bundle)\x_browse\modules\pe\readme.txt" DiskId="2" />
+          </Component>
+          <Component Id="todo.txt_2" Guid="A197CEAE-5B02-467F-B4E4-D6A083BE06B5">
+            <File Id="todo.txt_2" KeyPath="yes" Source="$(var.bundle)\x_browse\modules\pe\todo.txt" DiskId="2" />
+          </Component>
+        </Directory>
+      </Directory>
     </Directory>
     <?endif?>
   </Directory>
