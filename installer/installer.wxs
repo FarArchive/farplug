@@ -2,6 +2,13 @@
 <?define Product="FAR Manager" ?>
 <?define Manufacturer="Eugene Roshal & FAR Group" ?>
 <?define UpgradeCode="45ab8d55-86a1-44f1-8e0a-1890fa69ba2b" ?>
+<?if $(var.Platform) = "x86" ?>
+  <?define Suffix = "64" ?>
+  <?define PFiles = "ProgramFilesFolder" ?>
+<?else?>
+  <?define Suffix = "32" ?>
+  <?define PFiles = "ProgramFiles64Folder" ?>
+<?endif?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Product Id="*" Language="1033" Codepage="1251" Name="$(var.Product)" Version="$(var.Version)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
     <Package Id="*" Platform="$(var.Platform)" Compressed="yes" Manufacturer="$(var.Manufacturer)" Description="$(var.Product) $(var.Version)" InstallerVersion="150"/>
@@ -22,7 +29,7 @@
     <CustomAction Id="BCopyUninstall" FileKey="bcsvc.exe" ExeCommand="/R" Execute="deferred" Impersonate="no" Return="ignore"/>
     <?endif?>
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
+      <Directory Id="$(var.PFiles)">
         <Directory Id="INSTALLDIR" Name="Far">
           <?include files.wxi ?>
           <Component Id="InstallDir" Guid="d10b019e-4215-49c2-9b3d-9e042daca034">
