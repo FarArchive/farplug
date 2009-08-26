@@ -3,10 +3,10 @@
 <?define Manufacturer="Eugene Roshal & FAR Group" ?>
 <?define UpgradeCode="45ab8d55-86a1-44f1-8e0a-1890fa69ba2b" ?>
 <?if $(var.Platform) = "x86" ?>
-  <?define Suffix = "64" ?>
+  <?define Suffix = "32" ?>
   <?define PFiles = "ProgramFilesFolder" ?>
 <?else?>
-  <?define Suffix = "32" ?>
+  <?define Suffix = "64" ?>
   <?define PFiles = "ProgramFiles64Folder" ?>
 <?endif?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
