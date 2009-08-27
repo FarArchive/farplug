@@ -1366,21 +1366,6 @@
           <ComponentRef Id="wmexplorer.map" />
         </Feature>
       </Feature>
-      <Feature Id="x_browse" Level="2" Title="EXE Browser" AllowAdvertise="no" Description="Executable file structure browser">
-        <ComponentRef Id="cadt.dl" />
-        <ComponentRef Id="history.txt_20" />
-        <ComponentRef Id="readme.txt_22" />
-        <ComponentRef Id="todo.txt_1" />
-        <ComponentRef Id="x_browse.dll" />
-        <ComponentRef Id="x_browse.eng.hlf" />
-        <ComponentRef Id="x_browse.eng.lng" />
-        <ComponentRef Id="x_browse.ini" />
-        <ComponentRef Id="history.txt_21" />
-        <ComponentRef Id="pe.ebm" />
-        <ComponentRef Id="pe.english.lng" />
-        <ComponentRef Id="readme.txt_23" />
-        <ComponentRef Id="todo.txt_2" />
-      </Feature>
       <Feature Id="yac" Level="2" Title="yac" AllowAdvertise="no" Description="Command line completion">
         <ComponentRef Id="changelog_19" />
         <ComponentRef Id="readme_2" />
