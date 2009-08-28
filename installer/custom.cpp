@@ -224,7 +224,7 @@ void gen_dll_list(const string& path, list<string>& dll_list, list<string>& exe_
   FindClose(h_find);
 }
 
-const ULONG64 c_start_base = 0x20000000;
+const ULONG64 c_start_base = 0x6D000000;
 
 UINT __stdcall Optimize(MSIHANDLE h_install) {
   if (!is_inst(h_install, "Far")) return ERROR_SUCCESS;
