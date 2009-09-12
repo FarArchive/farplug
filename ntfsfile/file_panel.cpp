@@ -650,7 +650,7 @@ void FilePanel::change_directory(const UnicodeString& target_dir, bool search_mo
     new_cur_dir = extract_path_root(current_dir);
   }
   else if (target_dir == L"..") { // parent directory
-    new_cur_dir = extract_file_dir(current_dir);
+    new_cur_dir = extract_file_path(current_dir);
   }
   else if (extract_path_root(target_dir).size() != 0) { // absolute path
     new_cur_dir = del_trailing_slash(target_dir);

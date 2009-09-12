@@ -17,7 +17,7 @@ typedef __int64 s64;
 
 UnicodeString extract_path_root(const UnicodeString& path);
 UnicodeString extract_file_name(const UnicodeString& path);
-UnicodeString extract_file_dir(const UnicodeString& path);
+UnicodeString extract_file_path(const UnicodeString& path);
 UnicodeString long_path(const UnicodeString& path);
 UnicodeString add_trailing_slash(const UnicodeString& file_path);
 UnicodeString del_trailing_slash(const UnicodeString& file_path);

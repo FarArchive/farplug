@@ -88,7 +88,7 @@ void defragment(const ObjectArray<UnicodeString>& file_list, Log& log) {
       progress.file_name = file_list[i];
       progress.total_clusters = progress.moved_clusters = 0;
       progress.update_ui(true);
-      UnicodeString real_path = add_trailing_slash(get_real_path(extract_file_dir(file_list[i]))) + extract_file_name(file_list[i]);
+      UnicodeString real_path = add_trailing_slash(get_real_path(extract_file_path(file_list[i]))) + extract_file_name(file_list[i]);
       NtfsVolume volume;
       volume.open(extract_path_root(real_path));
       // file fragments

@@ -776,7 +776,7 @@ void FileAnalyzer::process_file(FileInfo& file_info, bool full_info) {
   file_info.reparse = (h_file_info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT;
   file_info.directory = (h_file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
   if (volume.serial != h_file_info.dwVolumeSerialNumber) { // volume changed
-    volume.open(extract_path_root(get_real_path(extract_file_dir(file_info.file_name))));
+    volume.open(extract_path_root(get_real_path(extract_file_path(file_info.file_name))));
   }
   file_info.volume = &volume;
 
@@ -1144,7 +1144,7 @@ FileType get_file_type(const UnicodeString& file_name) {
 void plugin_show_metadata(const ObjectArray<UnicodeString>& file_list) {
   FileAnalyzer fa;
   fa.file_list = file_list;
-  fa.volume.open(extract_path_root(get_real_path(extract_file_dir(file_list[0]))));
+  fa.volume.open(extract_path_root(get_real_path(extract_file_path(file_list[0]))));
   fa.file_info.file_name = file_list[0];
   fa.process_file(fa.file_info, true);
   fa.display_file_info();

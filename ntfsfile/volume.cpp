@@ -45,6 +45,16 @@ void clean_path(UnicodeString& path) {
 // \\?\Volume{1edbf4ba-e9fe-11dc-86b3-005056c00008}\path\...
 // \\?\UNC\server\share\path\...
 UnicodeString get_real_path(const UnicodeString& fp) {
+#ifdef FARAPI18
+  UnicodeString real_path;
+  const unsigned c_buf_size = 0x10000;
+  int size = g_fsf.ConvertNameToReal(fp.data(), real_path.buf(c_buf_size), c_buf_size);
+  if (size > c_buf_size) g_fsf.ConvertNameToReal(fp.data(), real_path.buf(size), size);
+  real_path.set_size();
+  DBG_LOG(L"get_real_path() = '" + real_path + L"'");
+  return real_path;
+#endif
+#ifdef FARAPI17
   UnicodeString path = fp;
   clean_path(path);
 
@@ -288,6 +298,7 @@ UnicodeString get_real_path(const UnicodeString& fp) {
       } // if reparse point
     } // while
   } // while
+#endif
 }
 
 VolumeInfo::VolumeInfo(const UnicodeString& file_name) {
@@ -306,7 +317,7 @@ void NtfsVolume::open(const UnicodeString& volume_name) {
   try {
     name = volume_name;
 
-    CHECK(!name.equal(0, L"\\\\?\\UNC"), L"Network shares are not supported");
+    CHECK(!is_unc_path(name), L"Network shares are not supported");
 
     /* get volume information */
     wchar_t vlm_label[MAX_PATH];

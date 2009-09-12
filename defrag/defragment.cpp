@@ -32,7 +32,7 @@ unsigned get_chain_count(const Array<ClusterChain>& cluster_chains, unsigned fir
 }
 
 void defragment(const UnicodeString& file_name) {
-  UnicodeString real_path = add_trailing_slash(get_real_path(extract_file_dir(file_name))) + extract_file_name(file_name);
+  UnicodeString real_path = add_trailing_slash(get_real_path(extract_file_path(file_name))) + extract_file_name(file_name);
   NtfsVolume volume;
   volume.open(extract_path_root(real_path));
   // file fragments
