@@ -296,6 +296,14 @@ UnicodeString extract_file_path(const UnicodeString& path) {
   return path.left(pos);
 }
 
+UnicodeString remove_path_root(const UnicodeString& path) {
+  unsigned pos;
+  bool is_unc_path;
+  locate_path_root(path, pos, is_unc_path);
+  if ((pos < path.size()) && (path[pos] == L'\\')) pos++;
+  return path.slice(pos);
+}
+
 bool is_root_path(const UnicodeString& path) {
   unsigned path_root_len;
   bool is_unc_path;

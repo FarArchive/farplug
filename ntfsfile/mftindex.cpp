@@ -396,10 +396,9 @@ u64 FilePanel::mft_find_root() const {
 }
 
 u64 FilePanel::mft_find_path(const UnicodeString& path) {
-  ObjectArray<UnicodeString> path_parts = split_str(path, L'\\');
-  if (path_parts.size() == 0) FAIL(SystemError(ERROR_FILE_NOT_FOUND));
+  ObjectArray<UnicodeString> path_parts = split_str(remove_path_root(del_trailing_slash(path)), L'\\');
   u64 file_ref_num = root_dir_ref_num;
-  for (unsigned i = 1; i < path_parts.size(); i++) {
+  for (unsigned i = 0; i < path_parts.size(); i++) {
     FileRecord fr;
     fr.parent_ref_num = file_ref_num;
     fr.file_name = path_parts[i];
