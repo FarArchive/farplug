@@ -1015,15 +1015,7 @@ bool file_list_from_cmdline(const UnicodeString& cmd, ObjectArray<UnicodeString>
   prefix = cmd.left(prefix_pos);
   UnicodeString file_name = cmd.slice(prefix_pos + 1);
   unquote(file_name);
-  UnicodeString full_file_name;
-  LPWSTR file_part;
-  DWORD ret = GetFullPathNameW(file_name.data(), MAX_PATH, full_file_name.buf(MAX_PATH), &file_part);
-  if (ret > MAX_PATH) {
-    ret = GetFullPathNameW(file_name.data(), ret, full_file_name.buf(ret), &file_part);
-  }
-  CHECK_SYS(ret);
-  full_file_name.set_size(ret);
-  file_list = full_file_name;
+  file_list = far_get_full_path(file_name);
   return true;
 }
 

@@ -48,8 +48,8 @@ UnicodeString get_real_path(const UnicodeString& fp) {
 #ifdef FARAPI18
   UnicodeString real_path;
   const unsigned c_buf_size = 0x10000;
-  int size = g_fsf.ConvertNameToReal(fp.data(), real_path.buf(c_buf_size), c_buf_size);
-  if (size > c_buf_size) g_fsf.ConvertNameToReal(fp.data(), real_path.buf(size), size);
+  int size = g_fsf.ConvertPath(CPM_REAL, fp.data(), real_path.buf(c_buf_size), c_buf_size);
+  if (size > c_buf_size) g_fsf.ConvertPath(CPM_REAL, fp.data(), real_path.buf(size), size);
   real_path.set_size();
   DBG_LOG(L"get_real_path() = '" + real_path + L"'");
   return real_path;

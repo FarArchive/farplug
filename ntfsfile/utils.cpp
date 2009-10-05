@@ -24,6 +24,7 @@ using namespace col;
 #include "utils.h"
 
 extern struct PluginStartupInfo g_far;
+extern struct FarStandardFunctions g_fsf;
 
 // unicode <-> oem codepage conversions
 void unicode_to_oem(AnsiString& oem_str, const UnicodeString& u_str) {
@@ -483,6 +484,26 @@ FarStr far_get_cur_dir(HANDLE h_panel, const PanelInfo& pi) {
   cur_dir.set_size(cur_dir_size);
 #endif
   return cur_dir;
+}
+
+UnicodeString far_get_full_path(const UnicodeString& file_name) {
+  UnicodeString full_file_name;
+#ifdef FARAPI17
+  LPWSTR file_part;
+  DWORD ret = GetFullPathNameW(file_name.data(), MAX_PATH, full_file_name.buf(MAX_PATH), &file_part);
+  if (ret > MAX_PATH) {
+    ret = GetFullPathNameW(file_name.data(), ret, full_file_name.buf(ret), &file_part);
+  }
+  CHECK_SYS(ret);
+  full_file_name.set_size(ret);
+#endif
+#ifdef FARAPI18
+  const unsigned c_buf_size = 0x10000;
+  int size = g_fsf.ConvertPath(CPM_FULL, file_name.data(), full_file_name.buf(c_buf_size), c_buf_size);
+  if (size > c_buf_size) g_fsf.ConvertPath(CPM_FULL, file_name.data(), full_file_name.buf(size), size);
+  full_file_name.set_size();
+#endif
+  return full_file_name;
 }
 
 PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi) {
