@@ -1265,14 +1265,7 @@ void panel_items_to_file_list(PluginPanelItem *PanelItem, int ItemsNumber, FileL
 void file_panel_items_to_file_list(PluginPanelItem *PanelItem, int ItemsNumber, PanelFileList& panel_file_list, UiLink& ui, PluginInstance* plugin) {
   panel_file_list.extend(ItemsNumber);
   PanelFileInfo fi;
-  // obtain current directory
-  plugin->last_object = L".";
-  UnicodeString curr_dir;
-  DWORD size = GetCurrentDirectoryW(0, NULL);
-  CHECK_API(size != 0);
-  CHECK_API(GetCurrentDirectoryW(size, curr_dir.buf(size)) != 0);
-  curr_dir.set_size();
-
+  UnicodeString curr_dir = far_get_current_dir();
   UnicodeString file_name, file_path;
   WIN32_FIND_DATAW find_data;
   for (int i = 0; i < ItemsNumber; i++) {

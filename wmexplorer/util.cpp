@@ -281,6 +281,16 @@ UnicodeString format_file_time(const FILETIME& file_time) {
   return date_str + L' ' + time_str;
 }
 
+UnicodeString add_trailing_slash(const UnicodeString& file_path) {
+  if ((file_path.size() == 0) || (file_path.last() == L'\\')) return file_path;
+  else return file_path + L'\\';
+}
+
+UnicodeString del_trailing_slash(const UnicodeString& file_path) {
+  if ((file_path.size() < 2) || (file_path.last() != L'\\')) return file_path;
+  else return file_path.left(file_path.size() - 1);
+}
+
 int far_control_int(HANDLE h_panel, int command, int param) {
 #ifdef FARAPI17
   return g_far.Control(h_panel, command, reinterpret_cast<void*>(param));
@@ -325,4 +335,20 @@ PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const Pa
   ppi.set_size(size);
   return reinterpret_cast<PluginPanelItem*>(ppi.buf());
 #endif
+}
+
+UnicodeString far_get_current_dir() {
+  UnicodeString curr_dir;
+#ifdef FARAPI17
+  DWORD size = GetCurrentDirectoryW(0, NULL);
+  CHECK_API(size != 0);
+  CHECK_API(GetCurrentDirectoryW(size, curr_dir.buf(size)) != 0);
+  curr_dir.set_size();
+#endif
+#ifdef FARAPI18
+  DWORD size = g_far.Control(INVALID_HANDLE_VALUE, FCTL_GETCURRENTDIRECTORY, 0, NULL);
+  g_far.Control(INVALID_HANDLE_VALUE, FCTL_GETCURRENTDIRECTORY, size, reinterpret_cast<LONG_PTR>(curr_dir.buf(size)));
+  curr_dir.set_size();
+#endif
+  return del_trailing_slash(curr_dir);
 }
