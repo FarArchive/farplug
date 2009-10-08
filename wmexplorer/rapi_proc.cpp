@@ -1265,21 +1265,16 @@ void panel_items_to_file_list(PluginPanelItem *PanelItem, int ItemsNumber, FileL
 void file_panel_items_to_file_list(PluginPanelItem *PanelItem, int ItemsNumber, PanelFileList& panel_file_list, UiLink& ui, PluginInstance* plugin) {
   panel_file_list.extend(ItemsNumber);
   PanelFileInfo fi;
-  UnicodeString curr_dir = far_get_current_dir();
   UnicodeString file_name, file_path;
   WIN32_FIND_DATAW find_data;
   for (int i = 0; i < ItemsNumber; i++) {
     if (ui.update_needed()) {
       draw_progress_msg(far_get_msg(MSG_PROGRESS_PREPARE));
     }
-    FilePath fp(FARSTR_TO_UNICODE(FAR_FILE_NAME(PanelItem[i].FindData)));
+    FilePath fp(far_get_full_path(FARSTR_TO_UNICODE(FAR_FILE_NAME(PanelItem[i].FindData))));
     fi.file_dir = fp.get_dir_path();
     file_name = fp.get_file_name();
-    if (!fp.is_absolute) {
-      if (fi.file_dir.size() == 0) fi.file_dir = curr_dir;
-      else fi.file_dir.insert(0, L'\\').insert(0, curr_dir);
-    }
-    COMPOSE_PATH2(file_path, fi.file_dir, file_name);
+    file_path = fp.get_full_path();
     plugin->last_object = file_path;
 #ifdef FARAPI17
     bool fn_invalid = file_name.search(L'?') != -1; // Far uses '?' instead of unmappable characters

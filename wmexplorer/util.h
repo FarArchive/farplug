@@ -70,5 +70,6 @@ int far_control_ptr(HANDLE h_panel, int command, const void* param);
 PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
 PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
 UnicodeString far_get_current_dir();
+UnicodeString far_get_full_path(const UnicodeString& file_path);
 
 #endif // _UTIL_H

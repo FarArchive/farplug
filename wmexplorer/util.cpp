@@ -19,6 +19,7 @@ using namespace col;
 #include "util.h"
 
 extern struct PluginStartupInfo g_far;
+extern struct FarStandardFunctions g_fsf;
 
 // unicode <-> oem codepage conversions
 void unicode_to_oem(AnsiString& oem_str, const UnicodeString& u_str) {
@@ -351,4 +352,21 @@ UnicodeString far_get_current_dir() {
   curr_dir.set_size();
 #endif
   return del_trailing_slash(curr_dir);
+}
+
+UnicodeString far_get_full_path(const UnicodeString& file_path) {
+  const unsigned c_buf_size = 0x10000;
+  UnicodeString full_path;
+#ifdef FARAPI18
+  int size = g_fsf.ConvertPath(CPM_FULL, file_path.data(), full_path.buf(c_buf_size), c_buf_size);
+  if (size > c_buf_size) g_fsf.ConvertPath(CPM_FULL, file_path.data(), full_path.buf(size), size);
+#endif
+#ifdef FARAPI17
+  LPWSTR file_part;
+  DWORD size = GetFullPathNameW(file_path.data(), c_buf_size, full_path.buf(c_buf_size), &file_part);
+  if (size > c_buf_size) size = GetFullPathNameW(file_path.data(), size, full_path.buf(size), &file_part);
+  CHECK_API(size != 0);
+#endif
+  full_path.set_size();
+  return full_path;
 }
