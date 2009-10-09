@@ -75,11 +75,10 @@ int error_dlg(Error& e, const UnicodeString& message) {
 }
 
 UnicodeString long_path(const UnicodeString& path) {
-  if (path.size() < MAX_PATH) return path;
-  if ((path[0] == L'\\') && (path[1] == L'\\') && (path[2] != L'.')) {
-    return UnicodeString(path).replace(0, 1, L"\\\\?\\UNC");
-  }
-  else return L"\\\\?\\" + path;
+  if (path.equal(0, L"\\\\?\\") || path.equal(0, L"\\\\.\\")) return path;
+  if (path.equal(0, L"\\??\\")) return UnicodeString(path).replace(0, 4, L"\\\\?\\");
+  if (path.equal(0, L"\\\\")) return UnicodeString(path).replace(0, 1, L"\\\\?\\UNC");
+  return L"\\\\?\\" + path;
 }
 
 #define BEGIN_RETRY_BLOCK \

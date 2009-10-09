@@ -320,7 +320,6 @@ bool is_unc_path(const UnicodeString& path) {
 }
 
 UnicodeString long_path(const UnicodeString& path) {
-  if (path.size() < MAX_PATH) return path;
   if (path.equal(0, L"\\\\?\\") || path.equal(0, L"\\\\.\\")) return path;
   if (path.equal(0, L"\\??\\")) return UnicodeString(path).replace(0, 4, L"\\\\?\\");
   if (path.equal(0, L"\\\\")) return UnicodeString(path).replace(0, 1, L"\\\\?\\UNC");
