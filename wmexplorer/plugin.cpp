@@ -636,7 +636,11 @@ int WINAPI FAR_EXPORT(GetFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelIte
   return res;
 }
 
-int WINAPI FAR_EXPORT(PutFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int Move, int OpMode) {
+int WINAPI FAR_EXPORT(PutFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int Move,
+#ifdef FARAPI18
+    const wchar_t *SrcPath,
+#endif
+    int OpMode) {
   SetFileApis set_file_apis;
   if ((ItemsNumber == 0) || (FAR_STRCMP(FAR_FILE_NAME(PanelItem[0].FindData), FAR_T("..")) == 0)) return 1;
   PluginInstance* plugin = (PluginInstance*) hPlugin;
@@ -701,9 +705,16 @@ int WINAPI FAR_EXPORT(PutFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelIte
         prepare_target_path(dst_dir_path, plugin->session, plugin);
       }
 
+#ifdef FARAPI17
+      UnicodeString SrcPath;
+      DWORD size = GetCurrentDirectoryW(MAX_PATH, SrcPath.buf(MAX_PATH));
+      CHECK_API(size != 0);
+      SrcPath.set_size();
+#endif
+
       // list of selected files
       PanelFileList panel_file_list;
-      file_panel_items_to_file_list(PanelItem, ItemsNumber, panel_file_list, ui, plugin);
+      file_panel_items_to_file_list(del_trailing_slash(SrcPath), PanelItem, ItemsNumber, panel_file_list, ui, plugin);
 
       // scan source directories and prepare lists of files to process
       ObjectArray<FileList> file_lists;
