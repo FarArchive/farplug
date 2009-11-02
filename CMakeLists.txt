@@ -14,11 +14,11 @@ IF(DEFINED MSVC)
 ENDIF(DEFINED MSVC)
 
 # project source files
-SET(sources plugin.cpp plugin.def ${bin}/msg.h)
+SET(sources plugin.cpp archive.cpp plugin.def ${bin}/msg.h)
 
 # configure project
 ADD_DEFINITIONS(-D_FAR_USE_FARFINDDATA -D_WIN32_WINNT=0x0500)
-INCLUDE_DIRECTORIES(${src} ${far_inc} ${bin})
+INCLUDE_DIRECTORIES(${src} ${src}/7z_api ${far_inc} ${bin})
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${sources})
 ADD_CUSTOM_TARGET(lng_hlf DEPENDS ${bin}/en.lng VERBATIM)
 ADD_DEPENDENCIES(${PROJECT_NAME} lng_hlf)
