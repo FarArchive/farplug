@@ -1,6 +1,13 @@
 #include <windows.h>
 
-#include "plugin.hpp"
+#include <string>
+#include <list>
+using namespace std;
+
+#include "msg.h"
+
+#include "farutils.hpp"
+#include "archive.hpp"
 
 int WINAPI GetMinFarVersion(void) {
   return FARMANAGERVERSION;
@@ -11,14 +18,23 @@ int WINAPI GetMinFarVersionW(void) {
 }
 
 void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info) {
-
+  Far::init(Info);
 }
 
 void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
+  static const wchar_t* plugin_menu[1];
 
+  Info->StructSize = sizeof(PluginInfo);
+
+  plugin_menu[0] = Far::msg_ptr(MSG_PLUGIN_NAME);
+  Info->PluginMenuStrings = plugin_menu;
+  Info->PluginMenuStringsNumber = ARRAYSIZE(plugin_menu);
 }
 
 HANDLE WINAPI OpenPluginW(int OpenFrom,INT_PTR Item) {
+  ArcLibs arc_libs;
+  arc_libs.load(Far::get_plugin_path());
+  ArcFormats arc_formats(arc_libs);
   return INVALID_HANDLE_VALUE;
 }
 

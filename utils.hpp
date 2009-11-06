@@ -1,19 +1,6 @@
 #pragma once
 
-#define CHECK_SYS(code) { if (!(code)) throw HRESULT_FROM_WIN32(GetLastError()); }
-
-#define CLEAN(type, object, code) \
-  class Clean_##object { \
-  private: \
-    type object; \
-  public: \
-    Clean_##object(type object): object(object) { \
-    } \
-    ~Clean_##object() { \
-      code; \
-    } \
-  }; \
-  Clean_##object clean_##object(object);
+#include "error.hpp"
 
 bool substr_match(const wstring& str, wstring::size_type pos, wstring::const_pointer mstr);
 
