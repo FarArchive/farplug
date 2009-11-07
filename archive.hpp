@@ -1,6 +1,9 @@
 #pragma once
 
+#define INITGUID
 #include "CPP/7zip/Archive/IArchive.h"
+
+#include "comutils.hpp"
 
 struct ArcLib {
   HMODULE h_module;
@@ -29,6 +32,7 @@ struct ArcLibs: public list<ArcLib> {
 };
 
 struct ArcFormat {
+  const ArcLib* arc_lib;
   wstring name;
   string class_id;
   bool update;
@@ -46,3 +50,38 @@ public:
   }
 };
 
+class FileStream: public IInStream, public UnknownImpl {
+private:
+  HANDLE h_file;
+public:
+  FileStream(const wstring& file_path);
+  ~FileStream();
+
+  UNKNOWN_IMPL_BEGIN
+  UNKNOWN_IMPL_ITF(IInStream)
+  UNKNOWN_IMPL_ITF(ISequentialInStream)
+  UNKNOWN_IMPL_END
+
+  STDMETHOD(Read)(void *data, UInt32 size, UInt32 *processedSize);
+  STDMETHOD(Seek)(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition);
+};
+
+class ArchiveOpenCallback: public IArchiveOpenCallback, public UnknownImpl {
+public:
+  UNKNOWN_IMPL_BEGIN
+  UNKNOWN_IMPL_ITF(IArchiveOpenCallback)
+  UNKNOWN_IMPL_END
+
+  STDMETHOD(SetTotal)(const UInt64 *files, const UInt64 *bytes);
+  STDMETHOD(SetCompleted)(const UInt64 *files, const UInt64 *bytes);
+};
+
+class ArchiveReader {
+private:
+  const ArcFormats& arc_formats;
+  ComObject<IInArchive> archive;
+public:
+  ArchiveReader(const ArcFormats& arc_formats): arc_formats(arc_formats) {
+  }
+  void open(const wstring& file_path);
+};

@@ -39,6 +39,11 @@ HANDLE WINAPI OpenPluginW(int OpenFrom,INT_PTR Item) {
 }
 
 HANDLE WINAPI OpenFilePluginW(const wchar_t *Name,const unsigned char *Data,int DataSize,int OpMode) {
+  ArcLibs arc_libs;
+  arc_libs.load(Far::get_plugin_path());
+  ArcFormats arc_formats(arc_libs);
+  ArchiveReader arc_reader(arc_formats);
+  arc_reader.open(Name);
   return INVALID_HANDLE_VALUE;
 }
 
