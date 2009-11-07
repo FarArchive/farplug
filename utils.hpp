@@ -3,6 +3,11 @@
 #include "error.hpp"
 
 bool substr_match(const wstring& str, wstring::size_type pos, wstring::const_pointer mstr);
+wstring word_wrap(const wstring& str, wstring::size_type wrap_bound);
+wstring fit_str(const wstring& str, wstring::size_type size);
+wstring strip(const wstring& str);
+int str_to_int(const wstring& str);
+wstring int_to_str(int val);
 
 wstring long_path(const wstring& path);
 
