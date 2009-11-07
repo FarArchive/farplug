@@ -129,17 +129,17 @@ FileStream::~FileStream() {
 }
 
 STDMETHODIMP FileStream::Read(void *data, UInt32 size, UInt32 *processedSize) {
+  COM_ERROR_HANDLER_BEGIN
   DWORD bytes_read;
-  if (ReadFile(h_file, data, size, &bytes_read, NULL)) {
-    if (processedSize)
-      *processedSize = bytes_read;
-    return NO_ERROR;
-  }
-  else
-    return HRESULT_FROM_WIN32(GetLastError());
+  CHECK_SYS(ReadFile(h_file, data, size, &bytes_read, NULL));
+  if (processedSize)
+    *processedSize = bytes_read;
+  return S_OK;
+  COM_ERROR_HANDLER_END
 }
 
 STDMETHODIMP FileStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
+  COM_ERROR_HANDLER_BEGIN
   DWORD move_method;
   switch (seekOrigin) {
   case STREAM_SEEK_SET:
@@ -157,24 +157,26 @@ STDMETHODIMP FileStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPositi
   LARGE_INTEGER distance;
   distance.QuadPart = offset;
   LARGE_INTEGER new_position;
-  if (SetFilePointerEx(h_file, distance, &new_position, move_method)) {
-    if (newPosition)
-      *newPosition = new_position.QuadPart;
-    return NO_ERROR;
-  }
-  else
-    return HRESULT_FROM_WIN32(GetLastError());
+  CHECK_SYS(SetFilePointerEx(h_file, distance, &new_position, move_method));
+  if (newPosition)
+    *newPosition = new_position.QuadPart;
+  return S_OK;
+  COM_ERROR_HANDLER_END
 }
 
 STDMETHODIMP ArchiveOpenCallback::SetTotal(const UInt64 *files, const UInt64 *bytes) {
+  COM_ERROR_HANDLER_BEGIN
   return S_OK;
+  COM_ERROR_HANDLER_END
 }
 
 STDMETHODIMP ArchiveOpenCallback::SetCompleted(const UInt64 *files, const UInt64 *bytes) {
+  COM_ERROR_HANDLER_BEGIN
   return S_OK;
+  COM_ERROR_HANDLER_END
 }
 
-void ArchiveReader::open(const wstring& file_path) {
+bool ArchiveReader::open(const wstring& file_path) {
   ComObject<FileStream> file_stream(new FileStream(file_path));
   ComObject<ArchiveOpenCallback> archive_open_callback(new ArchiveOpenCallback());
   for (ArcFormats::const_iterator arc_format = arc_formats.begin(); arc_format != arc_formats.end(); arc_format++) {
@@ -185,7 +187,8 @@ void ArchiveReader::open(const wstring& file_path) {
     file_stream->Seek(0, STREAM_SEEK_SET, NULL);
     if (check_com(in_arc->Open(file_stream, &max_check_start_position, archive_open_callback))) {
       archive = in_arc;
-      break;
+      return true;
     }
   }
+  return false;
 }

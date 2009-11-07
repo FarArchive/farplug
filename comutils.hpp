@@ -11,6 +11,18 @@ inline bool check_com(HRESULT hr) {
   return hr == S_OK;
 }
 
+#define COM_ERROR_HANDLER_BEGIN try {
+
+#define COM_ERROR_HANDLER_END \
+  } \
+  catch (const Error& e) { \
+    return e.hr; \
+  } \
+  catch (...) { \
+    return E_FAIL; \
+  }
+
+
 class UnknownImpl {
 protected:
   ULONG ref_cnt;

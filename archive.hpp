@@ -83,5 +83,5 @@ private:
 public:
   ArchiveReader(const ArcFormats& arc_formats): arc_formats(arc_formats) {
   }
-  void open(const wstring& file_path);
+  bool open(const wstring& file_path);
 };
