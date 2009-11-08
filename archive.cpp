@@ -2,7 +2,10 @@
 
 #include <string>
 #include <list>
+#include <map>
 using namespace std;
+
+#include "plugin.hpp"
 
 #include "utils.hpp"
 #include "sysutils.hpp"
@@ -76,7 +79,7 @@ ArcLibs::~ArcLibs() {
   clear();
 }
 
-void ArcFormats::load() {
+void ArcFormats::load(const ArcLibs& arc_libs) {
   for (ArcLibs::const_iterator arc_lib = arc_libs.begin(); arc_lib != arc_libs.end(); arc_lib++) {
     UInt32 num_formats;
     if (arc_lib->GetNumberOfFormats(&num_formats) == S_OK) {
@@ -93,6 +96,22 @@ void ArcFormats::load() {
     }
   }
 }
+
+class FileStream: public IInStream, public UnknownImpl {
+private:
+  HANDLE h_file;
+public:
+  FileStream(const wstring& file_path);
+  ~FileStream();
+
+  UNKNOWN_IMPL_BEGIN
+  UNKNOWN_IMPL_ITF(IInStream)
+  UNKNOWN_IMPL_ITF(ISequentialInStream)
+  UNKNOWN_IMPL_END
+
+  STDMETHOD(Read)(void *data, UInt32 size, UInt32 *processedSize);
+  STDMETHOD(Seek)(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition);
+};
 
 FileStream::FileStream(const wstring& file_path) {
   h_file = CreateFileW(long_path(file_path).data(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_POSIX_SEMANTICS, NULL);
@@ -139,6 +158,16 @@ STDMETHODIMP FileStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPositi
   COM_ERROR_HANDLER_END
 }
 
+class ArchiveOpenCallback: public IArchiveOpenCallback, public UnknownImpl {
+public:
+  UNKNOWN_IMPL_BEGIN
+  UNKNOWN_IMPL_ITF(IArchiveOpenCallback)
+  UNKNOWN_IMPL_END
+
+  STDMETHOD(SetTotal)(const UInt64 *files, const UInt64 *bytes);
+  STDMETHOD(SetCompleted)(const UInt64 *files, const UInt64 *bytes);
+};
+
 STDMETHODIMP ArchiveOpenCallback::SetTotal(const UInt64 *files, const UInt64 *bytes) {
   COM_ERROR_HANDLER_BEGIN
   return S_OK;
@@ -151,7 +180,8 @@ STDMETHODIMP ArchiveOpenCallback::SetCompleted(const UInt64 *files, const UInt64
   COM_ERROR_HANDLER_END
 }
 
-bool ArchiveReader::open(const wstring& file_path) {
+bool ArchiveReader::open(const ArcFormats& arc_formats, const wstring& file_path) {
+  FindFile(file_path).next(archive_file_info);
   ComObject<FileStream> file_stream(new FileStream(file_path));
   ComObject<ArchiveOpenCallback> archive_open_callback(new ArchiveOpenCallback());
   for (ArcFormats::const_iterator arc_format = arc_formats.begin(); arc_format != arc_formats.end(); arc_format++) {
@@ -166,4 +196,126 @@ bool ArchiveReader::open(const wstring& file_path) {
     }
   }
   return false;
+}
+
+wstring ArchiveReader::get_default_name() const {
+  wstring name = archive_file_info.cFileName;
+  size_t pos = name.find_last_of(L'.');
+  if (pos == wstring::npos)
+    return name;
+  else
+    return name.substr(0, pos);
+}
+
+void ArchiveReader::make_index() {
+  UInt32 num_items = 0;
+  CHECK_COM(archive->GetNumberOfItems(&num_items));
+  wstring path;
+  for (UInt32 i = 0; i < num_items; i++) {
+    PropVariant var;
+    CHECK_COM(archive->GetProperty(i, kpidPath, &var));
+    if (var.vt == VT_BSTR)
+      path.assign(var.bstrVal);
+    else
+      path.assign(get_default_name());
+
+    for (wstring::iterator ch = path.begin(); ch != path.end(); ch++)
+      if ((*ch == L'\\') || (*ch == L'/'))
+        *ch = 0;
+
+    const wchar_t* end_pos = path.data() + path.size();
+    const wchar_t* path_elem = path.data();
+    FileList* file_list = &root;
+    while (path_elem < end_pos) {
+      file_list = &(*file_list)[path_elem];
+      path_elem += wcslen(path_elem) + 1;
+    }
+    file_list->index = i;
+  }
+}
+
+FileList* ArchiveReader::find_dir(const wstring& dir) {
+  if (root.empty())
+    make_index();
+
+  wstring new_dir(dir);
+
+  for (wstring::iterator ch = new_dir.begin(); ch != new_dir.end(); ch++)
+    if ((*ch == L'\\') || (*ch == L'/'))
+      *ch = 0;
+
+  const wchar_t* end_pos = new_dir.data() + new_dir.size();
+  const wchar_t* path_elem = new_dir.data();
+  FileList* file_list = &root;
+  while (path_elem < end_pos) {
+    FileList::iterator child = file_list->find(path_elem);
+    if (child == file_list->end())
+      return NULL;
+    file_list = &child->second;
+    path_elem += wcslen(path_elem) + 1;
+  }
+  return file_list;
+}
+
+void ArchiveReader::get_file_info(const UInt32 file_index, const wstring& file_name, PluginPanelItem& panel_item) {
+  memset(&panel_item, 0, sizeof(panel_item));
+  panel_item.FindData.lpwszFileName = const_cast<wchar_t*>(file_name.data());
+  if (file_index == -1) {
+    panel_item.FindData.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
+    panel_item.FindData.ftCreationTime = archive_file_info.ftCreationTime;
+    panel_item.FindData.ftLastWriteTime = archive_file_info.ftLastWriteTime;
+    panel_item.FindData.ftLastAccessTime = archive_file_info.ftLastAccessTime;
+  }
+  else {
+    PropVariant size;
+    CHECK_COM(archive->GetProperty(file_index, kpidSize, &size));
+    if (size.vt == VT_UI8)
+      panel_item.FindData.nFileSize = size.uhVal.QuadPart;
+
+    PropVariant pack_size;
+    CHECK_COM(archive->GetProperty(file_index, kpidPackSize, &pack_size));
+    if (pack_size.vt == VT_UI8)
+      panel_item.FindData.nPackSize = pack_size.uhVal.QuadPart;
+
+    PropVariant attr;
+    CHECK_COM(archive->GetProperty(file_index, kpidAttrib, &attr));
+    if (attr.vt == VT_UI4)
+      panel_item.FindData.dwFileAttributes = attr.ulVal;
+
+    PropVariant is_dir;
+    CHECK_COM(archive->GetProperty(file_index, kpidIsDir, &is_dir));
+    if (is_dir.vt == VT_BOOL)
+      if (is_dir.boolVal)
+        panel_item.FindData.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
+
+    PropVariant mtime, ctime, atime;
+    CHECK_COM(archive->GetProperty(file_index, kpidCTime, &ctime));
+    CHECK_COM(archive->GetProperty(file_index, kpidMTime, &mtime));
+    CHECK_COM(archive->GetProperty(file_index, kpidATime, &atime));
+
+    FILETIME subst_time;
+    if (mtime.vt == VT_FILETIME)
+      subst_time = mtime.filetime;
+    else if (ctime.vt == VT_FILETIME)
+      subst_time = ctime.filetime;
+    else if (atime.vt == VT_FILETIME)
+      subst_time = atime.filetime;
+    else
+      subst_time = archive_file_info.ftLastWriteTime;
+
+    if (mtime.vt == VT_FILETIME)
+      panel_item.FindData.ftLastWriteTime = mtime.filetime;
+    else
+      panel_item.FindData.ftLastWriteTime = subst_time;
+
+    if (ctime.vt == VT_FILETIME)
+      panel_item.FindData.ftCreationTime = ctime.filetime;
+    else
+      panel_item.FindData.ftCreationTime = subst_time;
+
+    if (atime.vt == VT_FILETIME)
+      panel_item.FindData.ftLastAccessTime = atime.filetime;
+    else
+      panel_item.FindData.ftLastAccessTime = subst_time;
+  }
 }

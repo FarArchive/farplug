@@ -130,3 +130,12 @@ bool is_absolute_path(const wstring& path) {
   locate_path_root(path, path_root_len, is_unc_path);
   return path_root_len != 0;
 }
+
+wstring remove_path_root(const wstring& path) {
+  size_t path_root_len;
+  bool is_unc_path;
+  locate_path_root(path, path_root_len, is_unc_path);
+  if ((path_root_len < path.size()) && (path[path_root_len] == L'\\'))
+    path_root_len++;
+  return path.substr(path_root_len);
+}

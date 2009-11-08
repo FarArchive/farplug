@@ -21,3 +21,4 @@ wstring extract_file_path(const wstring& path);
 bool is_root_path(const wstring& path);
 bool is_unc_path(const wstring& path);
 bool is_absolute_path(const wstring& path);
+wstring remove_path_root(const wstring& path);

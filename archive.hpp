@@ -40,48 +40,24 @@ struct ArcFormat {
   wstring extension;
 };
 
-class ArcFormats: public list<ArcFormat> {
-private:
-  const ArcLibs& arc_libs;
-  void load();
-public:
-  ArcFormats(const ArcLibs& arc_libs): arc_libs(arc_libs) {
-    load();
-  }
+struct ArcFormats: public list<ArcFormat> {
+  void load(const ArcLibs& arc_libs);
 };
 
-class FileStream: public IInStream, public UnknownImpl {
-private:
-  HANDLE h_file;
-public:
-  FileStream(const wstring& file_path);
-  ~FileStream();
-
-  UNKNOWN_IMPL_BEGIN
-  UNKNOWN_IMPL_ITF(IInStream)
-  UNKNOWN_IMPL_ITF(ISequentialInStream)
-  UNKNOWN_IMPL_END
-
-  STDMETHOD(Read)(void *data, UInt32 size, UInt32 *processedSize);
-  STDMETHOD(Seek)(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition);
-};
-
-class ArchiveOpenCallback: public IArchiveOpenCallback, public UnknownImpl {
-public:
-  UNKNOWN_IMPL_BEGIN
-  UNKNOWN_IMPL_ITF(IArchiveOpenCallback)
-  UNKNOWN_IMPL_END
-
-  STDMETHOD(SetTotal)(const UInt64 *files, const UInt64 *bytes);
-  STDMETHOD(SetCompleted)(const UInt64 *files, const UInt64 *bytes);
+struct FileList: public map<wstring, FileList> {
+  UInt32 index;
+  FileList(): index(-1) {}
 };
 
 class ArchiveReader {
 private:
-  const ArcFormats& arc_formats;
   ComObject<IInArchive> archive;
+  WIN32_FIND_DATAW archive_file_info;
+  FileList root;
+  wstring get_default_name() const;
+  void make_index();
 public:
-  ArchiveReader(const ArcFormats& arc_formats): arc_formats(arc_formats) {
-  }
-  bool open(const wstring& file_path);
+  bool open(const ArcFormats& arc_formats, const wstring& file_path);
+  FileList* find_dir(const wstring& dir);
+  void get_file_info(const UInt32 file_index, const wstring& file_name, PluginPanelItem& panel_item);
 };
