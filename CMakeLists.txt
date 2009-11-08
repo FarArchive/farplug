@@ -15,7 +15,7 @@ IF(DEFINED MSVC)
 ENDIF(DEFINED MSVC)
 
 # project source files
-SET(sources plugin.cpp archive.cpp pathutils.cpp strutils.cpp farutils.cpp plugin.def ${bin}/msg.h)
+SET(sources plugin.cpp archive.cpp pathutils.cpp strutils.cpp farutils.cpp sysutils.cpp ui.cpp plugin.def ${bin}/msg.h)
 
 # configure project
 ADD_DEFINITIONS(-D_FAR_USE_FARFINDDATA -D_WIN32_WINNT=0x0500)

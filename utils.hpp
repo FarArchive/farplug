@@ -8,6 +8,7 @@ wstring fit_str(const wstring& str, wstring::size_type size);
 wstring strip(const wstring& str);
 int str_to_int(const wstring& str);
 wstring int_to_str(int val);
+wstring widen(const string& str);
 
 wstring long_path(const wstring& path);
 

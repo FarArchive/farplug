@@ -1,8 +1,11 @@
+#include <windows.h>
+
 #include <string>
 #include <list>
 using namespace std;
 
 #include "utils.hpp"
+#include "sysutils.hpp"
 #include "archive.hpp"
 
 HRESULT ArcLib::get_bool_prop(UInt32 index, PROPID prop_id, bool& value) const {
@@ -42,34 +45,6 @@ HRESULT ArcLib::get_bytes_prop(UInt32 index, PROPID prop_id, string& value) cons
     return E_FAIL;
   return S_OK;
 }
-
-class FindFile: private NonCopyable {
-private:
-  HANDLE h_find;
-  wstring find_mask;
-public:
-  FindFile(const wstring& find_mask): h_find(INVALID_HANDLE_VALUE), find_mask(find_mask) {}
-  ~FindFile() {
-    if (h_find != INVALID_HANDLE_VALUE)
-      FindClose(h_find);
-  }
-  bool next(WIN32_FIND_DATAW& find_data) {
-    if (h_find == INVALID_HANDLE_VALUE) {
-      h_find = FindFirstFileW(long_path(find_mask).c_str(), &find_data);
-      if (h_find == INVALID_HANDLE_VALUE) {
-        CHECK_SYS((GetLastError() == ERROR_NO_MORE_FILES) || (GetLastError() == ERROR_FILE_NOT_FOUND) || (GetLastError() == ERROR_PATH_NOT_FOUND));
-        return false;
-      }
-    }
-    else {
-      if (FindNextFileW(h_find, &find_data) == 0) {
-        CHECK_SYS(GetLastError() == ERROR_NO_MORE_FILES);
-        return false;
-      }
-    }
-    return true;
-  }
-};
 
 void ArcLibs::load(const wstring& path) {
   WIN32_FIND_DATAW find_data;

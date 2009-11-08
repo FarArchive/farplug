@@ -60,3 +60,7 @@ wstring int_to_str(int val) {
   wchar_t str[64];
   return _itow(val, str, 10);
 }
+
+wstring widen(const string& str) {
+  return wstring(str.begin(), str.end());
+}
