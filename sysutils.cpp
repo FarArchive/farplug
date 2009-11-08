@@ -19,10 +19,7 @@ FindFile::~FindFile() {
 bool FindFile::next(WIN32_FIND_DATAW& find_data) {
   if (h_find == INVALID_HANDLE_VALUE) {
     h_find = FindFirstFileW(long_path(find_mask).c_str(), &find_data);
-    if (h_find == INVALID_HANDLE_VALUE) {
-      CHECK_SYS((GetLastError() == ERROR_NO_MORE_FILES) || (GetLastError() == ERROR_FILE_NOT_FOUND) || (GetLastError() == ERROR_PATH_NOT_FOUND) || (GetLastError() == ERROR_BAD_PATHNAME));
-      return false;
-    }
+    CHECK_SYS(h_find != INVALID_HANDLE_VALUE);
   }
   else {
     if (FindNextFileW(h_find, &find_data) == 0) {
@@ -47,8 +44,7 @@ wstring get_system_message(HRESULT hr) {
       throw;
     }
     LocalFree(static_cast<HLOCAL>(sys_msg));
-    strip(message);
-    st << message << L" (0x" << hex << setw(8) << setfill(L'0') << hr << L")";
+    st << strip(message) << L" (0x" << hex << setw(8) << setfill(L'0') << hr << L")";
   }
   else {
     st << L"HRESULT: 0x" << hex << setw(8) << setfill(L'0') << hr;

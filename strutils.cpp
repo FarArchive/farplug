@@ -16,12 +16,12 @@ wstring word_wrap(const wstring& str, wstring::size_type wrap_bound) {
   wstring::size_type begin_pos = 0;
   while (begin_pos < str.size()) {
     wstring::size_type end_pos = begin_pos + wrap_bound;
-    if (end_pos > str.size())
-      end_pos = str.size();
-    for (wstring::size_type i = end_pos; i > begin_pos; i--) {
-      if (str[i - 1] == L' ') {
-        end_pos = i;
-        break;
+    if (end_pos < str.size()) {
+      for (wstring::size_type i = end_pos; i > begin_pos; i--) {
+        if (str[i - 1] == L' ') {
+          end_pos = i;
+          break;
+        }
       }
     }
     if (!result.empty())
