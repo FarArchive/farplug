@@ -77,7 +77,7 @@ public:
   unsigned fix_edit_box(const UnicodeString& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned button(const UnicodeString& text, DWORD flags = 0, bool def = false);
   unsigned def_button(const UnicodeString& text, DWORD flags = 0) {
-    return button(text, flags);
+    return button(text, flags, true);
   }
   unsigned check_box(const UnicodeString& text, int value, DWORD flags = 0);
   unsigned check_box(const UnicodeString& text, bool value, DWORD flags = 0) {
