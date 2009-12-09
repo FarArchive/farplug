@@ -92,7 +92,7 @@ public:
   unsigned fix_edit_box(const wstring& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned button(const wstring& text, DWORD flags = 0, bool def = false);
   unsigned def_button(const wstring& text, DWORD flags = 0) {
-    return button(text, flags);
+    return button(text, flags, true);
   }
   unsigned check_box(const wstring& text, int value, DWORD flags = 0);
   unsigned check_box(const wstring& text, bool value, DWORD flags = 0) {
