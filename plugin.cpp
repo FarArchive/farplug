@@ -94,7 +94,7 @@ void Plugin::list(PluginPanelItem** panel_item, int* items_number) {
 #define FAR_ERROR_HANDLER_END(return_error, return_cancel, silent) \
   } \
   catch (const Error& e) { \
-    if (e.hr == E_ABORT) \
+    if (e.code == E_ABORT) \
       return_cancel; \
     if (!silent) \
       error_dlg(e); \

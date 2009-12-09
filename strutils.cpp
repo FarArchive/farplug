@@ -24,6 +24,9 @@ wstring word_wrap(const wstring& str, wstring::size_type wrap_bound) {
         }
       }
     }
+    else {
+      end_pos = str.size();
+    }
     if (!result.empty())
       result.append(1, L'\n');
     result.append(str.data() + begin_pos, end_pos - begin_pos);

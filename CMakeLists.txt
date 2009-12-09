@@ -6,7 +6,6 @@ SET(src ${CMAKE_CURRENT_SOURCE_DIR})
 SET(bin ${CMAKE_CURRENT_BINARY_DIR})
 SET(top ${src}/..)
 
-SET(FARAPI18 1)
 INCLUDE(${top}/cmake/common.cmake)
 
 IF(DEFINED MSVC)

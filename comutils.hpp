@@ -16,7 +16,7 @@ inline bool check_com(HRESULT hr) {
 #define COM_ERROR_HANDLER_END \
   } \
   catch (const Error& e) { \
-    return e.hr; \
+    return e.code; \
   } \
   catch (...) { \
     return E_FAIL; \
