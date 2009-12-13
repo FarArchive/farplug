@@ -6,10 +6,7 @@
 #include <vector>
 using namespace std;
 
-#include "msg.h"
-
 #include "utils.hpp"
-#include "farutils.hpp"
 #include "inet.hpp"
 
 class HInternet: private NonCopyable {
@@ -88,8 +85,10 @@ void wait(Context& context, HANDLE h_abort) {
   }
 }
 
+const wchar_t* c_user_agent = L"MsiUpdate";
+
 string load_url(const wstring& url, HANDLE h_abort) {
-  HInternet h_session = WinHttpOpen(Far::msg_ptr(MSG_PLUGIN_NAME), WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, WINHTTP_FLAG_ASYNC);
+  HInternet h_session = WinHttpOpen(c_user_agent, WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, WINHTTP_FLAG_ASYNC);
   CHECK_SYS(h_session);
 
   Context context;
