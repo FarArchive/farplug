@@ -32,7 +32,7 @@ const char* c_platform = "x64";
 const char* c_update_script = "update2.php?p=64";
 #endif
 const unsigned c_exit_wait = 6;
-const unsigned c_update_period = 24 * 60 * 60;
+const unsigned c_update_period = 12 * 60 * 60;
 
 HANDLE h_abort = NULL;
 HANDLE h_update_thread = NULL;
@@ -57,6 +57,7 @@ void check_product_installed() {
 
 void initialize() {
   g_options.load();
+  curr_ver = Far::get_version();
   h_abort = CreateEvent(NULL, TRUE, FALSE, NULL);
   CHECK_SYS(h_abort);
   check_product_installed();
@@ -66,7 +67,6 @@ void initialize() {
   curr_time /= c_update_period;
   if (curr_time == g_options.last_check_time)
     return;
-  curr_ver = Far::get_version();
   g_options.last_check_time = static_cast<unsigned>(curr_time);
   g_options.save();
   unsigned th_id;
