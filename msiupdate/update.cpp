@@ -32,7 +32,7 @@ const char* c_platform = "x64";
 const char* c_update_script = "update2.php?p=64";
 #endif
 const unsigned c_exit_wait = 6;
-const unsigned c_update_period = 60 * 60;
+const unsigned c_update_period = 24 * 60 * 60;
 
 HANDLE h_abort = NULL;
 HANDLE h_update_thread = NULL;
@@ -66,6 +66,7 @@ void initialize() {
   curr_time /= c_update_period;
   if (curr_time == g_options.last_check_time)
     return;
+  curr_ver = Far::get_version();
   g_options.last_check_time = static_cast<unsigned>(curr_time);
   g_options.save();
   unsigned th_id;
@@ -96,8 +97,7 @@ string get_update_url() {
 }
 
 bool check() {
-  //check_product_installed();
-  curr_ver = Far::get_version();
+  check_product_installed();
   string update_info = load_url(widen(get_update_url() + c_update_script), h_abort);
   Ini::File update_ini;
   update_ini.parse(update_info);
@@ -114,7 +114,8 @@ void execute() {
   st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
   st << Far::get_msg(MSG_UPDATE_NEW_VERSION) << L' ' << VER_MAJOR(update_ver) << L'.' << VER_MINOR(update_ver) << L'.' << VER_BUILD(update_ver) << L'\n';
   st << Far::get_msg(MSG_UPDATE_QUESTION) << L'\n';
-  if (Far::message(st.str(), 0, FMSG_MB_YESNO) == 0) {
+  int res = Far::message(st.str(), 0, FMSG_MB_YESNOCANCEL);
+  if (res == 0) {
     wostringstream st;
     st << L"msiexec /promptrestart ";
     if (!g_options.use_full_install_ui) {
@@ -136,8 +137,10 @@ void execute() {
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
   }
-  g_options.last_check_version = update_ver;
-  g_options.save();
+  else if (res == 1) {
+    g_options.last_check_version = update_ver;
+    g_options.save();
+  }
 }
 
 }
