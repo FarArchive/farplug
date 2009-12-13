@@ -64,11 +64,11 @@ wstring strip(const wstring& str) {
 }
 
 int str_to_int(const string& str) {
-  return atoi(str.data());
+  return atoi(str.c_str());
 }
 
 int str_to_int(const wstring& str) {
-  return _wtoi(str.data());
+  return _wtoi(str.c_str());
 }
 
 wstring int_to_str(int val) {
