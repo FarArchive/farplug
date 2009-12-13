@@ -40,7 +40,7 @@ unsigned get_optimal_msg_width() {
 }
 
 int message(const wstring& msg, int button_cnt, DWORD flags) {
-  return g_far.Message(g_far.ModuleNumber, flags | FMSG_ALLINONE, NULL, reinterpret_cast<const wchar_t* const*>(msg.data()), 0, button_cnt);
+  return g_far.Message(g_far.ModuleNumber, flags | FMSG_ALLINONE, NULL, reinterpret_cast<const wchar_t* const*>(msg.c_str()), 0, button_cnt);
 }
 
 };

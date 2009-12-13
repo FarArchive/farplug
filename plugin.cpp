@@ -42,7 +42,7 @@ bool Plugin::open(const wstring& file_path) {
 void Plugin::info(OpenPluginInfo* opi) {
   opi->StructSize = sizeof(OpenPluginInfo);
   opi->Flags = OPIF_USEFILTER | OPIF_USESORTGROUPS | OPIF_USEHIGHLIGHTING | OPIF_ADDDOTS;
-  opi->CurDir = current_dir.data();
+  opi->CurDir = current_dir.c_str();
 }
 
 bool Plugin::set_dir(const wstring& dir) {

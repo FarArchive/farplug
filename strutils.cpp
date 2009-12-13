@@ -56,7 +56,7 @@ wstring strip(const wstring& str) {
 }
 
 int str_to_int(const wstring& str) {
-  return _wtoi(str.data());
+  return _wtoi(str.c_str());
 }
 
 wstring int_to_str(int val) {

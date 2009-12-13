@@ -114,7 +114,7 @@ public:
 };
 
 FileStream::FileStream(const wstring& file_path) {
-  h_file = CreateFileW(long_path(file_path).data(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_POSIX_SEMANTICS, NULL);
+  h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_POSIX_SEMANTICS, NULL);
   CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
 }
 
@@ -259,7 +259,7 @@ FileList* ArchiveReader::find_dir(const wstring& dir) {
 
 void ArchiveReader::get_file_info(const UInt32 file_index, const wstring& file_name, PluginPanelItem& panel_item) {
   memset(&panel_item, 0, sizeof(panel_item));
-  panel_item.FindData.lpwszFileName = const_cast<wchar_t*>(file_name.data());
+  panel_item.FindData.lpwszFileName = const_cast<wchar_t*>(file_name.c_str());
   if (file_index == -1) {
     panel_item.FindData.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
     panel_item.FindData.ftCreationTime = archive_file_info.ftCreationTime;
