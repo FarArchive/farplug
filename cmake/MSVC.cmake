@@ -106,3 +106,13 @@ ENDIF(NOT ${CFG_RUNTIME_TYPE} STREQUAL "none")
 SET(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
 SET(CMAKE_SHARED_LINKER_FLAGS_DEBUG ${CMAKE_EXE_LINKER_FLAGS_DEBUG})
 SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE ${CMAKE_EXE_LINKER_FLAGS_RELEASE})
+
+MACRO(add_precomp_header precomp_header precomp_source sources)
+  GET_FILENAME_COMPONENT(precomp_name ${precomp_header} NAME_WE)
+  SET(pch_name "${CMAKE_CURRENT_BINARY_DIR}/${precomp_name}.pch")
+
+  SET_SOURCE_FILES_PROPERTIES(${precomp_source} PROPERTIES COMPILE_FLAGS "-Yc\"${precomp_header}\" -Fp\"${pch_name}\"" OBJECT_OUTPUTS "${pch_name}")
+  SET_SOURCE_FILES_PROPERTIES(${${sources}} PROPERTIES COMPILE_FLAGS "-Yu\"${precomp_header}\" -FI\"${precomp_header}\" -Fp\"${pch_name}\"" OBJECT_DEPENDS "${pch_name}")
+
+  LIST(APPEND ${sources} ${precomp_source})
+ENDMACRO(add_precomp_header)

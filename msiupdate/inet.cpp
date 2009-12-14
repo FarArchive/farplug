@@ -1,11 +1,3 @@
-#include <windows.h>
-#include <winhttp.h>
-
-#include <string>
-#include <vector>
-#include <sstream>
-using namespace std;
-
 #include "utils.hpp"
 #include "options.hpp"
 #include "inet.hpp"
