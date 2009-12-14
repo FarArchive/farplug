@@ -9,9 +9,14 @@ using namespace std;
 #include "sysutils.hpp"
 
 wstring get_system_message(HRESULT hr) {
-  wostringstream st;
   wchar_t* sys_msg;
   DWORD len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, NULL);
+  if (!len) {
+    HMODULE h_winhttp = LoadLibrary("winhttp");
+    len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, h_winhttp, HRESULT_CODE(hr), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, NULL);
+    FreeLibrary(h_winhttp);
+  }
+  wostringstream st;
   if (len) {
     wstring message;
     try {
