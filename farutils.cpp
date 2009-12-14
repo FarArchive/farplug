@@ -68,36 +68,34 @@ unsigned get_label_len(const wstring& str) {
   return cnt;
 }
 
-void Dialog::set_text(FarDialogItem& di, const wstring& text) {
+unsigned Dialog::new_value(const wstring& text) {
   values.push_back(text);
-  di.PtrData = values.back().c_str();
+  return static_cast<unsigned>(values.size());
 }
 
-void Dialog::set_list_text(FarListItem& li, const wstring& text) {
-  values.push_back(text);
-  li.Text = values.back().c_str();
+const wchar_t* Dialog::get_value(unsigned idx) const {
+  return values[idx - 1].c_str();
 }
 
 void Dialog::frame(const wstring& text) {
-  FarDialogItem di;
-  memset(&di, 0, sizeof(di));
-  di.Type = DI_DOUBLEBOX;
-  di.X1 = c_x_frame - 2;
-  di.Y1 = c_y_frame - 1;
-  di.X2 = c_x_frame + client_xs + 1;
-  di.Y2 = c_y_frame + client_ys;
-  set_text(di, text);
+  DialogItem di;
+  di.type = DI_DOUBLEBOX;
+  di.x1 = c_x_frame - 2;
+  di.y1 = c_y_frame - 1;
+  di.x2 = c_x_frame + client_xs + 1;
+  di.y2 = c_y_frame + client_ys;
+  di.text_idx = new_value(text);
   new_item(di);
 }
 
 void Dialog::calc_frame_size() {
   client_ys = y - c_y_frame;
-  FarDialogItem& di = items.front(); // dialog frame
-  di.X2 = c_x_frame + client_xs + 1;
-  di.Y2 = c_y_frame + client_ys;
+  DialogItem& di = items.front(); // dialog frame
+  di.x2 = c_x_frame + client_xs + 1;
+  di.y2 = c_y_frame + client_ys;
 }
 
-unsigned Dialog::new_item(const FarDialogItem& di) {
+unsigned Dialog::new_item(const DialogItem& di) {
   items.push_back(di);
   return static_cast<unsigned>(items.size()) - 1;
 }
@@ -126,175 +124,232 @@ void Dialog::new_line() {
 
 void Dialog::spacer(unsigned size) {
   x += size;
-  if (x - c_x_frame > client_xs) client_xs = x - c_x_frame;
+  if (x - c_x_frame > client_xs)
+    client_xs = x - c_x_frame;
 }
 
 unsigned Dialog::separator() {
-  FarDialogItem di;
-  memset(&di, 0, sizeof(di));
-  di.Type = DI_TEXT;
-  di.Y1 = y;
-  di.Y2 = y;
-  di.Flags = DIF_SEPARATOR;
+  DialogItem di;
+  di.type = DI_TEXT;
+  di.y1 = y;
+  di.y2 = y;
+  di.flags = DIF_SEPARATOR;
   return new_item(di);
 }
 
 unsigned Dialog::label(const wstring& text, unsigned boxsize, DWORD flags) {
-  FarDialogItem di;
-  memset(&di, 0, sizeof(di));
-  di.Type = DI_TEXT;
-  di.X1 = x;
-  di.Y1 = y;
-  if (boxsize == AUTO_SIZE) x += get_label_len(text);
-  else x += boxsize;
-  if (x - c_x_frame > client_xs) client_xs = x - c_x_frame;
-  di.X2 = x - 1;
-  di.Y2 = y;
-  di.Flags = flags;
-  set_text(di, text);
+  DialogItem di;
+  di.type = DI_TEXT;
+  di.x1 = x;
+  di.y1 = y;
+  if (boxsize == AUTO_SIZE)
+    x += get_label_len(text);
+  else
+    x += boxsize;
+  if (x - c_x_frame > client_xs)
+    client_xs = x - c_x_frame;
+  di.x2 = x - 1;
+  di.y2 = y;
+  di.flags = flags;
+  di.text_idx = new_value(text);
   return new_item(di);
 }
 
 unsigned Dialog::edit_box(const wstring& text, unsigned boxsize, DWORD flags) {
-  FarDialogItem di;
-  memset(&di, 0, sizeof(di));
-  di.Type = DI_EDIT;
-  di.X1 = x;
-  di.Y1 = y;
-  if (boxsize == AUTO_SIZE) x = c_x_frame + client_xs;
-  else x += boxsize;
-  if (x - c_x_frame > client_xs) client_xs = x - c_x_frame;
-  di.X2 = x - 1;
-  di.Y2 = y;
-  di.Flags = flags;
-  set_text(di, text);
+  DialogItem di;
+  di.type = DI_EDIT;
+  di.x1 = x;
+  di.y1 = y;
+  if (boxsize == AUTO_SIZE)
+    x = c_x_frame + client_xs;
+  else
+    x += boxsize;
+  if (x - c_x_frame > client_xs)
+    client_xs = x - c_x_frame;
+  di.x2 = x - 1;
+  di.y2 = y;
+  di.flags = flags;
+  di.text_idx = new_value(text);
   return new_item(di);
 }
 
 unsigned Dialog::mask_edit_box(const wstring& text, const wstring& mask, unsigned boxsize, DWORD flags) {
-  FarDialogItem di;
-  memset(&di, 0, sizeof(di));
-  di.Type = DI_FIXEDIT;
-  di.X1 = x;
-  di.Y1 = y;
-  if (boxsize == AUTO_SIZE) x += static_cast<unsigned>(mask.size());
-  else x += boxsize;
-  if (x - c_x_frame > client_xs) client_xs = x - c_x_frame;
-  di.X2 = x - 1;
-  di.Y2 = y;
-  values.push_back(mask);
-  di.Mask = values.back().c_str();
-  di.Flags = DIF_MASKEDIT | flags;
-  set_text(di, text);
+  DialogItem di;
+  di.type = DI_FIXEDIT;
+  di.x1 = x;
+  di.y1 = y;
+  if (boxsize == AUTO_SIZE)
+    x += static_cast<unsigned>(mask.size());
+  else
+    x += boxsize;
+  if (x - c_x_frame > client_xs)
+    client_xs = x - c_x_frame;
+  di.x2 = x - 1;
+  di.y2 = y;
+  di.mask_idx = new_value(mask);
+  di.flags = DIF_MASKEDIT | flags;
+  di.text_idx = new_value(text);
   return new_item(di);
 }
 
 unsigned Dialog::fix_edit_box(const wstring& text, unsigned boxsize, DWORD flags) {
-  FarDialogItem di;
-  memset(&di, 0, sizeof(di));
-  di.Type = DI_FIXEDIT;
-  di.X1 = x;
-  di.Y1 = y;
-  if (boxsize == AUTO_SIZE) x += static_cast<unsigned>(text.size());
-  else x += boxsize;
-  if (x - c_x_frame > client_xs) client_xs = x - c_x_frame;
-  di.X2 = x - 1;
-  di.Y2 = y;
-  di.Flags = flags;
-  set_text(di, text);
+  DialogItem di;
+  di.type = DI_FIXEDIT;
+  di.x1 = x;
+  di.y1 = y;
+  if (boxsize == AUTO_SIZE)
+    x += static_cast<unsigned>(text.size());
+  else
+    x += boxsize;
+  if (x - c_x_frame > client_xs)
+    client_xs = x - c_x_frame;
+  di.x2 = x - 1;
+  di.y2 = y;
+  di.flags = flags;
+  di.text_idx = new_value(text);
   return new_item(di);
 }
 
 unsigned Dialog::button(const wstring& text, DWORD flags, bool def) {
-  FarDialogItem di;
-  memset(&di, 0, sizeof(di));
-  di.Type = DI_BUTTON;
-  di.X1 = x;
-  di.Y1 = y;
+  DialogItem di;
+  di.type = DI_BUTTON;
+  di.x1 = x;
+  di.y1 = y;
   x += get_label_len(text) + 4;
-  if (x - c_x_frame > client_xs) client_xs = x - c_x_frame;
-  di.Y2 = y;
-  di.Flags = flags;
-  di.DefaultButton = def ? 1 : 0;
-  set_text(di, text);
+  if (x - c_x_frame > client_xs)
+    client_xs = x - c_x_frame;
+  di.y2 = y;
+  di.flags = flags;
+  di.default_button = def ? 1 : 0;
+  di.text_idx = new_value(text);
   return new_item(di);
 }
 
 unsigned Dialog::check_box(const wstring& text, int value, DWORD flags) {
-  FarDialogItem di;
-  memset(&di, 0, sizeof(di));
-  di.Type = DI_CHECKBOX;
-  di.X1 = x;
-  di.Y1 = y;
+  DialogItem di;
+  di.type = DI_CHECKBOX;
+  di.x1 = x;
+  di.y1 = y;
   x += get_label_len(text) + 4;
-  if (x - c_x_frame > client_xs) client_xs = x - c_x_frame;
-  di.Y2 = y;
-  di.Flags = flags;
-  di.Selected = value;
-  set_text(di, text);
+  if (x - c_x_frame > client_xs)
+    client_xs = x - c_x_frame;
+  di.y2 = y;
+  di.flags = flags;
+  di.selected = value;
+  di.text_idx = new_value(text);
   return new_item(di);
 }
 
 unsigned Dialog::radio_button(const wstring& text, bool value, DWORD flags) {
-  FarDialogItem di;
-  memset(&di, 0, sizeof(di));
-  di.Type = DI_RADIOBUTTON;
-  di.X1 = x;
-  di.Y1 = y;
+  DialogItem di;
+  di.type = DI_RADIOBUTTON;
+  di.x1 = x;
+  di.y1 = y;
   x += get_label_len(text) + 4;
-  if (x - c_x_frame > client_xs) client_xs = x - c_x_frame;
-  di.Y2 = y;
-  di.Flags = flags;
-  di.Selected = value ? 1 : 0;
-  set_text(di, text);
+  if (x - c_x_frame > client_xs)
+    client_xs = x - c_x_frame;
+  di.y2 = y;
+  di.flags = flags;
+  di.selected = value ? 1 : 0;
+  di.text_idx = new_value(text);
   return new_item(di);
 }
 
 unsigned Dialog::combo_box(const vector<wstring>& list_items, unsigned sel_idx, unsigned boxsize, DWORD flags) {
-  FarDialogItem di;
-  memset(&di, 0, sizeof(di));
-  di.Type = DI_COMBOBOX;
-  di.X1 = x;
-  di.Y1 = y;
-  if (boxsize == AUTO_SIZE) x = c_x_frame + client_xs;
-  else x += boxsize;
-  if (x - c_x_frame > client_xs) client_xs = x - c_x_frame;
-  di.X2 = x - 2;
-  di.Y2 = y;
-  di.Flags = flags;
-  ListData list_data;
-  for (unsigned i = 0; i < list_items.size(); i++) {
-    FarListItem li;
-    memset(&li, 0, sizeof(li));
-    set_list_text(li, list_items[i]);
-    if (i == sel_idx) li.Flags = LIF_SELECTED;
-    list_data.items.push_back(li);
+  DialogItem di;
+  di.type = DI_COMBOBOX;
+  di.x1 = x;
+  di.y1 = y;
+  if (boxsize == AUTO_SIZE) {
+    if (flags & DIF_DROPDOWNLIST) {
+      unsigned max_len = 1;
+      for (unsigned i = 0; i < list_items.size(); i++) {
+        if (max_len < list_items[i].size())
+          max_len = list_items[i].size();
+      }
+      x += max_len + 1;
+    }
+    else
+      x = c_x_frame + client_xs;
   }
-  FarList fl;
-  fl.ItemsNumber = static_cast<DWORD>(list_data.items.size());
-  fl.Items = const_cast<FarListItem*>(&list_data.items[0]);
-  list_data.list.push_back(fl);
-  lists.push_back(list_data);
-  di.ListItems = const_cast<FarList*>(&lists.back().list[0]);
-  set_text(di, wstring());
+  else
+    x += boxsize;
+  if (x - c_x_frame > client_xs)
+    client_xs = x - c_x_frame;
+  di.x2 = x - 1 - 1; // -1 for down arrow
+  di.y2 = y;
+  di.flags = flags;
+  for (unsigned i = 0; i < list_items.size(); i++) {
+    if (di.list_idx)
+      new_value(list_items[i]);
+    else
+      di.list_idx = new_value(list_items[i]);
+  }
+  di.list_size = list_items.size();
+  di.list_pos = sel_idx;
   return new_item(di);
 }
 
 int Dialog::show() {
   calc_frame_size();
+
+  unsigned list_cnt = 0;
+  unsigned list_item_cnt = 0;
+  for (unsigned i = 0; i < items.size(); i++) {
+    if (items[i].list_idx) {
+      list_cnt++;
+      list_item_cnt += items[i].list_size;
+    }
+  }
+  Buffer<FarList> far_lists(list_cnt);
+  far_lists.clear();
+  Buffer<FarListItem> far_list_items(list_item_cnt);
+  far_list_items.clear();
+
+  Buffer<FarDialogItem> dlg_items(items.size());
+  dlg_items.clear();
+  unsigned fl_idx = 0;
+  unsigned fli_idx = 0;
+  for (unsigned i = 0; i < items.size(); i++) {
+    FarDialogItem* dlg_item = dlg_items.data() + i;
+    dlg_item->Type = items[i].type;
+    dlg_item->X1 = items[i].x1;
+    dlg_item->Y1 = items[i].y1;
+    dlg_item->X2 = items[i].x2;
+    dlg_item->Y2 = items[i].y2;
+    dlg_item->Focus = items[i].focus;
+    dlg_item->Flags = items[i].flags;
+    dlg_item->DefaultButton = items[i].default_button;
+    dlg_item->Selected = items[i].selected;
+    if (items[i].history_idx)
+      dlg_item->History = get_value(items[i].history_idx);
+    if (items[i].mask_idx)
+      dlg_item->Mask = get_value(items[i].mask_idx);
+    if (items[i].text_idx)
+      dlg_item->PtrData = get_value(items[i].text_idx);
+    if (items[i].list_idx) {
+      FarList* fl = far_lists.data() + fl_idx;
+      fl->Items = far_list_items.data() + fli_idx;
+      fl->ItemsNumber = items[i].list_size;
+      for (unsigned j = 0; j < items[i].list_size; j++) {
+        FarListItem* fli = far_list_items.data() + fli_idx;
+        if (j == items[i].list_pos)
+          fli->Flags = LIF_SELECTED;
+        fli->Text = get_value(items[i].list_idx + j);
+        fli_idx++;
+      }
+      fl_idx++;
+      dlg_item->ListItems = fl;
+    }
+  }
+
   int res = -1;
-  HANDLE h_dlg = g_far.DialogInit(g_far.ModuleNumber, -1, -1, client_xs + 2 * c_x_frame, client_ys + 2 * c_y_frame, help, &items[0], static_cast<unsigned>(items.size()), 0, 0, internal_dialog_proc, reinterpret_cast<LONG_PTR>(this));
+  HANDLE h_dlg = g_far.DialogInit(g_far.ModuleNumber, -1, -1, client_xs + 2 * c_x_frame, client_ys + 2 * c_y_frame, help, dlg_items.data(), dlg_items.size(), 0, 0, internal_dialog_proc, reinterpret_cast<LONG_PTR>(this));
   if (h_dlg != INVALID_HANDLE_VALUE) {
     res = g_far.DialogRun(h_dlg);
     g_far.DialogFree(h_dlg);
   }
   return res;
-}
-
-Dialog* Dialog::get_dlg(HANDLE h_dlg) {
-  Dialog* dlg = reinterpret_cast<Dialog*>(g_far.SendDlgMessage(h_dlg, DM_GETDLGDATA, 0, 0));
-  dlg->h_dlg = h_dlg;
-  return dlg;
 }
 
 wstring Dialog::get_text(unsigned ctrl_id) {

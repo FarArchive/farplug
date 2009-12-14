@@ -40,19 +40,15 @@ private:
   size_t buf_size;
 public:
   Buffer(size_t size) {
-    buffer = reinterpret_cast<Type*>(malloc(size * sizeof(Type)));
-    if (buffer == NULL)
-      throw bad_alloc();
+    buffer = new Type[size];
     buf_size = size;
   }
   ~Buffer() {
-    free(buffer);
+    delete[] buffer;
   }
   void resize(size_t size) {
-    Type* new_buffer = realloc(buffer, size * sizeof(Type));
-    if (buffer == NULL)
-      throw bad_alloc();
-    buffer = new_buffer;
+    delete[] buffer;
+    buffer = new Type[size];
     buf_size = size;
   }
   Type* data() {
@@ -61,4 +57,14 @@ public:
   size_t size() const {
     return buf_size;
   }
+  void clear() {
+    memset(buffer, 0, buf_size * sizeof(Type));
+  }
 };
+
+template<class T> const T* to_array(const vector<T>& v) {
+  if (v.empty())
+    return NULL;
+  else
+    return &v[0];
+}
