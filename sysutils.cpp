@@ -1,6 +1,7 @@
 #include <windows.h>
 
 #include <string>
+#include <vector>
 #include <sstream>
 #include <iomanip>
 using namespace std;
@@ -12,11 +13,9 @@ wstring get_system_message(HRESULT hr) {
   wchar_t* sys_msg;
   DWORD len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, NULL);
   if (!len) {
-    WORD fc = HRESULT_FACILITY(hr);
-    WORD code = HRESULT_CODE(hr);
-    if ((fc == FACILITY_WIN32) && (code >= 12000) && (code <= 12174)) { // WinHttp
+    if (HRESULT_FACILITY(hr) == FACILITY_WIN32) {
       HMODULE h_winhttp = LoadLibrary("winhttp");
-      len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, h_winhttp, code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, NULL);
+      len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, h_winhttp, HRESULT_CODE(hr), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, NULL);
       FreeLibrary(h_winhttp);
     }
   }

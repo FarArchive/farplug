@@ -7,6 +7,17 @@ config.title = Настройки
 config.use_full_install_ui = &Ручная установка
 config.update_stable_builds = Обновлять &стабильные сборки
 config.logged_install = Запись &лога при установке
+config.use_proxy = Использовать &прокси
+config.proxy_server = &Имя сервера:
+config.proxy_port = П&орт:
+config.proxy_auth_scheme = С&хема авторизации:
+config.proxy_auth.basic = Basic
+config.proxy_auth.ntlm = NTLM
+config.proxy_auth.passport = Passport
+config.proxy_auth.digest = Digest
+config.proxy_auth.negotiate = Negotiate
+config.proxy_user_name = И&мя пользователя:
+config.proxy_password = П&ароль:
 
 # Update dialog
 update.new_version = Доступна новая версия: 
