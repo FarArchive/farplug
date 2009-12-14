@@ -49,6 +49,27 @@ void call_user_apc(void* param);
 const unsigned c_x_frame = 5;
 const unsigned c_y_frame = 2;
 
+struct DialogItem {
+  DialogItemTypes type;
+  unsigned x1;
+  unsigned y1;
+  unsigned x2;
+  unsigned y2;
+  DWORD flags;
+  bool focus;
+  bool default_button;
+  int selected;
+  unsigned history_idx;
+  unsigned mask_idx;
+  unsigned text_idx;
+  unsigned list_idx;
+  unsigned list_size;
+  unsigned list_pos;
+  DialogItem() {
+    memset(this, 0, sizeof(*this));
+  }
+};
+
 class Dialog {
 private:
   unsigned client_xs;
@@ -56,21 +77,14 @@ private:
   unsigned x;
   unsigned y;
   const wchar_t* help;
-  vector<FarDialogItem> items;
   vector<wstring> values;
-  struct ListData {
-    vector<FarList> list;
-    vector<FarListItem> items;
-  };
-  vector<ListData> lists;
+  vector<DialogItem> items;
   HANDLE h_dlg;
-  // set text for dialog element
-  void set_text(FarDialogItem& di, const wstring& text);
-  // set text for list items
-  void set_list_text(FarListItem& li, const wstring& text);
+  unsigned new_value(const wstring& text);
+  const wchar_t* get_value(unsigned idx) const;
   void frame(const wstring& text);
   void calc_frame_size();
-  unsigned new_item(const FarDialogItem& di);
+  unsigned new_item(const DialogItem& di);
   static LONG_PTR WINAPI internal_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2);
 protected:
   virtual LONG_PTR default_dialog_proc(int msg, int param1, LONG_PTR param2);
@@ -103,7 +117,6 @@ public:
   // display dialog
   int show();
   // utilities to set/get control values
-  static Dialog* get_dlg(HANDLE h_dlg);
   wstring get_text(unsigned ctrl_id);
   void set_text(unsigned ctrl_id, const wstring& text);
   bool get_check(unsigned ctrl_id);
