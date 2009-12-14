@@ -1,7 +1,3 @@
-#include <vector>
-#include <string>
-using namespace std;
-
 #include "utils.hpp"
 
 bool substr_match(const wstring& str, wstring::size_type pos, wstring::const_pointer mstr) {

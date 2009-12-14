@@ -1,7 +1,5 @@
 #pragma once
 
-#include "plugin.hpp"
-
 namespace Far {
 
 #define FAR_ERROR_HANDLER_BEGIN try {

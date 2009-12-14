@@ -1,15 +1,3 @@
-#include <windows.h>
-#include <msi.h>
-
-#include <process.h>
-#include <time.h>
-
-#include <string>
-#include <map>
-#include <sstream>
-#include <vector>
-using namespace std;
-
 #include "msg.h"
 
 #include "farutils.hpp"
