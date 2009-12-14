@@ -141,7 +141,7 @@ string load_url(const wstring& url, const HttpOptions& options, HANDLE h_abort) 
     st << L"Server returned error code: " << status;
 
     Buffer<char> status_text(100);
-    DWORD status_text_size = status_text.size();
+    DWORD status_text_size = static_cast<DWORD>(status_text.size());
     BOOL res = WinHttpQueryHeaders(h_request, WINHTTP_QUERY_STATUS_TEXT, WINHTTP_HEADER_NAME_BY_INDEX, status_text.data(), &status_text_size, WINHTTP_NO_HEADER_INDEX);
     if (!res && (GetLastError() == ERROR_INSUFFICIENT_BUFFER)) {
       status_text.resize(status_text_size);
