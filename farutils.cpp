@@ -261,7 +261,7 @@ unsigned Dialog::combo_box(const vector<wstring>& list_items, unsigned sel_idx, 
       unsigned max_len = 1;
       for (unsigned i = 0; i < list_items.size(); i++) {
         if (max_len < list_items[i].size())
-          max_len = list_items[i].size();
+          max_len = static_cast<unsigned>(list_items[i].size());
       }
       x += max_len + 1;
     }
@@ -281,7 +281,7 @@ unsigned Dialog::combo_box(const vector<wstring>& list_items, unsigned sel_idx, 
     else
       di.list_idx = new_value(list_items[i]);
   }
-  di.list_size = list_items.size();
+  di.list_size = static_cast<unsigned>(list_items.size());
   di.list_pos = sel_idx;
   return new_item(di);
 }
@@ -340,7 +340,7 @@ int Dialog::show() {
   }
 
   int res = -1;
-  HANDLE h_dlg = g_far.DialogInit(g_far.ModuleNumber, -1, -1, client_xs + 2 * c_x_frame, client_ys + 2 * c_y_frame, help, dlg_items.data(), dlg_items.size(), 0, 0, internal_dialog_proc, reinterpret_cast<LONG_PTR>(this));
+  HANDLE h_dlg = g_far.DialogInit(g_far.ModuleNumber, -1, -1, client_xs + 2 * c_x_frame, client_ys + 2 * c_y_frame, help, dlg_items.data(), static_cast<unsigned>(dlg_items.size()), 0, 0, internal_dialog_proc, reinterpret_cast<LONG_PTR>(this));
   if (h_dlg != INVALID_HANDLE_VALUE) {
     res = g_far.DialogRun(h_dlg);
     g_far.DialogFree(h_dlg);
