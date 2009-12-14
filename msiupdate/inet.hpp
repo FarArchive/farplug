@@ -1,3 +1,3 @@
 #pragma once
 
-string load_url(const wstring& url, HANDLE h_abort);
+string load_url(const wstring& url, const HttpOptions& options, HANDLE h_abort);

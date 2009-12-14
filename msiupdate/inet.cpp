@@ -2,11 +2,12 @@
 #include <winhttp.h>
 
 #include <string>
-#include <sstream>
 #include <vector>
+#include <sstream>
 using namespace std;
 
 #include "utils.hpp"
+#include "options.hpp"
 #include "inet.hpp"
 
 class HInternet: private NonCopyable {
@@ -87,8 +88,22 @@ void wait(Context& context, HANDLE h_abort) {
 
 const wchar_t* c_user_agent = L"MsiUpdate";
 
-string load_url(const wstring& url, HANDLE h_abort) {
-  HInternet h_session = WinHttpOpen(c_user_agent, WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, WINHTTP_FLAG_ASYNC);
+string load_url(const wstring& url, const HttpOptions& options, HANDLE h_abort) {
+  DWORD proxy_type;
+  LPCWSTR proxy_name;
+  wstring address;
+  if (options.use_proxy && !options.proxy_server.empty()) {
+    address = options.proxy_server;
+    if (options.proxy_port)
+      address.append(L":").append(int_to_str(options.proxy_port));
+    proxy_type = WINHTTP_ACCESS_TYPE_NAMED_PROXY;
+    proxy_name = address.c_str();
+  }
+  else {
+    proxy_type = WINHTTP_ACCESS_TYPE_NO_PROXY;
+    proxy_name = WINHTTP_NO_PROXY_NAME;
+  }
+  HInternet h_session = WinHttpOpen(c_user_agent, proxy_type, proxy_name, WINHTTP_NO_PROXY_BYPASS, WINHTTP_FLAG_ASYNC);
   CHECK_SYS(h_session);
 
   Context context;
@@ -107,6 +122,19 @@ string load_url(const wstring& url, HANDLE h_abort) {
   HInternet h_request = WinHttpOpenRequest(h_conn, NULL, wstring(url_parts.lpszUrlPath, url_parts.dwUrlPathLength).c_str(), NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_BYPASS_PROXY_CACHE | WINHTTP_FLAG_REFRESH);
   CHECK_SYS(h_request);
 
+  if (options.use_proxy && !options.proxy_user_name.empty()) {
+    DWORD auth_scheme;
+    switch (options.proxy_auth_scheme) {
+    case 0: auth_scheme = WINHTTP_AUTH_SCHEME_BASIC; break;
+    case 1: auth_scheme = WINHTTP_AUTH_SCHEME_NTLM; break;
+    case 2: auth_scheme = WINHTTP_AUTH_SCHEME_PASSPORT; break;
+    case 3: auth_scheme = WINHTTP_AUTH_SCHEME_DIGEST; break;
+    case 4: auth_scheme = WINHTTP_AUTH_SCHEME_NEGOTIATE; break;
+    default: auth_scheme = WINHTTP_AUTH_SCHEME_BASIC; break;
+    }
+    CHECK_SYS(WinHttpSetCredentials(h_request, WINHTTP_AUTH_TARGET_PROXY, auth_scheme, options.proxy_user_name.c_str(), options.proxy_password.c_str(), NULL));
+  }
+
   CHECK_SYS(WinHttpSendRequest(h_request, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, reinterpret_cast<DWORD_PTR>(&context)));
   wait(context, h_abort);
 
@@ -119,6 +147,16 @@ string load_url(const wstring& url, HANDLE h_abort) {
   if (status != HTTP_STATUS_OK) {
     wostringstream st;
     st << L"Server returned error code: " << status;
+
+    Buffer<char> status_text(100);
+    DWORD status_text_size = status_text.size();
+    BOOL res = WinHttpQueryHeaders(h_request, WINHTTP_QUERY_STATUS_TEXT, WINHTTP_HEADER_NAME_BY_INDEX, status_text.data(), &status_text_size, WINHTTP_NO_HEADER_INDEX);
+    if (!res && (GetLastError() == ERROR_INSUFFICIENT_BUFFER)) {
+      status_text.resize(status_text_size);
+      res = WinHttpQueryHeaders(h_request, WINHTTP_QUERY_STATUS_TEXT, WINHTTP_HEADER_NAME_BY_INDEX, status_text.data(), &status_text_size, WINHTTP_NO_HEADER_INDEX);
+    }
+    if (res)
+      st << L" " << wstring(reinterpret_cast<wchar_t*>(status_text.data()), status_text_size / sizeof(wchar_t));
     FAIL_MSG(st.str());
   }
 

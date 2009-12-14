@@ -12,6 +12,18 @@ Options g_options;
 
 const wchar_t* c_plugin_key_name = L"msiupdate";
 
+const wchar_t* c_param_last_check_time = L"last_check_time";
+const wchar_t* c_param_last_check_version = L"last_check_version";
+const wchar_t* c_param_use_full_install_ui = L"use_full_install_ui";
+const wchar_t* c_param_update_stable_builds = L"update_stable_builds";
+const wchar_t* c_param_logged_install = L"logged_install";
+const wchar_t* c_param_use_proxy = L"use_proxy";
+const wchar_t* c_param_proxy_server = L"proxy_server";
+const wchar_t* c_param_proxy_port = L"proxy_port";
+const wchar_t* c_param_proxy_auth_scheme = L"proxy_auth_scheme";
+const wchar_t* c_param_proxy_user_name = L"proxy_user_name";
+const wchar_t* c_param_proxy_password = L"proxy_password";
+
 unsigned Options::get_int(const wchar_t* name, unsigned def_value) {
   unsigned value = def_value;
   HKEY h_root_key, h_plugin_key;
@@ -119,17 +131,30 @@ void Options::set_str(const wchar_t* name, const wstring& value) {
 }
 
 void Options::load() {
-  last_check_time = get_int(L"last_check_time", 0);
-  last_check_version = get_int(L"last_check_version", 0);
-  use_full_install_ui = get_bool(L"use_full_install_ui", false);
-  update_stable_builds = get_bool(L"update_stable_builds", false);
-  logged_install = get_bool(L"logged_install", true);
+  last_check_time = get_int(c_param_last_check_time);
+  last_check_version = get_int(c_param_last_check_version);
+  use_full_install_ui = get_bool(c_param_use_full_install_ui);
+  update_stable_builds = get_bool(c_param_update_stable_builds);
+  logged_install = get_bool(c_param_logged_install, true);
+  http.use_proxy = get_bool(c_param_use_proxy);
+  http.proxy_server = get_str(c_param_proxy_server);
+  http.proxy_port = get_int(c_param_proxy_port);
+  http.proxy_auth_scheme = get_int(c_param_proxy_auth_scheme);
+  http.proxy_user_name = get_str(c_param_proxy_user_name);
+  http.proxy_password = get_str(c_param_proxy_password);
+
 };
 
 void Options::save() {
-  set_int(L"last_check_time", last_check_time);
-  set_int(L"last_check_version", last_check_version);
-  set_bool(L"use_full_install_ui", use_full_install_ui);
-  set_bool(L"update_stable_builds", update_stable_builds);
-  set_bool(L"logged_install", logged_install);
+  set_int(c_param_last_check_time, last_check_time);
+  set_int(c_param_last_check_version, last_check_version);
+  set_bool(c_param_use_full_install_ui, use_full_install_ui);
+  set_bool(c_param_update_stable_builds, update_stable_builds);
+  set_bool(c_param_logged_install, logged_install);
+  set_bool(c_param_use_proxy, http.use_proxy);
+  set_str(c_param_proxy_server, http.proxy_server);
+  set_int(c_param_proxy_port, http.proxy_port);
+  set_int(c_param_proxy_auth_scheme, http.proxy_auth_scheme);
+  set_str(c_param_proxy_user_name, http.proxy_user_name);
+  set_str(c_param_proxy_password, http.proxy_password);
 }

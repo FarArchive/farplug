@@ -13,10 +13,10 @@ using namespace std;
 #include "msg.h"
 
 #include "farutils.hpp"
-#include "inet.hpp"
 #include "iniparse.hpp"
 #include "utils.hpp"
 #include "options.hpp"
+#include "inet.hpp"
 #include "update.hpp"
 
 namespace Updater {
@@ -98,7 +98,7 @@ string get_update_url() {
 
 bool check() {
   check_product_installed();
-  string update_info = load_url(widen(get_update_url() + c_update_script), h_abort);
+  string update_info = load_url(widen(get_update_url() + c_update_script), g_options.http, h_abort);
   Ini::File update_ini;
   update_ini.parse(update_info);
   string ver_major = update_ini.get("far", "major");
