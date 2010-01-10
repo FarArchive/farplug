@@ -92,7 +92,7 @@ string load_url(const wstring& url, const HttpOptions& options, HANDLE h_abort) 
     proxy_name = address.c_str();
   }
   else {
-    proxy_type = WINHTTP_ACCESS_TYPE_NO_PROXY;
+    proxy_type = WINHTTP_ACCESS_TYPE_DEFAULT_PROXY;
     proxy_name = WINHTTP_NO_PROXY_NAME;
   }
   HInternet h_session = WinHttpOpen(c_user_agent, proxy_type, proxy_name, WINHTTP_NO_PROXY_BYPASS, WINHTTP_FLAG_ASYNC);

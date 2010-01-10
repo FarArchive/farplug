@@ -114,7 +114,9 @@ void execute() {
       CHECK_SYS(GetTempPathW(ARRAYSIZE(temp_path), temp_path));
       st << L"/log \"" << add_trailing_slash(temp_path) << L"MsiUpdate_" << VER_MAJOR(curr_ver) << L"_" << widen(c_platform) << L".log\" ";
     }
-    st << "/i " << widen(get_update_url() + msi_name);
+    st << "/i \"" << widen(get_update_url() + msi_name) + L"\"";
+    if (!g_options.install_properties.empty())
+      st << L" " << g_options.install_properties;
     wstring command = st.str();
 
     STARTUPINFOW si;
