@@ -152,7 +152,16 @@ string load_url(const wstring& url, const HttpOptions& options, HANDLE h_abort) 
     FAIL_MSG(st.str());
   }
 
-  Buffer<char> buf(8 * 1024);
+  const unsigned c_max_clen = 100 * 1024 * 1024;
+  DWORD clen;
+  DWORD clen_size = sizeof(clen);
+  if (WinHttpQueryHeaders(h_request, WINHTTP_QUERY_CONTENT_LENGTH | WINHTTP_QUERY_FLAG_NUMBER, WINHTTP_HEADER_NAME_BY_INDEX, &clen, &clen_size, WINHTTP_NO_HEADER_INDEX)) {
+    if (clen < c_max_clen)
+      context.data.reserve(clen);
+  }
+
+  const unsigned c_read_buf_size = 64 * 1024;
+  Buffer<char> buf(c_read_buf_size);
   do {
     CHECK_SYS(WinHttpReadData(h_request, buf.data(), static_cast<DWORD>(buf.size()), NULL));
     wait(context, h_abort);
