@@ -23,6 +23,7 @@ public:
   bool use_full_install_ui;
   bool update_stable_builds;
   bool logged_install;
+  wstring install_properties;
   HttpOptions http;
   void load();
   void save();

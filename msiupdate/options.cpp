@@ -11,6 +11,7 @@ const wchar_t* c_param_last_check_version = L"last_check_version";
 const wchar_t* c_param_use_full_install_ui = L"use_full_install_ui";
 const wchar_t* c_param_update_stable_builds = L"update_stable_builds";
 const wchar_t* c_param_logged_install = L"logged_install";
+const wchar_t* c_param_install_properties = L"install_properties";
 const wchar_t* c_param_use_proxy = L"use_proxy";
 const wchar_t* c_param_proxy_server = L"proxy_server";
 const wchar_t* c_param_proxy_port = L"proxy_port";
@@ -130,6 +131,7 @@ void Options::load() {
   use_full_install_ui = get_bool(c_param_use_full_install_ui);
   update_stable_builds = get_bool(c_param_update_stable_builds);
   logged_install = get_bool(c_param_logged_install, true);
+  install_properties = get_str(c_param_install_properties);
   http.use_proxy = get_bool(c_param_use_proxy);
   http.proxy_server = get_str(c_param_proxy_server);
   http.proxy_port = get_int(c_param_proxy_port);
@@ -145,6 +147,7 @@ void Options::save() {
   set_bool(c_param_use_full_install_ui, use_full_install_ui);
   set_bool(c_param_update_stable_builds, update_stable_builds);
   set_bool(c_param_logged_install, logged_install);
+  set_str(c_param_install_properties, install_properties);
   set_bool(c_param_use_proxy, http.use_proxy);
   set_str(c_param_proxy_server, http.proxy_server);
   set_int(c_param_proxy_port, http.proxy_port);
