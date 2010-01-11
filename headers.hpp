@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <msi.h>
 #include <winhttp.h>
+#include <shobjidl.h>
 
 #include <process.h>
 #include <time.h>

@@ -67,6 +67,17 @@ wstring get_progress_bar_str(unsigned width, unsigned current, unsigned total) {
   return result;
 }
 
+void set_progress_state(TBPFLAG state) {
+  g_far.AdvControl(g_far.ModuleNumber, ACTL_SETPROGRESSSTATE, reinterpret_cast<void*>(state));
+}
+
+void set_progress_value(unsigned completed, unsigned total) {
+  PROGRESSVALUE pv;
+  pv.Completed = completed;
+  pv.Total = total;
+  g_far.AdvControl(g_far.ModuleNumber, ACTL_SETPROGRESSVALUE, &pv);
+}
+
 void call_user_apc(void* param) {
   g_far.AdvControl(g_far.ModuleNumber, ACTL_SYNCHRO, param);
 }
