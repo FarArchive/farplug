@@ -85,7 +85,7 @@ void call_user_apc(void* param) {
 bool post_keys(const vector<DWORD>& keys) {
   KeySequence key_sequence;
   key_sequence.Flags = KSFLAGS_DISABLEOUTPUT;
-  key_sequence.Count = keys.size();
+  key_sequence.Count = static_cast<int>(keys.size());
   key_sequence.Sequence = to_array(keys);
   return g_far.AdvControl(g_far.ModuleNumber, ACTL_POSTKEYSEQUENCE, &key_sequence) == TRUE;
 }
@@ -464,7 +464,7 @@ size_t Regex::search(const wstring& expr, const wstring& text) {
   memset(&regex_search, 0, sizeof(regex_search));
   regex_search.Text = text.c_str();
   regex_search.Position = 0;
-  regex_search.Length = text.size();
+  regex_search.Length = static_cast<int>(text.size());
   RegExpMatch regex_match;
   regex_search.Match = &regex_match;
   regex_search.Count = 1;

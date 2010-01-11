@@ -127,7 +127,7 @@ void show_changelog(unsigned build1, unsigned build2) {
     const wchar_t sig = 0xFEFF;
     DWORD size_written;
     CHECK_SYS(WriteFile(h_file, &sig, sizeof(sig), &size_written, NULL));
-    CHECK_SYS(WriteFile(h_file, text.data() + pos2, (pos1 - pos2) * sizeof(wchar_t), &size_written, NULL));
+    CHECK_SYS(WriteFile(h_file, text.data() + pos2, static_cast<DWORD>((pos1 - pos2) * sizeof(wchar_t)), &size_written, NULL));
   }
 
   Far::viewer(temp_file.get_path(), L"Changelog");

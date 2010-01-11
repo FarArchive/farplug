@@ -171,7 +171,7 @@ string load_url(const wstring& url, const HttpOptions& options, HANDLE h_abort, 
   do {
     CHECK_SYS(WinHttpReadData(h_request, buf.data(), static_cast<DWORD>(buf.size()), NULL));
     wait(context, h_abort);
-    progress->set(context.data.size(), clen);
+    progress->set(static_cast<unsigned>(context.data.size()), clen);
   }
   while (context.more_data);
 
