@@ -56,6 +56,23 @@ void call_user_apc(void* param) {
   g_far.AdvControl(g_far.ModuleNumber, ACTL_SYNCHRO, param);
 }
 
+bool post_keys(const vector<DWORD>& keys) {
+  KeySequence key_sequence;
+  key_sequence.Flags = KSFLAGS_DISABLEOUTPUT;
+  key_sequence.Count = keys.size();
+  key_sequence.Sequence = to_array(keys);
+  return g_far.AdvControl(g_far.ModuleNumber, ACTL_POSTKEYSEQUENCE, &key_sequence) == TRUE;
+}
+
+FarConfirmationsSettings get_confirmation_settings() {
+  return static_cast<FarConfirmationsSettings>(g_far.AdvControl(g_far.ModuleNumber, ACTL_GETCONFIRMATIONS, NULL));
+}
+
+bool get_short_window_info(unsigned idx, WindowInfo& window_info) {
+  window_info.Pos = idx;
+  return g_far.AdvControl(g_far.ModuleNumber, ACTL_GETSHORTWINDOWINFO, &window_info) == TRUE;
+}
+
 unsigned get_label_len(const wstring& str) {
   unsigned cnt = 0;
   for (unsigned i = 0; i < str.size(); i++) {

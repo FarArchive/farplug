@@ -31,3 +31,4 @@ button.cancel = Отмена
 
 # Errors
 error.no_msi = MSI пакет не установлен.
+error.editor_unsaved = Открыто окно редактора с несохраненными данными.

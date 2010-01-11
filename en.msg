@@ -31,3 +31,4 @@ button.cancel = Cancel
 
 # Errors
 error.no_msi = MSI package is not installed.
+error.editor_unsaved = There are editor windows open with unsaved data.

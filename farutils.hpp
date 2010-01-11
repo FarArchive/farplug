@@ -42,6 +42,9 @@ unsigned get_optimal_msg_width();
 int message(const wstring& msg, int button_cnt, DWORD flags);
 
 void call_user_apc(void* param);
+bool post_keys(const vector<DWORD>& keys);
+FarConfirmationsSettings get_confirmation_settings();
+bool get_short_window_info(unsigned idx, WindowInfo& window_info);
 
 #define AUTO_SIZE (-1)
 const unsigned c_x_frame = 5;

@@ -104,6 +104,15 @@ void execute() {
   st << Far::get_msg(MSG_UPDATE_QUESTION) << L'\n';
   int res = Far::message(st.str(), 0, FMSG_MB_YESNOCANCEL);
   if (res == 0) {
+    WindowInfo window_info;
+    bool editor_unsaved = false;
+    for (unsigned idx = 0; !editor_unsaved && Far::get_short_window_info(idx, window_info); idx++) {
+      if ((window_info.Type == WTYPE_EDITOR) && window_info.Modified)
+        editor_unsaved = true;
+    }
+    if (editor_unsaved)
+      FAIL_MSG(Far::get_msg(MSG_ERROR_EDITOR_UNSAVED));
+
     wostringstream st;
     st << L"msiexec /promptrestart ";
     if (!g_options.use_full_install_ui) {
@@ -126,6 +135,12 @@ void execute() {
     CHECK_SYS(CreateProcessW(NULL, const_cast<LPWSTR>(command.c_str()), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE, NULL, NULL, &si, &pi));
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
+
+    vector<DWORD> keys;
+    keys.push_back(KEY_F10);
+    if (Far::get_confirmation_settings() & FCS_EXIT)
+      keys.push_back(KEY_ENTER);
+    Far::post_keys(keys);
   }
   else if (res == 1) {
     g_options.last_check_version = update_ver;
