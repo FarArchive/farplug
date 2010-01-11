@@ -239,7 +239,7 @@ string load_url(const wstring& url, const HttpOptions& options) {
       CHECK_SYS(SetEvent(h_abort));
       wait_for_single_object(h_thread, INFINITE);
     }
-    else throw;
+    throw;
   }
   DWORD exit_code;
   CHECK_SYS(GetExitCodeThread(h_thread, &exit_code));
