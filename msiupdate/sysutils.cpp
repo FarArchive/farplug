@@ -32,7 +32,7 @@ wstring get_system_message(HRESULT hr) {
 
 wstring get_console_title() {
   Buffer<wchar_t> buf(10000);
-  DWORD size = GetConsoleTitleW(buf.data(), buf.size());
+  DWORD size = GetConsoleTitleW(buf.data(), static_cast<DWORD>(buf.size()));
   return wstring(buf.data(), size);
 }
 
@@ -49,7 +49,7 @@ bool wait_for_single_object(HANDLE handle, DWORD timeout) {
 
 TempFile::TempFile() {
   Buffer<wchar_t> buf(MAX_PATH);
-  DWORD len = GetTempPathW(buf.size(), buf.data());
+  DWORD len = GetTempPathW(static_cast<DWORD>(buf.size()), buf.data());
   CHECK(len <= buf.size());
   CHECK_SYS(len);
   wstring temp_path = wstring(buf.data(), len);
@@ -62,7 +62,7 @@ TempFile::~TempFile() {
 }
 
 wstring ansi_to_unicode(const string& str, unsigned code_page) {
-  unsigned size = str.size();
+  unsigned size = static_cast<unsigned>(str.size());
   if (size == 0)
     return wstring();
   Buffer<wchar_t> out(size);
