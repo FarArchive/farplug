@@ -53,6 +53,8 @@ HANDLE save_screen();
 void restore_screen(HANDLE h_scr);
 void flush_screen();
 
+int viewer(const wstring& file_name, const wstring& title);
+
 #define AUTO_SIZE (-1)
 const unsigned c_x_frame = 5;
 const unsigned c_y_frame = 2;
@@ -133,6 +135,15 @@ public:
   void set_color(unsigned ctrl_id, unsigned char color);
   void set_focus(unsigned ctrl_id);
   void enable(unsigned ctrl_id, bool enable);
+};
+
+class Regex: private NonCopyable {
+private:
+  HANDLE h_regex;
+public:
+  Regex();
+  ~Regex();
+  size_t search(const wstring& expr, const wstring& text);
 };
 
 };

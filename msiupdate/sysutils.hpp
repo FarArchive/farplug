@@ -3,6 +3,7 @@
 wstring get_system_message(HRESULT hr);
 wstring get_console_title();
 bool wait_for_single_object(HANDLE handle, DWORD timeout);
+wstring ansi_to_unicode(const string& str, unsigned code_page);
 
 class CriticalSection: private NonCopyable, private CRITICAL_SECTION {
 public:
@@ -35,5 +36,16 @@ public:
   }
   ~CleanHandle() {
     CloseHandle(h);
+  }
+};
+
+class TempFile: private NonCopyable {
+private:
+  wstring path;
+public:
+  TempFile();
+  ~TempFile();
+  wstring get_path() const {
+    return path;
   }
 };

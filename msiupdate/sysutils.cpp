@@ -46,3 +46,27 @@ bool wait_for_single_object(HANDLE handle, DWORD timeout) {
   else
     FAIL(E_FAIL);
 }
+
+TempFile::TempFile() {
+  Buffer<wchar_t> buf(MAX_PATH);
+  DWORD len = GetTempPathW(buf.size(), buf.data());
+  CHECK(len <= buf.size());
+  CHECK_SYS(len);
+  wstring temp_path = wstring(buf.data(), len);
+  CHECK_SYS(GetTempFileNameW(temp_path.c_str(), L"", 0, buf.data()));
+  path.assign(buf.data());
+}
+
+TempFile::~TempFile() {
+  DeleteFileW(path.c_str());
+}
+
+wstring ansi_to_unicode(const string& str, unsigned code_page) {
+  unsigned size = str.size();
+  if (size == 0)
+    return wstring();
+  Buffer<wchar_t> out(size);
+  int res = MultiByteToWideChar(code_page, 0, str.data(), size, out.data(), size);
+  CHECK_SYS(res);
+  return wstring(out.data(), res);
+}

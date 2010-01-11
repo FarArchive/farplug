@@ -24,6 +24,7 @@ config.proxy_password = Pass&word:
 update.new_version = New version is available: 
 update.no_new_version = Your version is up to date.
 update.question = Do you want to update?
+update.changelog = &View changelog
 
 # Download progress
 download.title = Downloading
@@ -32,6 +33,8 @@ download.message = Downloading data
 # Generic buttons
 button.ok = OK
 button.cancel = Cancel
+button.yes = Yes
+button.no = No
 
 # Errors
 error.no_msi = MSI package is not installed.

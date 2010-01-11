@@ -111,6 +111,10 @@ void flush_screen() {
   g_far.Text(0, 0, 0, NULL); // flush buffer hack
 }
 
+int viewer(const wstring& file_name, const wstring& title) {
+  return g_far.Viewer(file_name.c_str(), title.c_str(), 0, 0, -1, -1, VF_DISABLEHISTORY | VF_ENABLE_F6, CP_UNICODE);
+}
+
 unsigned get_label_len(const wstring& str) {
   unsigned cnt = 0;
   for (unsigned i = 0; i < str.size(); i++) {
@@ -442,6 +446,32 @@ void Dialog::set_focus(unsigned ctrl_id) {
 
 void Dialog::enable(unsigned ctrl_id, bool enable) {
   g_far.SendDlgMessage(h_dlg, DM_ENABLE, ctrl_id, enable ? TRUE : FALSE);
+}
+
+Regex::Regex(): h_regex(INVALID_HANDLE_VALUE) {
+  CHECK(g_far.RegExpControl(0, RECTL_CREATE, reinterpret_cast<LONG_PTR>(&h_regex)));
+}
+
+Regex::~Regex() {
+  if (h_regex != INVALID_HANDLE_VALUE)
+    CHECK(g_far.RegExpControl(h_regex, RECTL_FREE, 0));
+}
+
+size_t Regex::search(const wstring& expr, const wstring& text) {
+  CHECK(g_far.RegExpControl(h_regex, RECTL_COMPILE, reinterpret_cast<LONG_PTR>((L"/" + expr + L"/").c_str())));
+  CHECK(g_far.RegExpControl(h_regex, RECTL_OPTIMIZE, 0));
+  RegExpSearch regex_search;
+  memset(&regex_search, 0, sizeof(regex_search));
+  regex_search.Text = text.c_str();
+  regex_search.Position = 0;
+  regex_search.Length = text.size();
+  RegExpMatch regex_match;
+  regex_search.Match = &regex_match;
+  regex_search.Count = 1;
+  if (g_far.RegExpControl(h_regex, RECTL_SEARCHEX, reinterpret_cast<LONG_PTR>(&regex_search)))
+    return regex_search.Match[0].start;
+  else
+    return -1;
 }
 
 };
