@@ -41,6 +41,8 @@ wstring get_msg(int id);
 unsigned get_optimal_msg_width();
 int message(const wstring& msg, int button_cnt, DWORD flags);
 wstring get_progress_bar_str(unsigned width, unsigned current, unsigned total);
+void set_progress_state(TBPFLAG state);
+void set_progress_value(unsigned completed, unsigned total);
 
 void call_user_apc(void* param);
 bool post_keys(const vector<DWORD>& keys);

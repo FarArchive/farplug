@@ -2,16 +2,16 @@
 
 class LoadUrlProgress: public ProgressMonitor, private CriticalSection {
 private:
+  unsigned completed;
   unsigned total;
-  unsigned done;
 public:
-  LoadUrlProgress(): ProgressMonitor(), total(0), done(0) {
+  LoadUrlProgress(): ProgressMonitor(), completed(0), total(0) {
   }
   virtual void do_update_ui();
-  void set(unsigned done, unsigned total) {
+  void set(unsigned completed, unsigned total) {
     if (this) {
       CriticalSectionLock cs_lock(*this);
-      this->done = done;
+      this->completed = completed;
       this->total = total;
     }
   }

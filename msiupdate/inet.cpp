@@ -250,17 +250,17 @@ string load_url(const wstring& url, const HttpOptions& options) {
 }
 
 void LoadUrlProgress::do_update_ui() {
-  unsigned done, total;
+  unsigned completed, total;
   {
     CriticalSectionLock cs_lock(*this);
-    done = this->done;
+    completed = this->completed;
     total = this->total;
   }
   wostringstream msg;
   msg << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
   msg << Far::get_msg(MSG_DOWNLOAD_MESSAGE);
-  if (done) {
-    msg << L": " << done;
+  if (completed || total) {
+    msg << L": " << completed;
     if (total)
       msg << L"/" << total;
   }
@@ -268,13 +268,18 @@ void LoadUrlProgress::do_update_ui() {
     msg << L"...";
   msg << L'\n';
   if (total)
-    msg << Far::get_progress_bar_str(60, done, total);
+    msg << Far::get_progress_bar_str(60, completed, total);
   Far::message(msg.str(), 0, FMSG_LEFTALIGN);
   msg.str(wstring());
   msg << Far::get_msg(MSG_DOWNLOAD_TITLE);
-  if (total && done <= total)
-    msg << L": " << done * 100 / total << L"%";
-  else
+  if (total && completed <= total) {
+    msg << L": " << completed * 100 / total << L"%";
+    Far::set_progress_state(TBPF_NORMAL);
+    Far::set_progress_value(completed, total);
+  }
+  else {
     msg << L"...";
+    Far::set_progress_state(TBPF_INDETERMINATE);
+  }
   SetConsoleTitleW(msg.str().c_str());
 }
