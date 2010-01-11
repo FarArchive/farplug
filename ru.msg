@@ -25,6 +25,10 @@ update.new_version = Доступна новая версия:
 update.no_new_version = У вас установлена последняя версия.
 update.question = Хотите запустить обновление?
 
+# Download progress
+download.title = Загрузка
+download.message = Загрузка данных
+
 # Generic buttons
 button.ok = OK
 button.cancel = Отмена

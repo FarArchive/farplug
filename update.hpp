@@ -4,7 +4,8 @@ namespace Updater {
 
 void initialize();
 void finalize();
-bool check();
+wstring get_update_url();
+bool check(const string& update_info);
 void execute();
 
 }

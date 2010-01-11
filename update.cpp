@@ -1,9 +1,12 @@
 #include "msg.h"
 
+#include "utils.hpp"
 #include "farutils.hpp"
+#include "sysutils.hpp"
 #include "iniparse.hpp"
 #include "utils.hpp"
 #include "options.hpp"
+#include "ui.hpp"
 #include "inet.hpp"
 #include "update.hpp"
 
@@ -12,12 +15,12 @@ namespace Updater {
 #ifdef _M_IX86
 const char* c_upgrade_code = "{67A59013-488F-4388-81F3-828A1DCEDA32}";
 const char* c_platform = "x86";
-const char* c_update_script = "update2.php?p=32";
+const wchar_t* c_update_script = L"update2.php?p=32";
 #endif
 #ifdef _M_X64
 const char* c_upgrade_code = "{83140F3F-1457-42EB-8053-233293664714}";
 const char* c_platform = "x64";
-const char* c_update_script = "update2.php?p=64";
+const wchar_t* c_update_script = L"update2.php?p=64";
 #endif
 const unsigned c_exit_wait = 6;
 const unsigned c_update_period = 12 * 60 * 60;
@@ -25,11 +28,12 @@ const unsigned c_update_period = 12 * 60 * 60;
 HANDLE h_abort = NULL;
 HANDLE h_update_thread = NULL;
 unsigned curr_ver, update_ver;
-string msi_name;
+wstring msi_name;
 
 unsigned __stdcall check_thread(void* param) {
   try {
-    if (check() && (update_ver > g_options.last_check_version))
+    string update_info = load_url(get_update_url(), g_options.http, h_abort);
+    if (check(update_info) && (update_ver > g_options.last_check_version))
       Far::call_user_apc(0);
   }
   catch (...) {
@@ -75,25 +79,28 @@ void finalize() {
     CloseHandle(h_abort);
 }
 
-string get_update_url() {
-  string update_url = "http://www.farmanager.com/";
+wstring get_base_update_url() {
+  wstring update_url = L"http://www.farmanager.com/";
   if (g_options.update_stable_builds)
-    update_url += "files/";
+    update_url += L"files/";
   else
-    update_url += "nightly/";
+    update_url += L"nightly/";
   return update_url;
 }
 
-bool check() {
+wstring get_update_url() {
+  return get_base_update_url() + c_update_script;
+}
+
+bool check(const string& update_info) {
   check_product_installed();
-  string update_info = load_url(widen(get_update_url() + c_update_script), g_options.http, h_abort);
   Ini::File update_ini;
   update_ini.parse(update_info);
   string ver_major = update_ini.get("far", "major");
   string ver_minor = update_ini.get("far", "minor");
   string ver_build = update_ini.get("far", "build");
   update_ver = MAKE_VERSION(str_to_int(ver_major), str_to_int(ver_minor), str_to_int(ver_build));
-  msi_name = update_ini.get("far", "msi");
+  msi_name = widen(update_ini.get("far", "msi"));
   return update_ver > curr_ver;
 }
 
@@ -123,7 +130,7 @@ void execute() {
       CHECK_SYS(GetTempPathW(ARRAYSIZE(temp_path), temp_path));
       st << L"/log \"" << add_trailing_slash(temp_path) << L"MsiUpdate_" << VER_MAJOR(curr_ver) << L"_" << widen(c_platform) << L".log\" ";
     }
-    st << "/i \"" << widen(get_update_url() + msi_name) + L"\"";
+    st << "/i \"" << get_base_update_url() + msi_name + L"\"";
     if (!g_options.install_properties.empty())
       st << L" " << g_options.install_properties;
     wstring command = st.str();
