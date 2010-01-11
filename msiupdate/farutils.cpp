@@ -8,7 +8,7 @@ namespace Far {
 PluginStartupInfo g_far;
 FarStandardFunctions g_fsf;
 
-void init(const PluginStartupInfo *psi) {
+void init(const PluginStartupInfo* psi) {
   g_far = *psi;
   g_fsf = *psi->FSF;
 }
@@ -52,6 +52,21 @@ int message(const wstring& msg, int button_cnt, DWORD flags) {
   return g_far.Message(g_far.ModuleNumber, flags | FMSG_ALLINONE, NULL, reinterpret_cast<const wchar_t* const*>(msg.c_str()), 0, button_cnt);
 }
 
+wstring get_progress_bar_str(unsigned width, unsigned current, unsigned total) {
+  const wchar_t c_pb_black = 9608;
+  const wchar_t c_pb_white = 9617;
+  unsigned len1;
+  if (current > total || total == 0)
+    len1 = width;
+  else
+    len1 = static_cast<unsigned>(static_cast<unsigned __int64>(current) * width / total);
+  unsigned len2 = width - len1;
+  wstring result;
+  result.append(len1, c_pb_black);
+  result.append(len2, c_pb_white);
+  return result;
+}
+
 void call_user_apc(void* param) {
   g_far.AdvControl(g_far.ModuleNumber, ACTL_SYNCHRO, param);
 }
@@ -71,6 +86,18 @@ FarConfirmationsSettings get_confirmation_settings() {
 bool get_short_window_info(unsigned idx, WindowInfo& window_info) {
   window_info.Pos = idx;
   return g_far.AdvControl(g_far.ModuleNumber, ACTL_GETSHORTWINDOWINFO, &window_info) == TRUE;
+}
+
+HANDLE save_screen() {
+  return g_far.SaveScreen(0, 0, -1, -1);
+}
+
+void restore_screen(HANDLE h_scr) {
+  g_far.RestoreScreen(h_scr);
+}
+
+void flush_screen() {
+  g_far.Text(0, 0, 0, NULL); // flush buffer hack
 }
 
 unsigned get_label_len(const wstring& str) {

@@ -1,5 +1,10 @@
+#include "msg.h"
+
 #include "utils.hpp"
+#include "sysutils.hpp"
+#include "farutils.hpp"
 #include "options.hpp"
+#include "ui.hpp"
 #include "inet.hpp"
 
 class HInternet: private NonCopyable {
@@ -80,7 +85,7 @@ void wait(Context& context, HANDLE h_abort) {
 
 const wchar_t* c_user_agent = L"MsiUpdate";
 
-string load_url(const wstring& url, const HttpOptions& options, HANDLE h_abort) {
+string load_url(const wstring& url, const HttpOptions& options, HANDLE h_abort, LoadUrlProgress* progress) {
   DWORD proxy_type;
   LPCWSTR proxy_name;
   wstring address;
@@ -158,6 +163,7 @@ string load_url(const wstring& url, const HttpOptions& options, HANDLE h_abort) 
   if (WinHttpQueryHeaders(h_request, WINHTTP_QUERY_CONTENT_LENGTH | WINHTTP_QUERY_FLAG_NUMBER, WINHTTP_HEADER_NAME_BY_INDEX, &clen, &clen_size, WINHTTP_NO_HEADER_INDEX)) {
     if (clen < c_max_clen)
       context.data.reserve(clen);
+    progress->set(0, clen);
   }
 
   const unsigned c_read_buf_size = 64 * 1024;
@@ -165,8 +171,110 @@ string load_url(const wstring& url, const HttpOptions& options, HANDLE h_abort) 
   do {
     CHECK_SYS(WinHttpReadData(h_request, buf.data(), static_cast<DWORD>(buf.size()), NULL));
     wait(context, h_abort);
+    progress->set(context.data.size(), clen);
   }
   while (context.more_data);
 
   return context.data;
+}
+
+struct LoadUrlContext {
+  wstring url;
+  HttpOptions options;
+  HANDLE h_abort;
+  LoadUrlProgress* progress;
+  string result;
+  Error error;
+};
+
+unsigned __stdcall load_url_thread(void* param) {
+  LoadUrlContext* ctx = reinterpret_cast<LoadUrlContext*>(param);
+  try {
+    try {
+      ctx->result = load_url(ctx->url, ctx->options, ctx->h_abort, ctx->progress);
+      return TRUE;
+    }
+    catch (const Error&) {
+      throw;
+    }
+    catch (const std::exception& e) {
+      FAIL_MSG(widen(e.what()));
+    }
+    catch (...) {
+      FAIL(E_FAIL);
+    }
+  }
+  catch (const Error& e) {
+    ctx->error = e;
+  }
+  catch (...) {
+  }
+  return FALSE;
+}
+
+string load_url(const wstring& url, const HttpOptions& options) {
+  HANDLE h_abort = CreateEvent(NULL, TRUE, FALSE, NULL);
+  CHECK_SYS(h_abort);
+  CleanHandle h_abort_clean(h_abort);
+  LoadUrlProgress progress;
+  LoadUrlContext ctx;
+  ctx.url = url;
+  ctx.options = options;
+  ctx.h_abort = h_abort;
+  ctx.progress = &progress;
+  unsigned th_id;
+  HANDLE h_thread = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, load_url_thread, &ctx, 0, &th_id));
+  CHECK_SYS(h_thread);
+  CleanHandle h_thread_clean(h_thread);
+  try {
+    while (true) {
+      const unsigned c_wait_time = 100;
+      if (wait_for_single_object(h_thread, c_wait_time))
+        break;
+      progress.update_ui();
+    }
+  }
+  catch (const Error& e) {
+    if (e.code == E_ABORT) {
+      CHECK_SYS(SetEvent(h_abort));
+      wait_for_single_object(h_thread, INFINITE);
+    }
+    else throw;
+  }
+  DWORD exit_code;
+  CHECK_SYS(GetExitCodeThread(h_thread, &exit_code));
+  if (exit_code)
+    return ctx.result;
+  else
+    throw ctx.error;
+}
+
+void LoadUrlProgress::do_update_ui() {
+  unsigned done, total;
+  {
+    CriticalSectionLock cs_lock(*this);
+    done = this->done;
+    total = this->total;
+  }
+  wostringstream msg;
+  msg << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
+  msg << Far::get_msg(MSG_DOWNLOAD_MESSAGE);
+  if (done) {
+    msg << L": " << done;
+    if (total)
+      msg << L"/" << total;
+  }
+  else
+    msg << L"...";
+  msg << L'\n';
+  if (total)
+    msg << Far::get_progress_bar_str(60, done, total);
+  Far::message(msg.str(), 0, FMSG_LEFTALIGN);
+  msg.str(wstring());
+  msg << Far::get_msg(MSG_DOWNLOAD_TITLE);
+  if (total && done <= total)
+    msg << L": " << done * 100 / total << L"%";
+  else
+    msg << L"...";
+  SetConsoleTitleW(msg.str().c_str());
 }

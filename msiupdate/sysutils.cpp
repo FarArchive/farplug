@@ -29,3 +29,20 @@ wstring get_system_message(HRESULT hr) {
   }
   return st.str();
 }
+
+wstring get_console_title() {
+  Buffer<wchar_t> buf(10000);
+  DWORD size = GetConsoleTitleW(buf.data(), buf.size());
+  return wstring(buf.data(), size);
+}
+
+bool wait_for_single_object(HANDLE handle, DWORD timeout) {
+  DWORD res = WaitForSingleObject(handle, timeout);
+  CHECK_SYS(res != WAIT_FAILED);
+  if (res == WAIT_OBJECT_0)
+    return true;
+  else if (res == WAIT_TIMEOUT)
+    return false;
+  else
+    FAIL(E_FAIL);
+}

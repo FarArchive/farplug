@@ -25,6 +25,10 @@ update.new_version = New version is available:
 update.no_new_version = Your version is up to date.
 update.question = Do you want to update?
 
+# Download progress
+download.title = Downloading
+download.message = Downloading data
+
 # Generic buttons
 button.ok = OK
 button.cancel = Cancel

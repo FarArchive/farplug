@@ -1,8 +1,8 @@
 #pragma once
 
 struct Error {
-  int code;
-  wstring message;
+  HRESULT code;
+  list<wstring> messages;
   const char* file;
   int line;
 };
@@ -17,8 +17,8 @@ struct Error {
 
 #define FAIL_MSG(_message) { \
   Error error; \
-  error.code = 0; \
-  error.message = _message; \
+  error.code = NO_ERROR; \
+  error.messages.push_back(_message); \
   error.file = __FILE__; \
   error.line = __LINE__; \
   throw error; \

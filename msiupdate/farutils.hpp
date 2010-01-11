@@ -25,7 +25,7 @@ namespace Far {
     return_error; \
   }
 
-void init(const PluginStartupInfo *psi);
+void init(const PluginStartupInfo* psi);
 wstring get_plugin_module_path();
 wstring get_root_key_name();
 
@@ -40,11 +40,16 @@ wstring get_msg(int id);
 
 unsigned get_optimal_msg_width();
 int message(const wstring& msg, int button_cnt, DWORD flags);
+wstring get_progress_bar_str(unsigned width, unsigned current, unsigned total);
 
 void call_user_apc(void* param);
 bool post_keys(const vector<DWORD>& keys);
 FarConfirmationsSettings get_confirmation_settings();
 bool get_short_window_info(unsigned idx, WindowInfo& window_info);
+
+HANDLE save_screen();
+void restore_screen(HANDLE h_scr);
+void flush_screen();
 
 #define AUTO_SIZE (-1)
 const unsigned c_x_frame = 5;

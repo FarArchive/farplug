@@ -8,6 +8,7 @@
 #include <time.h>
 
 #include <string>
+#include <list>
 #include <vector>
 #include <map>
 #include <sstream>

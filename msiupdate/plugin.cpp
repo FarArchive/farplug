@@ -2,8 +2,10 @@
 
 #include "utils.hpp"
 #include "farutils.hpp"
+#include "sysutils.hpp"
 #include "options.hpp"
 #include "ui.hpp"
+#include "inet.hpp"
 #include "update.hpp"
 
 int WINAPI GetMinFarVersion(void) {
@@ -41,7 +43,8 @@ void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
 
 HANDLE WINAPI OpenPluginW(int OpenFrom,INT_PTR Item) {
   FAR_ERROR_HANDLER_BEGIN;
-  if (Updater::check())
+  string update_info = load_url(Updater::get_update_url(), g_options.http);
+  if (Updater::check(update_info))
     Updater::execute();
   else
     info_dlg(Far::get_msg(MSG_UPDATE_NO_NEW_VERSION));
