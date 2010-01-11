@@ -24,6 +24,7 @@ config.proxy_password = П&ароль:
 update.new_version = Доступна новая версия: 
 update.no_new_version = У вас установлена последняя версия.
 update.question = Хотите запустить обновление?
+update.changelog = &Посмотреть изменения
 
 # Download progress
 download.title = Загрузка
@@ -32,6 +33,8 @@ download.message = Загрузка данных
 # Generic buttons
 button.ok = OK
 button.cancel = Отмена
+button.yes = Да
+button.no = Нет
 
 # Errors
 error.no_msi = MSI пакет не установлен.

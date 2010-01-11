@@ -22,6 +22,7 @@ const char* c_upgrade_code = "{83140F3F-1457-42EB-8053-233293664714}";
 const char* c_platform = "x64";
 const wchar_t* c_update_script = L"update2.php?p=64";
 #endif
+const wchar_t* changelog_url = L"http://farmanager.com/svn/trunk/unicode_far/changelog";
 const unsigned c_exit_wait = 6;
 const unsigned c_update_period = 12 * 60 * 60;
 
@@ -104,13 +105,92 @@ bool check(const string& update_info) {
   return update_ver > curr_ver;
 }
 
+void show_changelog(unsigned build1, unsigned build2) {
+  wstring text = ansi_to_unicode(load_url(changelog_url, g_options.http), 1251);
+  const wchar_t* c_expr_prefix = L"[^\\s]+\\s+\\d+\\.\\d+\\.\\d+\\s+\\d+:\\d+:\\d+\\s+[+-]?\\d+\\s+-\\s+build\\s+";
+  const wchar_t* c_expr_suffix = L"\\s*";
+  Far::Regex regex;
+  size_t pos1 = regex.search(c_expr_prefix + int_to_str(build1) + c_expr_suffix, text);
+  if (pos1 == -1)
+    pos1 = text.size();
+  size_t pos2 = regex.search(c_expr_prefix + int_to_str(build2) + c_expr_suffix, text);
+  if (pos2 == -1)
+    pos2 = 0;
+  CHECK(pos1 > pos2);
+
+  TempFile temp_file;
+  {
+    HANDLE h_file = CreateFileW(temp_file.get_path().c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
+    CleanHandle h_file_clean(h_file);
+
+    const wchar_t sig = 0xFEFF;
+    DWORD size_written;
+    CHECK_SYS(WriteFile(h_file, &sig, sizeof(sig), &size_written, NULL));
+    CHECK_SYS(WriteFile(h_file, text.data() + pos2, (pos1 - pos2) * sizeof(wchar_t), &size_written, NULL));
+  }
+
+  Far::viewer(temp_file.get_path(), L"Changelog");
+}
+
+enum UpdateDialogResult {
+  yes,
+  no,
+  cancel,
+};
+
+class UpdateDialog: public Far::Dialog {
+private:
+  enum {
+    c_client_xs = 40
+  };
+
+  int changelog_ctrl_id;
+  int yes_ctrl_id;
+  int no_ctrl_id;
+  int cancel_ctrl_id;
+
+  LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
+    if (msg == DN_INITDIALOG) {
+      set_focus(yes_ctrl_id);
+      return TRUE;
+    }
+    else if ((msg == DN_BTNCLICK) && (param1 == changelog_ctrl_id)) {
+      show_changelog(VER_BUILD(curr_ver), VER_BUILD(update_ver));
+    }
+    return default_dialog_proc(msg, param1, param2);
+  }
+
+public:
+  UpdateDialog(): Far::Dialog(Far::get_msg(MSG_PLUGIN_NAME), c_client_xs) {
+  }
+
+  UpdateDialogResult show() {
+    wostringstream st;
+    st << Far::get_msg(MSG_UPDATE_NEW_VERSION) << L' ' << VER_MAJOR(update_ver) << L'.' << VER_MINOR(update_ver) << L'.' << VER_BUILD(update_ver);
+    label(st.str());
+    new_line();
+    label(Far::get_msg(MSG_UPDATE_QUESTION));
+    new_line();
+    changelog_ctrl_id = button(Far::get_msg(MSG_UPDATE_CHANGELOG), DIF_BTNNOCLOSE);
+    new_line();
+    separator();
+    new_line();
+    yes_ctrl_id = def_button(Far::get_msg(MSG_BUTTON_YES), DIF_CENTERGROUP);
+    no_ctrl_id = button(Far::get_msg(MSG_BUTTON_NO), DIF_CENTERGROUP);
+    cancel_ctrl_id = button(Far::get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
+    new_line();
+
+    int item = Far::Dialog::show();
+    if (item == yes_ctrl_id) return yes;
+    else if (item == no_ctrl_id) return no;
+    else return cancel;
+  }
+};
+
 void execute() {
-  wostringstream st;
-  st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-  st << Far::get_msg(MSG_UPDATE_NEW_VERSION) << L' ' << VER_MAJOR(update_ver) << L'.' << VER_MINOR(update_ver) << L'.' << VER_BUILD(update_ver) << L'\n';
-  st << Far::get_msg(MSG_UPDATE_QUESTION) << L'\n';
-  int res = Far::message(st.str(), 0, FMSG_MB_YESNOCANCEL);
-  if (res == 0) {
+  UpdateDialogResult res = UpdateDialog().show();
+  if (res == yes) {
     WindowInfo window_info;
     bool editor_unsaved = false;
     for (unsigned idx = 0; !editor_unsaved && Far::get_short_window_info(idx, window_info); idx++) {
@@ -149,7 +229,7 @@ void execute() {
       keys.push_back(KEY_ENTER);
     Far::post_keys(keys);
   }
-  else if (res == 1) {
+  else if (res == no) {
     g_options.last_check_version = update_ver;
     g_options.save();
   }
