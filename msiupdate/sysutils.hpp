@@ -4,6 +4,7 @@ wstring get_system_message(HRESULT hr);
 wstring get_console_title();
 bool wait_for_single_object(HANDLE handle, DWORD timeout);
 wstring ansi_to_unicode(const string& str, unsigned code_page);
+wstring expand_env_vars(const wstring& str);
 
 class CriticalSection: private NonCopyable, private CRITICAL_SECTION {
 public:

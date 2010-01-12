@@ -76,3 +76,34 @@ wstring int_to_str(int val) {
 wstring widen(const string& str) {
   return wstring(str.begin(), str.end());
 }
+
+list<wstring> split(const wstring& str, wchar_t sep) {
+  list<wstring> result;
+  size_t begin = 0;
+  while (begin < str.size()) {
+    size_t end = str.find(sep, begin);
+    if (end == wstring::npos)
+      end = str.size();
+    wstring sub_str = str.substr(begin, end - begin);
+    result.push_back(sub_str);
+    begin = end + 1;
+  }
+  return result;
+}
+
+wstring combine(const list<wstring>& lst, wchar_t sep) {
+  size_t size = 0;
+  for (list<wstring>::const_iterator str = lst.begin(); str != lst.end(); str++) {
+    if (size)
+      size++;
+    size += str->size();
+  }
+  wstring result;
+  result.reserve(size);
+  for (list<wstring>::const_iterator str = lst.begin(); str != lst.end(); str++) {
+    if (!result.empty())
+      result.append(1, sep);
+    result.append(*str);
+  }
+  return result;
+}

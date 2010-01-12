@@ -18,6 +18,9 @@ const wchar_t* c_param_proxy_port = L"proxy_port";
 const wchar_t* c_param_proxy_auth_scheme = L"proxy_auth_scheme";
 const wchar_t* c_param_proxy_user_name = L"proxy_user_name";
 const wchar_t* c_param_proxy_password = L"proxy_password";
+const wchar_t* c_param_cache_enabled = L"cache_enabled";
+const wchar_t* c_param_cache_max_size = L"cache_max_size";
+const wchar_t* c_param_cache_dir = L"cache_dir";
 
 unsigned Options::get_int(const wchar_t* name, unsigned def_value) {
   unsigned value = def_value;
@@ -138,7 +141,9 @@ void Options::load() {
   http.proxy_auth_scheme = get_int(c_param_proxy_auth_scheme);
   http.proxy_user_name = get_str(c_param_proxy_user_name);
   http.proxy_password = get_str(c_param_proxy_password);
-
+  cache_enabled = get_bool(c_param_cache_enabled, false);
+  cache_max_size = get_int(c_param_cache_max_size, 2);
+  cache_dir = get_str(c_param_cache_dir, L"%TEMP%");
 };
 
 void Options::save() {
@@ -154,4 +159,7 @@ void Options::save() {
   set_int(c_param_proxy_auth_scheme, http.proxy_auth_scheme);
   set_str(c_param_proxy_user_name, http.proxy_user_name);
   set_str(c_param_proxy_password, http.proxy_password);
+  set_bool(c_param_cache_enabled, cache_enabled);
+  set_int(c_param_cache_max_size, cache_max_size);
+  set_str(c_param_cache_dir, cache_dir);
 }

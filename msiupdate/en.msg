@@ -19,6 +19,9 @@ config.proxy_auth.digest = Digest
 config.proxy_auth.negotiate = Negotiate
 config.proxy_user_name = &User name:
 config.proxy_password = Pass&word:
+config.cache_enabled = &Cache install packages locally
+config.cache_max_size = &Max. number of packages:
+config.cache_dir = Cache d&irectory:
 
 # Update dialog
 update.new_version = New version is available: 

@@ -188,6 +188,36 @@ public:
   }
 };
 
+void prepare_directory(const wstring& dir) {
+  if (GetFileAttributesW(dir.c_str()) == INVALID_FILE_ATTRIBUTES) {
+    if (!is_root_path(dir)) {
+      prepare_directory(extract_file_path(dir));
+      CHECK_SYS(CreateDirectoryW(dir.c_str(), NULL));
+    }
+  }
+}
+
+void save_to_cache(const string& package, const wstring& cache_dir, const wstring& package_name) {
+  prepare_directory(cache_dir);
+
+  const wchar_t* c_param_cache_index = L"cache_index";
+  list<wstring> cache_index = split(Options::get_str(c_param_cache_index), L'\n');
+
+  while (cache_index.size() && cache_index.size() >= g_options.cache_max_size) {
+    DeleteFileW((add_trailing_slash(cache_dir) + cache_index.front()).c_str());
+    cache_index.erase(cache_index.begin());
+  }
+
+  HANDLE h_file = CreateFileW((add_trailing_slash(cache_dir) + package_name).c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
+  CleanHandle h_file_clean(h_file);
+  DWORD size_written;
+  CHECK_SYS(WriteFile(h_file, package.data(), package.size(), &size_written, NULL));
+
+  cache_index.push_back(package_name);
+  Options::set_str(c_param_cache_index, combine(cache_index, L'\n'));
+}
+
 void execute() {
   UpdateDialogResult res = UpdateDialog().show();
   if (res == yes) {
@@ -200,6 +230,13 @@ void execute() {
     if (editor_unsaved)
       FAIL_MSG(Far::get_msg(MSG_ERROR_EDITOR_UNSAVED));
 
+    wstring cache_dir;
+    if (g_options.cache_enabled) {
+      cache_dir = expand_env_vars(g_options.cache_dir);
+      string package = load_url(get_base_update_url() + msi_name, g_options.http);
+      save_to_cache(package, cache_dir, msi_name);
+    }
+
     wostringstream st;
     st << L"msiexec /promptrestart ";
     if (!g_options.use_full_install_ui) {
@@ -210,7 +247,10 @@ void execute() {
       CHECK_SYS(GetTempPathW(ARRAYSIZE(temp_path), temp_path));
       st << L"/log \"" << add_trailing_slash(temp_path) << L"MsiUpdate_" << VER_MAJOR(curr_ver) << L"_" << widen(c_platform) << L".log\" ";
     }
-    st << "/i \"" << get_base_update_url() + msi_name + L"\"";
+    if (g_options.cache_enabled)
+      st << "/i \"" << add_trailing_slash(cache_dir) + msi_name + L"\"";
+    else
+      st << "/i \"" << get_base_update_url() + msi_name + L"\"";
     if (!g_options.install_properties.empty())
       st << L" " << g_options.install_properties;
     wstring command = st.str();
