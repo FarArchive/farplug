@@ -39,6 +39,18 @@ button.cancel = Отмена
 button.yes = Да
 button.no = Нет
 
+# Size and speed suffixes
+suffix.size.b = Б
+suffix.size.kb = КБ
+suffix.size.mb = МБ
+suffix.size.gb = ГБ
+suffix.size.tb = ТБ
+suffix.speed.b = Б/s
+suffix.speed.kb = КБ/s
+suffix.speed.mb = МБ/s
+suffix.speed.gb = ГБ/s
+suffix.speed.tb = ТБ/s
+
 # Errors
 error.no_msi = MSI пакет не установлен.
 error.editor_unsaved = Открыто окно редактора с несохраненными данными.

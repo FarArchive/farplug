@@ -13,6 +13,7 @@ wstring int_to_str(int val);
 wstring widen(const string& str);
 list<wstring> split(const wstring& str, wchar_t sep);
 wstring combine(const list<wstring>& lst, wchar_t sep);
+wstring format_data_size(unsigned __int64 value, const wchar_t* suffixes[5]);
 
 wstring long_path(const wstring& path);
 

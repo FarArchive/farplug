@@ -111,3 +111,50 @@ wstring combine(const list<wstring>& lst, wchar_t sep) {
   }
   return result;
 }
+
+wstring format_data_size(unsigned __int64 value, const wchar_t* suffixes[5]) {
+  unsigned f = 0;
+  unsigned __int64 div = 1;
+  while ((value / div >= 1000) && (f < 4)) {
+    f++;
+    div *= 1024;
+  }
+  unsigned __int64 v1 = value / div;
+
+  unsigned __int64 mul;
+  if (v1 < 10) mul = 100;
+  else if (v1 < 100) mul = 10;
+  else mul = 1;
+
+  unsigned __int64 v2 = value % div;
+  unsigned __int64 d = v2 * mul * 10 / div % 10;
+  v2 = v2 * mul / div;
+  if (d >= 5) {
+    if (v2 + 1 == mul) {
+      v2 = 0;
+      if ((v1 == 999) && (f < 4)) {
+        v1 = 0;
+        v2 = 98;
+        f += 1;
+      }
+      else v1 += 1;
+    }
+    else v2 += 1;
+  }
+
+  wstring result;
+  wchar_t buf[30];
+  _ui64tow_s(v1, buf, ARRAYSIZE(buf), 10);
+  result += buf;
+  if (v2 != 0) {
+    result += L'.';
+    if ((v1 < 10) && (v2 < 10)) result += L'0';
+    _ui64tow_s(v2, buf, ARRAYSIZE(buf), 10);
+    result += buf;
+  }
+  if (*suffixes[f]) {
+    result += L' ';
+    result += suffixes[f];
+  }
+  return result;
+}

@@ -52,14 +52,16 @@ int message(const wstring& msg, int button_cnt, DWORD flags) {
   return g_far.Message(g_far.ModuleNumber, flags | FMSG_ALLINONE, NULL, reinterpret_cast<const wchar_t* const*>(msg.c_str()), 0, button_cnt);
 }
 
-wstring get_progress_bar_str(unsigned width, unsigned current, unsigned total) {
+wstring get_progress_bar_str(unsigned width, unsigned __int64 completed, unsigned __int64 total) {
   const wchar_t c_pb_black = 9608;
   const wchar_t c_pb_white = 9617;
   unsigned len1;
-  if (current > total || total == 0)
-    len1 = width;
+  if (total == 0)
+    len1 = 0;
   else
-    len1 = static_cast<unsigned>(static_cast<unsigned __int64>(current) * width / total);
+    len1 = static_cast<unsigned>(static_cast<double>(completed) * width / total);
+  if (len1 > width)
+    len1 = width;
   unsigned len2 = width - len1;
   wstring result;
   result.append(len1, c_pb_black);
@@ -71,7 +73,7 @@ void set_progress_state(TBPFLAG state) {
   g_far.AdvControl(g_far.ModuleNumber, ACTL_SETPROGRESSSTATE, reinterpret_cast<void*>(state));
 }
 
-void set_progress_value(unsigned completed, unsigned total) {
+void set_progress_value(unsigned __int64 completed, unsigned __int64 total) {
   PROGRESSVALUE pv;
   pv.Completed = completed;
   pv.Total = total;
