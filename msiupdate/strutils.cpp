@@ -24,9 +24,13 @@ wstring word_wrap(const wstring& str, wstring::size_type wrap_bound) {
     else {
       end_pos = str.size();
     }
-    if (!result.empty())
-      result.append(1, L'\n');
-    result.append(str.data() + begin_pos, end_pos - begin_pos);
+    wstring::size_type trim_pos = end_pos;
+    while (trim_pos > begin_pos && str[trim_pos - 1] == L' ') trim_pos--;
+    if (trim_pos > begin_pos) {
+      if (!result.empty())
+        result.append(1, L'\n');
+      result.append(str.data() + begin_pos, trim_pos - begin_pos);
+    }
     begin_pos = end_pos;
   }
   return result;
