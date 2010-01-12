@@ -256,30 +256,33 @@ void LoadUrlProgress::do_update_ui() {
     completed = this->completed;
     total = this->total;
   }
-  wostringstream msg;
-  msg << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-  msg << Far::get_msg(MSG_DOWNLOAD_MESSAGE);
+  wstring msg;
+  msg.append(Far::get_msg(MSG_PLUGIN_NAME)).append(1, L'\n');
+  msg.append(Far::get_msg(MSG_DOWNLOAD_MESSAGE));
   if (completed || total) {
-    msg << L": " << completed;
+    msg.append(L": ").append(format_data_size(completed, get_size_suffixes()));
     if (total)
-      msg << L"/" << total;
+      msg.append(L" / ").append(format_data_size(total, get_size_suffixes()));
+    unsigned __int64 time = time_elapsed();
+    if (time)
+      msg.append(L" @ ").append(format_data_size(completed / time, get_speed_suffixes()));
   }
   else
-    msg << L"...";
-  msg << L'\n';
+    msg.append(L"...");
+  msg.append(1, L'\n');
   if (total)
-    msg << Far::get_progress_bar_str(60, completed, total);
-  Far::message(msg.str(), 0, FMSG_LEFTALIGN);
-  msg.str(wstring());
-  msg << Far::get_msg(MSG_DOWNLOAD_TITLE);
+    msg.append(Far::get_progress_bar_str(60, completed, total));
+  Far::message(msg, 0, FMSG_LEFTALIGN);
+  msg.clear();
+  msg.append(Far::get_msg(MSG_DOWNLOAD_TITLE));
   if (total && completed <= total) {
-    msg << L": " << completed * 100 / total << L"%";
+    msg.append(L": ").append(int_to_str(static_cast<int>(static_cast<double>(completed) * 100 / total))).append(L"%");
     Far::set_progress_state(TBPF_NORMAL);
     Far::set_progress_value(completed, total);
   }
   else {
-    msg << L"...";
+    msg.append(L"...");
     Far::set_progress_state(TBPF_INDETERMINATE);
   }
-  SetConsoleTitleW(msg.str().c_str());
+  SetConsoleTitleW(msg.c_str());
 }

@@ -37,8 +37,8 @@ void info_dlg(const wstring& msg) {
 }
 
 ProgressMonitor::ProgressMonitor(bool lazy): h_scr(NULL) {
-  unsigned __int64 t_curr;
   QueryPerformanceCounter(reinterpret_cast<PLARGE_INTEGER>(&t_curr));
+  t_start = t_curr;
   QueryPerformanceFrequency(reinterpret_cast<PLARGE_INTEGER>(&t_freq));
   if (lazy)
     t_next = t_curr + t_freq / 2;
@@ -55,7 +55,6 @@ ProgressMonitor::~ProgressMonitor() {
 }
 
 void ProgressMonitor::update_ui(bool force) {
-  unsigned __int64 t_curr;
   QueryPerformanceCounter(reinterpret_cast<PLARGE_INTEGER>(&t_curr));
   if ((t_curr >= t_next) || force) {
     if (h_scr == NULL) {
@@ -210,4 +209,26 @@ public:
 
 bool config_dialog(Options& options) {
   return ConfigDialog(options).show();
+}
+
+const wchar_t** get_size_suffixes() {
+  static const wchar_t* suffixes[5] = {
+    L"",
+    Far::msg_ptr(MSG_SUFFIX_SIZE_KB),
+    Far::msg_ptr(MSG_SUFFIX_SIZE_MB),
+    Far::msg_ptr(MSG_SUFFIX_SIZE_GB),
+    Far::msg_ptr(MSG_SUFFIX_SIZE_TB),
+  };
+  return suffixes;
+}
+
+const wchar_t** get_speed_suffixes() {
+  static const wchar_t* suffixes[5] = {
+    Far::msg_ptr(MSG_SUFFIX_SPEED_B),
+    Far::msg_ptr(MSG_SUFFIX_SPEED_KB),
+    Far::msg_ptr(MSG_SUFFIX_SPEED_MB),
+    Far::msg_ptr(MSG_SUFFIX_SPEED_GB),
+    Far::msg_ptr(MSG_SUFFIX_SPEED_TB),
+  };
+  return suffixes;
 }
