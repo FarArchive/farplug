@@ -212,7 +212,7 @@ void save_to_cache(const string& package, const wstring& cache_dir, const wstrin
   CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   CleanHandle h_file_clean(h_file);
   DWORD size_written;
-  CHECK_SYS(WriteFile(h_file, package.data(), package.size(), &size_written, NULL));
+  CHECK_SYS(WriteFile(h_file, package.data(), static_cast<DWORD>(package.size()), &size_written, NULL));
 
   cache_index.push_back(package_name);
   Options::set_str(c_param_cache_index, combine(cache_index, L'\n'));

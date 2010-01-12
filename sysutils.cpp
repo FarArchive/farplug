@@ -73,10 +73,10 @@ wstring ansi_to_unicode(const string& str, unsigned code_page) {
 
 wstring expand_env_vars(const wstring& str) {
   Buffer<wchar_t> buf(MAX_PATH);
-  unsigned size = ExpandEnvironmentStringsW(str.c_str(), buf.data(), buf.size());
+  unsigned size = ExpandEnvironmentStringsW(str.c_str(), buf.data(), static_cast<DWORD>(buf.size()));
   if (size > buf.size()) {
     buf.resize(size);
-    size = ExpandEnvironmentStringsW(str.c_str(), buf.data(), buf.size());
+    size = ExpandEnvironmentStringsW(str.c_str(), buf.data(), static_cast<DWORD>(buf.size()));
   }
   CHECK_SYS(size);
   return wstring(buf.data(), size - 1);
