@@ -11,6 +11,8 @@ int str_to_int(const string& str);
 int str_to_int(const wstring& str);
 wstring int_to_str(int val);
 wstring widen(const string& str);
+list<wstring> split(const wstring& str, wchar_t sep);
+wstring combine(const list<wstring>& lst, wchar_t sep);
 
 wstring long_path(const wstring& path);
 

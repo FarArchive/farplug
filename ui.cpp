@@ -95,6 +95,9 @@ private:
   int proxy_auth_scheme_ctrl_id;
   int proxy_user_name_ctrl_id;
   int proxy_password_ctrl_id;
+  int cache_enabled_ctrl_id;
+  int cache_max_size_ctrl_id;
+  int cache_dir_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -110,16 +113,27 @@ private:
       options.http.proxy_auth_scheme = get_list_pos(proxy_auth_scheme_ctrl_id);
       options.http.proxy_user_name = get_text(proxy_user_name_ctrl_id);
       options.http.proxy_password = get_text(proxy_password_ctrl_id);
+      options.cache_enabled = get_check(cache_enabled_ctrl_id);
+      options.cache_max_size = str_to_int(get_text(cache_max_size_ctrl_id));
+      options.cache_dir = get_text(cache_dir_ctrl_id);
     }
-    if (msg == DN_INITDIALOG) {
+    else if (msg == DN_INITDIALOG) {
       bool f_enabled = get_check(use_proxy_ctrl_id);
       for (int ctrl_id = use_proxy_ctrl_id + 1; ctrl_id <= proxy_password_ctrl_id; ctrl_id++)
+        enable(ctrl_id, f_enabled);
+      f_enabled = get_check(cache_enabled_ctrl_id);
+      for (int ctrl_id = cache_enabled_ctrl_id + 1; ctrl_id <= cache_dir_ctrl_id; ctrl_id++)
         enable(ctrl_id, f_enabled);
       return TRUE;
     }
     else if ((msg == DN_BTNCLICK) && (param1 == use_proxy_ctrl_id)) {
       bool f_enabled = param2 ? true : false;
       for (int ctrl_id = use_proxy_ctrl_id + 1; ctrl_id <= proxy_password_ctrl_id; ctrl_id++)
+        enable(ctrl_id, f_enabled);
+    }
+    else if ((msg == DN_BTNCLICK) && (param1 == cache_enabled_ctrl_id)) {
+      bool f_enabled = param2 ? true : false;
+      for (int ctrl_id = cache_enabled_ctrl_id + 1; ctrl_id <= cache_dir_ctrl_id; ctrl_id++)
         enable(ctrl_id, f_enabled);
     }
     return default_dialog_proc(msg, param1, param2);
@@ -167,6 +181,19 @@ public:
     spacer(2);
     label(Far::get_msg(MSG_CONFIG_PROXY_PASSWORD));
     proxy_password_ctrl_id = edit_box(options.http.proxy_password, 15);
+    new_line();
+    separator();
+    new_line();
+
+    cache_enabled_ctrl_id = check_box(Far::get_msg(MSG_CONFIG_CACHE_ENABLED), options.cache_enabled);
+    new_line();
+    spacer(2);
+    label(Far::get_msg(MSG_CONFIG_CACHE_MAX_SIZE));
+    cache_max_size_ctrl_id = edit_box(int_to_str(options.cache_max_size), 2);
+    new_line();
+    spacer(2);
+    label(Far::get_msg(MSG_CONFIG_CACHE_DIR));
+    cache_dir_ctrl_id = edit_box(options.cache_dir, 30);
     new_line();
     separator();
     new_line();
