@@ -70,7 +70,6 @@ public:
   ProgressMonitor(bool lazy);
   virtual ~ProgressMonitor();
   void update_ui(bool force = false);
-  void clear_ui();
 };
 
 int far_control_int(HANDLE h_panel, int command, int param);
