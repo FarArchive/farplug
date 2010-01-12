@@ -1,5 +1,7 @@
 #pragma once
 
+extern const wchar_t* c_plugin_key_name;
+
 struct HttpOptions {
   bool use_proxy;
   wstring proxy_server;

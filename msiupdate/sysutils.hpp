@@ -5,6 +5,8 @@ wstring get_console_title();
 bool wait_for_single_object(HANDLE handle, DWORD timeout);
 wstring ansi_to_unicode(const string& str, unsigned code_page);
 wstring expand_env_vars(const wstring& str);
+wstring reg_query_value(HKEY h_key, const wchar_t* name, const wstring& def_value = wstring());
+void reg_set_value(HKEY h_key, const wchar_t* name, const wstring& value);
 
 class CriticalSection: private NonCopyable, private CRITICAL_SECTION {
 public:

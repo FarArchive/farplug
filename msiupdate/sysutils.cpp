@@ -81,3 +81,21 @@ wstring expand_env_vars(const wstring& str) {
   CHECK_SYS(size);
   return wstring(buf.data(), size - 1);
 }
+
+wstring reg_query_value(HKEY h_key, const wchar_t* name, const wstring& def_value) {
+  DWORD type = REG_SZ;
+  DWORD data_size;
+  LONG res = RegQueryValueExW(h_key, name, NULL, &type, NULL, &data_size);
+  if (res == ERROR_SUCCESS) {
+    Buffer<wchar_t> buf(data_size / sizeof(wchar_t));
+    res = RegQueryValueExW(h_key, name, NULL, &type, reinterpret_cast<LPBYTE>(buf.data()), &data_size);
+    if (res == ERROR_SUCCESS) {
+      return wstring(buf.data(), buf.size() - 1);
+    }
+  }
+  return def_value;
+}
+
+void reg_set_value(HKEY h_key, const wchar_t* name, const wstring& value) {
+  CHECK_ADVSYS(RegSetValueExW(h_key, name, 0, REG_SZ, reinterpret_cast<LPBYTE>(const_cast<wchar_t*>(value.c_str())), (static_cast<DWORD>(value.size()) + 1) * sizeof(wchar_t)));
+}

@@ -8,6 +8,7 @@
 #include "options.hpp"
 #include "ui.hpp"
 #include "inet.hpp"
+#include "transact.hpp"
 #include "update.hpp"
 
 namespace Updater {
@@ -199,23 +200,26 @@ void prepare_directory(const wstring& dir) {
 
 void save_to_cache(const string& package, const wstring& cache_dir, const wstring& package_name) {
   prepare_directory(cache_dir);
+  ktm::Transaction transaction;
+  {
+    const wchar_t* c_param_cache_index = L"cache_index";
+    ktm::Key plugin_key(HKEY_CURRENT_USER, (add_trailing_slash(Far::get_root_key_name()) + c_plugin_key_name).c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, transaction.handle());
 
-  const wchar_t* c_param_cache_index = L"cache_index";
-  list<wstring> cache_index = split(Options::get_str(c_param_cache_index), L'\n');
+    list<wstring> cache_index = split(reg_query_value(plugin_key.handle(), c_param_cache_index), L'\n');
 
-  while (cache_index.size() && cache_index.size() >= g_options.cache_max_size) {
-    DeleteFileW((add_trailing_slash(cache_dir) + cache_index.front()).c_str());
-    cache_index.erase(cache_index.begin());
+    while (cache_index.size() && cache_index.size() >= g_options.cache_max_size) {
+      ktm::DeleteFile((add_trailing_slash(cache_dir) + cache_index.front()).c_str(), transaction.handle());
+      cache_index.erase(cache_index.begin());
+    }
+
+    ktm::File package_file((add_trailing_slash(cache_dir) + package_name).c_str(), GENERIC_WRITE, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, transaction.handle());
+    DWORD size_written;
+    CHECK_SYS(WriteFile(package_file.handle(), package.data(), static_cast<DWORD>(package.size()), &size_written, NULL));
+
+    cache_index.push_back(package_name);
+    reg_set_value(plugin_key.handle(), c_param_cache_index, combine(cache_index, L'\n'));
   }
-
-  HANDLE h_file = CreateFileW((add_trailing_slash(cache_dir) + package_name).c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-  CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
-  CleanHandle h_file_clean(h_file);
-  DWORD size_written;
-  CHECK_SYS(WriteFile(h_file, package.data(), static_cast<DWORD>(package.size()), &size_written, NULL));
-
-  cache_index.push_back(package_name);
-  Options::set_str(c_param_cache_index, combine(cache_index, L'\n'));
+  transaction.commit();
 }
 
 void execute() {
