@@ -6,8 +6,6 @@ Options g_options;
 
 const wchar_t* c_plugin_key_name = L"msiupdate";
 
-const wchar_t* c_param_last_check_time = L"last_check_time";
-const wchar_t* c_param_last_check_version = L"last_check_version";
 const wchar_t* c_param_use_full_install_ui = L"use_full_install_ui";
 const wchar_t* c_param_update_stable_builds = L"update_stable_builds";
 const wchar_t* c_param_logged_install = L"logged_install";
@@ -129,8 +127,6 @@ void Options::set_str(const wchar_t* name, const wstring& value) {
 }
 
 void Options::load() {
-  last_check_time = get_int(c_param_last_check_time);
-  last_check_version = get_int(c_param_last_check_version);
   use_full_install_ui = get_bool(c_param_use_full_install_ui);
   update_stable_builds = get_bool(c_param_update_stable_builds);
   logged_install = get_bool(c_param_logged_install, true);
@@ -147,8 +143,6 @@ void Options::load() {
 };
 
 void Options::save() {
-  set_int(c_param_last_check_time, last_check_time);
-  set_int(c_param_last_check_version, last_check_version);
   set_bool(c_param_use_full_install_ui, use_full_install_ui);
   set_bool(c_param_update_stable_builds, update_stable_builds);
   set_bool(c_param_logged_install, logged_install);

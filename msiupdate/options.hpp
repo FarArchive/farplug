@@ -19,8 +19,6 @@ public:
   static void set_int(const wchar_t* name, unsigned value);
   static void set_bool(const wchar_t* name, bool value);
   static void set_str(const wchar_t* name, const wstring& value);
-  unsigned last_check_time;
-  unsigned last_check_version;
   bool use_full_install_ui;
   bool update_stable_builds;
   bool logged_install;

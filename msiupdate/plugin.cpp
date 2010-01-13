@@ -2,10 +2,8 @@
 
 #include "utils.hpp"
 #include "farutils.hpp"
-#include "sysutils.hpp"
 #include "options.hpp"
 #include "ui.hpp"
-#include "inet.hpp"
 #include "update.hpp"
 
 int WINAPI GetMinFarVersion(void) {
@@ -19,7 +17,8 @@ int WINAPI GetMinFarVersionW(void) {
 void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info) {
   Far::init(Info);
   FAR_ERROR_HANDLER_BEGIN;
-  Updater::initialize();
+  g_options.load();
+  Update::init();
   FAR_ERROR_HANDLER_END(return, return, false);
 }
 
@@ -27,11 +26,8 @@ void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
   FAR_ERROR_HANDLER_BEGIN;
   static const wchar_t* plugin_menu[1];
   static const wchar_t* config_menu[1];
-
   Info->StructSize = sizeof(PluginInfo);
-
   Info->Flags = PF_PRELOAD;
-
   plugin_menu[0] = Far::msg_ptr(MSG_PLUGIN_NAME);
   Info->PluginMenuStrings = plugin_menu;
   Info->PluginMenuStringsNumber = ARRAYSIZE(plugin_menu);
@@ -43,11 +39,7 @@ void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
 
 HANDLE WINAPI OpenPluginW(int OpenFrom,INT_PTR Item) {
   FAR_ERROR_HANDLER_BEGIN;
-  string update_info = load_url(Updater::get_update_url(), g_options.http);
-  if (Updater::check(update_info))
-    Updater::execute();
-  else
-    info_dlg(Far::get_msg(MSG_UPDATE_NO_NEW_VERSION));
+  Update::execute();
   return INVALID_HANDLE_VALUE;
   FAR_ERROR_HANDLER_END(return INVALID_HANDLE_VALUE, return INVALID_HANDLE_VALUE, false);
 }
@@ -64,14 +56,21 @@ int WINAPI ConfigureW(int ItemNumber) {
 
 void WINAPI ExitFARW(void) {
   FAR_ERROR_HANDLER_BEGIN;
-  Updater::finalize();
+  Update::clean();
   FAR_ERROR_HANDLER_END(return, return, true);
 }
 
 int WINAPI ProcessSynchroEventW(int Event, void *Param) {
   FAR_ERROR_HANDLER_BEGIN;
   if (Event == SE_COMMONSYNCHRO) {
-    Updater::execute();
+    switch (static_cast<Update::Command>(reinterpret_cast<int>(Param))) {
+    case Update::cmdClean:
+      Update::clean();
+      break;
+    case Update::cmdExecute:
+      Update::execute();
+      break;
+    }
   }
   return 0;
   FAR_ERROR_HANDLER_END(return 0, return 0, false);
