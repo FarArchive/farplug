@@ -1,6 +1,6 @@
 m4_include(`version.m4')m4_dnl
 .Language=English,English
-.PluginContents=WM Explorer
+.PluginContents=MsiUpdate
 
 @Contents
 $^#MsiUpdate __VER_MAJOR__.__VER_MINOR__.__VER_PATCH__#
