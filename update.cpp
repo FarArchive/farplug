@@ -123,7 +123,7 @@ private:
   }
 
 public:
-  UpdateDialog(const UpdateInfo& update_info): Far::Dialog(Far::get_msg(MSG_PLUGIN_NAME), c_client_xs), update_info(update_info) {
+  UpdateDialog(const UpdateInfo& update_info): Far::Dialog(Far::get_msg(MSG_PLUGIN_NAME), c_client_xs, L"update"), update_info(update_info) {
   }
 
   UpdateDialogResult show() {
@@ -186,6 +186,7 @@ void execute() {
   check_product_installed();
   string update_url_text = load_url(get_update_url() + c_update_script, g_options.http);
   UpdateInfo update_info = parse_update_info(update_url_text);
+  Options::set_int(c_param_update_version, update_info.version);
   if (update_info.version <= current_version) {
     info_dlg(Far::get_msg(MSG_UPDATE_NO_NEW_VERSION));
     return;
