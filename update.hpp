@@ -1,11 +1,14 @@
 #pragma once
 
-namespace Updater {
+namespace Update {
 
-void initialize();
-void finalize();
-wstring get_update_url();
-bool check(const string& update_info);
+enum Command {
+  cmdClean,
+  cmdExecute,
+};
+
+void init();
+void clean();
 void execute();
 
 }
