@@ -90,6 +90,7 @@ void show_changelog(unsigned build1, unsigned build2) {
   }
 
   Far::viewer(temp_file.get_path(), L"Changelog");
+  Far::flush_screen();
 }
 
 enum UpdateDialogResult {
