@@ -24,7 +24,7 @@ ADD_DEFINITIONS(-D_FAR_USE_FARFINDDATA -D_WIN32_WINNT=0x0500)
 INCLUDE_DIRECTORIES(${src} ${far_inc} ${bin})
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${sources})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} winhttp msi)
-ADD_CUSTOM_TARGET(lng_hlf DEPENDS ${bin}/en.lng ${bin}/ru.lng VERBATIM)
+ADD_CUSTOM_TARGET(lng_hlf DEPENDS ${bin}/en.lng ${bin}/ru.lng ${bin}/en.hlf ${bin}/ru.hlf VERBATIM)
 ADD_DEPENDENCIES(${PROJECT_NAME} lng_hlf)
 ADD_DEPENDENCIES(lng_hlf check_rev)
 
@@ -38,7 +38,12 @@ ADD_CUSTOM_COMMAND(
 enc_file(${bin}/en.lng.1 ${bin}/en.lng us-ascii)
 enc_file(${bin}/ru.lng.1 ${bin}/ru.lng cp866)
 
+m4_process(${src}/en.hlf.m4 ${bin}/en.hlf.1)
+enc_file(${bin}/en.hlf.1 ${bin}/en.hlf us-ascii)
+m4_process(${src}/ru.hlf.m4 ${bin}/ru.hlf.1)
+enc_file(${bin}/ru.hlf.1 ${bin}/ru.hlf cp866)
+
 gen_ver()
 m4_process(${src}/version.rc.m4 ${bin}/version.rc)
 
-gen_distrib(${bin}/en.lng ${bin}/ru.lng)
+gen_distrib(${bin}/en.lng ${bin}/ru.lng ${bin}/en.hlf ${bin}/ru.hlf)

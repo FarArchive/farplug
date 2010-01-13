@@ -20,7 +20,7 @@ config.proxy_auth.negotiate = Negotiate
 config.proxy_user_name = И&мя пользователя:
 config.proxy_password = П&ароль:
 config.cache_enabled = Сохра&нять инсталляционные пакеты локально
-config.cache_max_size = Макс. &число пакетов:
+config.cache_max_size = Максимальное &число пакетов:
 config.cache_dir = &Каталог для сохранения:
 
 # Update dialog

@@ -139,7 +139,7 @@ private:
   }
 
 public:
-  ConfigDialog(Options& options): Far::Dialog(Far::get_msg(MSG_CONFIG_TITLE), c_client_xs), options(options) {
+  ConfigDialog(Options& options): Far::Dialog(Far::get_msg(MSG_CONFIG_TITLE), c_client_xs, L"config"), options(options) {
   }
 
   bool show() {
