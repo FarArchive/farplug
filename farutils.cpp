@@ -163,7 +163,7 @@ LONG_PTR WINAPI Dialog::internal_dialog_proc(HANDLE h_dlg, int msg, int param1, 
   dlg->h_dlg = h_dlg;
   FAR_ERROR_HANDLER_BEGIN;
   return dlg->dialog_proc(msg, param1, param2);
-  FAR_ERROR_HANDLER_END(;, ;, false);
+  FAR_ERROR_HANDLER_END( , , false);
   return dlg->default_dialog_proc(msg, param1, param2);
 }
 
