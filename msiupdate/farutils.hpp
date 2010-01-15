@@ -10,10 +10,12 @@ namespace Far {
     if (e.code == E_ABORT) { \
       return_cancel; \
     } \
-    if (!silent) { \
-      error_dlg(e); \
+    else { \
+      if (!silent) { \
+        error_dlg(e); \
+      } \
+      return_error; \
     } \
-    return_error; \
   } \
   catch (const std::exception& e) { \
     if (!silent) { \
@@ -22,6 +24,7 @@ namespace Far {
     return_error; \
   } \
   catch (...) { \
+    error_dlg(L"Unknown exception"); \
     return_error; \
   }
 
