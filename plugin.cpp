@@ -1,10 +1,3 @@
-#include <windows.h>
-
-#include <string>
-#include <list>
-#include <map>
-using namespace std;
-
 #include "msg.h"
 
 #include "utils.hpp"
@@ -88,26 +81,6 @@ void Plugin::list(PluginPanelItem** panel_item, int* items_number) {
   *panel_item = items;
   *items_number = file_list->size();
 }
-
-#define FAR_ERROR_HANDLER_BEGIN try {
-
-#define FAR_ERROR_HANDLER_END(return_error, return_cancel, silent) \
-  } \
-  catch (const Error& e) { \
-    if (e.code == E_ABORT) \
-      return_cancel; \
-    if (!silent) \
-      error_dlg(e); \
-    return_error; \
-  } \
-  catch (const std::exception& e) { \
-    if (!silent) \
-      error_dlg(e); \
-    return_error; \
-  } \
-  catch (...) { \
-    return_error; \
-  }
 
 int WINAPI GetMinFarVersion(void) {
   return FARMANAGERVERSION;

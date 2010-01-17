@@ -1,6 +1,5 @@
 #pragma once
 
-#include "noncopyable.hpp"
 #include "error.hpp"
 
 #define CHECK_COM(code) { HRESULT __ret = (code); if (__ret != S_OK) FAIL(__ret); }

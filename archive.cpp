@@ -1,12 +1,3 @@
-#include <windows.h>
-
-#include <string>
-#include <list>
-#include <map>
-using namespace std;
-
-#include "plugin.hpp"
-
 #include "utils.hpp"
 #include "sysutils.hpp"
 #include "archive.hpp"

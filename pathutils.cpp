@@ -1,6 +1,3 @@
-#include <string>
-using namespace std;
-
 #include "utils.hpp"
 
 wstring long_path(const wstring& path) {

@@ -1,8 +1,5 @@
 #pragma once
 
-#define INITGUID
-#include "CPP/7zip/Archive/IArchive.h"
-
 #include "comutils.hpp"
 
 struct ArcLib {
