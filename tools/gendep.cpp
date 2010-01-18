@@ -61,9 +61,9 @@ bool is_include_directive(const wstring& text, size_t pos, wstring& file_name) {
   parser.ws();
   if (!parser.str(L"include")) return false;
   parser.ws();
-  if (!parser.ch(L'"')) return false;
-  file_name = parser.extract(L"\"\n");
-  if (!parser.ch(L'"')) return false;
+  if (!parser.ch(L'"') && !parser.ch(L'<')) return false;
+  file_name = parser.extract(L"\">\n");
+  if (!parser.ch(L'"') && !parser.ch(L'>')) return false;
   return true;
 }
 
@@ -71,21 +71,27 @@ bool file_exists(const wstring& file_path) {
   return GetFileAttributesW(long_path(get_full_path_name(file_path)).c_str()) != INVALID_FILE_ATTRIBUTES;
 }
 
-list<wstring> get_file_list(const list<wstring>& include_dirs, const wstring& text) {
+void fix_slashes(wstring& path) {
+  for (size_t i = 0; i < path.size(); i++) {
+    if (path[i] == L'/') path[i] = L'\\';
+  }
+}
+
+list<wstring> get_include_file_list(const wstring& file_path, const list<wstring>& include_dirs) {
   list<wstring> file_list;
-  wstring file_name;
+  wstring text = load_file(file_path);
+  wstring inc_file;
   size_t pos = 0;
   while (true) {
-    if (is_include_directive(text, pos, file_name)) {
-      bool found = false;
+    if (is_include_directive(text, pos, inc_file)) {
+      fix_slashes(inc_file);
+      wstring inc_path = add_trailing_slash(extract_file_path(file_path)) + inc_file;
+      bool found = file_exists(inc_path);
       for (list<wstring>::const_iterator inc_dir = include_dirs.begin(); !found && inc_dir != include_dirs.end(); inc_dir++) {
-        wstring rel_path = add_trailing_slash(*inc_dir) + file_name;
-        if (file_exists(rel_path)) {
-          file_list.push_back(rel_path);
-          found = true;
-        }
+        inc_path = add_trailing_slash(*inc_dir) + inc_file;
+        found = file_exists(inc_path);
       }
-      if (!found) FAIL_MSG(L"Header \"" + file_name + L"\" not found");
+      if (found) file_list.push_back(inc_path);
     }
     pos = text.find(L'\n', pos);
     if (pos == wstring::npos) break;
@@ -94,14 +100,37 @@ list<wstring> get_file_list(const list<wstring>& include_dirs, const wstring& te
   return file_list;
 }
 
-#define CHECK_CMD(code) if (!(code)) FAIL_MSG(L"Usage: gendep [-I<include> ...]")
-void parse_cmd_line(const list<wstring>& params, list<wstring>& include_dirs) {
-  include_dirs.clear();
+void process_file(wstring& output, set<wstring>& file_set, const wstring& file_path, const list<wstring>& include_dirs) {
+  if (file_set.count(file_path)) return;
+  file_set.insert(file_path);
+  list<wstring> include_files = get_include_file_list(file_path, include_dirs);
+  if (!include_files.empty()) {
+    output.append(file_path).append(1, L':');
+    for (list<wstring>::const_iterator inc_file = include_files.begin(); inc_file != include_files.end(); inc_file++) {
+      output.append(1, L' ').append(*inc_file);
+    }
+    output.append(1, L'\n');
+  }
+  for (list<wstring>::const_iterator inc_file = include_files.begin(); inc_file != include_files.end(); inc_file++) {
+    process_file(output, file_set, *inc_file, include_dirs);
+  }
+}
+
+#define CHECK_CMD(code) if (!(code)) FAIL_MSG(L"Usage: gendep [-I<include> | <source_dir> ...]")
+void parse_cmd_line(const list<wstring>& params, list<wstring>& source_dirs, list<wstring>& include_dirs) {
+  source_dirs.assign(1, wstring());
   for (list<wstring>::const_iterator param = params.begin(); param != params.end(); param++) {
-    CHECK_CMD(substr_match(*param, 0, L"-I"));
-    wstring inc_dir = param->substr(2);
-    CHECK_CMD(!inc_dir.empty());
-    include_dirs.push_back(inc_dir);
+    if (substr_match(*param, 0, L"-I")) {
+      wstring inc_dir = param->substr(2);
+      CHECK_CMD(!inc_dir.empty());
+      fix_slashes(inc_dir);
+      include_dirs.push_back(inc_dir);
+    }
+    else {
+      wstring src_dir = *param;
+      fix_slashes(src_dir);
+      source_dirs.push_back(src_dir);
+    }
   }
 }
 
@@ -109,23 +138,16 @@ int wmain(int argc, wchar_t* argv[]) {
   BEGIN_ERROR_HANDLER;
   list<wstring> params;
   for (unsigned i = 1; i < argc; i++) params.push_back(argv[i]);
-  list<wstring> include_dirs;
-  parse_cmd_line(params, include_dirs);
-  include_dirs.push_front(wstring());
+  list<wstring> source_dirs, include_dirs;
+  parse_cmd_line(params, source_dirs, include_dirs);
   wstring output;
-  wstring cur_dir = get_current_directory();
-  FindFile files(cur_dir);
-  WIN32_FIND_DATAW find_data;
-  while (files.next(find_data)) {
-    if (is_valid_ext(find_data.cFileName)) {
-      wstring text = load_file(add_trailing_slash(cur_dir) + find_data.cFileName);
-      list<wstring> include_file_list = get_file_list(include_dirs, text);
-      if (include_file_list.size()) {
-        output.append(find_data.cFileName).append(1, L':');
-        for (list<wstring>::const_iterator fn = include_file_list.begin(); fn != include_file_list.end(); fn++) {
-          output.append(1, L' ').append(*fn);
-        }
-        output.append(1, L'\n');
+  set<wstring> file_set;
+  for (list<wstring>::const_iterator src_dir = source_dirs.begin(); src_dir != source_dirs.end(); src_dir++) {
+    FindFile files(get_full_path_name(src_dir->empty() ? L"." : *src_dir));
+    WIN32_FIND_DATAW find_data;
+    while (files.next(find_data)) {
+      if ((find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 && is_valid_ext(find_data.cFileName)) {
+        process_file(output, file_set, add_trailing_slash(*src_dir) + find_data.cFileName, include_dirs);
       }
     }
   }

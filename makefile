@@ -2,7 +2,7 @@
 
 CPPFLAGS = -nologo -Zi -W3 -Gy -GS -GR -EHsc -MP -c
 DEFINES = -DWIN32_LEAN_AND_MEAN -D_WINDOWS -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_FAR_USE_FARFINDDATA -D_WIN32_WINNT=0x0500
-LINKFLAGS = -nologo -debug -incremental:no -stack:10000000 -map /manifest:no -dynamicbase -nxcompat -largeaddressaware -dll
+LINKFLAGS = -nologo -debug -incremental:no -stack:10000000 -map -manifest:no -dynamicbase -nxcompat -largeaddressaware -dll
 RCFLAGS = -nologo
 
 !if "$(CPU)" == "AMD64" || "$(PLATFORM)" == "x64"
@@ -27,7 +27,7 @@ LINKFLAGS = $(LINKFLAGS) -fixed:no
 !endif
 OUTDIR = $(OUTDIR).$(PLATFORM)
 INCLUDES = -I7z -Ifar -I$(OUTDIR)
-CPPFLAGS = $(CPPFLAGS) -Fo$(OUTDIR)\ -Fd$(OUTDIR)\ -I$(OUTDIR) $(INCLUDES) $(DEFINES)
+CPPFLAGS = $(CPPFLAGS) -Fo$(OUTDIR)\ -Fd$(OUTDIR)\ $(INCLUDES) $(DEFINES)
 RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
 
 OBJS = $(OUTDIR)\archive.obj $(OUTDIR)\farutils.obj $(OUTDIR)\pathutils.obj $(OUTDIR)\plugin.obj $(OUTDIR)\strutils.obj $(OUTDIR)\sysutils.obj $(OUTDIR)\ui.obj
