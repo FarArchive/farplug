@@ -2,8 +2,9 @@
 
 #include <algorithm>
 #include <string>
-#include <vector>
 #include <list>
+#include <vector>
+#include <deque>
 #include <map>
 #include <sstream>
 #include <iomanip>
@@ -19,6 +20,27 @@ using namespace std;
 #include "pathutils.cpp"
 #include "sysutils.cpp"
 #include "iniparse.cpp"
+
+#define BEGIN_ERROR_HANDLER try {
+#define END_ERROR_HANDLER \
+  } \
+  catch (const Error& e) { \
+    if (e.code != NO_ERROR) { \
+      wstring sys_msg = get_system_message(e.code); \
+      if (!sys_msg.empty()) \
+        wcerr << sys_msg << endl; \
+    } \
+    for (list<wstring>::const_iterator message = e.messages.begin(); message != e.messages.end(); message++) { \
+      wcerr << *message << endl; \
+    } \
+    wcerr << extract_file_name(widen(e.file)) << L':' << e.line << endl; \
+  } \
+  catch (const exception& e) { \
+    cerr << typeid(e).name() << ": " << e.what() << endl; \
+  } \
+  catch (...) { \
+    cerr << "unknown error" << endl; \
+  }
 
 #define CP_UTF16 1200
 wstring load_file(const wstring& file_name, unsigned* code_page = NULL) {
@@ -54,53 +76,4 @@ void save_file(const wstring& file_name, const wstring& text, unsigned code_page
     string data = unicode_to_ansi(text, code_page);
     file.write(data.data(), data.size());
   }
-}
-
-void search_and_replace(wstring& text, const wstring& name, const wstring& value) {
-  size_t pos = 0;
-  while (true) {
-    pos = text.find(name, pos);
-    if (pos == wstring::npos) break;
-    text.replace(pos, name.size(), value);
-    pos += value.size();
-  }
-}
-
-const wchar_t* prefix = L"<(";
-const wchar_t* suffix = L")>";
-
-int wmain(int argc, wchar_t* argv[]) {
-  try {
-    if (argc != 4)
-      FAIL_MSG(L"Usage: preproc ini_file in_file out_file");
-    unsigned code_page;
-    wstring text = load_file(argv[2], &code_page);
-    Ini::File ini_file;
-    ini_file.parse(load_file(argv[1]));
-    for (Ini::File::const_iterator section = ini_file.begin(); section != ini_file.end(); section++) {
-      for (Ini::Section::const_iterator item = section->second.begin(); item != section->second.end(); item++) {
-        search_and_replace(text, prefix + item->first + suffix, item->second);
-      }
-    }
-    save_file(argv[3], text, code_page);
-    return 0;
-  }
-  catch (const Error& e) {
-    if (e.code != NO_ERROR) {
-      wstring sys_msg = get_system_message(e.code);
-      if (!sys_msg.empty())
-        wcerr << sys_msg << endl;
-    }
-    for (list<wstring>::const_iterator message = e.messages.begin(); message != e.messages.end(); message++) {
-      wcerr << *message << endl;
-    }
-    wcerr << extract_file_name(widen(e.file)) << L':' << e.line << endl;
-  }
-  catch (const exception& e) {
-    cerr << typeid(e).name() << ": " << e.what() << endl;
-  }
-  catch (...) {
-    cerr << "unknown error" << endl;
-  }
-  return 1;
 }

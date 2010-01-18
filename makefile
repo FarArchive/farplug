@@ -1,5 +1,3 @@
-#.SILENT:
-
 !include project.ini
 
 CPPFLAGS = -nologo -Zi -W3 -Gy -GS -GR -EHsc -MP -c
@@ -109,15 +107,8 @@ $(DISTRIB): $(DISTRIB_FILES) project.ini
   7z a -mx=9 $@ $(DISTRIB_FILES)
 
 
-prepare:
-  if not exist tools mkdir tools
-  cl -nologo -EHsc -Fotools\ -Fetools\gendep.exe gendep.cpp $(LIBS)
-  cl -nologo -EHsc -Fotools\ -Fetools\msgc.exe msgc.cpp $(LIBS)
-  cl -nologo -EHsc -Fotools\ -Fetools\preproc.exe preproc.cpp $(LIBS)
-
-
 clean:
   rd /s /q $(OUTDIR)
 
 
-.PHONY: project distrib build_project build_distrib depfile prepare clean
+.PHONY: project distrib build_project build_distrib depfile clean
