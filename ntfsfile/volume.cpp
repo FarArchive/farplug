@@ -329,7 +329,7 @@ void NtfsVolume::open(const UnicodeString& volume_name) {
     CHECK(_wcsicmp(vlm_fs, L"NTFS") == 0, L"Only NTFS volumes are supported");
 
     /* allocate volume handle */
-    handle = CreateFileW((name.equal(0, L"\\\\?\\") ? name : (L"\\\\.\\" + name)).data(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
+    handle = CreateFileW((name.equal(0, L"\\\\?\\") ? name : (L"\\\\.\\" + name)).data(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
     CHECK_SYS(handle != INVALID_HANDLE_VALUE);
 
     /* get NTFS specific volume information */
@@ -344,6 +344,10 @@ void NtfsVolume::open(const UnicodeString& volume_name) {
     close();
     throw;
   }
+}
+
+void NtfsVolume::flush() {
+  CHECK_SYS(FlushFileBuffers(handle));
 }
 
 UnicodeString get_volume_guid(const UnicodeString& volume_name) {

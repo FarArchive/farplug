@@ -74,7 +74,7 @@ public:
 
 int far_control_int(HANDLE h_panel, int command, int param);
 int far_control_ptr(HANDLE h_panel, int command, const void* param);
-FarStr far_get_cur_dir(HANDLE h_panel, const PanelInfo& pi);
+FarStr far_get_panel_dir(HANDLE h_panel, const PanelInfo& pi);
 UnicodeString far_get_full_path(const UnicodeString& file_name);
 PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
 PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);

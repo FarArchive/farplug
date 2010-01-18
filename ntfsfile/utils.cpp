@@ -472,14 +472,14 @@ int far_control_ptr(HANDLE h_panel, int command, const void* param) {
 #endif
 }
 
-FarStr far_get_cur_dir(HANDLE h_panel, const PanelInfo& pi) {
+FarStr far_get_panel_dir(HANDLE h_panel, const PanelInfo& pi) {
   FarStr cur_dir;
 #ifdef FARAPI17
   return pi.CurDir;
 #endif
 #ifdef FARAPI18
-  unsigned cur_dir_size = g_far.Control(h_panel, FCTL_GETCURRENTDIRECTORY, 0, 0) - 1;
-  g_far.Control(h_panel, FCTL_GETCURRENTDIRECTORY, cur_dir_size + 1, reinterpret_cast<LONG_PTR>(cur_dir.buf(cur_dir_size)));
+  unsigned cur_dir_size = g_far.Control(h_panel, FCTL_GETPANELDIR, 0, 0) - 1;
+  g_far.Control(h_panel, FCTL_GETPANELDIR, cur_dir_size + 1, reinterpret_cast<LONG_PTR>(cur_dir.buf(cur_dir_size)));
   cur_dir.set_size(cur_dir_size);
 #endif
   return cur_dir;

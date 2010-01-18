@@ -40,7 +40,7 @@ PanelState save_state(HANDLE h_panel) {
   PanelState state;
   PanelInfo pi;
   if (far_control_ptr(h_panel, FCTL_GETPANELINFO, &pi)) {
-    state.directory = far_get_cur_dir(h_panel, pi);
+    state.directory = far_get_panel_dir(h_panel, pi);
     if (pi.CurrentItem < pi.ItemsNumber) {
       PluginPanelItem* ppi = far_get_panel_item(h_panel, pi.CurrentItem, pi);
       if (ppi) {
@@ -615,6 +615,7 @@ void FilePanel::sort_file_list(std::list<PanelItemData>& pid_list) {
 
 void FilePanel::new_file_list(PluginPanelItem*& panel_items, int& item_num, bool search_mode) {
   FileListProgress progress;
+  volume.flush();
   std::list<PanelItemData> pid_list;
   if (mft_mode) {
     if (g_file_panel_mode.use_usn_journal && !search_mode) {

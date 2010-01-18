@@ -1083,7 +1083,7 @@ bool file_list_from_panel(ObjectArray<UnicodeString>& file_list, bool own_panel)
   }
 
   file_list.clear();
-  UnicodeString cur_dir = FARSTR_TO_UNICODE(far_get_cur_dir(INVALID_HANDLE_VALUE, p_info));
+  UnicodeString cur_dir = FARSTR_TO_UNICODE(far_get_panel_dir(INVALID_HANDLE_VALUE, p_info));
   if (sel_file_cnt != 0) {
     file_list.extend(sel_file_cnt);
     cur_dir = add_trailing_slash(cur_dir);

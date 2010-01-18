@@ -27,6 +27,7 @@ struct NtfsVolume {
     serial = 0;
   }
   void open(const UnicodeString& volume_name);
+  void flush();
 };
 
 UnicodeString get_real_path(const UnicodeString& fp);
