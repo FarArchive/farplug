@@ -406,6 +406,7 @@ void FilePanel::scan_dir(const UnicodeString& root_path, const UnicodeString& re
       unsigned mft_rec_cnt = 0;
       bool error = false;
       FileInfo file_info;
+      volume.synced = false;
       try {
         BY_HANDLE_FILE_INFORMATION h_file_info;
         HANDLE h_file = CreateFileW(long_path(file_path).data(), FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_POSIX_SEMANTICS, NULL);
@@ -615,7 +616,6 @@ void FilePanel::sort_file_list(std::list<PanelItemData>& pid_list) {
 
 void FilePanel::new_file_list(PluginPanelItem*& panel_items, int& item_num, bool search_mode) {
   FileListProgress progress;
-  volume.flush();
   std::list<PanelItemData> pid_list;
   if (mft_mode) {
     if (g_file_panel_mode.use_usn_journal && !search_mode) {

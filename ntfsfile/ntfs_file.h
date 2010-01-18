@@ -54,7 +54,7 @@ private:
   void process_attr_list_entry(const ATTR_LIST_ENTRY* attr_list_entry, Array<u64>& ext_rec_list);
 public:
   // filled by external code
-  const NtfsVolume* volume;
+  NtfsVolume* volume;
   UnicodeString file_name;
   unsigned hard_link_cnt;
   bool directory;

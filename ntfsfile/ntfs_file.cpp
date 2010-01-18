@@ -370,6 +370,7 @@ void FileInfo::process_base_file_rec() {
 
         unsigned size = static_cast<unsigned>(data_runs[i].len * volume->cluster_size);
         DWORD bytes_ret;
+        volume->flush();
         CHECK_SYS(ReadFile(volume->handle, attr_data_buf + buf_pos, size, &bytes_ret, NULL));
         CHECK_FMT(size == bytes_ret);
         buf_pos += size;

@@ -312,10 +312,16 @@ VolumeInfo::VolumeInfo(const UnicodeString& file_name) {
   cluster_size = SectorsPerCluster * BytesPerSector;
 }
 
+UnicodeString get_volume_path(const UnicodeString& volume_name) {
+  if (volume_name.equal(0, L"\\\\?\\")) return volume_name;
+  else return L"\\\\.\\" + volume_name;
+}
+
 void NtfsVolume::open(const UnicodeString& volume_name) {
   close();
   try {
     name = volume_name;
+    synced = false;
 
     CHECK(!is_unc_path(name), L"Network shares are not supported");
 
@@ -329,7 +335,7 @@ void NtfsVolume::open(const UnicodeString& volume_name) {
     CHECK(_wcsicmp(vlm_fs, L"NTFS") == 0, L"Only NTFS volumes are supported");
 
     /* allocate volume handle */
-    handle = CreateFileW((name.equal(0, L"\\\\?\\") ? name : (L"\\\\.\\" + name)).data(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
+    handle = CreateFileW(get_volume_path(name).data(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
     CHECK_SYS(handle != INVALID_HANDLE_VALUE);
 
     /* get NTFS specific volume information */
@@ -347,7 +353,15 @@ void NtfsVolume::open(const UnicodeString& volume_name) {
 }
 
 void NtfsVolume::flush() {
-  CHECK_SYS(FlushFileBuffers(handle));
+  if (!synced) {
+    HANDLE handle = CreateFileW(get_volume_path(name).data(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+    if (handle != INVALID_HANDLE_VALUE) {
+      FlushFileBuffers(handle);
+      CloseHandle(handle);
+      DBG_LOG(UnicodeString(L"volume flushed"));
+    }
+    synced = true;
+  }
 }
 
 UnicodeString get_volume_guid(const UnicodeString& volume_name) {

@@ -212,6 +212,7 @@ void FilePanel::create_mft_index() {
 
   FileInfo file_info;
   file_info.volume = &volume;
+  volume.synced = false;
   u64 max_file_index = file_info.load_base_file_rec(volume.mft_size / volume.file_rec_size - 1);
   std::list<FileRecord> file_list;
   progress.max_file_index = max_file_index;
@@ -312,6 +313,7 @@ void FilePanel::update_mft_index_from_usn() {
   std::list<FileRecord> file_list;
   FileInfo file_info;
   file_info.volume = &volume;
+  volume.synced = false;
   for (std::set<u64>::const_iterator file_index = upd_file_refs.begin(); file_index != upd_file_refs.end(); file_index++) {
     DBG_LOG(UnicodeString::format(L"mft_update_index(): %Lx", *file_index));
     progress.current++;

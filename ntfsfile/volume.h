@@ -13,6 +13,7 @@ struct NtfsVolume {
   unsigned cluster_size;
   unsigned __int64 mft_size;
   HANDLE handle;
+  bool synced;
   NtfsVolume(): handle(INVALID_HANDLE_VALUE), serial(0) {
   }
   ~NtfsVolume() {
