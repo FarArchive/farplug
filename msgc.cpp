@@ -32,25 +32,49 @@ struct MsgPair {
 struct MsgFile {
   deque<MsgPair> msg_list;
   wstring lang_tag;
+  unsigned code_page;
 };
 
-wstring load_file(const wstring& file_name) {
+#define CP_UTF16 1200
+wstring load_file(const wstring& file_name, unsigned* code_page = NULL) {
   File file(get_full_path_name(file_name), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
   Buffer<char> buffer(file.size());
   unsigned size = file.read(buffer);
-  return ansi_to_unicode(string(buffer.data(), size), CP_ACP);
+  if ((size >= 2) && (buffer.data()[0] == '\xFF') && (buffer.data()[1] == '\xFE')) {
+    if (code_page) *code_page = CP_UTF16;
+    return wstring(reinterpret_cast<wchar_t*>(buffer.data() + 2), (buffer.size() - 2) / 2);
+  }
+  else if ((size >= 3) && (buffer.data()[0] == '\xEF') && (buffer.data()[1] == '\xBB') && (buffer.data()[2] == '\xBF')) {
+    if (code_page) *code_page = CP_UTF8;
+    return ansi_to_unicode(string(buffer.data() + 3, size - 3), CP_UTF8);
+  }
+  else {
+    if (code_page) *code_page = CP_ACP;
+    return ansi_to_unicode(string(buffer.data(), size), CP_ACP);
+  }
 }
 
-void save_file(const wstring& file_name, const wstring& text) {
+void save_file(const wstring& file_name, const wstring& text, unsigned code_page = 0) {
   File file(get_full_path_name(file_name), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
-  string data = unicode_to_ansi(text, CP_ACP);
-  file.write(data.data(), data.size());
+  if (code_page == CP_UTF16) {
+    const char c_sig[] = { '\xFF', '\xFE' };
+    file.write(c_sig, sizeof(c_sig));
+    file.write(reinterpret_cast<const char*>(text.data()), text.size() * 2);
+  }
+  else {
+    if (code_page == CP_UTF8) {
+      const char c_sig[] = { '\xEF', '\xBB', '\xBF' };
+      file.write(c_sig, sizeof(c_sig));
+    }
+    string data = unicode_to_ansi(text, code_page);
+    file.write(data.data(), data.size());
+  }
 }
 
 #define CHECK_PARSE(code) if (!(code)) FAIL_MSG(L"Parse error at " + file_path + L":" + int_to_str(line_cnt + 1))
 MsgFile load_msg_file(const wstring& file_path) {
   MsgFile msg_file;
-  wstring text = load_file(file_path);
+  wstring text = load_file(file_path, &msg_file.code_page);
   MsgPair mp;
   unsigned line_cnt = 0;
   size_t pos_start = 0;
@@ -153,7 +177,7 @@ int wmain(int argc, wchar_t* argv[]) {
     for (unsigned i = 0; i < msgs[0].msg_list.size(); i++) {
       header_data.append(L"#define " + msgs[0].msg_list[i].id + L" " + int_to_str(i) + L"\n");
     }
-    save_file(header_file, header_data);
+    save_file(header_file, header_data, CP_ACP);
     // create Far language files
     wstring lng_data;
     for (unsigned i = 0; i < msgs.size(); i++) {
@@ -161,7 +185,7 @@ int wmain(int argc, wchar_t* argv[]) {
       for (unsigned j = 0; j < msgs[i].msg_list.size(); j++) {
         lng_data += msgs[i].msg_list[j].phrase + L'\n';
       }
-      save_file(files[i].out, lng_data);
+      save_file(files[i].out, lng_data, msgs[i].code_page);
     }
     return 0;
   }

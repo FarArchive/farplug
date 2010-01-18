@@ -33,11 +33,23 @@ bool is_valid_ext(const wchar_t* file_name) {
   return false;
 }
 
-wstring load_file(const wstring& file_name) {
-  File file(file_name, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
+#define CP_UTF16 1200
+wstring load_file(const wstring& file_name, unsigned* code_page = NULL) {
+  File file(get_full_path_name(file_name), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
   Buffer<char> buffer(file.size());
   unsigned size = file.read(buffer);
-  return ansi_to_unicode(string(buffer.data(), size), CP_ACP);
+  if ((size >= 2) && (buffer.data()[0] == '\xFF') && (buffer.data()[1] == '\xFE')) {
+    if (code_page) *code_page = CP_UTF16;
+    return wstring(reinterpret_cast<wchar_t*>(buffer.data() + 2), (buffer.size() - 2) / 2);
+  }
+  else if ((size >= 3) && (buffer.data()[0] == '\xEF') && (buffer.data()[1] == '\xBB') && (buffer.data()[2] == '\xBF')) {
+    if (code_page) *code_page = CP_UTF8;
+    return ansi_to_unicode(string(buffer.data() + 3, size - 3), CP_UTF8);
+  }
+  else {
+    if (code_page) *code_page = CP_ACP;
+    return ansi_to_unicode(string(buffer.data(), size), CP_ACP);
+  }
 }
 
 class Parser {

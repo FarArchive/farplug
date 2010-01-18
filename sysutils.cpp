@@ -114,23 +114,25 @@ TempFile::~TempFile() {
 }
 
 wstring ansi_to_unicode(const string& str, unsigned code_page) {
-  unsigned size = static_cast<unsigned>(str.size());
-  if (size == 0)
+  unsigned str_size = static_cast<unsigned>(str.size());
+  if (str_size == 0)
     return wstring();
+  int size = MultiByteToWideChar(code_page, 0, str.data(), str_size, NULL, 0);
   Buffer<wchar_t> out(size);
-  int res = MultiByteToWideChar(code_page, 0, str.data(), size, out.data(), size);
-  CHECK_SYS(res);
-  return wstring(out.data(), res);
+  size = MultiByteToWideChar(code_page, 0, str.data(), str_size, out.data(), out.size());
+  CHECK_SYS(size);
+  return wstring(out.data(), size);
 }
 
 string unicode_to_ansi(const wstring& str, unsigned code_page) {
-  unsigned size = static_cast<unsigned>(str.size());
-  if (size == 0)
+  unsigned str_size = static_cast<unsigned>(str.size());
+  if (str_size == 0)
     return string();
+  int size = WideCharToMultiByte(code_page, 0, str.data(), str_size, NULL, 0, NULL, NULL);
   Buffer<char> out(size);
-  int res = WideCharToMultiByte(code_page, 0, str.data(), size, out.data(), size, NULL, NULL);
-  CHECK_SYS(res);
-  return string(out.data(), res);
+  size = WideCharToMultiByte(code_page, 0, str.data(), str_size, out.data(), out.size(), NULL, NULL);
+  CHECK_SYS(size);
+  return string(out.data(), size);
 }
 
 wstring expand_env_vars(const wstring& str) {

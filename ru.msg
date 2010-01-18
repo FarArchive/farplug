@@ -1,15 +1,15 @@
-.Language=English,English
+Ôªø.Language=English,English
 
-plugin.name = 7z2
+plugin.name = <(NAME)>
 
 # Size and speed suffixes
-suffix.size.b = Å
-suffix.size.kb = äÅ
-suffix.size.mb = åÅ
-suffix.size.gb = ÉÅ
-suffix.size.tb = íÅ
-suffix.speed.b = Å/s
-suffix.speed.kb = äÅ/s
-suffix.speed.mb = åÅ/s
-suffix.speed.gb = ÉÅ/s
-suffix.speed.tb = íÅ/s
+suffix.size.b = –ë
+suffix.size.kb = –ö–ë
+suffix.size.mb = –ú–ë
+suffix.size.gb = –ì–ë
+suffix.size.tb = –¢–ë
+suffix.speed.b = –ë/s
+suffix.speed.kb = –ö–ë/s
+suffix.speed.mb = –ú–ë/s
+suffix.speed.gb = –ì–ë/s
+suffix.speed.tb = –¢–ë/s

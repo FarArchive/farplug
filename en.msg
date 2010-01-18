@@ -1,6 +1,6 @@
-.Language=English,English
+﻿.Language=English,English
 
-plugin.name = 7z2
+plugin.name = <(NAME)>
 
 # Size and speed suffixes
 suffix.size.b = B

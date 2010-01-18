@@ -1,0 +1,5 @@
+﻿.Language=English,English
+.PluginContents=<(NAME)>
+
+@Contents
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
