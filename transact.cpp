@@ -1,15 +1,13 @@
 #include "error.hpp"
 #include "utils.hpp"
+#include "sysutils.hpp"
 #include "transact.hpp"
-
-namespace ktm {
 
 typedef HANDLE (APIENTRY *FCreateTransaction)(LPSECURITY_ATTRIBUTES lpTransactionAttributes, LPGUID UOW, DWORD CreateOptions, DWORD IsolationLevel, DWORD IsolationFlags, DWORD Timeout, LPWSTR Description);
 typedef BOOL (APIENTRY *FCommitTransaction)(HANDLE TransactionHandle);
 typedef HANDLE (WINAPI *FCreateFileTransactedW)(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile, HANDLE hTransaction, PUSHORT pusMiniVersion, PVOID lpExtendedParameter);
 typedef BOOL (WINAPI *FDeleteFileTransactedW)(LPCWSTR lpFileName, HANDLE hTransaction);
 typedef LSTATUS (APIENTRY *FRegCreateKeyTransactedW)(HKEY hKey, LPCWSTR lpSubKey, DWORD Reserved, LPWSTR lpClass, DWORD dwOptions, REGSAM samDesired, const LPSECURITY_ATTRIBUTES lpSecurityAttributes, PHKEY phkResult, LPDWORD lpdwDisposition, HANDLE hTransaction, PVOID  pExtendedParemeter);
-
 
 HMODULE h_ktmw32 = NULL;
 HMODULE h_kernel32 = NULL;
@@ -84,15 +82,7 @@ File::File(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD d
   CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
 }
 
-File::~File() {
-  CloseHandle(h_file);
-}
-
-HANDLE File::handle() const {
-  return h_file;
-}
-
-BOOL DeleteFile(LPCWSTR lpFileName, HANDLE hTransaction) {
+BOOL delete_file_transacted(LPCWSTR lpFileName, HANDLE hTransaction) {
   if (fDeleteFileTransactedW) {
     return fDeleteFileTransactedW(lpFileName, hTransaction);
   }
@@ -108,14 +98,4 @@ Key::Key(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired, HANDLE hTransaction) {
   else {
     CHECK_ADVSYS(RegCreateKeyExW(hKey, lpSubKey, 0, NULL, REG_OPTION_NON_VOLATILE, samDesired, NULL, &h_key, NULL));
   }
-}
-
-Key::~Key() {
-  RegCloseKey(h_key);
-}
-
-HKEY Key::handle() const {
-  return h_key;
-}
-
 }

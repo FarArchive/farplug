@@ -80,24 +80,6 @@ wstring expand_env_vars(const wstring& str) {
   return wstring(buf.data(), size - 1);
 }
 
-wstring reg_query_value(HKEY h_key, const wchar_t* name, const wstring& def_value) {
-  DWORD type = REG_SZ;
-  DWORD data_size;
-  LONG res = RegQueryValueExW(h_key, name, NULL, &type, NULL, &data_size);
-  if (res == ERROR_SUCCESS) {
-    Buffer<wchar_t> buf(data_size / sizeof(wchar_t));
-    res = RegQueryValueExW(h_key, name, NULL, &type, reinterpret_cast<LPBYTE>(buf.data()), &data_size);
-    if (res == ERROR_SUCCESS) {
-      return wstring(buf.data(), buf.size() - 1);
-    }
-  }
-  return def_value;
-}
-
-void reg_set_value(HKEY h_key, const wchar_t* name, const wstring& value) {
-  CHECK_ADVSYS(RegSetValueExW(h_key, name, 0, REG_SZ, reinterpret_cast<LPBYTE>(const_cast<wchar_t*>(value.c_str())), (static_cast<DWORD>(value.size()) + 1) * sizeof(wchar_t)));
-}
-
 wstring get_full_path_name(const wstring& path) {
   Buffer<wchar_t> buf(MAX_PATH);
   DWORD size = GetFullPathNameW(path.c_str(), static_cast<DWORD>(buf.size()), buf.data(), NULL);
@@ -129,10 +111,6 @@ File::~File() {
   CloseHandle(h_file);
 }
 
-HANDLE File::handle() const {
-  return h_file;
-}
-
 unsigned __int64 File::size() {
   LARGE_INTEGER file_size;
   CHECK_SYS(GetFileSizeEx(h_file, &file_size));
@@ -148,6 +126,62 @@ unsigned File::read(Buffer<char>& buffer) {
 void File::write(const void* data, unsigned size) {
   DWORD size_written;
   CHECK_SYS(WriteFile(h_file, data, size, &size_written, NULL));
+}
+
+Key::Key(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired) {
+  CHECK_ADVSYS(RegCreateKeyExW(hKey, lpSubKey, 0, NULL, REG_OPTION_NON_VOLATILE, samDesired, NULL, &h_key, NULL));
+}
+
+Key::~Key() {
+  RegCloseKey(h_key);
+}
+
+bool Key::query_bool(const wchar_t* name, bool def_value) {
+  DWORD type = REG_DWORD;
+  DWORD data;
+  DWORD data_size = sizeof(data);
+  LONG res = RegQueryValueExW(h_key, name, NULL, &type, reinterpret_cast<LPBYTE>(&data), &data_size);
+  if (res == ERROR_SUCCESS)
+    return data != 0;
+  return def_value;
+}
+
+unsigned Key::query_int(const wchar_t* name, unsigned def_value) {
+  DWORD type = REG_DWORD;
+  DWORD data;
+  DWORD data_size = sizeof(data);
+  LONG res = RegQueryValueExW(h_key, name, NULL, &type, reinterpret_cast<LPBYTE>(&data), &data_size);
+  if (res == ERROR_SUCCESS)
+    return data;
+  return def_value;
+}
+
+wstring Key::query_str(const wchar_t* name, const wstring& def_value) {
+  DWORD type = REG_SZ;
+  DWORD data_size;
+  LONG res = RegQueryValueExW(h_key, name, NULL, &type, NULL, &data_size);
+  if (res == ERROR_SUCCESS) {
+    Buffer<wchar_t> buf(data_size / sizeof(wchar_t));
+    res = RegQueryValueExW(h_key, name, NULL, &type, reinterpret_cast<LPBYTE>(buf.data()), &data_size);
+    if (res == ERROR_SUCCESS) {
+      return wstring(buf.data(), buf.size() - 1);
+    }
+  }
+  return def_value;
+}
+
+void Key::set_bool(const wchar_t* name, bool value) {
+  DWORD data = value ? 1 : 0;
+  CHECK_ADVSYS(RegSetValueExW(h_key, name, 0, REG_DWORD, reinterpret_cast<LPBYTE>(&data), sizeof(data)));
+}
+
+void Key::set_int(const wchar_t* name, unsigned value) {
+  DWORD data = value;
+  CHECK_ADVSYS(RegSetValueExW(h_key, name, 0, REG_DWORD, reinterpret_cast<LPBYTE>(&data), sizeof(data)));
+}
+
+void Key::set_str(const wchar_t* name, const wstring& value) {
+  CHECK_ADVSYS(RegSetValueExW(h_key, name, 0, REG_SZ, reinterpret_cast<LPBYTE>(const_cast<wchar_t*>(value.c_str())), (static_cast<DWORD>(value.size()) + 1) * sizeof(wchar_t)));
 }
 
 FindFile::FindFile(const wstring& file_path): file_path(file_path), h_find(INVALID_HANDLE_VALUE) {

@@ -6,8 +6,6 @@ bool wait_for_single_object(HANDLE handle, DWORD timeout);
 wstring ansi_to_unicode(const string& str, unsigned code_page);
 string unicode_to_ansi(const wstring& str, unsigned code_page);
 wstring expand_env_vars(const wstring& str);
-wstring reg_query_value(HKEY h_key, const wchar_t* name, const wstring& def_value = wstring());
-void reg_set_value(HKEY h_key, const wchar_t* name, const wstring& value);
 wstring get_full_path_name(const wstring& path);
 wstring get_current_directory();
 
@@ -39,11 +37,26 @@ protected:
   HANDLE h_file;
 public:
   File(const wstring& file_path, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes);
+  File(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTransaction);
   ~File();
-  HANDLE handle() const;
   unsigned __int64 size();
   unsigned read(Buffer<char>& buffer);
   void write(const void* data, unsigned size);
+};
+
+class Key: private NonCopyable {
+private:
+  HKEY h_key;
+public:
+  Key(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired);
+  Key(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired, HANDLE hTransaction);
+  ~Key();
+  bool query_bool(const wchar_t* name, bool def_value = false);
+  unsigned query_int(const wchar_t* name, unsigned def_value = 0);
+  wstring query_str(const wchar_t* name, const wstring& def_value = wstring());
+  void set_bool(const wchar_t* name, bool value);
+  void set_int(const wchar_t* name, unsigned value);
+  void set_str(const wchar_t* name, const wstring& value);
 };
 
 class FindFile: private NonCopyable {
