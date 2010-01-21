@@ -53,7 +53,7 @@ wstring ansi_to_unicode(const string& str, unsigned code_page) {
     return wstring();
   int size = MultiByteToWideChar(code_page, 0, str.data(), str_size, NULL, 0);
   Buffer<wchar_t> out(size);
-  size = MultiByteToWideChar(code_page, 0, str.data(), str_size, out.data(), out.size());
+  size = MultiByteToWideChar(code_page, 0, str.data(), str_size, out.data(), size);
   CHECK_SYS(size);
   return wstring(out.data(), size);
 }
@@ -64,7 +64,7 @@ string unicode_to_ansi(const wstring& str, unsigned code_page) {
     return string();
   int size = WideCharToMultiByte(code_page, 0, str.data(), str_size, NULL, 0, NULL, NULL);
   Buffer<char> out(size);
-  size = WideCharToMultiByte(code_page, 0, str.data(), str_size, out.data(), out.size(), NULL, NULL);
+  size = WideCharToMultiByte(code_page, 0, str.data(), str_size, out.data(), size, NULL, NULL);
   CHECK_SYS(size);
   return string(out.data(), size);
 }
@@ -336,7 +336,7 @@ unsigned MessageWindow::message_loop(HANDLE h_abort) {
       MSG msg;
       while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
         if (msg.message == WM_QUIT)
-          return msg.wParam;
+          return static_cast<unsigned>(msg.wParam);
       }
     }
     else FAIL(E_FAIL);
