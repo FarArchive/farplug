@@ -62,14 +62,19 @@ class ProgressMonitor {
 private:
   HANDLE h_scr;
   UnicodeString con_title;
+  unsigned __int64 t_start;
+  unsigned __int64 t_curr;
   unsigned __int64 t_next;
   unsigned __int64 t_freq;
 protected:
   virtual void do_update_ui() = 0;
 public:
-  ProgressMonitor(bool lazy);
+  ProgressMonitor(bool lazy = true);
   virtual ~ProgressMonitor();
   void update_ui(bool force = false);
+  unsigned __int64 time_elapsed() const {
+    return (t_curr - t_start) / (t_freq / 1000);
+  }
 };
 
 int far_control_int(HANDLE h_panel, int command, int param);
@@ -78,6 +83,8 @@ FarStr far_get_panel_dir(HANDLE h_panel, const PanelInfo& pi);
 UnicodeString far_get_full_path(const UnicodeString& file_name);
 PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
 PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
+void far_set_progress_state(TBPFLAG state);
+void far_set_progress_value(unsigned __int64 completed, unsigned __int64 total);
 
 #define BEGIN_ERROR_HANDLER try {
 #define END_ERROR_HANDLER(success, failure) \

@@ -1,16 +1,3 @@
-#include <windows.h>
-
-#include <list>
-
-#include "plugin.hpp"
-#include "farkeys.hpp"
-
-#include "col/AnsiString.h"
-#include "col/UnicodeString.h"
-#include "col/PlainArray.h"
-#include "col/ObjectArray.h"
-using namespace col;
-
 #include "farapi_config.h"
 
 #define _ERROR_WINDOWS
@@ -219,6 +206,8 @@ void FileListProgress::do_update_ui() {
   ObjectArray<UnicodeString> lines;
   lines += center(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_READ_DIR_PROGRESS_MESSAGE).data(), count), c_client_xs);
   draw_text_box(far_get_msg(MSG_FILE_PANEL_READ_DIR_PROGRESS_TITLE), lines, c_client_xs);
+  SetConsoleTitleW(far_get_msg(MSG_FILE_PANEL_READ_DIR_PROGRESS_TITLE).data());
+  far_set_progress_state(TBPF_INDETERMINATE);
 }
 
 UnicodeString& fit_col_str(UnicodeString& str, unsigned size) {

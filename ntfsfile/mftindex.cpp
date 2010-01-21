@@ -1,22 +1,3 @@
-#include <windows.h>
-#include <winioctl.h>
-
-#include <list>
-#include <set>
-#include <map>
-#include <algorithm>
-
-#include "lzo/lzo1x.h"
-#include "lzo/lzo_asm.h"
-
-#include "plugin.hpp"
-
-#include "col/AnsiString.h"
-#include "col/UnicodeString.h"
-#include "col/PlainArray.h"
-#include "col/ObjectArray.h"
-using namespace col;
-
 #include "farapi_config.h"
 
 #define _ERROR_WINDOWS
@@ -200,6 +181,8 @@ void FilePanel::create_mft_index() {
       lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
       draw_text_box(far_get_msg(MSG_FILE_PANEL_READ_VOLUME_PROGRESS_TITLE), lines, c_client_xs);
       SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_READ_VOLUME_PROGRESS_CONSOLE_TITLE).data(), curr_file_index * 100 / max_file_index).data());
+      far_set_progress_state(TBPF_NORMAL);
+      far_set_progress_value(curr_file_index, max_file_index);
     }
   public:
     unsigned count;
@@ -274,6 +257,8 @@ void FilePanel::update_mft_index_from_usn() {
       lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
       draw_text_box(far_get_msg(MSG_FILE_PANEL_UPDATE_CACHE_PROGRESS_TITLE), lines, c_client_xs);
       SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_UPDATE_CACHE_PROGRESS_CONSOLE_TITLE).data(), static_cast<unsigned>(current * 100 / total)).data());
+      far_set_progress_state(TBPF_NORMAL);
+      far_set_progress_value(current, total);
     }
   public:
     u64 current, total;
@@ -471,6 +456,8 @@ void FilePanel::store_mft_index() {
       lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
       draw_text_box(far_get_msg(MSG_FILE_PANEL_WRITE_CACHE_PROGRESS_TITLE), lines, c_client_xs);
       SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_WRITE_CACHE_PROGRESS_CONSOLE_TITLE).data(), percent).data());
+      far_set_progress_state(TBPF_NORMAL);
+      far_set_progress_value(percent, 100);
     }
   public:
     unsigned percent;
@@ -564,6 +551,8 @@ void FilePanel::load_mft_index() {
       lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
       draw_text_box(far_get_msg(MSG_FILE_PANEL_READ_CACHE_PROGRESS_TITLE), lines, c_client_xs);
       SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_FILE_PANEL_READ_CACHE_PROGRESS_CONSOLE_TITLE).data(), percent).data());
+      far_set_progress_state(TBPF_NORMAL);
+      far_set_progress_value(percent, 100);
     }
   public:
     unsigned percent;

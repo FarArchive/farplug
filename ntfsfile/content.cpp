@@ -1,23 +1,3 @@
-#include <windows.h>
-
-#include <process.h>
-#include <string.h>
-
-#include "lzo/lzo1x.h"
-
-#include "openssl/md4.h"
-#include "openssl/md5.h"
-#include "openssl/sha.h"
-
-#include "plugin.hpp"
-#include "farcolor.hpp"
-
-#include "col/AnsiString.h"
-#include "col/UnicodeString.h"
-#include "col/PlainArray.h"
-#include "col/ObjectArray.h"
-using namespace col;
-
 #include "farapi_config.h"
 
 #define _ERROR_WINDOWS
@@ -344,53 +324,6 @@ void show_result_dialog(const UnicodeString& file_name, const ContentOptions& op
   dlg.show(result_dlg_proc);
 }
 
-void draw_progress(u64 data_size, u64 comp_size, u64 zero_size, u64 file_size, u64 time /* ms */, const ContentOptions& options) {
-  const unsigned c_client_xs = 55;
-  ObjectArray<UnicodeString> lines;
-
-  // percent done
-  unsigned percent_done;
-  if (file_size == 0) percent_done = 100;
-  else percent_done = (unsigned) (data_size * 100 / file_size);
-  SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_CONTENT_PROGRESS_CONSOLE_TITLE).data(), percent_done).data());
-
-  // if too little time to estimate speed
-  if (time != 0) {
-    lines += UnicodeString::format(far_get_msg(MSG_CONTENT_PROGRESS_PROCESSED1).data(), &format_inf_amount_short(data_size),
-      &format_inf_amount_short(file_size), percent_done,
-      &format_inf_amount_short(data_size * 1000 / time, true));
-  }
-  else {
-    lines += UnicodeString::format(far_get_msg(MSG_CONTENT_PROGRESS_PROCESSED2).data(), &format_inf_amount_short(data_size),
-      &format_inf_amount_short(file_size), percent_done);
-  }
-
-  // progress bar
-  if (file_size != 0) {
-    unsigned len1;
-    if (file_size == 0) len1 = c_client_xs;
-    else len1 = (unsigned) (data_size * c_client_xs / file_size);
-    if (len1 > c_client_xs) len1 = c_client_xs;
-    unsigned len2 = c_client_xs - len1;
-    lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
-  }
-
-  // time left
-  if ((time != 0) && (data_size != 0)) {
-    u64 total_time = file_size * time / data_size;
-    lines += UnicodeString::format(far_get_msg(MSG_CONTENT_PROGRESS_ELAPSED).data(), &format_time(time),
-      &format_time(total_time - time), &format_time(total_time));
-  }
-
-  if ((options.compression) && (data_size != 0)) {
-    lines += UnicodeString::format(far_get_msg(MSG_CONTENT_PROGRESS_COMPRESSION).data(), &format_inf_amount_short(comp_size),
-      &format_inf_amount_short(data_size), 100 * comp_size / data_size);
-  }
-
-  draw_text_box(far_get_msg(MSG_CONTENT_PROGRESS_TITLE), lines, c_client_xs);
-}
-
-
 void ed2k_update_block_hashes(const u8* buffer, unsigned buffer_size, Array<u8>& block_hashes, unsigned& last_block_slack, MD4_CTX& md4_ctx) {
   const unsigned c_ed2k_block_size = 9500 * 1024;
   if (last_block_slack > buffer_size) {
@@ -534,6 +467,74 @@ template<typename Data> unsigned __stdcall wth_proc(void* wth_param) {
   }
 }
 
+class ProcessFileProgress: public ProgressMonitor {
+protected:
+  virtual void do_update_ui() {
+    const unsigned c_client_xs = 55;
+    ObjectArray<UnicodeString> lines;
+
+    u64 data_size;
+    u64 comp_size;
+    if (sd.num_th != 0) EnterCriticalSection(&sd.sync);
+    try {
+      data_size = sd.data_size;
+      comp_size = sd.comp_size;
+    }
+    finally (if (sd.num_th != 0) LeaveCriticalSection(&sd.sync));
+    u64 file_size = result.file_size;
+    u64 time = time_elapsed();
+
+    // percent done
+    unsigned percent_done;
+    if (file_size == 0) percent_done = 100;
+    else percent_done = (unsigned) (data_size * 100 / file_size);
+    SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_CONTENT_PROGRESS_CONSOLE_TITLE).data(), percent_done).data());
+    far_set_progress_state(TBPF_NORMAL);
+    far_set_progress_value(percent_done, 100);
+
+    // if too little time to estimate speed
+    if (time != 0) {
+      lines += UnicodeString::format(far_get_msg(MSG_CONTENT_PROGRESS_PROCESSED1).data(), &format_inf_amount_short(data_size),
+        &format_inf_amount_short(file_size), percent_done,
+        &format_inf_amount_short(data_size * 1000 / time, true));
+    }
+    else {
+      lines += UnicodeString::format(far_get_msg(MSG_CONTENT_PROGRESS_PROCESSED2).data(), &format_inf_amount_short(data_size),
+        &format_inf_amount_short(file_size), percent_done);
+    }
+
+    // progress bar
+    if (file_size != 0) {
+      unsigned len1;
+      if (file_size == 0) len1 = c_client_xs;
+      else len1 = (unsigned) (data_size * c_client_xs / file_size);
+      if (len1 > c_client_xs) len1 = c_client_xs;
+      unsigned len2 = c_client_xs - len1;
+      lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
+    }
+
+    // time left
+    if ((time != 0) && (data_size != 0)) {
+      u64 total_time = file_size * time / data_size;
+      lines += UnicodeString::format(far_get_msg(MSG_CONTENT_PROGRESS_ELAPSED).data(), &format_time(time),
+        &format_time(total_time - time), &format_time(total_time));
+    }
+
+    if ((options.compression) && (data_size != 0)) {
+      lines += UnicodeString::format(far_get_msg(MSG_CONTENT_PROGRESS_COMPRESSION).data(), &format_inf_amount_short(comp_size),
+        &format_inf_amount_short(data_size), 100 * comp_size / data_size);
+    }
+
+    draw_text_box(far_get_msg(MSG_CONTENT_PROGRESS_TITLE), lines, c_client_xs);
+  }
+public:
+  SharedData& sd;
+  const ContentInfo& result;
+  const ContentOptions& options;
+  ProcessFileProgress(SharedData& sd, const ContentInfo& result, const ContentOptions& options): ProgressMonitor(true), sd(sd), result(result), options(options) {
+  }
+};
+
 void process_file_content(const UnicodeString& file_name, const ContentOptions& options, ContentInfo& result) {
   ALLOC_RSRC(HANDLE h_scr = g_far.SaveScreen(0, 0, -1, -1));
 
@@ -564,7 +565,6 @@ void process_file_content(const UnicodeString& file_name, const ContentOptions& 
 
   sd.data_size = 0; // file data size
   sd.comp_size = 0; // compressed file size
-  u64 total_zero_size = 0; // zero clusters
 
   // crc32 checksum
   u32 crc32 = 0;
@@ -579,12 +579,7 @@ void process_file_content(const UnicodeString& file_name, const ContentOptions& 
   unsigned ed2k_last_block_slack = 0;
   MD4_CTX md4_ctx;
 
-  // remember start time
-  u64 start_time;
-  QueryPerformanceCounter((LARGE_INTEGER*) &start_time);
-  u64 timer_freq;
-  QueryPerformanceFrequency((LARGE_INTEGER*) &timer_freq);
-  u64 last_update = start_time;
+  ProcessFileProgress progress(sd, result, options);
 
   // create compression threads
   ALLOC_RSRC(Array<HANDLE> h_wth);
@@ -665,27 +660,7 @@ void process_file_content(const UnicodeString& file_name, const ContentOptions& 
         if (options.ed2k) ed2k_update_block_hashes(buffer, size, ed2k_block_hashes, ed2k_last_block_slack, md4_ctx);
       }
 
-      // query current time
-      u64 curr_time;
-      QueryPerformanceCounter((LARGE_INTEGER*) &curr_time);
-      // update progress dialog
-      if (curr_time > last_update + timer_freq) {
-        last_update = curr_time;
-        u64 total_data_size;
-        u64 total_comp_size;
-        if (sd.num_th != 0) EnterCriticalSection(&sd.sync);
-        try {
-          total_data_size = sd.data_size;
-          total_comp_size = sd.comp_size;
-        }
-        finally (if (sd.num_th != 0) LeaveCriticalSection(&sd.sync));
-        draw_progress(total_data_size, total_comp_size, total_zero_size, result.file_size, (curr_time - start_time) * 1000 / timer_freq, options);
-
-        // if user cancelled
-        if (check_for_esc()) {
-          BREAK;
-        }
-      }
+      progress.update_ui();
 
       // check for end of file
       eof = last_error == ERROR_HANDLE_EOF;
@@ -737,9 +712,8 @@ void process_file_content(const UnicodeString& file_name, const ContentOptions& 
 
   // populate result structure
   assert(sd.data_size == result.file_size);
-  u64 curr_time;
-  QueryPerformanceCounter((LARGE_INTEGER*) &curr_time);
-  result.time = (curr_time - start_time) * 1000 / timer_freq;
+  progress.update_ui();
+  result.time = progress.time_elapsed();
   if (options.compression) result.comp_size = sd.comp_size;
   if (options.crc32) {
     const u8* c = (const u8*) &crc32;
@@ -841,9 +815,6 @@ struct CompressionState: public CompressionStats {
   CRITICAL_SECTION sync;
   HANDLE h_io_ready_sem;
   HANDLE h_proc_ready_sem;
-  u64 start_time; // processing start time
-  u64 timer_freq; // system timer frequency
-  u64 last_update; // last time UI was updated
   u64 est_size; // estimated total file data size
   unsigned est_file_cnt; // estimated number of files processed
   unsigned est_dir_cnt; // estimated number of dirs processed
@@ -851,97 +822,121 @@ struct CompressionState: public CompressionStats {
   unsigned est_err_cnt; // estimated number of files/dirs skipped because of errors
 };
 
-void draw_progress(const CompressionState& st) {
-  const unsigned c_client_xs = 55;
-  ObjectArray<UnicodeString> lines;
+class CompressFilesProgress: public ProgressMonitor {
+protected:
+  virtual void do_update_ui() {
+    const unsigned c_client_xs = 55;
+    ObjectArray<UnicodeString> lines;
 
-  // percent done
-  unsigned percent_done;
-  if (st.est_size == 0) percent_done = 100;
-  else percent_done = (unsigned) (st.data_size * 100 / st.est_size);
-  if (percent_done > 100) percent_done = 100;
-  SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_CONSOLE_TITLE).data(), percent_done).data());
+    u64 data_size, est_size, comp_size;
+    u64 time = time_elapsed();
+    unsigned file_cnt, dir_cnt, reparse_cnt, err_cnt;
+    unsigned est_file_cnt, est_dir_cnt;
+    if (st.num_th != 0) EnterCriticalSection(&st.sync);
+    try {
+      data_size = st.data_size;
+      est_size = st.est_size;
+      comp_size = st.comp_size;
+      file_cnt = st.file_cnt;
+      dir_cnt = st.dir_cnt;
+      reparse_cnt = st.reparse_cnt;
+      err_cnt = st.err_cnt;
+      est_file_cnt = st.est_file_cnt;
+      est_dir_cnt = st.est_dir_cnt;
+    }
+    finally (if (st.num_th != 0) LeaveCriticalSection(&st.sync));
 
-  lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_PROCESSED).data(),
-    &format_inf_amount_short(st.data_size),
-    &format_inf_amount_short(st.est_size), percent_done);
-  if (st.time != 0) {
-    lines.item(lines.size() - 1).add(L' ').add_fmt(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_SPEED).data(), &format_inf_amount_short(st.data_size * 1000 / st.time, true));
-  }
+    // percent done
+    unsigned percent_done;
+    if (est_size == 0) percent_done = 100;
+    else percent_done = (unsigned) (data_size * 100 / est_size);
+    if (percent_done > 100) percent_done = 100;
+    SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_CONSOLE_TITLE).data(), percent_done).data());
+    far_set_progress_state(TBPF_NORMAL);
+    far_set_progress_value(percent_done, 100);
 
-  if (st.data_size != 0) {
-    lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_COMPRESSION).data(), &format_inf_amount_short(st.comp_size),
-      &format_inf_amount_short(st.data_size), 100 * st.comp_size / st.data_size);
-  }
-  lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+    lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_PROCESSED).data(),
+      &format_inf_amount_short(data_size),
+      &format_inf_amount_short(est_size), percent_done);
+    if (time != 0) {
+      lines.item(lines.size() - 1).add(L' ').add_fmt(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_SPEED).data(), &format_inf_amount_short(data_size * 1000 / time, true));
+    }
 
-  // progress bar
-  if (st.est_size != 0) {
-    unsigned len1;
-    if (st.est_size == 0) len1 = c_client_xs;
-    else len1 = (unsigned) (st.data_size * c_client_xs / st.est_size);
-    if (len1 > c_client_xs) len1 = c_client_xs;
-    unsigned len2 = c_client_xs - len1;
-    lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
-  }
-
-  // time left
-  if ((st.time != 0) && (st.data_size != 0)) {
-    u64 total_time = st.est_size * st.time / st.data_size;
-    lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_ELAPSED).data(), &format_time(st.time),
-      &format_time(total_time - st.time), &format_time(total_time));
-  }
-
-  if ((st.file_cnt != 0) || (st.dir_cnt != 0) || (st.reparse_cnt != 0) || (st.err_cnt != 0)) {
+    if (data_size != 0) {
+      lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_COMPRESSION).data(), &format_inf_amount_short(comp_size),
+        &format_inf_amount_short(data_size), 100 * comp_size / data_size);
+    }
     lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
-  }
-  if (st.file_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_FILES).data(), st.file_cnt, st.est_file_cnt);
-  if (st.dir_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_DIRS).data(), st.dir_cnt, st.est_dir_cnt);
-  if (st.reparse_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_REPARSE).data(), st.reparse_cnt);
-  if (st.err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_ERRORS).data(), &UnicodeString::format(L"\1%c%u\2", CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), st.err_cnt));
-  draw_text_box(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_TITLE), lines, c_client_xs);
-}
 
-void draw_estimation_progress(const CompressionState& st) {
-  const unsigned c_client_xs = 35;
-  ObjectArray<UnicodeString> lines;
-  if (st.est_size != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_SIZE).data(), &format_inf_amount_short(st.est_size));
-  if ((st.est_size != 0) && ((st.est_file_cnt != 0) || (st.est_dir_cnt != 0) || (st.est_reparse_cnt != 0) || (st.est_err_cnt != 0))) {
-    lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
-  }
-  if (st.est_file_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_FILES).data(), st.est_file_cnt);
-  if (st.est_dir_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_DIRS).data(), st.est_dir_cnt);
-  if (st.est_reparse_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_REPARSE).data(), st.est_reparse_cnt);
-  if (st.est_err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_ERRORS).data(), &UnicodeString::format(L"\1%c%u\2", CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), st.est_err_cnt));
-  draw_text_box(far_get_msg(MSG_ESTIMATE_PROGRESS_TITLE), lines, c_client_xs);
-}
+    // progress bar
+    if (est_size != 0) {
+      unsigned len1;
+      if (est_size == 0) len1 = c_client_xs;
+      else len1 = (unsigned) (data_size * c_client_xs / est_size);
+      if (len1 > c_client_xs) len1 = c_client_xs;
+      unsigned len2 = c_client_xs - len1;
+      lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
+    }
 
-void estimate_file_size(const UnicodeString& file_name, CompressionState& st) {
+    // time left
+    if ((time != 0) && (data_size != 0)) {
+      u64 total_time = est_size * time / data_size;
+      lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_ELAPSED).data(), &format_time(time),
+        &format_time(total_time - time), &format_time(total_time));
+    }
+
+    if ((file_cnt != 0) || (dir_cnt != 0) || (reparse_cnt != 0) || (err_cnt != 0)) {
+      lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+    }
+    if (file_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_FILES).data(), file_cnt, est_file_cnt);
+    if (dir_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_DIRS).data(), dir_cnt, est_dir_cnt);
+    if (reparse_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_REPARSE).data(), reparse_cnt);
+    if (err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_ERRORS).data(), &UnicodeString::format(L"\1%c%u\2", CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), err_cnt));
+    draw_text_box(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_TITLE), lines, c_client_xs);
+  }
+public:
+  CompressionState& st;
+  CompressFilesProgress(CompressionState& st): ProgressMonitor(false), st(st) {
+  }
+};
+
+class EstimationProgress: public ProgressMonitor {
+protected:
+  virtual void do_update_ui() {
+    const unsigned c_client_xs = 35;
+    ObjectArray<UnicodeString> lines;
+    if (st.est_size != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_SIZE).data(), &format_inf_amount_short(st.est_size));
+    if ((st.est_size != 0) && ((st.est_file_cnt != 0) || (st.est_dir_cnt != 0) || (st.est_reparse_cnt != 0) || (st.est_err_cnt != 0))) {
+      lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+    }
+    if (st.est_file_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_FILES).data(), st.est_file_cnt);
+    if (st.est_dir_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_DIRS).data(), st.est_dir_cnt);
+    if (st.est_reparse_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_REPARSE).data(), st.est_reparse_cnt);
+    if (st.est_err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_ERRORS).data(), &UnicodeString::format(L"\1%c%u\2", CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), st.est_err_cnt));
+    draw_text_box(far_get_msg(MSG_ESTIMATE_PROGRESS_TITLE), lines, c_client_xs);
+    SetConsoleTitleW(far_get_msg(MSG_ESTIMATE_PROGRESS_TITLE).data());
+    far_set_progress_state(TBPF_INDETERMINATE);
+  }
+public:
+  const CompressionState& st;
+  EstimationProgress(const CompressionState& st): ProgressMonitor(true), st(st) {
+  }
+};
+
+void estimate_file_size(const UnicodeString& file_name, CompressionState& st, EstimationProgress& progress) {
   WIN32_FIND_DATAW find_data;
   HANDLE h_find = FindFirstFileW(long_path(file_name).data(), &find_data);
   if (h_find == INVALID_HANDLE_VALUE) st.est_err_cnt++;
   else {
     ALLOC_RSRC(;);
     st.est_size += ((u64) find_data.nFileSizeHigh << 32) | find_data.nFileSizeLow;
-    // query current time
-    u64 curr_time;
-    QueryPerformanceCounter((LARGE_INTEGER*) &curr_time);
-    // update progress dialog
-    if (curr_time > st.last_update + st.timer_freq) {
-      st.last_update = curr_time;
-      draw_estimation_progress(st);
-
-      // if user cancelled
-      if (check_for_esc()) {
-        BREAK;
-      }
-    }
+    progress.update_ui();
     FREE_RSRC(FindClose(h_find));
     st.est_file_cnt++;
   }
 }
 
-void estimate_directory_size(const UnicodeString& dir_name, CompressionState& st) {
+void estimate_directory_size(const UnicodeString& dir_name, CompressionState& st, EstimationProgress& progress) {
   bool root_dir = dir_name.last() == L'\\';
   UnicodeString file_name;
   WIN32_FIND_DATAW find_data;
@@ -960,7 +955,7 @@ void estimate_directory_size(const UnicodeString& dir_name, CompressionState& st
           st.est_reparse_cnt++;
         }
         else if ((find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) {
-          estimate_directory_size(file_name, st);
+          estimate_directory_size(file_name, st, progress);
         }
         else {
           st.est_file_cnt++;
@@ -968,19 +963,7 @@ void estimate_directory_size(const UnicodeString& dir_name, CompressionState& st
         }
       }
 
-      // query current time
-      u64 curr_time;
-      QueryPerformanceCounter((LARGE_INTEGER*) &curr_time);
-      // update progress dialog
-      if (curr_time > st.last_update + st.timer_freq) {
-        st.last_update = curr_time;
-        draw_estimation_progress(st);
-
-        // if user cancelled
-        if (check_for_esc()) {
-          BREAK;
-        }
-      }
+      progress.update_ui();
 
       if (FindNextFileW(h_find, &find_data) == 0) {
         CHECK_SYS(GetLastError() == ERROR_NO_MORE_FILES);
@@ -992,7 +975,7 @@ void estimate_directory_size(const UnicodeString& dir_name, CompressionState& st
   }
 }
 
-void compress_file(const UnicodeString& file_name, CompressionState& st) {
+void compress_file(const UnicodeString& file_name, CompressionState& st, CompressFilesProgress& progress) {
   HANDLE h_file = CreateFileW(long_path(file_name).data(), FILE_READ_DATA, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED | FILE_FLAG_POSIX_SEMANTICS | FILE_FLAG_SEQUENTIAL_SCAN, NULL);
   if (h_file == INVALID_HANDLE_VALUE) st.err_cnt++;
   else {
@@ -1059,24 +1042,7 @@ void compress_file(const UnicodeString& file_name, CompressionState& st) {
         }
       }
 
-      // query current time
-      u64 curr_time;
-      QueryPerformanceCounter((LARGE_INTEGER*) &curr_time);
-      // update progress dialog
-      if (curr_time > st.last_update + st.timer_freq) {
-        if (st.num_th != 0) EnterCriticalSection(&st.sync);
-        try {
-          st.last_update = curr_time;
-          st.time = (curr_time - st.start_time) * 1000 / st.timer_freq;
-          draw_progress(st);
-        }
-        finally (if (st.num_th != 0) LeaveCriticalSection(&st.sync));
-
-        // if user cancelled
-        if (check_for_esc()) {
-          BREAK;
-        }
-      }
+      progress.update_ui();
 
       // check for end of file
       eof = last_error == ERROR_HANDLE_EOF;
@@ -1114,7 +1080,7 @@ void compress_file(const UnicodeString& file_name, CompressionState& st) {
   }
 }
 
-void compress_directory(const UnicodeString& dir_name, CompressionState& st) {
+void compress_directory(const UnicodeString& dir_name, CompressionState& st, CompressFilesProgress& progress) {
   bool root_dir = dir_name.last() == L'\\';
   UnicodeString file_name;
   WIN32_FIND_DATAW find_data;
@@ -1133,27 +1099,14 @@ void compress_directory(const UnicodeString& dir_name, CompressionState& st) {
           st.reparse_cnt++;
         }
         else if ((find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) {
-          compress_directory(file_name, st);
+          compress_directory(file_name, st, progress);
         }
         else {
-          compress_file(file_name, st);
+          compress_file(file_name, st, progress);
         }
       }
 
-      // query current time
-      u64 curr_time;
-      QueryPerformanceCounter((LARGE_INTEGER*) &curr_time);
-      // update progress dialog
-      if (curr_time > st.last_update + st.timer_freq) {
-        st.last_update = curr_time;
-        st.time = (curr_time - st.start_time) * 1000 / st.timer_freq;
-        draw_progress(st);
-
-        // if user cancelled
-        if (check_for_esc()) {
-          BREAK;
-        }
-      }
+      progress.update_ui();
 
       if (FindNextFileW(h_find, &find_data) == 0) {
         CHECK_SYS(GetLastError() == ERROR_NO_MORE_FILES);
@@ -1194,35 +1147,29 @@ void compress_files(const ObjectArray<UnicodeString>& file_list, CompressionStat
     st.buffer_data_size += 0;
   }
 
-  // remember start time
-  QueryPerformanceCounter((LARGE_INTEGER*) &st.start_time);
-  QueryPerformanceFrequency((LARGE_INTEGER*) &st.timer_freq);
-  st.last_update = st.start_time;
+  {
+    EstimationProgress progress(st);
 
-  st.est_size = st.est_file_cnt = st.est_dir_cnt = st.est_reparse_cnt = st.est_err_cnt = 0;
+    st.est_size = st.est_file_cnt = st.est_dir_cnt = st.est_reparse_cnt = st.est_err_cnt = 0;
 
-  // estimate total file size
-  for (unsigned i = 0; i < file_list.size(); i++) {
-    const UnicodeString& file_name = file_list[i];
-    DWORD fattr = GetFileAttributesW(file_name.data());
-    if (fattr == INVALID_FILE_ATTRIBUTES) {
-      st.est_err_cnt++;
-    }
-    else if ((fattr & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT) {
-      st.est_reparse_cnt++;
-    }
-    else if ((fattr & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) {
-      estimate_directory_size(file_name, st);
-    }
-    else {
-      estimate_file_size(file_name, st);
+    // estimate total file size
+    for (unsigned i = 0; i < file_list.size(); i++) {
+      const UnicodeString& file_name = file_list[i];
+      DWORD fattr = GetFileAttributesW(file_name.data());
+      if (fattr == INVALID_FILE_ATTRIBUTES) {
+        st.est_err_cnt++;
+      }
+      else if ((fattr & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT) {
+        st.est_reparse_cnt++;
+      }
+      else if ((fattr & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) {
+        estimate_directory_size(file_name, st, progress);
+      }
+      else {
+        estimate_file_size(file_name, st, progress);
+      }
     }
   }
-
-  // remember start time
-  QueryPerformanceCounter((LARGE_INTEGER*) &st.start_time);
-  QueryPerformanceFrequency((LARGE_INTEGER*) &st.timer_freq);
-  st.last_update = st.start_time;
 
   st.data_size = 0;
   st.comp_size = 0;
@@ -1231,6 +1178,8 @@ void compress_files(const ObjectArray<UnicodeString>& file_list, CompressionStat
   st.dir_cnt = 0;
   st.reparse_cnt = 0;
   st.err_cnt = 0;
+
+  CompressFilesProgress progress(st);
 
   // create compression threads
   ALLOC_RSRC(st.h_wth);
@@ -1254,10 +1203,10 @@ void compress_files(const ObjectArray<UnicodeString>& file_list, CompressionStat
         st.reparse_cnt++;
       }
       else if ((fattr & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) {
-        compress_directory(file_name, st);
+        compress_directory(file_name, st, progress);
       }
       else {
-        compress_file(file_name, st);
+        compress_file(file_name, st, progress);
       }
     }
   }
@@ -1275,9 +1224,8 @@ void compress_files(const ObjectArray<UnicodeString>& file_list, CompressionStat
   );
 
   // populate result structure
-  u64 curr_time;
-  QueryPerformanceCounter((LARGE_INTEGER*) &curr_time);
-  st.time = (curr_time - st.start_time) * 1000 / st.timer_freq;
+  progress.update_ui();
+  st.time = progress.time_elapsed();
   result = st;
 
   FREE_RSRC(delete[] st.comp_work_buffer);

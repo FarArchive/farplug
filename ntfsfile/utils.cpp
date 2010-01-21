@@ -1,16 +1,3 @@
-#include <windows.h>
-
-#include <stdio.h>
-#include <math.h>
-
-#include "plugin.hpp"
-
-#include "col/AnsiString.h"
-#include "col/UnicodeString.h"
-#include "col/PlainArray.h"
-#include "col/ObjectArray.h"
-using namespace col;
-
 #include "farapi_config.h"
 
 #define _ERROR_WINDOWS
@@ -380,8 +367,8 @@ ObjectArray<UnicodeString> split_str(const UnicodeString& str, wchar_t split_ch)
 }
 
 ProgressMonitor::ProgressMonitor(bool lazy): h_scr(NULL) {
-  unsigned __int64 t_curr;
   QueryPerformanceCounter((PLARGE_INTEGER) &t_curr);
+  t_start = t_curr;
   QueryPerformanceFrequency((PLARGE_INTEGER) &t_freq);
   if (lazy) t_next = t_curr + t_freq / 2;
   else t_next = t_curr;
@@ -391,11 +378,11 @@ ProgressMonitor::~ProgressMonitor() {
   if (h_scr != NULL) {
     g_far.RestoreScreen(h_scr);
     SetConsoleTitleW(con_title.data());
+    far_set_progress_state(TBPF_NOPROGRESS);
   }
 }
 
 void ProgressMonitor::update_ui(bool force) {
-  unsigned __int64 t_curr;
   QueryPerformanceCounter((PLARGE_INTEGER) &t_curr);
   if ((t_curr >= t_next) || force) {
     if (h_scr == NULL) {
@@ -530,6 +517,21 @@ PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const Pa
   g_far.Control(h_panel, FCTL_GETSELECTEDPANELITEM, index, reinterpret_cast<LONG_PTR>(ppi.buf()));
   ppi.set_size(size);
   return reinterpret_cast<PluginPanelItem*>(ppi.buf());
+#endif
+}
+
+void far_set_progress_state(TBPFLAG state) {
+#ifdef FARAPI18
+  g_far.AdvControl(g_far.ModuleNumber, ACTL_SETPROGRESSSTATE, reinterpret_cast<void*>(state));
+#endif
+}
+
+void far_set_progress_value(unsigned __int64 completed, unsigned __int64 total) {
+#ifdef FARAPI18
+  PROGRESSVALUE pv;
+  pv.Completed = completed;
+  pv.Total = total;
+  g_far.AdvControl(g_far.ModuleNumber, ACTL_SETPROGRESSVALUE, &pv);
 #endif
 }
 

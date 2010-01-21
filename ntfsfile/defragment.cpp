@@ -1,14 +1,3 @@
-#include <windows.h>
-#include <winioctl.h>
-
-#include "plugin.hpp"
-
-#include "col/AnsiString.h"
-#include "col/UnicodeString.h"
-#include "col/PlainArray.h"
-#include "col/ObjectArray.h"
-using namespace col;
-
 #include "farapi_config.h"
 
 #define _ERROR_WINDOWS
@@ -38,10 +27,13 @@ protected:
       unsigned len2 = c_client_xs - len1;
       lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
       SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_DEFRAG_PROGRESS_CONSOLE_TITLE).data(), moved_clusters * 100 / total_clusters).data());
+      far_set_progress_state(TBPF_NORMAL);
+      far_set_progress_value(moved_clusters, total_clusters);
     }
     else {
       lines.add(far_get_msg(MSG_DEFRAG_PROGRESS_ANALYZE)).add(UnicodeString()).add(UnicodeString());
       SetConsoleTitleW(far_get_msg(MSG_DEFRAG_PROGRESS_ANALYZE).data());
+      far_set_progress_state(TBPF_INDETERMINATE);
     }
     if (total_files > 1) lines += UnicodeString::format(far_get_msg(MSG_DEFRAG_PROGRESS_FILES).data(), processed_files, total_files);
     draw_text_box(far_get_msg(MSG_DEFRAG_PROGRESS_TITLE), lines, c_client_xs);

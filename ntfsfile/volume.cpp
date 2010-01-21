@@ -1,14 +1,3 @@
-#include <windows.h>
-#include <winioctl.h>
-
-#include "plugin.hpp"
-
-#include "col/AnsiString.h"
-#include "col/UnicodeString.h"
-#include "col/PlainArray.h"
-#include "col/ObjectArray.h"
-using namespace col;
-
 #include "farapi_config.h"
 
 #define _ERROR_WINDOWS
