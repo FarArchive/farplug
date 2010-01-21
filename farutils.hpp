@@ -48,9 +48,7 @@ void set_progress_state(TBPFLAG state);
 void set_progress_value(unsigned __int64 completed, unsigned __int64 total);
 
 void call_user_apc(void* param);
-bool post_keys(const vector<DWORD>& keys);
-FarConfirmationsSettings get_confirmation_settings();
-bool get_short_window_info(unsigned idx, WindowInfo& window_info);
+void quit();
 
 HANDLE save_screen();
 void restore_screen(HANDLE h_scr);
