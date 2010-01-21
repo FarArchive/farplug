@@ -2,11 +2,11 @@
 
 namespace Ini {
 
-typedef map<string, string> Section;
-class File: public map<string, Section> {
+typedef map<wstring, wstring> Section;
+class File: public map<wstring, Section> {
 public:
-  string get(const string& section_name, const string& key_name);
-  void parse(const string& str);
+  wstring get(const wstring& section_name, const wstring& key_name);
+  void parse(const wstring& text);
 };
 
 }
