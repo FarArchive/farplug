@@ -158,24 +158,23 @@ void prepare_directory(const wstring& dir) {
 
 void save_to_cache(const string& package, const wstring& cache_dir, const wstring& package_name) {
   prepare_directory(cache_dir);
-  ktm::Transaction transaction;
+  Transaction transaction;
   {
     const wchar_t* c_param_cache_index = L"cache_index";
-    ktm::Key plugin_key(HKEY_CURRENT_USER, (add_trailing_slash(Far::get_root_key_name()) + c_plugin_key_name).c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, transaction.handle());
+    Key plugin_key(HKEY_CURRENT_USER, (add_trailing_slash(Far::get_root_key_name()) + c_plugin_key_name).c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, transaction.handle());
 
-    list<wstring> cache_index = split(reg_query_value(plugin_key.handle(), c_param_cache_index), L'\n');
+    list<wstring> cache_index = split(plugin_key.query_str(c_param_cache_index), L'\n');
 
     while (cache_index.size() && cache_index.size() >= g_options.cache_max_size) {
-      ktm::DeleteFile((add_trailing_slash(cache_dir) + cache_index.front()).c_str(), transaction.handle());
+      delete_file_transacted((add_trailing_slash(cache_dir) + cache_index.front()).c_str(), transaction.handle());
       cache_index.erase(cache_index.begin());
     }
 
-    ktm::File package_file((add_trailing_slash(cache_dir) + package_name).c_str(), GENERIC_WRITE, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, transaction.handle());
-    DWORD size_written;
-    CHECK_SYS(WriteFile(package_file.handle(), package.data(), static_cast<DWORD>(package.size()), &size_written, NULL));
+    File package_file((add_trailing_slash(cache_dir) + package_name).c_str(), GENERIC_WRITE, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, transaction.handle());
+    package_file.write(package.data(), static_cast<unsigned>(package.size()));
 
     cache_index.push_back(package_name);
-    reg_set_value(plugin_key.handle(), c_param_cache_index, combine(cache_index, L'\n'));
+    plugin_key.set_str(c_param_cache_index, combine(cache_index, L'\n'));
   }
   transaction.commit();
 }
