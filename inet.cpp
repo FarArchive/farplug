@@ -178,45 +178,47 @@ string load_url(const wstring& url, const HttpOptions& options, HANDLE h_abort, 
   return context.data;
 }
 
-struct LoadUrlContext: public Thread {
+class LoadUrl: public Thread, public Event {
+private:
   wstring url;
   HttpOptions options;
-  HANDLE h_abort;
-  LoadUrlProgress* progress;
   string data;
+public:
+  LoadUrlProgress progress;
   virtual void run() {
-    data = load_url(url, options, h_abort, progress);
+    data = load_url(url, options, h_event, &progress);
+  }
+  LoadUrl(const wstring& url, const HttpOptions& options): Event(true, false), url(url), options(options) {
+  }
+  string get_data() const {
+    return data;
+  }
+  string process() {
+    start();
+    try {
+      while (true) {
+        const unsigned c_wait_time = 100;
+        if (wait(c_wait_time))
+          break;
+        progress.update_ui();
+      }
+    }
+    catch (const Error& e) {
+      if (e.code == E_ABORT) {
+        set();
+        wait(INFINITE);
+      }
+      throw;
+    }
+    if (get_result())
+      return get_data();
+    else
+      throw get_error();
   }
 };
 
 string load_url(const wstring& url, const HttpOptions& options) {
-  Event abort(true, false);
-  LoadUrlProgress progress;
-  LoadUrlContext ctx;
-  ctx.url = url;
-  ctx.options = options;
-  ctx.h_abort = abort.handle();
-  ctx.progress = &progress;
-  ctx.start();
-  try {
-    while (true) {
-      const unsigned c_wait_time = 100;
-      if (ctx.wait(c_wait_time))
-        break;
-      progress.update_ui();
-    }
-  }
-  catch (const Error& e) {
-    if (e.code == E_ABORT) {
-      abort.set();
-      ctx.wait(INFINITE);
-    }
-    throw;
-  }
-  if (ctx.get_result())
-    return ctx.data;
-  else
-    throw ctx.get_error();
+  return LoadUrl(url, options).process();
 }
 
 void LoadUrlProgress::do_update_ui() {

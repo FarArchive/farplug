@@ -80,7 +80,9 @@ public:
   void start();
   bool wait(unsigned wait_time);
   bool get_result();
-  Error get_error();
+  Error get_error() {
+    return error;
+  }
 };
 
 class Event: private NonCopyable {
@@ -89,6 +91,5 @@ protected:
 public:
   Event(bool manual_reset, bool initial_state);
   ~Event();
-  HANDLE handle() const;
   void set();
 };

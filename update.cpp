@@ -244,31 +244,43 @@ void execute() {
   }
 }
 
-HANDLE g_h_abort = NULL;
-HANDLE g_h_thread = NULL;
-wstring g_update_url;
-HttpOptions g_http_options;
-unsigned __stdcall check_thread(void* arg) {
-  try {
-    string update_url_text = load_url(g_update_url, g_http_options, g_h_abort);
+class AutoUpdate: public Thread, public Event {
+private:
+  wstring update_url;
+  HttpOptions http_options;
+  virtual void run() {
+    struct Clean {
+      ~Clean() {
+        Far::call_user_apc(reinterpret_cast<void*>(cmdClean));
+      }
+    };
+    Clean clean;
+    string update_url_text = load_url(update_url, http_options, h_event);
     UpdateInfo update_info = parse_update_info(ansi_to_unicode(update_url_text, CP_ACP));
     Options::set_int(c_param_update_version, update_info.version);
-    Far::call_user_apc(reinterpret_cast<void*>(cmdClean));
   }
-  catch (...) {
+public:
+  AutoUpdate(const wstring& update_url, const HttpOptions& http_options): Event(true, false), update_url(update_url), http_options(http_options) {
   }
-  return 0;
-}
+  ~AutoUpdate() {
+    set();
+  }
+};
+
+AutoUpdate* g_auto_update = NULL;
 
 void init() {
   current_version = Far::get_version();
+
   check_product_installed();
+
   unsigned update_version = Options::get_int(c_param_update_version);
   unsigned last_check_version = Options::get_int(c_param_last_check_version);
   if ((update_version > current_version) && (update_version > last_check_version)) {
     Far::call_user_apc(reinterpret_cast<void*>(cmdExecute));
     return;
   }
+
   time_t curr_time = time(NULL);
   CHECK(curr_time != -1);
   curr_time /= c_update_period;
@@ -276,28 +288,22 @@ void init() {
   if (curr_time == last_check_time)
     return;
   Options::set_int(c_param_last_check_time, static_cast<unsigned>(curr_time));
-  g_update_url = get_update_url() + c_update_script;
-  g_http_options = g_options.http;
-  g_h_abort = CreateEvent(NULL, TRUE, FALSE, NULL);
-  CHECK_SYS(g_h_abort);
-  unsigned th_id;
-  g_h_thread = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, check_thread, NULL, 0, &th_id));
-  CHECK_SYS(g_h_thread);
+
+  g_auto_update = new AutoUpdate(get_update_url() + c_update_script, g_options.http);
+  try {
+    g_auto_update->start();
+  }
+  catch (...) {
+    delete g_auto_update;
+    g_auto_update = NULL;
+    throw;
+  }
 }
 
 void clean() {
-  if (g_h_thread) {
-    SetEvent(g_h_abort);
-    DWORD wait_res = WaitForSingleObject(g_h_thread, c_exit_wait * 1000);
-    if (wait_res != WAIT_OBJECT_0) {
-      TerminateThread(g_h_thread, 0);
-    }
-    CloseHandle(g_h_thread);
-    g_h_thread = NULL;
-  }
-  if (g_h_abort) {
-    CloseHandle(g_h_abort);
-    g_h_abort = NULL;
+  if (g_auto_update) {
+    delete g_auto_update;
+    g_auto_update = NULL;
   }
 }
 

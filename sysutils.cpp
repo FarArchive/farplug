@@ -218,19 +218,20 @@ unsigned __stdcall Thread::thread_proc(void* arg) {
   return FALSE;
 }
 
-Thread::Thread() {
-  unsigned th_id;
-  h_thread = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, thread_proc, this, CREATE_SUSPENDED, &th_id));
-  CHECK_SYS(h_thread);
+Thread::Thread(): h_thread(NULL) {
 }
 
 Thread::~Thread() {
-  wait(INFINITE);
-  CloseHandle(h_thread);
+  if (h_thread) {
+    wait(INFINITE);
+    CloseHandle(h_thread);
+  }
 }
 
 void Thread::start() {
-  CHECK_SYS(ResumeThread(h_thread));
+  unsigned th_id;
+  h_thread = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, thread_proc, this, 0, &th_id));
+  CHECK_SYS(h_thread);
 }
 
 bool Thread::wait(unsigned wait_time) {
@@ -243,10 +244,6 @@ bool Thread::get_result() {
   return exit_code == TRUE ? true : false;
 }
 
-Error Thread::get_error() {
-  return error;
-}
-
 Event::Event(bool manual_reset, bool initial_state) {
   h_event = CreateEvent(NULL, manual_reset, initial_state, NULL);
   CHECK_SYS(h_event);
@@ -254,10 +251,6 @@ Event::Event(bool manual_reset, bool initial_state) {
 
 Event::~Event() {
   CloseHandle(h_event);
-}
-
-HANDLE Event::handle() const {
-  return h_event;
 }
 
 void Event::set() {
