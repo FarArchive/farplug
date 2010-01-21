@@ -16,7 +16,6 @@ namespace Update {
 
 const wchar_t* c_param_last_check_time = L"last_check_time";
 const wchar_t* c_param_last_check_version = L"last_check_version";
-const wchar_t* c_param_update_version = L"update_version";
 #ifdef _M_IX86
 const char* c_upgrade_code = "{67A59013-488F-4388-81F3-828A1DCEDA32}";
 const char* c_platform = "x86";
@@ -185,7 +184,6 @@ void execute() {
   check_product_installed();
   string update_url_text = load_url(get_update_url() + c_update_script, g_options.http);
   UpdateInfo update_info = parse_update_info(ansi_to_unicode(update_url_text, CP_ACP));
-  Options::set_int(c_param_update_version, update_info.version);
   if (update_info.version <= current_version) {
     info_dlg(Far::get_msg(MSG_UPDATE_NO_NEW_VERSION));
     return;
@@ -262,7 +260,6 @@ private:
     Clean clean;
     string update_url_text = load_url(update_url, http_options, h_event);
     UpdateInfo update_info = parse_update_info(ansi_to_unicode(update_url_text, CP_ACP));
-    Options::set_int(c_param_update_version, update_info.version);
     unsigned last_check_version = Options::get_int(c_param_last_check_version);
     if ((update_info.version > current_version) && (update_info.version > last_check_version)) {
       wostringstream st;
@@ -287,13 +284,6 @@ void init() {
   current_version = Far::get_version();
 
   check_product_installed();
-
-  unsigned update_version = Options::get_int(c_param_update_version);
-  unsigned last_check_version = Options::get_int(c_param_last_check_version);
-  if ((update_version > current_version) && (update_version > last_check_version)) {
-    Far::call_user_apc(reinterpret_cast<void*>(cmdExecute));
-    return;
-  }
 
   time_t curr_time = time(NULL);
   CHECK(curr_time != -1);
