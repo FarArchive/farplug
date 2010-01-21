@@ -24,10 +24,15 @@ config.cache_max_size = &Max. number of packages:
 config.cache_dir = Cache d&irectory:
 
 # Update dialog
-update.new_version = New version is available: 
+update.new_version = New version is available:
 update.no_new_version = Your version is up to date.
 update.question = Do you want to update?
 update.changelog = &View changelog
+
+# Tray notification
+tray.title = Update is available.
+tray.version = New version is available:
+tray.update = Click here to update.
 
 # Download progress
 download.title = Downloading

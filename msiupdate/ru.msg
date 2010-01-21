@@ -24,10 +24,15 @@ config.cache_max_size = Максимальное &число пакетов:
 config.cache_dir = &Каталог для сохранения:
 
 # Update dialog
-update.new_version = Доступна новая версия: 
+update.new_version = Доступна новая версия:
 update.no_new_version = У вас установлена последняя версия.
 update.question = Хотите запустить обновление?
 update.changelog = &Посмотреть изменения
+
+# Tray notification
+tray.title = Доступно обновление.
+tray.version = Доступна новая версия:
+tray.update = Кликните для запуска обновления.
 
 # Download progress
 download.title = Загрузка

@@ -9,6 +9,7 @@
 #include "ui.hpp"
 #include "inet.hpp"
 #include "transact.hpp"
+#include "trayicon.hpp"
 #include "update.hpp"
 
 namespace Update {
@@ -248,6 +249,10 @@ class AutoUpdate: public Thread, public Event {
 private:
   wstring update_url;
   HttpOptions http_options;
+  wstring window_name;
+  wstring msg_tray_title;
+  wstring msg_tray_version;
+  wstring msg_tray_update;
   virtual void run() {
     struct Clean {
       ~Clean() {
@@ -258,9 +263,18 @@ private:
     string update_url_text = load_url(update_url, http_options, h_event);
     UpdateInfo update_info = parse_update_info(ansi_to_unicode(update_url_text, CP_ACP));
     Options::set_int(c_param_update_version, update_info.version);
+    unsigned last_check_version = Options::get_int(c_param_last_check_version);
+    if ((update_info.version > current_version) && (update_info.version > last_check_version)) {
+      wostringstream st;
+      st << msg_tray_version << L' ' << VER_MAJOR(update_info.version) << L'.' << VER_MINOR(update_info.version) << L'.' << VER_BUILD(update_info.version) << L'\n' << msg_tray_update;
+      const WORD c_far_icon = 100;
+      TrayIcon tray_icon(window_name, c_far_icon, msg_tray_title, st.str());
+      if (tray_icon.message_loop(h_event))
+        Far::call_user_apc(reinterpret_cast<void*>(cmdExecute));
+    }
   }
 public:
-  AutoUpdate(const wstring& update_url, const HttpOptions& http_options): Event(true, false), update_url(update_url), http_options(http_options) {
+  AutoUpdate(const wstring& update_url, const HttpOptions& http_options): Event(true, false), update_url(update_url), http_options(http_options), window_name(Far::get_msg(MSG_PLUGIN_NAME)), msg_tray_title(Far::get_msg(MSG_TRAY_TITLE)), msg_tray_version(Far::get_msg(MSG_TRAY_VERSION)), msg_tray_update(Far::get_msg(MSG_TRAY_UPDATE)) {
   }
   ~AutoUpdate() {
     set();
