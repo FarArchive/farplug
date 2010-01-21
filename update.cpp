@@ -37,15 +37,15 @@ struct UpdateInfo {
   wstring package_name;
 };
 
-UpdateInfo parse_update_info(const string& text) {
+UpdateInfo parse_update_info(const wstring& text) {
   Ini::File update_ini;
   update_ini.parse(text);
-  string ver_major = update_ini.get("far", "major");
-  string ver_minor = update_ini.get("far", "minor");
-  string ver_build = update_ini.get("far", "build");
+  wstring ver_major = update_ini.get(L"far", L"major");
+  wstring ver_minor = update_ini.get(L"far", L"minor");
+  wstring ver_build = update_ini.get(L"far", L"build");
   UpdateInfo update_info;
   update_info.version = MAKE_VERSION(str_to_int(ver_major), str_to_int(ver_minor), str_to_int(ver_build));
-  update_info.package_name = widen(update_ini.get("far", "msi"));
+  update_info.package_name = update_ini.get(L"far", L"msi");
   return update_info;
 }
 
@@ -79,14 +79,11 @@ void show_changelog(unsigned build1, unsigned build2) {
 
   TempFile temp_file;
   {
-    HANDLE h_file = CreateFileW(temp_file.get_path().c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
-    CleanHandle h_file_clean(h_file);
+    File file(temp_file.get_path(), GENERIC_WRITE, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL);
 
     const wchar_t sig = 0xFEFF;
-    DWORD size_written;
-    CHECK_SYS(WriteFile(h_file, &sig, sizeof(sig), &size_written, NULL));
-    CHECK_SYS(WriteFile(h_file, text.data() + pos2, static_cast<DWORD>((pos1 - pos2) * sizeof(wchar_t)), &size_written, NULL));
+    file.write(&sig, sizeof(sig));
+    file.write(text.data() + pos2, static_cast<unsigned>((pos1 - pos2) * sizeof(wchar_t)));
   }
 
   Far::viewer(temp_file.get_path(), L"Changelog");
@@ -186,7 +183,7 @@ void save_to_cache(const string& package, const wstring& cache_dir, const wstrin
 void execute() {
   check_product_installed();
   string update_url_text = load_url(get_update_url() + c_update_script, g_options.http);
-  UpdateInfo update_info = parse_update_info(update_url_text);
+  UpdateInfo update_info = parse_update_info(ansi_to_unicode(update_url_text, CP_ACP));
   Options::set_int(c_param_update_version, update_info.version);
   if (update_info.version <= current_version) {
     info_dlg(Far::get_msg(MSG_UPDATE_NO_NEW_VERSION));
@@ -254,7 +251,7 @@ HttpOptions g_http_options;
 unsigned __stdcall check_thread(void* arg) {
   try {
     string update_url_text = load_url(g_update_url, g_http_options, g_h_abort);
-    UpdateInfo update_info = parse_update_info(update_url_text);
+    UpdateInfo update_info = parse_update_info(ansi_to_unicode(update_url_text, CP_ACP));
     Options::set_int(c_param_update_version, update_info.version);
     Far::call_user_apc(reinterpret_cast<void*>(cmdClean));
   }

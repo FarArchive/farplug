@@ -2,6 +2,7 @@
 #include "sysutils.hpp"
 
 wstring get_system_message(HRESULT hr) {
+  wostringstream st;
   wchar_t* sys_msg;
   DWORD len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, NULL);
   if (!len) {
@@ -11,7 +12,6 @@ wstring get_system_message(HRESULT hr) {
       FreeLibrary(h_winhttp);
     }
   }
-  wostringstream st;
   if (len) {
     wstring message;
     try {
@@ -47,28 +47,26 @@ bool wait_for_single_object(HANDLE handle, DWORD timeout) {
     FAIL(E_FAIL);
 }
 
-TempFile::TempFile() {
-  Buffer<wchar_t> buf(MAX_PATH);
-  DWORD len = GetTempPathW(static_cast<DWORD>(buf.size()), buf.data());
-  CHECK(len <= buf.size());
-  CHECK_SYS(len);
-  wstring temp_path = wstring(buf.data(), len);
-  CHECK_SYS(GetTempFileNameW(temp_path.c_str(), L"", 0, buf.data()));
-  path.assign(buf.data());
-}
-
-TempFile::~TempFile() {
-  DeleteFileW(path.c_str());
-}
-
 wstring ansi_to_unicode(const string& str, unsigned code_page) {
-  unsigned size = static_cast<unsigned>(str.size());
-  if (size == 0)
+  unsigned str_size = static_cast<unsigned>(str.size());
+  if (str_size == 0)
     return wstring();
+  int size = MultiByteToWideChar(code_page, 0, str.data(), str_size, NULL, 0);
   Buffer<wchar_t> out(size);
-  int res = MultiByteToWideChar(code_page, 0, str.data(), size, out.data(), size);
-  CHECK_SYS(res);
-  return wstring(out.data(), res);
+  size = MultiByteToWideChar(code_page, 0, str.data(), str_size, out.data(), out.size());
+  CHECK_SYS(size);
+  return wstring(out.data(), size);
+}
+
+string unicode_to_ansi(const wstring& str, unsigned code_page) {
+  unsigned str_size = static_cast<unsigned>(str.size());
+  if (str_size == 0)
+    return string();
+  int size = WideCharToMultiByte(code_page, 0, str.data(), str_size, NULL, 0, NULL, NULL);
+  Buffer<char> out(size);
+  size = WideCharToMultiByte(code_page, 0, str.data(), str_size, out.data(), out.size(), NULL, NULL);
+  CHECK_SYS(size);
+  return string(out.data(), size);
 }
 
 wstring expand_env_vars(const wstring& str) {
@@ -98,4 +96,170 @@ wstring reg_query_value(HKEY h_key, const wchar_t* name, const wstring& def_valu
 
 void reg_set_value(HKEY h_key, const wchar_t* name, const wstring& value) {
   CHECK_ADVSYS(RegSetValueExW(h_key, name, 0, REG_SZ, reinterpret_cast<LPBYTE>(const_cast<wchar_t*>(value.c_str())), (static_cast<DWORD>(value.size()) + 1) * sizeof(wchar_t)));
+}
+
+wstring get_full_path_name(const wstring& path) {
+  Buffer<wchar_t> buf(MAX_PATH);
+  DWORD size = GetFullPathNameW(path.c_str(), static_cast<DWORD>(buf.size()), buf.data(), NULL);
+  if (size > buf.size()) {
+    buf.resize(size);
+    size = GetFullPathNameW(path.c_str(), static_cast<DWORD>(buf.size()), buf.data(), NULL);
+  }
+  CHECK_SYS(size);
+  return wstring(buf.data(), size);
+}
+
+wstring get_current_directory() {
+  Buffer<wchar_t> buf(MAX_PATH);
+  DWORD size = GetCurrentDirectoryW(static_cast<DWORD>(buf.size()), buf.data());
+  if (size > buf.size()) {
+    buf.resize(size);
+    size = GetCurrentDirectoryW(static_cast<DWORD>(buf.size()), buf.data());
+  }
+  CHECK_SYS(size);
+  return wstring(buf.data(), size);
+}
+
+File::File(const wstring& file_path, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes) {
+  h_file = CreateFileW(long_path(file_path).c_str(), dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, dwFlagsAndAttributes, NULL);
+  CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
+}
+
+File::~File() {
+  CloseHandle(h_file);
+}
+
+HANDLE File::handle() const {
+  return h_file;
+}
+
+unsigned __int64 File::size() {
+  LARGE_INTEGER file_size;
+  CHECK_SYS(GetFileSizeEx(h_file, &file_size));
+  return file_size.QuadPart;
+}
+
+unsigned File::read(Buffer<char>& buffer) {
+  DWORD size_read;
+  CHECK_SYS(ReadFile(h_file, buffer.data(), static_cast<DWORD>(buffer.size()), &size_read, NULL));
+  return size_read;
+}
+
+void File::write(const void* data, unsigned size) {
+  DWORD size_written;
+  CHECK_SYS(WriteFile(h_file, data, size, &size_written, NULL));
+}
+
+FindFile::FindFile(const wstring& file_path): file_path(file_path), h_find(INVALID_HANDLE_VALUE) {
+}
+
+FindFile::~FindFile() {
+  if (h_find != INVALID_HANDLE_VALUE)
+    FindClose(h_find);
+}
+
+bool FindFile::next(WIN32_FIND_DATAW& find_data) {
+  while (true) {
+    if (h_find == INVALID_HANDLE_VALUE) {
+      h_find = FindFirstFileW(long_path(add_trailing_slash(file_path) + L'*').c_str(), &find_data);
+      CHECK_SYS(h_find != INVALID_HANDLE_VALUE);
+    }
+    else {
+      if (!FindNextFileW(h_find, &find_data)) {
+        if (GetLastError() == ERROR_NO_MORE_FILES)
+          return false;
+        CHECK_SYS(false);
+      }
+    }
+    if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+      if ((find_data.cFileName[0] == L'.') && ((find_data.cFileName[1] == 0) || ((find_data.cFileName[1] == L'.') && (find_data.cFileName[2] == 0))))
+        continue;
+    }
+    return true;
+  }
+}
+
+TempFile::TempFile() {
+  Buffer<wchar_t> buf(MAX_PATH);
+  DWORD len = GetTempPathW(static_cast<DWORD>(buf.size()), buf.data());
+  CHECK(len <= buf.size());
+  CHECK_SYS(len);
+  wstring temp_path = wstring(buf.data(), len);
+  CHECK_SYS(GetTempFileNameW(temp_path.c_str(), L"", 0, buf.data()));
+  path.assign(buf.data());
+}
+
+TempFile::~TempFile() {
+  DeleteFileW(path.c_str());
+}
+
+unsigned __stdcall Thread::thread_proc(void* arg) {
+  Thread* thread = reinterpret_cast<Thread*>(arg);
+  try {
+    try {
+      thread->run();
+      return TRUE;
+    }
+    catch (const Error&) {
+      throw;
+    }
+    catch (const std::exception& e) {
+      FAIL_MSG(widen(e.what()));
+    }
+    catch (...) {
+      FAIL(E_FAIL);
+    }
+  }
+  catch (const Error& e) {
+    thread->error = e;
+  }
+  catch (...) {
+  }
+  return FALSE;
+}
+
+Thread::Thread() {
+  unsigned th_id;
+  h_thread = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, thread_proc, this, CREATE_SUSPENDED, &th_id));
+  CHECK_SYS(h_thread);
+}
+
+Thread::~Thread() {
+  wait(INFINITE);
+  CloseHandle(h_thread);
+}
+
+void Thread::start() {
+  CHECK_SYS(ResumeThread(h_thread));
+}
+
+bool Thread::wait(unsigned wait_time) {
+  return wait_for_single_object(h_thread, wait_time);
+}
+
+bool Thread::get_result() {
+  DWORD exit_code;
+  CHECK_SYS(GetExitCodeThread(h_thread, &exit_code));
+  return exit_code == TRUE ? true : false;
+}
+
+Error Thread::get_error() {
+  return error;
+}
+
+Event::Event(bool manual_reset, bool initial_state) {
+  h_event = CreateEvent(NULL, manual_reset, initial_state, NULL);
+  CHECK_SYS(h_event);
+}
+
+Event::~Event() {
+  CloseHandle(h_event);
+}
+
+HANDLE Event::handle() const {
+  return h_event;
+}
+
+void Event::set() {
+  CHECK_SYS(SetEvent(h_event));
 }

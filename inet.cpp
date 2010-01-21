@@ -178,75 +178,45 @@ string load_url(const wstring& url, const HttpOptions& options, HANDLE h_abort, 
   return context.data;
 }
 
-struct LoadUrlContext {
+struct LoadUrlContext: public Thread {
   wstring url;
   HttpOptions options;
   HANDLE h_abort;
   LoadUrlProgress* progress;
-  string result;
-  Error error;
+  string data;
+  virtual void run() {
+    data = load_url(url, options, h_abort, progress);
+  }
 };
 
-unsigned __stdcall load_url_thread(void* param) {
-  LoadUrlContext* ctx = reinterpret_cast<LoadUrlContext*>(param);
-  try {
-    try {
-      ctx->result = load_url(ctx->url, ctx->options, ctx->h_abort, ctx->progress);
-      return TRUE;
-    }
-    catch (const Error&) {
-      throw;
-    }
-    catch (const std::exception& e) {
-      FAIL_MSG(widen(e.what()));
-    }
-    catch (...) {
-      FAIL(E_FAIL);
-    }
-  }
-  catch (const Error& e) {
-    ctx->error = e;
-  }
-  catch (...) {
-  }
-  return FALSE;
-}
-
 string load_url(const wstring& url, const HttpOptions& options) {
-  HANDLE h_abort = CreateEvent(NULL, TRUE, FALSE, NULL);
-  CHECK_SYS(h_abort);
-  CleanHandle h_abort_clean(h_abort);
+  Event abort(true, false);
   LoadUrlProgress progress;
   LoadUrlContext ctx;
   ctx.url = url;
   ctx.options = options;
-  ctx.h_abort = h_abort;
+  ctx.h_abort = abort.handle();
   ctx.progress = &progress;
-  unsigned th_id;
-  HANDLE h_thread = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, load_url_thread, &ctx, 0, &th_id));
-  CHECK_SYS(h_thread);
-  CleanHandle h_thread_clean(h_thread);
+  ctx.start();
   try {
     while (true) {
       const unsigned c_wait_time = 100;
-      if (wait_for_single_object(h_thread, c_wait_time))
+      if (ctx.wait(c_wait_time))
         break;
       progress.update_ui();
     }
   }
   catch (const Error& e) {
     if (e.code == E_ABORT) {
-      CHECK_SYS(SetEvent(h_abort));
-      wait_for_single_object(h_thread, INFINITE);
+      abort.set();
+      ctx.wait(INFINITE);
     }
     throw;
   }
-  DWORD exit_code;
-  CHECK_SYS(GetExitCodeThread(h_thread, &exit_code));
-  if (exit_code)
-    return ctx.result;
+  if (ctx.get_result())
+    return ctx.data;
   else
-    throw ctx.error;
+    throw ctx.get_error();
 }
 
 void LoadUrlProgress::do_update_ui() {
