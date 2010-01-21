@@ -256,3 +256,68 @@ Event::~Event() {
 void Event::set() {
   CHECK_SYS(SetEvent(h_event));
 }
+
+WindowClass::WindowClass(const wstring& name, WindowProc window_proc): name(name) {
+  WNDCLASSW wndclass;
+  memset(&wndclass, 0, sizeof(wndclass));
+  wndclass.lpfnWndProc = window_proc;
+  wndclass.cbWndExtra = sizeof(this);
+  wndclass.lpszClassName = name.c_str();
+  CHECK_SYS(RegisterClassW(&wndclass));
+}
+
+WindowClass::~WindowClass() {
+  UnregisterClassW(name.c_str(), NULL);
+}
+
+LRESULT CALLBACK MessageWindow::message_window_proc(HWND h_wnd, UINT msg, WPARAM w_param, LPARAM l_param) {
+  try {
+    MessageWindow* message_window = reinterpret_cast<MessageWindow*>(GetWindowLongPtrW(h_wnd, 0));
+    if (message_window) return message_window->window_proc(msg, w_param, l_param);
+  }
+  catch (...) {
+  }
+  return DefWindowProcW(h_wnd, msg, w_param, l_param);
+}
+
+MessageWindow::MessageWindow(const wstring& name): WindowClass(name, message_window_proc) {
+  h_wnd = CreateWindowW(name.c_str(), name.c_str(), 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, this);
+  CHECK_SYS(h_wnd);
+  SetWindowLongPtrW(h_wnd, 0, reinterpret_cast<LONG_PTR>(this));
+}
+
+MessageWindow::~MessageWindow() {
+  SetWindowLongPtrW(h_wnd, 0, 0);
+  DestroyWindow(h_wnd);
+}
+
+unsigned MessageWindow::message_loop(HANDLE h_abort) {
+  while (true) {
+    DWORD res = MsgWaitForMultipleObjects(1, &h_abort, FALSE, INFINITE, QS_POSTMESSAGE | QS_SENDMESSAGE);
+    CHECK_SYS(res != WAIT_FAILED);
+    if (res == WAIT_OBJECT_0) {
+      FAIL(E_ABORT);
+    }
+    else if (res == WAIT_OBJECT_0 + 1) {
+      MSG msg;
+      while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+        if (msg.message == WM_QUIT)
+          return msg.wParam;
+      }
+    }
+    else FAIL(E_FAIL);
+  }
+}
+
+void MessageWindow::end_message_loop(unsigned result) {
+  PostQuitMessage(result);
+}
+
+Icon::Icon(WORD icon_id, int width, int height) {
+  h_icon = static_cast<HICON>(LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(icon_id), IMAGE_ICON, width, height, LR_DEFAULTCOLOR));
+  CHECK_SYS(h_icon);
+}
+
+Icon::~Icon() {
+  DestroyIcon(h_icon);
+}

@@ -4,6 +4,7 @@
 #include <msi.h>
 #include <winhttp.h>
 #include <shobjidl.h>
+#include <shellapi.h>
 
 #include <process.h>
 #include <time.h>

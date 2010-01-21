@@ -15,7 +15,7 @@ IF(DEFINED MSVC)
 ENDIF(DEFINED MSVC)
 
 # project source files
-SET(cpp_sources plugin.cpp pathutils.cpp strutils.cpp farutils.cpp sysutils.cpp ui.cpp inet.cpp iniparse.cpp update.cpp options.cpp transact.cpp)
+SET(cpp_sources plugin.cpp pathutils.cpp strutils.cpp farutils.cpp sysutils.cpp ui.cpp inet.cpp iniparse.cpp update.cpp options.cpp transact.cpp trayicon.cpp)
 add_precomp_header("headers.hpp" "headers.cpp" cpp_sources)
 SET(sources ${cpp_sources} plugin.def ${bin}/msg.h ${bin}/version.rc)
 
