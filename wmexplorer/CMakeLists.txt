@@ -20,7 +20,9 @@ IF(NOT rapi2_inc)
 ENDIF(NOT rapi2_inc)
 
 # project source files
-SET(sources plugin.cpp rapi_proc.cpp util.cpp ui.cpp dlgapi.cpp options.cpp filepath.cpp file_filters.cpp file_info.cpp ${bin}/msg.h ${bin}/version.rc)
+SET(cpp_sources plugin.cpp rapi_proc.cpp util.cpp ui.cpp dlgapi.cpp options.cpp filepath.cpp file_filters.cpp file_info.cpp)
+add_precomp_header("headers.hpp" "headers.cpp" cpp_sources)
+SET(sources ${cpp_sources} ${bin}/version.rc ${bin}/msg.h)
 IF(FARAPI18)
   SET(sources ${sources} plugin_uni.def)
 ELSE(FARAPI18)

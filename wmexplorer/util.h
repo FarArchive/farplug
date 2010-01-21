@@ -71,5 +71,7 @@ PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& 
 PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
 UnicodeString far_get_current_dir();
 UnicodeString far_get_full_path(const UnicodeString& file_path);
+void far_set_progress_state(TBPFLAG state);
+void far_set_progress_value(unsigned __int64 completed, unsigned __int64 total);
 
 #endif // _UTIL_H

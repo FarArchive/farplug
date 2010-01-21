@@ -1,17 +1,3 @@
-#include <windows.h>
-
-#include "rapi2.h"
-#include "replfilt.h"
-
-#include "plugin.hpp"
-#include "farcolor.hpp"
-
-#include "col/AnsiString.h"
-#include "col/UnicodeString.h"
-#include "col/PlainArray.h"
-#include "col/ObjectArray.h"
-using namespace col;
-
 #include "farapi_config.h"
 
 #include "msg.h"
@@ -215,6 +201,8 @@ void draw_progress_msg(const UnicodeString& message) {
   ObjectArray<UnicodeString> lines;
   lines += center(message, c_client_xs);
   draw_text_box(far_get_msg(MSG_PLUGIN_NAME), lines, c_client_xs);
+  SetConsoleTitleW(message.data());
+  far_set_progress_state(TBPF_INDETERMINATE);
 }
 
 void draw_create_list_progress(const CreateListStats& stats) {
@@ -223,6 +211,8 @@ void draw_create_list_progress(const CreateListStats& stats) {
   lines += center(UnicodeString::format(far_get_msg(MSG_CREATE_LIST_PROGRESS_OBJECTS).data(), stats.files, stats.dirs, '\1', stats.errors == 0 ? g_colors[COL_DIALOGTEXT] : CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), stats.errors), c_client_xs);
   lines += center(UnicodeString::format(far_get_msg(MSG_CREATE_LIST_PROGRESS_SIZE).data(), &format_data_size(stats.size, get_size_suffixes())), c_client_xs);
   draw_text_box(far_get_msg(MSG_CREATE_LIST_PROGRESS_TITLE), lines, c_client_xs);
+  SetConsoleTitleW(far_get_msg(MSG_CREATE_LIST_PROGRESS_TITLE).data());
+  far_set_progress_state(TBPF_INDETERMINATE);
 }
 
 struct CopyFilesDlgData {
@@ -465,13 +455,15 @@ void draw_copy_files_progress(const CopyFilesProgress& progress, const CopyFiles
   if (progress_total_size == 0) percent = 0;
   else percent = (unsigned) (progress.processed_total_size * 100 / progress_total_size);
   lines += UnicodeString::format(far_get_msg(MSG_COPY_FILES_PROGRESS_SIZE).data(), &format_data_size(progress.processed_total_size, get_size_suffixes()), &format_data_size(progress_total_size, get_size_suffixes()), percent, &format_data_size(speed, get_speed_suffixes()));
+  SetConsoleTitleW(UnicodeString::format(L"{%u%%} %S", percent, &far_get_msg(move ? MSG_MOVE_FILES_PROGRESS_TITLE : MSG_COPY_FILES_PROGRESS_TITLE)).data());
+  far_set_progress_state(TBPF_NORMAL);
+  far_set_progress_value(percent, 100);
 
   // times
   unsigned __int64 total_time;
   if (progress.processed_total_size == 0) total_time = time;
   else total_time = time * progress_total_size / progress.processed_total_size;
   lines += UnicodeString::format(far_get_msg(MSG_COPY_FILES_PROGRESS_TIME).data(), &format_time(time), &format_time(total_time - time), &format_time(total_time));
-  SetConsoleTitleW(UnicodeString::format(L"{%u%% %Lu} %S", percent, (total_time - time) / 1000, &far_get_msg(move ? MSG_MOVE_FILES_PROGRESS_TITLE : MSG_COPY_FILES_PROGRESS_TITLE)).data());
 
   // total progress bar
   if (progress_total_size == 0) len1 = c_client_xs;
@@ -511,6 +503,8 @@ void draw_move_remote_files_progress(const CopyFilesProgress& progress, const Co
   lines += UnicodeString::format(far_get_msg(MSG_MOVE_REMOTE_FILES_PROGRESS_STATS).data(), stats.files, stats.dirs);
 
   draw_text_box(far_get_msg(MSG_MOVE_REMOTE_FILES_PROGRESS_TITLE), lines, c_client_xs);
+  SetConsoleTitleW(far_get_msg(MSG_MOVE_REMOTE_FILES_PROGRESS_TITLE).data());
+  far_set_progress_state(TBPF_INDETERMINATE);
 }
 
 struct DeleteFilesDlgData {
@@ -592,6 +586,13 @@ void draw_delete_files_progress(const DeleteFilesProgress& progress, const Delet
   else len1 = (unsigned) (progress.objects * c_client_xs / progress.total_objects);
   unsigned len2 = c_client_xs - len1;
   lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
+  // percent
+  unsigned percent;
+  if (progress.total_objects == 0) percent = 0;
+  else percent = progress.objects * 100 / progress.total_objects;
+  SetConsoleTitleW(UnicodeString::format(L"{%u%%} %S", percent, &far_get_msg(MSG_DELETE_FILES_PROGRESS_TITLE)).data());
+  far_set_progress_state(TBPF_NORMAL);
+  far_set_progress_value(percent, 100);
   // separator
   lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
   // times

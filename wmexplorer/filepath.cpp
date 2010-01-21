@@ -1,7 +1,3 @@
-#include "col/UnicodeString.h"
-#include "col/ObjectArray.h"
-using namespace col;
-
 #include "filepath.h"
 
 void FilePath::convert_path(const UnicodeString& _path) {

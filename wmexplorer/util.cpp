@@ -1,16 +1,3 @@
-#include <windows.h>
-
-#include "plugin.hpp"
-
-#include <stdio.h>
-#include <math.h>
-
-#include "col/AnsiString.h"
-#include "col/UnicodeString.h"
-#include "col/PlainArray.h"
-#include "col/ObjectArray.h"
-using namespace col;
-
 #include "farapi_config.h"
 
 #define _ERROR_WINDOWS
@@ -347,8 +334,8 @@ UnicodeString far_get_current_dir() {
   curr_dir.set_size();
 #endif
 #ifdef FARAPI18
-  DWORD size = g_far.Control(INVALID_HANDLE_VALUE, FCTL_GETCURRENTDIRECTORY, 0, NULL);
-  g_far.Control(INVALID_HANDLE_VALUE, FCTL_GETCURRENTDIRECTORY, size, reinterpret_cast<LONG_PTR>(curr_dir.buf(size)));
+  DWORD size = g_fsf.GetCurrentDirectory(0, NULL);
+  g_fsf.GetCurrentDirectory(size, curr_dir.buf(size));
   curr_dir.set_size();
 #endif
   return del_trailing_slash(curr_dir);
@@ -369,4 +356,19 @@ UnicodeString far_get_full_path(const UnicodeString& file_path) {
 #endif
   full_path.set_size();
   return full_path;
+}
+
+void far_set_progress_state(TBPFLAG state) {
+#ifdef FARAPI18
+  g_far.AdvControl(g_far.ModuleNumber, ACTL_SETPROGRESSSTATE, reinterpret_cast<void*>(state));
+#endif
+}
+
+void far_set_progress_value(unsigned __int64 completed, unsigned __int64 total) {
+#ifdef FARAPI18
+  PROGRESSVALUE pv;
+  pv.Completed = completed;
+  pv.Total = total;
+  g_far.AdvControl(g_far.ModuleNumber, ACTL_SETPROGRESSVALUE, &pv);
+#endif
 }

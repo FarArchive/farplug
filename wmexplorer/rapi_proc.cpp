@@ -1,17 +1,3 @@
-#include <windows.h>
-
-#include "rapi2.h"
-#include "ceutil.h"
-#include "replfilt.h"
-
-#include "plugin.hpp"
-
-#include "col/AnsiString.h"
-#include "col/UnicodeString.h"
-#include "col/PlainArray.h"
-#include "col/ObjectArray.h"
-using namespace col;
-
 #include "farapi_config.h"
 
 #define _ERROR_WINDOWS
