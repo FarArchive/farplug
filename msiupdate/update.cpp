@@ -190,15 +190,6 @@ void execute() {
   }
   UpdateDialogResult res = UpdateDialog(update_info).show();
   if (res == udrYes) {
-    WindowInfo window_info;
-    bool editor_unsaved = false;
-    for (unsigned idx = 0; !editor_unsaved && Far::get_short_window_info(idx, window_info); idx++) {
-      if ((window_info.Type == WTYPE_EDITOR) && window_info.Modified)
-        editor_unsaved = true;
-    }
-    if (editor_unsaved)
-      FAIL_MSG(Far::get_msg(MSG_ERROR_EDITOR_UNSAVED));
-
     wstring cache_dir;
     if (g_options.cache_enabled) {
       cache_dir = expand_env_vars(g_options.cache_dir);
@@ -232,11 +223,7 @@ void execute() {
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
 
-    vector<DWORD> keys;
-    keys.push_back(KEY_F10);
-    if (Far::get_confirmation_settings() & FCS_EXIT)
-      keys.push_back(KEY_ENTER);
-    Far::post_keys(keys);
+    Far::quit();
   }
   else if (res == udrNo) {
     Options::set_int(c_param_last_check_version, update_info.version);
