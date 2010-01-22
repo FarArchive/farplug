@@ -253,8 +253,7 @@ private:
     if ((update_info.version > current_version) && (update_info.version > last_check_version)) {
       wostringstream st;
       st << msg_tray_version << L' ' << VER_MAJOR(update_info.version) << L'.' << VER_MINOR(update_info.version) << L'.' << VER_BUILD(update_info.version) << L'\n' << msg_tray_update;
-      const WORD c_far_icon = 100;
-      TrayIcon tray_icon(window_name, c_far_icon, msg_tray_title, st.str());
+      TrayIcon tray_icon(window_name, msg_tray_title, st.str());
       if (tray_icon.message_loop(h_event))
         Far::call_user_apc(reinterpret_cast<void*>(cmdExecute));
     }

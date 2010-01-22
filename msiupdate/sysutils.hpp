@@ -1,5 +1,7 @@
 #pragma once
 
+extern HINSTANCE g_h_instance;
+
 wstring get_system_message(HRESULT hr);
 wstring get_console_title();
 bool wait_for_single_object(HANDLE handle, DWORD timeout);
@@ -134,6 +136,6 @@ class Icon: private NonCopyable {
 protected:
   HICON h_icon;
 public:
-  Icon(WORD icon_id, int width, int height);
+  Icon(HMODULE h_module, WORD icon_id, int width, int height);
   ~Icon();
 };

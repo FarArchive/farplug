@@ -1,6 +1,8 @@
 #include "utils.hpp"
 #include "sysutils.hpp"
 
+HINSTANCE g_h_instance = NULL;
+
 wstring get_system_message(HRESULT hr) {
   wostringstream st;
   wchar_t* sys_msg;
@@ -296,6 +298,7 @@ WindowClass::WindowClass(const wstring& name, WindowProc window_proc): name(name
   memset(&wndclass, 0, sizeof(wndclass));
   wndclass.lpfnWndProc = window_proc;
   wndclass.cbWndExtra = sizeof(this);
+  wndclass.hInstance = g_h_instance;
   wndclass.lpszClassName = name.c_str();
   CHECK_SYS(RegisterClassW(&wndclass));
 }
@@ -315,7 +318,7 @@ LRESULT CALLBACK MessageWindow::message_window_proc(HWND h_wnd, UINT msg, WPARAM
 }
 
 MessageWindow::MessageWindow(const wstring& name): WindowClass(name, message_window_proc) {
-  h_wnd = CreateWindowW(name.c_str(), name.c_str(), 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, this);
+  h_wnd = CreateWindowW(name.c_str(), name.c_str(), 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, g_h_instance, this);
   CHECK_SYS(h_wnd);
   SetWindowLongPtrW(h_wnd, 0, reinterpret_cast<LONG_PTR>(this));
 }
@@ -347,8 +350,8 @@ void MessageWindow::end_message_loop(unsigned result) {
   PostQuitMessage(result);
 }
 
-Icon::Icon(WORD icon_id, int width, int height) {
-  h_icon = static_cast<HICON>(LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(icon_id), IMAGE_ICON, width, height, LR_DEFAULTCOLOR));
+Icon::Icon(HMODULE h_module, WORD icon_id, int width, int height) {
+  h_icon = static_cast<HICON>(LoadImage(h_module, MAKEINTRESOURCE(icon_id), IMAGE_ICON, width, height, LR_DEFAULTCOLOR));
   CHECK_SYS(h_icon);
 }
 

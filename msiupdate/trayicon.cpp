@@ -18,7 +18,7 @@ LRESULT TrayIcon::window_proc(UINT msg, WPARAM w_param, LPARAM l_param) {
   return DefWindowProcW(h_wnd, msg, w_param, l_param);
 }
 
-TrayIcon::TrayIcon(const wstring& window_name, WORD icon_id, const wstring& title, const wstring& text): MessageWindow(window_name), Icon(icon_id, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON)) {
+TrayIcon::TrayIcon(const wstring& window_name, const wstring& title, const wstring& text): MessageWindow(window_name), Icon(g_h_instance, c_icon_id, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON)) {
   win2k = LOWORD(GetVersion()) == 5;
   memset(&nid, 0, sizeof(nid));
   nid.cbSize = sizeof(nid);

@@ -1,6 +1,7 @@
 #include "msg.h"
 
 #include "utils.hpp"
+#include "sysutils.hpp"
 #include "farutils.hpp"
 #include "options.hpp"
 #include "ui.hpp"
@@ -74,4 +75,9 @@ int WINAPI ProcessSynchroEventW(int Event, void *Param) {
   }
   return 0;
   FAR_ERROR_HANDLER_END(return 0, return 0, false);
+}
+
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
+  g_h_instance = hinstDLL;
+  return TRUE;
 }
