@@ -9,6 +9,6 @@ enum Command {
 
 void init();
 void clean();
-void execute();
+void execute(bool ask);
 
 }
