@@ -39,7 +39,7 @@ void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
 
 HANDLE WINAPI OpenPluginW(int OpenFrom,INT_PTR Item) {
   FAR_ERROR_HANDLER_BEGIN;
-  Update::execute();
+  Update::execute(true);
   return INVALID_HANDLE_VALUE;
   FAR_ERROR_HANDLER_END(return INVALID_HANDLE_VALUE, return INVALID_HANDLE_VALUE, false);
 }
@@ -68,7 +68,7 @@ int WINAPI ProcessSynchroEventW(int Event, void *Param) {
       Update::clean();
       break;
     case Update::cmdExecute:
-      Update::execute();
+      Update::execute(false);
       break;
     }
   }

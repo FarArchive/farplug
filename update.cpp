@@ -179,7 +179,7 @@ void save_to_cache(const string& package, const wstring& cache_dir, const wstrin
   transaction.commit();
 }
 
-void execute() {
+void execute(bool ask) {
   check_product_installed();
   string update_url_text = load_url(get_update_url() + c_update_script, g_options.http);
   UpdateInfo update_info = parse_update_info(ansi_to_unicode(update_url_text, CP_ACP));
@@ -187,7 +187,7 @@ void execute() {
     info_dlg(Far::get_msg(MSG_UPDATE_NO_NEW_VERSION));
     return;
   }
-  UpdateDialogResult res = UpdateDialog(update_info).show();
+  UpdateDialogResult res = ask ? UpdateDialog(update_info).show() : udrYes;
   if (res == udrYes) {
     wstring cache_dir;
     if (g_options.cache_enabled) {
@@ -210,6 +210,9 @@ void execute() {
       st << "/i \"" << add_trailing_slash(cache_dir) + update_info.package_name + L"\"";
     else
       st << "/i \"" << get_update_url() + update_info.package_name + L"\"";
+    if (!g_options.use_full_install_ui) {
+      st << L" LAUNCHAPP=1";
+    }
     if (!g_options.install_properties.empty())
       st << L" " << g_options.install_properties;
     wstring command = st.str();
