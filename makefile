@@ -30,15 +30,22 @@ INCLUDES = -Ifar -I$(OUTDIR)
 CPPFLAGS = $(CPPFLAGS) -Fo$(OUTDIR)\ -Fd$(OUTDIR)\ $(INCLUDES) $(DEFINES)
 RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
 
+!ifdef BUILD
+!include $(OUTDIR)\far.ini
+!endif
+
 OBJS = $(OUTDIR)\farutils.obj $(OUTDIR)\inet.obj $(OUTDIR)\iniparse.obj $(OUTDIR)\options.obj $(OUTDIR)\pathutils.obj $(OUTDIR)\plugin.obj $(OUTDIR)\strutils.obj $(OUTDIR)\sysutils.obj $(OUTDIR)\transact.obj $(OUTDIR)\trayicon.obj $(OUTDIR)\ui.obj $(OUTDIR)\update.obj
 
 LIBS = user32.lib advapi32.lib shell32.lib winhttp.lib msi.lib
 
-project: depfile
+project: depfile $(OUTDIR)\far.ini
   $(MAKE) -nologo -$(MAKEFLAGS) build_project BUILD=1
 
-distrib: depfile
+distrib: depfile $(OUTDIR)\far.ini
   $(MAKE) -nologo -$(MAKEFLAGS) build_distrib BUILD=1
+
+installer: depfile $(OUTDIR)\far.ini
+  $(MAKE) -nologo -$(MAKEFLAGS) build_installer BUILD=1
 
 build_project: $(OUTDIR)\$(MODULE).dll $(OUTDIR)\en.lng $(OUTDIR)\ru.lng $(OUTDIR)\en.hlf $(OUTDIR)\ru.hlf
 
@@ -87,6 +94,9 @@ $(OUTDIR)\en.hlf: project.ini en.hlf
 $(OUTDIR)\ru.hlf: project.ini ru.hlf
   $(PREPROC)
 
+$(OUTDIR)\far.ini: far\plugin.hpp
+  tools\farver $** $@
+
 $(OUTDIR):
   if not exist $(OUTDIR) mkdir $(OUTDIR)
 
@@ -104,16 +114,28 @@ DISTRIB = $(DISTRIB)_$(PLATFORM)
 DISTRIB = $(DISTRIB)_dbg
 DISTRIB_FILES = $(DISTRIB_FILES) .\$(OUTDIR)\$(MODULE).pdb
 !endif
-DISTRIB = $(DISTRIB).7z
 
-build_distrib: $(DISTRIB)
+build_distrib: $(DISTRIB).7z
 
-$(DISTRIB): $(DISTRIB_FILES) project.ini
+$(DISTRIB).7z: $(DISTRIB_FILES) project.ini
   7z a -mx=9 $@ $(DISTRIB_FILES)
+
+build_installer: $(DISTRIB).msi
+
+WIXOBJ = $(OUTDIR)\installer.wixobj $(OUTDIR)\ui.wixobj $(OUTDIR)\plugin.wixobj
+
+$(DISTRIB).msi: $(DISTRIB_FILES) project.ini $(WIXOBJ) installer\ui_en-us.wxl installer\banner.jpg installer\dialog.jpg installer\exclam.ico installer\info.ico
+  light -nologo -cultures:en-us -loc installer\ui_en-us.wxl -spdb -sval -dcl:high -b installer -out $@ $(WIXOBJ)
+
+{installer}.wxs{$(OUTDIR)}.wixobj::
+  candle -nologo -Iinstaller -out $(OUTDIR)\ -dSourceDir=$(OUTDIR) -dPlatform=$(PLATFORM) -dProduct=$(NAME) -dVersion=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) -dMinFarVersion=$(FAR_VER_MAJOR).$(FAR_VER_MINOR).$(FAR_VER_BUILD) $<
+
+installer\installer.wxs installer\plugin.wxs: installer\installer.wxi installer\plugin.wxi
 
 
 clean:
   rd /s /q $(OUTDIR)
 
 
-.PHONY: project distrib build_project build_distrib depfile clean
+.PHONY: project distrib build_project build_distrib build_installer depfile clean
+.SUFFIXES: .wxs

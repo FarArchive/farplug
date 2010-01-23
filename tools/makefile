@@ -4,4 +4,5 @@ build:
   $(CPP) $(CPPFLAGS) gendep.cpp
   $(CPP) $(CPPFLAGS) msgc.cpp
   $(CPP) $(CPPFLAGS) preproc.cpp
+  $(CPP) $(CPPFLAGS) farver.cpp
   del /q *.obj
