@@ -1,4 +1,4 @@
-CPPFLAGS = -nologo -EHsc -I.. advapi32.lib
+CPPFLAGS = -nologo -EHsc -I.. user32.lib advapi32.lib
 
 build:
   $(CPP) $(CPPFLAGS) gendep.cpp

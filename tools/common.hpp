@@ -12,6 +12,8 @@
 #include <iostream>
 using namespace std;
 
+#include <process.h>
+
 #include "error.hpp"
 #include "utils.hpp"
 #include "sysutils.hpp"
