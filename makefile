@@ -17,7 +17,7 @@ LINKFLAGS = $(LINKFLAGS) -safeseh
 !ifdef RELEASE
 OUTDIR = Release
 DEFINES = $(DEFINES) -DNDEBUG
-CPPFLAGS = $(CPPFLAGS) -O2 -GL -MT
+CPPFLAGS = $(CPPFLAGS) -O1 -GL -MT
 LINKFLAGS = $(LINKFLAGS) -opt:ref -opt:icf -LTCG
 !else
 OUTDIR = Debug
@@ -95,7 +95,7 @@ $(OUTDIR):
 !endif
 
 
-DISTRIB = $(OUTDIR)\$(MODULE)_uni
+DISTRIB = $(OUTDIR)\$(MODULE)_$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)_uni
 DISTRIB_FILES = .\$(OUTDIR)\$(MODULE).dll .\$(OUTDIR)\$(MODULE).map .\$(OUTDIR)\en.lng .\$(OUTDIR)\ru.lng .\$(OUTDIR)\en.hlf .\$(OUTDIR)\ru.hlf
 !if "$(PLATFORM)" != "x86"
 DISTRIB = $(DISTRIB)_$(PLATFORM)
