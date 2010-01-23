@@ -15,8 +15,7 @@ $ #Configuration#
     #Use full install UI# - full UI installation mode will let you review and select Far components.
     #Update stable builds# - only stable builds are checked for updates.
     #Log installation process# - save installation log file (MsiUpdate_2_x86.log) into system temporary directory.
-    #Additional parameters# - space separated values passed to installer. Examples:
-    LAUNCHAPP=1 - start Far after automatic installation is complete.
+    #Additional parameters# - space separated values passed to installer. Example:
     MSIFASTINSTALL=1 - do not create system restore points during installation (Windows 7 or higher).
     #Cache install packages locally# - installation packages will be saved into a local directory.
     #Max. number of packages# - maximum number of packages to save locally. Old packages are deleted when this limit is exceeded.
