@@ -1,4 +1,4 @@
-LIBRARY msiupdate BASE=0x64800000
+LIBRARY <(MODULE)> BASE=0x64800000
 EXPORTS
   GetMinFarVersion
   GetMinFarVersionW

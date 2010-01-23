@@ -1,0 +1,6 @@
+glob:SciTE*
+glob:tools\*.exe
+glob:Debug.x86\*
+glob:Release.x86\*
+glob:Debug.x64\*
+glob:Release.x64\*

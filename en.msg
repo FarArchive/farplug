@@ -1,6 +1,6 @@
-.Language=English,English
+﻿.Language=English,English
 
-plugin.name = MsiUpdate
+plugin.name = <(NAME)>
 
 # Configuration dialog
 config.title = Configuration

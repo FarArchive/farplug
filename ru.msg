@@ -1,61 +1,61 @@
-.Language=English,English
+я╗┐.Language=English,English
 
-plugin.name = MsiUpdate
+plugin.name = <(NAME)>
 
 # Configuration dialog
-config.title = Настройки
-config.use_full_install_ui = &Ручная установка
-config.update_stable_builds = Обновлять &стабильные сборки
-config.logged_install = Запись &лога при установке
-config.install_properties = &Дополнительные параметры:
-config.use_proxy = Использовать собственные настройки &прокси
-config.proxy_server = &Имя сервера:
-config.proxy_port = П&орт:
-config.proxy_auth_scheme = С&хема авторизации:
+config.title = ╨Э╨░╤Б╤В╤А╨╛╨╣╨║╨╕
+config.use_full_install_ui = &╨а╤Г╤З╨╜╨░╤П ╤Г╤Б╤В╨░╨╜╨╛╨▓╨║╨░
+config.update_stable_builds = ╨Ю╨▒╨╜╨╛╨▓╨╗╤П╤В╤М &╤Б╤В╨░╨▒╨╕╨╗╤М╨╜╤Л╨╡ ╤Б╨▒╨╛╤А╨║╨╕
+config.logged_install = ╨Ч╨░╨┐╨╕╤Б╤М &╨╗╨╛╨│╨░ ╨┐╤А╨╕ ╤Г╤Б╤В╨░╨╜╨╛╨▓╨║╨╡
+config.install_properties = &╨Ф╨╛╨┐╨╛╨╗╨╜╨╕╤В╨╡╨╗╤М╨╜╤Л╨╡ ╨┐╨░╤А╨░╨╝╨╡╤В╤А╤Л:
+config.use_proxy = ╨Ш╤Б╨┐╨╛╨╗╤М╨╖╨╛╨▓╨░╤В╤М ╤Б╨╛╨▒╤Б╤В╨▓╨╡╨╜╨╜╤Л╨╡ ╨╜╨░╤Б╤В╤А╨╛╨╣╨║╨╕ &╨┐╤А╨╛╨║╤Б╨╕
+config.proxy_server = &╨Ш╨╝╤П ╤Б╨╡╤А╨▓╨╡╤А╨░:
+config.proxy_port = ╨Я&╨╛╤А╤В:
+config.proxy_auth_scheme = ╨б&╤Е╨╡╨╝╨░ ╨░╨▓╤В╨╛╤А╨╕╨╖╨░╤Ж╨╕╨╕:
 config.proxy_auth.basic = Basic
 config.proxy_auth.ntlm = NTLM
 config.proxy_auth.passport = Passport
 config.proxy_auth.digest = Digest
 config.proxy_auth.negotiate = Negotiate
-config.proxy_user_name = И&мя пользователя:
-config.proxy_password = П&ароль:
-config.cache_enabled = Сохра&нять инсталляционные пакеты локально
-config.cache_max_size = Максимальное &число пакетов:
-config.cache_dir = &Каталог для сохранения:
+config.proxy_user_name = ╨Ш&╨╝╤П ╨┐╨╛╨╗╤М╨╖╨╛╨▓╨░╤В╨╡╨╗╤П:
+config.proxy_password = ╨Я&╨░╤А╨╛╨╗╤М:
+config.cache_enabled = ╨б╨╛╤Е╤А╨░&╨╜╤П╤В╤М ╨╕╨╜╤Б╤В╨░╨╗╨╗╤П╤Ж╨╕╨╛╨╜╨╜╤Л╨╡ ╨┐╨░╨║╨╡╤В╤Л ╨╗╨╛╨║╨░╨╗╤М╨╜╨╛
+config.cache_max_size = ╨Ь╨░╨║╤Б╨╕╨╝╨░╨╗╤М╨╜╨╛╨╡ &╤З╨╕╤Б╨╗╨╛ ╨┐╨░╨║╨╡╤В╨╛╨▓:
+config.cache_dir = &╨Ъ╨░╤В╨░╨╗╨╛╨│ ╨┤╨╗╤П ╤Б╨╛╤Е╤А╨░╨╜╨╡╨╜╨╕╤П:
 
 # Update dialog
-update.new_version = Доступна новая версия:
-update.no_new_version = У вас установлена последняя версия.
-update.question = Хотите запустить обновление?
-update.changelog = &Посмотреть изменения
+update.new_version = ╨Ф╨╛╤Б╤В╤Г╨┐╨╜╨░ ╨╜╨╛╨▓╨░╤П ╨▓╨╡╤А╤Б╨╕╤П:
+update.no_new_version = ╨г ╨▓╨░╤Б ╤Г╤Б╤В╨░╨╜╨╛╨▓╨╗╨╡╨╜╨░ ╨┐╨╛╤Б╨╗╨╡╨┤╨╜╤П╤П ╨▓╨╡╤А╤Б╨╕╤П.
+update.question = ╨е╨╛╤В╨╕╤В╨╡ ╨╖╨░╨┐╤Г╤Б╤В╨╕╤В╤М ╨╛╨▒╨╜╨╛╨▓╨╗╨╡╨╜╨╕╨╡?
+update.changelog = &╨Я╨╛╤Б╨╝╨╛╤В╤А╨╡╤В╤М ╨╕╨╖╨╝╨╡╨╜╨╡╨╜╨╕╤П
 
 # Tray notification
-tray.title = Доступно обновление.
-tray.version = Доступна новая версия:
-tray.update = Кликните для запуска обновления.
+tray.title = ╨Ф╨╛╤Б╤В╤Г╨┐╨╜╨╛ ╨╛╨▒╨╜╨╛╨▓╨╗╨╡╨╜╨╕╨╡.
+tray.version = ╨Ф╨╛╤Б╤В╤Г╨┐╨╜╨░ ╨╜╨╛╨▓╨░╤П ╨▓╨╡╤А╤Б╨╕╤П:
+tray.update = ╨Ъ╨╗╨╕╨║╨╜╨╕╤В╨╡ ╨┤╨╗╤П ╨╖╨░╨┐╤Г╤Б╨║╨░ ╨╛╨▒╨╜╨╛╨▓╨╗╨╡╨╜╨╕╤П.
 
 # Download progress
-download.title = Загрузка
-download.message = Загрузка данных
+download.title = ╨Ч╨░╨│╤А╤Г╨╖╨║╨░
+download.message = ╨Ч╨░╨│╤А╤Г╨╖╨║╨░ ╨┤╨░╨╜╨╜╤Л╤Е
 
 # Generic buttons
 button.ok = OK
-button.cancel = Отмена
-button.yes = Да
-button.no = Нет
+button.cancel = ╨Ю╤В╨╝╨╡╨╜╨░
+button.yes = ╨Ф╨░
+button.no = ╨Э╨╡╤В
 
 # Size and speed suffixes
-suffix.size.b = Б
-suffix.size.kb = КБ
-suffix.size.mb = МБ
-suffix.size.gb = ГБ
-suffix.size.tb = ТБ
-suffix.speed.b = Б/s
-suffix.speed.kb = КБ/s
-suffix.speed.mb = МБ/s
-suffix.speed.gb = ГБ/s
-suffix.speed.tb = ТБ/s
+suffix.size.b = ╨С
+suffix.size.kb = ╨Ъ╨С
+suffix.size.mb = ╨Ь╨С
+suffix.size.gb = ╨У╨С
+suffix.size.tb = ╨в╨С
+suffix.speed.b = ╨С/s
+suffix.speed.kb = ╨Ъ╨С/s
+suffix.speed.mb = ╨Ь╨С/s
+suffix.speed.gb = ╨У╨С/s
+suffix.speed.tb = ╨в╨С/s
 
 # Errors
-error.no_msi = MSI пакет не установлен.
-error.editor_unsaved = Открыто окно редактора с несохраненными данными.
+error.no_msi = MSI ╨┐╨░╨║╨╡╤В ╨╜╨╡ ╤Г╤Б╤В╨░╨╜╨╛╨▓╨╗╨╡╨╜.
+error.editor_unsaved = ╨Ю╤В╨║╤А╤Л╤В╨╛ ╨╛╨║╨╜╨╛ ╤А╨╡╨┤╨░╨║╤В╨╛╤А╨░ ╤Б ╨╜╨╡╤Б╨╛╤Е╤А╨░╨╜╨╡╨╜╨╜╤Л╨╝╨╕ ╨┤╨░╨╜╨╜╤Л╨╝╨╕.

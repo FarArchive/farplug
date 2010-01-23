@@ -1,16 +1,15 @@
-m4_include(`version.m4')m4_dnl
-.Language=English,English
-.PluginContents=MsiUpdate
+﻿.Language=English,English
+.PluginContents=<(NAME)>
 
 @Contents
-$^#MsiUpdate __VER_MAJOR__.__VER_MINOR__.__VER_PATCH__#
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 
     Plugin notifies about new versions of Far Manager and performs automatic updates using official MSI packages.
     ~Updates~@http://forum.farmanager.com/viewtopic.php?t=4843@
     ~Duscussion~@http://forum.farmanager.com/viewtopic.php?t=4844@
 
 @config
-$^#MsiUpdate __VER_MAJOR__.__VER_MINOR__.__VER_PATCH__#
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #Configuration#
 
     #Use full install UI# - full UI installation mode will let you review and select Far components.
@@ -24,7 +23,7 @@ $ #Configuration#
     #Cache directory# - directory name for installation package storage. It can contain environment variables. Examle: %FARHOME%\msicache
 
 @update
-$^#MsiUpdate __VER_MAJOR__.__VER_MINOR__.__VER_PATCH__#
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #Update dialog#
 
     This dialog is shown when new version is available. #View changelog# button shows changes done between current and new version.
