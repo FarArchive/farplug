@@ -134,7 +134,7 @@ installer\installer.wxs installer\plugin.wxs: installer\installer.wxi installer\
 
 
 clean:
-  rd /s /q $(OUTDIR)
+  if exist $(OUTDIR) rd /s /q $(OUTDIR)
 
 
 .PHONY: project distrib build_project build_distrib build_installer depfile clean
