@@ -122,13 +122,20 @@ $(DISTRIB).7z: $(DISTRIB_FILES) project.ini
 
 build_installer: $(DISTRIB).msi
 
+LIGHTFLAGS = -nologo -cultures:en-us -spdb -sval -b installer
+CANDLEFLAGS = -nologo -Iinstaller -dSourceDir=$(OUTDIR) -dPlatform=$(PLATFORM) -dProduct=$(NAME) -dVersion=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) -dMinFarVersion=$(FAR_VER_MAJOR).$(FAR_VER_MINOR).$(FAR_VER_BUILD)
+!ifdef RELEASE
+LIGHTFLAGS = $(LIGHTFLAGS) -dcl:high
+!else
+LIGHTFLAGS = $(LIGHTFLAGS) -sh -cc $(OUTDIR) -reusecab -O2
+!endif
 WIXOBJ = $(OUTDIR)\installer.wixobj $(OUTDIR)\ui.wixobj $(OUTDIR)\plugin.wixobj
 
 $(DISTRIB).msi: $(DISTRIB_FILES) project.ini $(WIXOBJ) installer\ui_en-us.wxl installer\banner.jpg installer\dialog.jpg installer\exclam.ico installer\info.ico
-  light -nologo -cultures:en-us -loc installer\ui_en-us.wxl -spdb -sval -dcl:high -b installer -out $@ $(WIXOBJ)
+  light $(LIGHTFLAGS) -loc installer\ui_en-us.wxl -out $@ $(WIXOBJ)
 
 {installer}.wxs{$(OUTDIR)}.wixobj::
-  candle -nologo -Iinstaller -out $(OUTDIR)\ -dSourceDir=$(OUTDIR) -dPlatform=$(PLATFORM) -dProduct=$(NAME) -dVersion=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) -dMinFarVersion=$(FAR_VER_MAJOR).$(FAR_VER_MINOR).$(FAR_VER_BUILD) $<
+  candle $(CANDLEFLAGS) -out $(OUTDIR)\ $<
 
 installer\installer.wxs installer\plugin.wxs: installer\installer.wxi installer\plugin.wxi
 
