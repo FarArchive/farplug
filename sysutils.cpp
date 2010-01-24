@@ -186,6 +186,10 @@ void Key::set_str(const wchar_t* name, const wstring& value) {
   CHECK_ADVSYS(RegSetValueExW(h_key, name, 0, REG_SZ, reinterpret_cast<LPBYTE>(const_cast<wchar_t*>(value.c_str())), (static_cast<DWORD>(value.size()) + 1) * sizeof(wchar_t)));
 }
 
+void Key::delete_value(const wchar_t* name) {
+  CHECK_ADVSYS(RegDeleteValueW(h_key, name));
+}
+
 FindFile::FindFile(const wstring& file_path): file_path(file_path), h_find(INVALID_HANDLE_VALUE) {
 }
 

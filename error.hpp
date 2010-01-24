@@ -24,6 +24,14 @@ struct Error {
   throw error; \
 }
 
+#define IGNORE_ERRORS(code) { \
+  try { \
+    code; \
+  } \
+  catch (...) { \
+  } \
+}
+
 #define CHECK_SYS(code) { if (!(code)) FAIL(HRESULT_FROM_WIN32(GetLastError())); }
 #define CHECK_ADVSYS(code) { DWORD __ret = (code); if (__ret != ERROR_SUCCESS) FAIL(HRESULT_FROM_WIN32(__ret)); }
 #define CHECK_COM(code) { HRESULT __ret = (code); if (FAILED(__ret)) FAIL(__ret); }

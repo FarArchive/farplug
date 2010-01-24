@@ -59,6 +59,7 @@ public:
   void set_bool(const wchar_t* name, bool value);
   void set_int(const wchar_t* name, unsigned value);
   void set_str(const wchar_t* name, const wstring& value);
+  void delete_value(const wchar_t* name);
 };
 
 class FindFile: private NonCopyable {

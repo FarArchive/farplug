@@ -21,6 +21,9 @@ const wchar_t* c_param_cache_enabled = L"cache_enabled";
 const wchar_t* c_param_cache_max_size = L"cache_max_size";
 const wchar_t* c_param_cache_dir = L"cache_dir";
 
+const unsigned c_def_cache_max_size = 2;
+const wchar_t* c_def_cache_dir = L"%TEMP%";
+
 wstring get_plugin_key_name() {
   return add_trailing_slash(Far::get_root_key_name()) + c_plugin_key_name;
 }
@@ -40,25 +43,34 @@ wstring Options::get_str(const wchar_t* name, const wstring& def_value) {
   return plugin_key.query_str(name, def_value);
 }
 
-void Options::set_int(const wchar_t* name, unsigned value) {
+void Options::set_int(const wchar_t* name, unsigned value, unsigned def_value) {
   Key plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE);
-  plugin_key.set_int(name, value);
+  if (value == def_value)
+    IGNORE_ERRORS(plugin_key.delete_value(name))
+  else
+    plugin_key.set_int(name, value);
 }
 
-void Options::set_bool(const wchar_t* name, bool value) {
+void Options::set_bool(const wchar_t* name, bool value, bool def_value) {
   Key plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE);
-  plugin_key.set_bool(name, value);
+  if (value == def_value)
+    IGNORE_ERRORS(plugin_key.delete_value(name))
+  else
+    plugin_key.set_bool(name, value);
 }
 
-void Options::set_str(const wchar_t* name, const wstring& value) {
+void Options::set_str(const wchar_t* name, const wstring& value, const wstring& def_value) {
   Key plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE);
-  plugin_key.set_str(name, value);
+  if (value == def_value)
+    IGNORE_ERRORS(plugin_key.delete_value(name))
+  else
+    plugin_key.set_str(name, value);
 }
 
 void Options::load() {
   use_full_install_ui = get_bool(c_param_use_full_install_ui);
   update_stable_builds = get_bool(c_param_update_stable_builds);
-  logged_install = get_bool(c_param_logged_install, true);
+  logged_install = get_bool(c_param_logged_install);
   install_properties = get_str(c_param_install_properties);
   http.use_proxy = get_bool(c_param_use_proxy);
   http.proxy_server = get_str(c_param_proxy_server);
@@ -66,9 +78,9 @@ void Options::load() {
   http.proxy_auth_scheme = get_int(c_param_proxy_auth_scheme);
   http.proxy_user_name = get_str(c_param_proxy_user_name);
   http.proxy_password = get_str(c_param_proxy_password);
-  cache_enabled = get_bool(c_param_cache_enabled, false);
-  cache_max_size = get_int(c_param_cache_max_size, 2);
-  cache_dir = get_str(c_param_cache_dir, L"%TEMP%");
+  cache_enabled = get_bool(c_param_cache_enabled);
+  cache_max_size = get_int(c_param_cache_max_size, c_def_cache_max_size);
+  cache_dir = get_str(c_param_cache_dir, c_def_cache_dir);
 };
 
 void Options::save() {
@@ -83,6 +95,6 @@ void Options::save() {
   set_str(c_param_proxy_user_name, http.proxy_user_name);
   set_str(c_param_proxy_password, http.proxy_password);
   set_bool(c_param_cache_enabled, cache_enabled);
-  set_int(c_param_cache_max_size, cache_max_size);
-  set_str(c_param_cache_dir, cache_dir);
+  set_int(c_param_cache_max_size, cache_max_size, c_def_cache_max_size);
+  set_str(c_param_cache_dir, cache_dir, c_def_cache_dir);
 }
