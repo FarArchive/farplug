@@ -15,6 +15,7 @@
     <Property Id="ARPHELPLINK" Value="$(var.SupportUrl)" />
     <Property Id="ARPURLINFOABOUT" Value="$(var.InfoUrl)" />
     <Property Id="ARPURLUPDATEINFO" Value="$(var.UpdateUrl)" />
+    <Property Id="ARPNOMODIFY" Value="1" />
     <Media Id="1" Cabinet="plugin.cab" EmbedCab="yes" />
     <CustomAction Id="SetUserInstallDir" Property="INSTALLDIR" Value="[USERINSTALLDIR]" />
     <CustomAction Id="SetALLUSERS" Property="ALLUSERS" Value="" />
