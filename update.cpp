@@ -210,9 +210,6 @@ void execute(bool ask) {
       st << "/i \"" << add_trailing_slash(cache_dir) + update_info.package_name + L"\"";
     else
       st << "/i \"" << get_update_url() + update_info.package_name + L"\"";
-    if (!g_options.use_full_install_ui) {
-      st << L" LAUNCHAPP=1";
-    }
     if (!g_options.install_properties.empty())
       st << L" " << g_options.install_properties;
     wstring command = st.str();
