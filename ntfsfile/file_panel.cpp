@@ -772,6 +772,10 @@ private:
     else if ((msg == DN_BTNCLICK) && (param1 == dlg->use_usn_journal_ctrl_id)) {
       dlg->enable(dlg->delete_usn_journal_ctrl_id, param2 != 0);
       dlg->enable(dlg->use_cache_ctrl_id, param2 != 0);
+      dlg->enable(dlg->cache_dir_lbl_id, param2 != 0 && dlg->get_check(dlg->use_cache_ctrl_id));
+      dlg->enable(dlg->cache_dir_ctrl_id, param2 != 0 && dlg->get_check(dlg->use_cache_ctrl_id));
+    }
+    else if ((msg == DN_BTNCLICK) && (param1 == dlg->use_cache_ctrl_id)) {
       dlg->enable(dlg->cache_dir_lbl_id, param2 != 0);
       dlg->enable(dlg->cache_dir_ctrl_id, param2 != 0);
     }
