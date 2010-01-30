@@ -861,9 +861,9 @@ public:
     new_line();
     use_cache_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_CACHE), mode.use_cache, mode.use_usn_journal ? 0 : DIF_DISABLE);
     spacer(2);
-    cache_dir_lbl_id = label(far_get_msg(MSG_FILE_PANEL_CACHE_DIR), AUTO_SIZE, mode.use_usn_journal ? 0 : DIF_DISABLE);
+    cache_dir_lbl_id = label(far_get_msg(MSG_FILE_PANEL_CACHE_DIR), AUTO_SIZE, mode.use_cache && mode.use_usn_journal ? 0 : DIF_DISABLE);
     spacer(1);
-    cache_dir_ctrl_id = var_edit_box(mode.cache_dir, MAX_PATH, AUTO_SIZE, mode.use_usn_journal ? 0 : DIF_DISABLE);
+    cache_dir_ctrl_id = var_edit_box(mode.cache_dir, MAX_PATH, AUTO_SIZE, mode.use_cache && mode.use_usn_journal ? 0 : DIF_DISABLE);
     new_line();
     separator();
     new_line();
