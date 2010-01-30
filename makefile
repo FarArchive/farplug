@@ -1,18 +1,20 @@
 !include project.ini
 
+COMMONDIR = ..\common
+TOOLSDIR = ..\tools
+
 CPPFLAGS = -nologo -Zi -W3 -Gy -GS -GR -EHsc -MP -c
-DEFINES = -DWIN32_LEAN_AND_MEAN -D_WINDOWS -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_FAR_USE_FARFINDDATA -D_WIN32_WINNT=0x0500
-LINKFLAGS = -nologo -debug -incremental:no -stack:10000000 -map -manifest:no -dynamicbase -nxcompat -largeaddressaware -dll
+DEFINES = -DWIN32_LEAN_AND_MEAN -D_WINDOWS -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_WIN32_WINNT=0x0500
+LINKFLAGS = -nologo -debug -incremental:no -map -manifest:no -dynamicbase -nxcompat -largeaddressaware -dll
 RCFLAGS = -nologo
 
 !if "$(CPU)" == "AMD64" || "$(PLATFORM)" == "x64"
 PLATFORM = x64
-DEFINES = $(DEFINES) -DWIN64
 !else
 PLATFORM = x86
-DEFINES = $(DEFINES) -DWIN32
 LINKFLAGS = $(LINKFLAGS) -safeseh
 !endif
+DEFINES = $(DEFINES) -DPLATFORM=$(PLATFORM)
 
 !ifdef RELEASE
 OUTDIR = Release
@@ -21,18 +23,18 @@ CPPFLAGS = $(CPPFLAGS) -O2 -GL -MT
 LINKFLAGS = $(LINKFLAGS) -opt:ref -opt:icf -LTCG
 !else
 OUTDIR = Debug
-DEFINES = $(DEFINES) -DDEBUG -D_DEBUG
+DEFINES = $(DEFINES) -DDEBUG
 CPPFLAGS = $(CPPFLAGS) -Od -RTC1 -MTd
 LINKFLAGS = $(LINKFLAGS) -fixed:no
 !endif
 OUTDIR = $(OUTDIR).$(PLATFORM)
-INCLUDES = -I7z -Ifar -I$(OUTDIR)
+INCLUDES = -I7z -Ifar -I$(OUTDIR) -I$(COMMONDIR)
 CPPFLAGS = $(CPPFLAGS) -Fo$(OUTDIR)\ -Fd$(OUTDIR)\ $(INCLUDES) $(DEFINES)
 RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
 
 OBJS = $(OUTDIR)\archive.obj $(OUTDIR)\farutils.obj $(OUTDIR)\pathutils.obj $(OUTDIR)\plugin.obj $(OUTDIR)\strutils.obj $(OUTDIR)\sysutils.obj $(OUTDIR)\ui.obj
 
-LIBS = advapi32.lib ole32.lib oleaut32.lib
+LIBS = user32.lib advapi32.lib ole32.lib oleaut32.lib
 
 project: depfile
   $(MAKE) -nologo -$(MAKEFLAGS) build_project BUILD=1
@@ -50,19 +52,22 @@ $(OBJS): $(OUTDIR)\headers.pch
 .cpp{$(OUTDIR)}.obj::
   $(CPP) $(CPPFLAGS) -Yuheaders.hpp -FIheaders.hpp -Fp$(OUTDIR)\headers.pch $<
 
+{$(COMMONDIR)}.cpp{$(OUTDIR)}.obj::
+  $(CPP) $(CPPFLAGS) -Yuheaders.hpp -FIheaders.hpp -Fp$(OUTDIR)\headers.pch $<
+
 $(OUTDIR)\headers.pch: headers.cpp headers.hpp
   $(CPP) $(CPPFLAGS) headers.cpp -Ycheaders.hpp -Fp$(OUTDIR)\headers.pch
 
 depfile: $(OUTDIR) $(OUTDIR)\msg.h
-  tools\gendep.exe $(INCLUDES) > $(OUTDIR)\dep.mak
+  $(TOOLSDIR)\gendep.exe $(INCLUDES) > $(OUTDIR)\dep.mak
 
 $(OUTDIR)\msg.h $(OUTDIR)\en.lng $(OUTDIR)\ru.lng: $(OUTDIR) $(OUTDIR)\en.msg $(OUTDIR)\ru.msg
-  tools\msgc -in $(OUTDIR)\en.msg $(OUTDIR)\ru.msg -out $(OUTDIR)\msg.h $(OUTDIR)\en.lng $(OUTDIR)\ru.lng
+  $(TOOLSDIR)\msgc -in $(OUTDIR)\en.msg $(OUTDIR)\ru.msg -out $(OUTDIR)\msg.h $(OUTDIR)\en.lng $(OUTDIR)\ru.lng
 
 $(OUTDIR)\version.res: $(OUTDIR)\version.rc
-  $(RC) $(RCFLAGS) $(OUTDIR)\version.rc
+  $(RC) $(RCFLAGS) -fo$@ $**
 
-PREPROC = tools\preproc $** $@
+PREPROC = $(TOOLSDIR)\preproc $** $@
 
 $(OUTDIR)\version.rc: project.ini version.rc
   $(PREPROC)
@@ -90,7 +95,7 @@ $(OUTDIR):
 !endif
 
 
-DISTRIB = $(OUTDIR)\$(MODULE)_uni
+DISTRIB = $(OUTDIR)\$(MODULE)_$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)_uni
 DISTRIB_FILES = .\$(OUTDIR)\$(MODULE).dll .\$(OUTDIR)\$(MODULE).map .\$(OUTDIR)\en.lng .\$(OUTDIR)\ru.lng .\$(OUTDIR)\en.hlf .\$(OUTDIR)\ru.hlf
 !if "$(PLATFORM)" != "x86"
 DISTRIB = $(DISTRIB)_$(PLATFORM)
@@ -99,16 +104,15 @@ DISTRIB = $(DISTRIB)_$(PLATFORM)
 DISTRIB = $(DISTRIB)_dbg
 DISTRIB_FILES = $(DISTRIB_FILES) .\$(OUTDIR)\$(MODULE).pdb
 !endif
-DISTRIB = $(DISTRIB).7z
 
-build_distrib: $(DISTRIB)
+build_distrib: $(DISTRIB).7z
 
-$(DISTRIB): $(DISTRIB_FILES) project.ini
+$(DISTRIB).7z: $(DISTRIB_FILES) project.ini
   7z a -mx=9 $@ $(DISTRIB_FILES)
 
 
 clean:
-  rd /s /q $(OUTDIR)
+  if exist $(OUTDIR) rd /s /q $(OUTDIR)
 
 
 .PHONY: project distrib build_project build_distrib depfile clean

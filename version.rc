@@ -14,7 +14,11 @@ BEGIN
     BEGIN
       VALUE "FileVersion", "<(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>.0\0"
       VALUE "ProductVersion", "<(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>.0\0"
-      VALUE "FileDescription", "<(NAME)> plugin for Far Manager\0"
+#if PLATFORM==x64
+      VALUE "FileDescription", "<(NAME)> for Far Manager 2 x64\0"
+#else
+      VALUE "FileDescription", "<(NAME)> for Far Manager 2\0"
+#endif
       VALUE "OriginalFilename", "<(MODULE)>.dll\0"
 #ifdef DEBUG 
       VALUE "SpecialBuild", "Debug build.\0"

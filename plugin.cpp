@@ -79,7 +79,7 @@ void Plugin::list(PluginPanelItem** panel_item, int* items_number) {
     throw;
   }
   *panel_item = items;
-  *items_number = file_list->size();
+  *items_number = static_cast<int>(file_list->size());
 }
 
 int WINAPI GetMinFarVersion(void) {

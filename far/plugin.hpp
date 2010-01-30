@@ -5,7 +5,7 @@
 /*
   plugin.hpp
 
-  Plugin API for FAR Manager 2.0 build 1331
+  Plugin API for FAR Manager 2.0 build 1349
 */
 
 /*
@@ -42,7 +42,7 @@ other possible license with no implications from the above license on them.
 
 #define FARMANAGERVERSION_MAJOR 2
 #define FARMANAGERVERSION_MINOR 0
-#define FARMANAGERVERSION_BUILD 1331
+#define FARMANAGERVERSION_BUILD 1349
 
 #ifndef RC_INVOKED
 
@@ -221,6 +221,7 @@ enum FarDialogItemFlags
 	DIF_MASKEDIT              = 0x00400000UL,
 	DIF_SELECTONENTRY         = 0x00800000UL,
 	DIF_3STATE                = 0x00800000UL,
+	DIF_EDITPATH              = 0x01000000UL,
 	DIF_LISTWRAPMODE          = 0x01000000UL,
 	DIF_NOAUTOCOMPLETE        = 0x02000000UL,
 	DIF_LISTAUTOHIGHLIGHT     = 0x02000000UL,
@@ -941,6 +942,7 @@ enum ADVANCED_CONTROL_COMMANDS
 	ACTL_SYNCHRO              = 28,
 	ACTL_SETPROGRESSSTATE     = 29,
 	ACTL_SETPROGRESSVALUE     = 30,
+	ACTL_QUIT                 = 31,
 };
 
 
@@ -1506,6 +1508,7 @@ enum INPUTBOXFLAGS
 	FIB_NOUSELASTHISTORY = 0x00000008,
 	FIB_BUTTONS          = 0x00000010,
 	FIB_NOAMPERSAND      = 0x00000020,
+	FIB_EDITPATH         = 0x01000000,
 };
 
 typedef int (WINAPI *FARAPIINPUTBOX)(
