@@ -12,19 +12,19 @@ namespace Far {
     } \
     else { \
       if (!silent) { \
-        error_dlg(e); \
+        Far::error_dlg(e); \
       } \
       return_error; \
     } \
   } \
   catch (const std::exception& e) { \
     if (!silent) { \
-      error_dlg(e); \
+      Far::error_dlg(e); \
     } \
     return_error; \
   } \
   catch (...) { \
-    error_dlg(L"Unknown exception"); \
+    Far::error_dlg(L"Unknown exception"); \
     return_error; \
   }
 
@@ -55,6 +55,11 @@ void restore_screen(HANDLE h_scr);
 void flush_screen();
 
 int viewer(const wstring& file_name, const wstring& title);
+
+void error_dlg(const Error& e);
+void error_dlg(const std::exception& e);
+void error_dlg(const wstring& msg);
+void info_dlg(const wstring& msg);
 
 #define AUTO_SIZE (-1)
 const unsigned c_x_frame = 5;

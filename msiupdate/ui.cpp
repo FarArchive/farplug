@@ -6,36 +6,6 @@
 #include "options.hpp"
 #include "ui.hpp"
 
-void error_dlg(const Error& e) {
-  wostringstream st;
-  st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-  if (e.code != NO_ERROR) {
-    wstring sys_msg = get_system_message(e.code);
-    if (!sys_msg.empty())
-      st << word_wrap(sys_msg, Far::get_optimal_msg_width()) << L'\n';
-  }
-  for (list<wstring>::const_iterator message = e.messages.begin(); message != e.messages.end(); message++) {
-    st << word_wrap(*message, Far::get_optimal_msg_width()) << L'\n';
-  }
-  st << extract_file_name(widen(e.file)) << L':' << e.line;
-  Far::message(st.str(), 0, FMSG_WARNING | FMSG_MB_OK);
-}
-
-void error_dlg(const std::exception& e) {
-  wostringstream st;
-  st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-  st << word_wrap(widen(e.what()), Far::get_optimal_msg_width()) << L'\n';
-  Far::message(st.str(), 0, FMSG_WARNING | FMSG_MB_OK);
-}
-
-void error_dlg(const wstring& msg) {
-  Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L'\n' + msg, 0, FMSG_WARNING | FMSG_MB_OK);
-}
-
-void info_dlg(const wstring& msg) {
-  Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L'\n' + msg, 0, FMSG_MB_OK);
-}
-
 ProgressMonitor::ProgressMonitor(bool lazy): h_scr(NULL) {
   QueryPerformanceCounter(reinterpret_cast<PLARGE_INTEGER>(&t_curr));
   t_start = t_curr;

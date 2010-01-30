@@ -1,18 +1,20 @@
 !include project.ini
 
+COMMONDIR = ..\common
+TOOLSDIR = ..\tools
+
 CPPFLAGS = -nologo -Zi -W3 -Gy -GS -GR -EHsc -MP -c
-DEFINES = -DWIN32_LEAN_AND_MEAN -D_WINDOWS -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_FAR_USE_FARFINDDATA -D_WIN32_WINNT=0x0500
-LINKFLAGS = -nologo -debug -incremental:no -stack:10000000 -map -manifest:no -dynamicbase -nxcompat -largeaddressaware -dll
+DEFINES = -DWIN32_LEAN_AND_MEAN -D_WINDOWS -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_WIN32_WINNT=0x0500
+LINKFLAGS = -nologo -debug -incremental:no -map -manifest:no -dynamicbase -nxcompat -largeaddressaware -dll
 RCFLAGS = -nologo
 
 !if "$(CPU)" == "AMD64" || "$(PLATFORM)" == "x64"
 PLATFORM = x64
-DEFINES = $(DEFINES) -DWIN64
 !else
 PLATFORM = x86
-DEFINES = $(DEFINES) -DWIN32
 LINKFLAGS = $(LINKFLAGS) -safeseh
 !endif
+DEFINES = $(DEFINES) -DPLATFORM=$(PLATFORM)
 
 !ifdef RELEASE
 OUTDIR = Release
@@ -21,12 +23,12 @@ CPPFLAGS = $(CPPFLAGS) -O1 -GL -MT
 LINKFLAGS = $(LINKFLAGS) -opt:ref -opt:icf -LTCG
 !else
 OUTDIR = Debug
-DEFINES = $(DEFINES) -DDEBUG -D_DEBUG
+DEFINES = $(DEFINES) -DDEBUG
 CPPFLAGS = $(CPPFLAGS) -Od -RTC1 -MTd
 LINKFLAGS = $(LINKFLAGS) -fixed:no
 !endif
 OUTDIR = $(OUTDIR).$(PLATFORM)
-INCLUDES = -Ifar -I$(OUTDIR)
+INCLUDES = -Ifar -I$(OUTDIR) -I$(COMMONDIR)
 CPPFLAGS = $(CPPFLAGS) -Fo$(OUTDIR)\ -Fd$(OUTDIR)\ $(INCLUDES) $(DEFINES)
 RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
 
@@ -57,14 +59,17 @@ $(OBJS): $(OUTDIR)\headers.pch
 .cpp{$(OUTDIR)}.obj::
   $(CPP) $(CPPFLAGS) -Yuheaders.hpp -FIheaders.hpp -Fp$(OUTDIR)\headers.pch $<
 
+{$(COMMONDIR)}.cpp{$(OUTDIR)}.obj::
+  $(CPP) $(CPPFLAGS) -Yuheaders.hpp -FIheaders.hpp -Fp$(OUTDIR)\headers.pch $<
+
 $(OUTDIR)\headers.pch: headers.cpp headers.hpp
   $(CPP) $(CPPFLAGS) headers.cpp -Ycheaders.hpp -Fp$(OUTDIR)\headers.pch
 
 depfile: $(OUTDIR) $(OUTDIR)\msg.h
-  tools\gendep.exe $(INCLUDES) > $(OUTDIR)\dep.mak
+  $(TOOLSDIR)\gendep.exe $(INCLUDES) > $(OUTDIR)\dep.mak
 
 $(OUTDIR)\msg.h $(OUTDIR)\en.lng $(OUTDIR)\ru.lng: $(OUTDIR) $(OUTDIR)\en.msg $(OUTDIR)\ru.msg
-  tools\msgc -in $(OUTDIR)\en.msg $(OUTDIR)\ru.msg -out $(OUTDIR)\msg.h $(OUTDIR)\en.lng $(OUTDIR)\ru.lng
+  $(TOOLSDIR)\msgc -in $(OUTDIR)\en.msg $(OUTDIR)\ru.msg -out $(OUTDIR)\msg.h $(OUTDIR)\en.lng $(OUTDIR)\ru.lng
 
 $(OUTDIR)\version.res: $(OUTDIR)\version.rc
   $(RC) $(RCFLAGS) -fo$@ $**
@@ -74,7 +79,7 @@ $(OUTDIR)\icon.res: icon.rc
 
 icon.rc: update.ico
 
-PREPROC = tools\preproc $** $@
+PREPROC = $(TOOLSDIR)\preproc $** $@
 
 $(OUTDIR)\version.rc: project.ini version.rc
   $(PREPROC)
@@ -95,7 +100,7 @@ $(OUTDIR)\ru.hlf: project.ini ru.hlf
   $(PREPROC)
 
 $(OUTDIR)\far.ini: far\plugin.hpp
-  tools\farver $** $@
+  $(TOOLSDIR)\farver $** $@
 
 $(OUTDIR):
   if not exist $(OUTDIR) mkdir $(OUTDIR)

@@ -1,7 +1,7 @@
+#include "msg.h"
 #include "utils.hpp"
+#include "sysutils.hpp"
 #include "farutils.hpp"
-#include "options.hpp"
-#include "ui.hpp"
 
 namespace Far {
 
@@ -103,6 +103,36 @@ void flush_screen() {
 
 int viewer(const wstring& file_name, const wstring& title) {
   return g_far.Viewer(file_name.c_str(), title.c_str(), 0, 0, -1, -1, VF_DISABLEHISTORY | VF_ENABLE_F6, CP_UNICODE);
+}
+
+void error_dlg(const Error& e) {
+  wostringstream st;
+  st << get_msg(MSG_PLUGIN_NAME) << L'\n';
+  if (e.code != NO_ERROR) {
+    wstring sys_msg = get_system_message(e.code);
+    if (!sys_msg.empty())
+      st << word_wrap(sys_msg, get_optimal_msg_width()) << L'\n';
+  }
+  for (list<wstring>::const_iterator msg = e.messages.begin(); msg != e.messages.end(); msg++) {
+    st << word_wrap(*msg, get_optimal_msg_width()) << L'\n';
+  }
+  st << extract_file_name(widen(e.file)) << L':' << e.line;
+  message(st.str(), 0, FMSG_WARNING | FMSG_MB_OK);
+}
+
+void error_dlg(const std::exception& e) {
+  wostringstream st;
+  st << get_msg(MSG_PLUGIN_NAME) << L'\n';
+  st << word_wrap(widen(e.what()), get_optimal_msg_width()) << L'\n';
+  message(st.str(), 0, FMSG_WARNING | FMSG_MB_OK);
+}
+
+void error_dlg(const wstring& msg) {
+  message(get_msg(MSG_PLUGIN_NAME) + L'\n' + msg, 0, FMSG_WARNING | FMSG_MB_OK);
+}
+
+void info_dlg(const wstring& msg) {
+  message(get_msg(MSG_PLUGIN_NAME) + L'\n' + msg, 0, FMSG_MB_OK);
 }
 
 unsigned get_label_len(const wstring& str) {

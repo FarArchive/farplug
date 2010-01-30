@@ -184,7 +184,7 @@ void execute(bool ask) {
   string update_url_text = load_url(get_update_url() + c_update_script, g_options.http);
   UpdateInfo update_info = parse_update_info(ansi_to_unicode(update_url_text, CP_ACP));
   if (update_info.version <= current_version) {
-    info_dlg(Far::get_msg(MSG_UPDATE_NO_NEW_VERSION));
+    Far::info_dlg(Far::get_msg(MSG_UPDATE_NO_NEW_VERSION));
     return;
   }
   UpdateDialogResult res = ask ? UpdateDialog(update_info).show() : udrYes;
