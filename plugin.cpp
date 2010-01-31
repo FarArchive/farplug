@@ -1,6 +1,7 @@
 #include "msg.h"
 
 #include "utils.hpp"
+#include "sysutils.hpp"
 #include "farutils.hpp"
 #include "archive.hpp"
 #include "ui.hpp"

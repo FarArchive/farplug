@@ -151,23 +151,29 @@ STDMETHODIMP FileStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPositi
   COM_ERROR_HANDLER_END
 }
 
-class ArchiveOpenCallback: public IArchiveOpenCallback, public UnknownImpl, public ProgressMonitor {
+class ArchiveOpenCallback: public IArchiveOpenCallback, public IArchiveOpenVolumeCallback, public UnknownImpl, public ProgressMonitor {
 private:
   UInt64 total_files;
   UInt64 total_bytes;
   UInt64 completed_files;
   UInt64 completed_bytes;
+  const wstring dir;
+  FindData file_info;
   virtual void do_update_ui();
 public:
-  ArchiveOpenCallback(): total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
+  ArchiveOpenCallback(const wstring& dir, const FindData& arc_file_info): dir(dir), file_info(arc_file_info), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
   UNKNOWN_IMPL_ITF(IArchiveOpenCallback)
+  UNKNOWN_IMPL_ITF(IArchiveOpenVolumeCallback)
   UNKNOWN_IMPL_END
 
   STDMETHOD(SetTotal)(const UInt64 *files, const UInt64 *bytes);
   STDMETHOD(SetCompleted)(const UInt64 *files, const UInt64 *bytes);
+
+  STDMETHOD(GetProperty)(PROPID propID, PROPVARIANT *value);
+  STDMETHOD(GetStream)(const wchar_t *name, IInStream **inStream);
 };
 
 STDMETHODIMP ArchiveOpenCallback::SetTotal(const UInt64 *files, const UInt64 *bytes) {
@@ -188,9 +194,52 @@ STDMETHODIMP ArchiveOpenCallback::SetCompleted(const UInt64 *files, const UInt64
   COM_ERROR_HANDLER_END
 }
 
+STDMETHODIMP ArchiveOpenCallback::GetProperty(PROPID propID, PROPVARIANT *value) {
+  COM_ERROR_HANDLER_BEGIN
+  PropVariant var;
+  switch (propID) {
+  case kpidName:
+    var = file_info.cFileName; break;
+  case kpidIsDir:
+    var = file_info.is_dir(); break;
+  case kpidSize:
+    var = file_info.size(); break;
+  case kpidAttrib:
+    var = static_cast<UInt32>(file_info.dwFileAttributes); break;
+  case kpidCTime:
+    var = file_info.ftCreationTime; break;
+  case kpidATime:
+    var = file_info.ftLastAccessTime; break;
+  case kpidMTime:
+    var = file_info.ftLastWriteTime; break;
+  }
+  var.detach(value);
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
+
+STDMETHODIMP ArchiveOpenCallback::GetStream(const wchar_t *name, IInStream **inStream) {
+  COM_ERROR_HANDLER_BEGIN
+  wstring file_path = add_trailing_slash(dir) + name;
+  try {
+    file_info = get_find_data(file_path);
+  }
+  catch (Error&) {
+    return S_FALSE;
+  }
+  if (file_info.is_dir())
+    return S_FALSE;
+  ComObject<IInStream> file_stream(new FileStream(file_path));
+  file_stream.detach(inStream);
+  update_ui();
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
+
 void ArchiveOpenCallback::do_update_ui() {
   wostringstream st;
   st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
+  st << add_trailing_slash(dir) + file_info.cFileName << L'\n';
   st << completed_files << L" / " << total_files << L'\n';
   st << Far::get_progress_bar_str(60, completed_files, total_files) << L'\n';
   st << L"\x01\n";
@@ -200,12 +249,10 @@ void ArchiveOpenCallback::do_update_ui() {
 }
 
 bool ArchiveReader::open(const ArcFormats& arc_formats, const wstring& file_path) {
-  HANDLE h_find = FindFirstFileW(long_path(file_path).c_str(), &archive_file_info);
-  CHECK_SYS(h_find != INVALID_HANDLE_VALUE);
-  FindClose(h_find);
+  archive_file_info = get_find_data(file_path);
 
   ComObject<FileStream> file_stream(new FileStream(file_path));
-  ComObject<ArchiveOpenCallback> archive_open_callback(new ArchiveOpenCallback());
+  ComObject<ArchiveOpenCallback> archive_open_callback(new ArchiveOpenCallback(extract_file_path(file_path), archive_file_info));
   for (ArcFormats::const_iterator arc_format = arc_formats.begin(); arc_format != arc_formats.end(); arc_format++) {
     ComObject<IInArchive> in_arc;
     CHECK_COM(arc_format->arc_lib->CreateObject(reinterpret_cast<const GUID*>(arc_format->class_id.data()), &IID_IInArchive, reinterpret_cast<void**>(&in_arc)));

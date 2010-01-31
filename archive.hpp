@@ -63,7 +63,7 @@ typedef pair<FileList::const_iterator, FileList::const_iterator> FileListRef;
 class ArchiveReader {
 private:
   ComObject<IInArchive> archive;
-  WIN32_FIND_DATAW archive_file_info;
+  FindData archive_file_info;
   FileList file_list;
   FileIndex dir_find_index;
   wstring get_default_name() const;
