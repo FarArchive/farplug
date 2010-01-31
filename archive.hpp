@@ -41,20 +41,35 @@ struct ArcFormats: public list<ArcFormat> {
   void load(const ArcLibs& arc_libs);
 };
 
-struct FileList: public map<wstring, FileList> {
+struct FileInfo {
   UInt32 index;
-  FileList(): index(-1) {}
+  UInt32 parent;
+  wstring name;
+  DWORD attr;
+  unsigned __int64 size;
+  unsigned __int64 psize;
+  FILETIME ctime;
+  FILETIME mtime;
+  FILETIME atime;
+  bool is_dir() const {
+    return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
+  }
 };
+typedef vector<FileInfo> FileList;
+const UInt32 c_root_index = -1;
+typedef vector<UInt32> FileIndex;
+typedef pair<FileList::const_iterator, FileList::const_iterator> FileListRef;
 
 class ArchiveReader {
 private:
   ComObject<IInArchive> archive;
   WIN32_FIND_DATAW archive_file_info;
-  FileList root;
+  FileList file_list;
+  FileIndex dir_find_index;
   wstring get_default_name() const;
   void make_index();
 public:
   bool open(const ArcFormats& arc_formats, const wstring& file_path);
-  FileList* find_dir(const wstring& dir);
-  void get_file_info(const UInt32 file_index, const wstring& file_name, PluginPanelItem& panel_item);
+  UInt32 dir_find(const wstring& dir);
+  FileListRef dir_list(UInt32 dir_index);
 };

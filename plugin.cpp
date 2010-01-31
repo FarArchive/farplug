@@ -15,7 +15,7 @@ private:
 public:
   bool open(const wstring& file_path);
   void info(OpenPluginInfo* opi);
-  bool set_dir(const wstring& dir);
+  void set_dir(const wstring& dir);
   void list(PluginPanelItem** panel_item, int* items_number);
 };
 
@@ -38,10 +38,7 @@ void Plugin::info(OpenPluginInfo* opi) {
   opi->CurDir = current_dir.c_str();
 }
 
-bool Plugin::set_dir(const wstring& dir) {
-  if (dir.empty())
-    return false;
-
+void Plugin::set_dir(const wstring& dir) {
   wstring new_dir;
   if (dir == L"\\")
     new_dir.assign(dir);
@@ -55,23 +52,27 @@ bool Plugin::set_dir(const wstring& dir) {
   if (new_dir == L"\\")
     new_dir.clear();
 
-  if (reader.find_dir(remove_path_root(new_dir))) {
-    current_dir = new_dir;
-    return true;
-  }
-  else
-    return false;
+  reader.dir_find(new_dir);
+  current_dir = new_dir;
 }
 
 void Plugin::list(PluginPanelItem** panel_item, int* items_number) {
-  FileList* file_list = reader.find_dir(remove_path_root(current_dir));
-  if (file_list == NULL)
-    FAIL(E_FAIL);
-  PluginPanelItem* items = new PluginPanelItem[file_list->size()];
+  UInt32 dir_index = reader.dir_find(current_dir);
+  FileListRef fl_ref = reader.dir_list(dir_index);
+  unsigned size = fl_ref.second - fl_ref.first;
+  PluginPanelItem* items = new PluginPanelItem[size];
+  memset(items, 0, size * sizeof(PluginPanelItem));
   try {
-    size_t idx = 0;
-    for (FileList::const_iterator file_item = file_list->begin(); file_item != file_list->end(); file_item++, idx++) {
-      reader.get_file_info(file_item->second.index, file_item->first, items[idx]);
+    FileList::const_iterator& file_info = fl_ref.first;
+    for (unsigned i = 0; i < size; i++, file_info++) {
+      FAR_FIND_DATA& fdata = items[i].FindData;
+      fdata.dwFileAttributes = file_info->attr;
+      fdata.ftCreationTime = file_info->ctime;
+      fdata.ftLastAccessTime = file_info->atime;
+      fdata.ftLastWriteTime = file_info->mtime;
+      fdata.nFileSize = file_info->size;
+      fdata.nPackSize = file_info->psize;
+      fdata.lpwszFileName = file_info->name.c_str();
     }
   }
   catch (...) {
@@ -79,7 +80,7 @@ void Plugin::list(PluginPanelItem** panel_item, int* items_number) {
     throw;
   }
   *panel_item = items;
-  *items_number = static_cast<int>(file_list->size());
+  *items_number = size;
 }
 
 int WINAPI GetMinFarVersion(void) {
@@ -143,7 +144,8 @@ void WINAPI GetOpenPluginInfoW(HANDLE hPlugin,struct OpenPluginInfo *Info) {
 
 int WINAPI SetDirectoryW(HANDLE hPlugin,const wchar_t *Dir,int OpMode) {
   FAR_ERROR_HANDLER_BEGIN;
-  return reinterpret_cast<Plugin*>(hPlugin)->set_dir(Dir) ? TRUE : FALSE;
+  reinterpret_cast<Plugin*>(hPlugin)->set_dir(Dir);
+  return TRUE;
   FAR_ERROR_HANDLER_END(return FALSE, return FALSE, (OpMode & (OPM_SILENT | OPM_FIND)) != 0);
 }
 

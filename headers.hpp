@@ -12,8 +12,12 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <set>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
+#include <functional>
+#include <iterator>
 using namespace std;
 
 #define INITGUID

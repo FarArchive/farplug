@@ -41,11 +41,10 @@ HRESULT ArcLib::get_bytes_prop(UInt32 index, PROPID prop_id, string& value) cons
 }
 
 void ArcLibs::load(const wstring& path) {
-  WIN32_FIND_DATAW find_data;
-  FindFile find_file(add_trailing_slash(path) + L"*.dll");
-  while (find_file.next(find_data)) {
+  FileEnum file_enum(path);
+  while (file_enum.next()) {
     ArcLib arc_lib;
-    arc_lib.h_module = LoadLibraryW((add_trailing_slash(path) + find_data.cFileName).c_str());
+    arc_lib.h_module = LoadLibraryW((add_trailing_slash(path) + file_enum.data().cFileName).c_str());
     if (arc_lib.h_module) {
       arc_lib.CreateObject = reinterpret_cast<ArcLib::FCreateObject>(GetProcAddress(arc_lib.h_module, "CreateObject"));
       arc_lib.GetNumberOfMethods = reinterpret_cast<ArcLib::FGetNumberOfMethods>(GetProcAddress(arc_lib.h_module, "GetNumberOfMethods"));
@@ -172,7 +171,10 @@ STDMETHODIMP ArchiveOpenCallback::SetCompleted(const UInt64 *files, const UInt64
 }
 
 bool ArchiveReader::open(const ArcFormats& arc_formats, const wstring& file_path) {
-  FindFile(file_path).next(archive_file_info);
+  HANDLE h_find = FindFirstFileW(long_path(file_path).c_str(), &archive_file_info);
+  CHECK_SYS(h_find != INVALID_HANDLE_VALUE);
+  FindClose(h_find);
+
   ComObject<FileStream> file_stream(new FileStream(file_path));
   ComObject<ArchiveOpenCallback> archive_open_callback(new ArchiveOpenCallback());
   for (ArcFormats::const_iterator arc_format = arc_formats.begin(); arc_format != arc_formats.end(); arc_format++) {
@@ -181,7 +183,7 @@ bool ArchiveReader::open(const ArcFormats& arc_formats, const wstring& file_path
 
     const UInt64 max_check_start_position = 1 << 20;
     file_stream->Seek(0, STREAM_SEEK_SET, NULL);
-    if (check_com(in_arc->Open(file_stream, &max_check_start_position, archive_open_callback))) {
+    if (s_ok(in_arc->Open(file_stream, &max_check_start_position, archive_open_callback))) {
       archive = in_arc;
       return true;
     }
@@ -201,112 +203,202 @@ wstring ArchiveReader::get_default_name() const {
 void ArchiveReader::make_index() {
   UInt32 num_items = 0;
   CHECK_COM(archive->GetNumberOfItems(&num_items));
-  wstring path;
-  for (UInt32 i = 0; i < num_items; i++) {
-    PropVariant var;
-    CHECK_COM(archive->GetProperty(i, kpidPath, &var));
-    if (var.vt == VT_BSTR)
-      path.assign(var.bstrVal);
-    else
-      path.assign(get_default_name());
+  file_list.clear();
+  file_list.reserve(num_items);
 
-    for (wstring::iterator ch = path.begin(); ch != path.end(); ch++)
-      if ((*ch == L'\\') || (*ch == L'/'))
-        *ch = 0;
-
-    const wchar_t* end_pos = path.data() + path.size();
-    const wchar_t* path_elem = path.data();
-    FileList* file_list = &root;
-    while (path_elem < end_pos) {
-      file_list = &(*file_list)[path_elem];
-      path_elem += wcslen(path_elem) + 1;
+  struct DirCmp: public binary_function<FileInfo, FileInfo, bool> {
+    bool operator()(const FileInfo& left, const FileInfo& right) const {
+      if (left.parent == right.parent)
+        return left.name < right.name;
+      else
+        return left.parent < right.parent;
     }
-    file_list->index = i;
+  };
+  typedef set<FileInfo, DirCmp> DirList;
+  DirList dir_list;
+
+  FileInfo dir_info;
+  UInt32 fake_dir_index = num_items;
+  FileInfo file_info;
+  wstring path;
+  PropVariant var;
+  for (UInt32 i = 0; i < num_items; i++) {
+    CHECK_COM(archive->GetProperty(i, kpidPath, &var));
+    CHECK(var.vt == VT_BSTR);
+    path.assign(var.bstrVal);
+
+    file_info.index = i;
+
+    // attributes
+    bool is_dir = s_ok(archive->GetProperty(i, kpidIsDir, &var)) && var.vt == VT_BOOL && var.boolVal;
+    if (s_ok(archive->GetProperty(i, kpidAttrib, &var)) && var.vt == VT_UI4)
+      file_info.attr = var.ulVal;
+    else
+      file_info.attr = 0;
+    if (is_dir)
+      file_info.attr |= FILE_ATTRIBUTE_DIRECTORY;
+    else
+      is_dir = file_info.is_dir();
+
+    // size
+    if (is_dir) {
+      file_info.size = file_info.psize = 0;
+    }
+    else {
+      if (s_ok(archive->GetProperty(i, kpidSize, &var)) && var.vt == VT_UI8)
+        file_info.size = var.uhVal.QuadPart;
+      if (s_ok(archive->GetProperty(i, kpidPackSize, &var)) && var.vt == VT_UI8)
+        file_info.psize = var.uhVal.QuadPart;
+    }
+
+    // date & time
+    if (s_ok(archive->GetProperty(i, kpidCTime, &var)) && var.vt == VT_FILETIME)
+      file_info.ctime = var.filetime;
+    else
+      file_info.ctime = archive_file_info.ftCreationTime;
+    if (s_ok(archive->GetProperty(i, kpidMTime, &var)) && var.vt == VT_FILETIME)
+      file_info.mtime = var.filetime;
+    else
+      file_info.mtime = archive_file_info.ftLastWriteTime;
+    if (s_ok(archive->GetProperty(i, kpidATime, &var)) && var.vt == VT_FILETIME)
+      file_info.atime = var.filetime;
+    else
+      file_info.atime = archive_file_info.ftLastAccessTime;
+
+    // file name
+    size_t name_end_pos = path.size();
+    while (name_end_pos && is_slash(path[name_end_pos - 1])) name_end_pos--;
+    size_t name_pos = name_end_pos;
+    while (name_pos && !is_slash(path[name_pos - 1])) name_pos--;
+    file_info.name.assign(path.data() + name_pos, name_end_pos - name_pos);
+
+    // split path into individual directories and put them into DirList
+    dir_info.parent = c_root_index;
+    dir_info.attr = FILE_ATTRIBUTE_DIRECTORY;
+    dir_info.size = dir_info.psize = 0;
+    dir_info.ctime = archive_file_info.ftCreationTime;
+    dir_info.mtime = archive_file_info.ftLastWriteTime;
+    dir_info.atime = archive_file_info.ftLastAccessTime;
+    size_t begin_pos = 0;
+    while (begin_pos < name_pos) {
+      dir_info.index = fake_dir_index;
+      size_t end_pos = begin_pos;
+      while (end_pos < name_pos && !is_slash(path[end_pos])) end_pos++;
+      if (end_pos != begin_pos) {
+        dir_info.name.assign(path.data() + begin_pos, end_pos - begin_pos);
+        pair<DirList::iterator, bool> ins_pos = dir_list.insert(dir_info);
+        if (ins_pos.second) {
+          CHECK(fake_dir_index >= num_items && fake_dir_index != c_root_index);
+          fake_dir_index++;
+        }
+        dir_info.parent = ins_pos.first->index;
+      }
+      begin_pos = end_pos + 1;
+    }
+    file_info.parent = dir_info.parent;
+
+    if (is_dir) {
+      pair<DirList::iterator, bool> ins_pos = dir_list.insert(file_info);
+      if (!ins_pos.second) { // directory already present in DirList
+        UInt32 old_index = ins_pos.first->index;
+        *ins_pos.first = file_info;
+        ins_pos.first->index = old_index;
+      }
+    }
+    else {
+      file_list.push_back(file_info);
+    }
   }
+  file_list.reserve(file_list.size() + dir_list.size());
+  copy(dir_list.begin(), dir_list.end(), back_insert_iterator<FileList>(file_list));
+  struct DirListIndexCmp: public binary_function<FileInfo, FileInfo, bool> {
+    bool operator()(const FileInfo& left, const FileInfo& right) const {
+      if (left.parent == right.parent)
+        return left.index < right.index;
+      else
+        return left.parent < right.parent;
+    }
+  };
+  sort(file_list.begin(), file_list.end(), DirListIndexCmp());
+
+  // create directory search index
+  dir_find_index.clear();
+  dir_find_index.reserve(dir_list.size());
+  for (size_t i = 0; i < file_list.size(); i++) {
+    if (file_list[i].is_dir())
+      dir_find_index.push_back(i);
+  }
+  struct DirFindIndexCmp: public binary_function<UInt32, UInt32, bool> {
+  private:
+    const FileList& file_list;
+  public:
+    DirFindIndexCmp(const FileList& file_list): file_list(file_list) {
+    }
+    bool operator()(const UInt32& left, const UInt32& right) const {
+      if (file_list[left].parent == file_list[right].parent)
+        return file_list[left].name < file_list[right].name;
+      else
+        return file_list[left].parent < file_list[right].parent;
+    }
+  };
+  sort(dir_find_index.begin(), dir_find_index.end(), DirFindIndexCmp(file_list));
 }
 
-FileList* ArchiveReader::find_dir(const wstring& dir) {
-  if (root.empty())
+UInt32 ArchiveReader::dir_find(const wstring& path) {
+  if (file_list.empty())
     make_index();
 
-  wstring new_dir(dir);
+  struct DirFindIndexCmp: public binary_function<UInt32, UInt32, bool> {
+  private:
+    const FileList& file_list;
+    FileInfo file_info;
+  public:
+    DirFindIndexCmp(const FileList& file_list, UInt32 parent_index, const wstring& name): file_list(file_list) {
+      file_info.parent = parent_index;
+      file_info.name = name;
+    }
+    bool operator()(const UInt32& left, const UInt32& right) const {
+      const FileInfo& fi_left = left == -1 ? file_info : file_list[left];
+      const FileInfo& fi_right = right == -1 ? file_info : file_list[right];
+      if (fi_left.parent == fi_right.parent)
+        return fi_left.name < fi_right.name;
+      else
+        return fi_left.parent < fi_right.parent;
+    }
+  };
 
-  for (wstring::iterator ch = new_dir.begin(); ch != new_dir.end(); ch++)
-    if ((*ch == L'\\') || (*ch == L'/'))
-      *ch = 0;
-
-  const wchar_t* end_pos = new_dir.data() + new_dir.size();
-  const wchar_t* path_elem = new_dir.data();
-  FileList* file_list = &root;
-  while (path_elem < end_pos) {
-    FileList::iterator child = file_list->find(path_elem);
-    if (child == file_list->end())
-      return NULL;
-    file_list = &child->second;
-    path_elem += wcslen(path_elem) + 1;
+  UInt32 parent_index = c_root_index;
+  wstring name;
+  size_t begin_pos = 0;
+  while (begin_pos < path.size()) {
+    size_t end_pos = begin_pos;
+    while (end_pos < path.size() && !is_slash(path[end_pos])) end_pos++;
+    if (end_pos != begin_pos) {
+      name.assign(path.data() + begin_pos, end_pos - begin_pos);
+      FileIndex::const_iterator dir_idx = lower_bound(dir_find_index.begin(), dir_find_index.end(), -1, DirFindIndexCmp(file_list, parent_index, name));
+      CHECK(dir_idx != dir_find_index.end());
+      const FileInfo& dir_info = file_list[*dir_idx];
+      CHECK(dir_info.parent == parent_index && dir_info.name == name);
+      parent_index = dir_info.index;
+    }
+    begin_pos = end_pos + 1;
   }
-  return file_list;
+  return parent_index;
 }
 
-void ArchiveReader::get_file_info(const UInt32 file_index, const wstring& file_name, PluginPanelItem& panel_item) {
-  memset(&panel_item, 0, sizeof(panel_item));
-  panel_item.FindData.lpwszFileName = const_cast<wchar_t*>(file_name.c_str());
-  if (file_index == -1) {
-    panel_item.FindData.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
-    panel_item.FindData.ftCreationTime = archive_file_info.ftCreationTime;
-    panel_item.FindData.ftLastWriteTime = archive_file_info.ftLastWriteTime;
-    panel_item.FindData.ftLastAccessTime = archive_file_info.ftLastAccessTime;
-  }
-  else {
-    PropVariant size;
-    CHECK_COM(archive->GetProperty(file_index, kpidSize, &size));
-    if (size.vt == VT_UI8)
-      panel_item.FindData.nFileSize = size.uhVal.QuadPart;
+FileListRef ArchiveReader::dir_list(UInt32 dir_index) {
+  if (file_list.empty())
+    make_index();
 
-    PropVariant pack_size;
-    CHECK_COM(archive->GetProperty(file_index, kpidPackSize, &pack_size));
-    if (pack_size.vt == VT_UI8)
-      panel_item.FindData.nPackSize = pack_size.uhVal.QuadPart;
+  struct DirListIndexCmp: public binary_function<FileInfo, FileInfo, bool> {
+    bool operator()(const FileInfo& left, const FileInfo& right) const {
+      return left.parent < right.parent;
+    }
+  };
+  FileInfo dir_info;
+  dir_info.parent = dir_index;
+  FileListRef fl_ref = equal_range(file_list.begin(), file_list.end(), dir_info, DirListIndexCmp());
+  CHECK(fl_ref.first != file_list.end());
 
-    PropVariant attr;
-    CHECK_COM(archive->GetProperty(file_index, kpidAttrib, &attr));
-    if (attr.vt == VT_UI4)
-      panel_item.FindData.dwFileAttributes = attr.ulVal;
-
-    PropVariant is_dir;
-    CHECK_COM(archive->GetProperty(file_index, kpidIsDir, &is_dir));
-    if (is_dir.vt == VT_BOOL)
-      if (is_dir.boolVal)
-        panel_item.FindData.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
-
-    PropVariant mtime, ctime, atime;
-    CHECK_COM(archive->GetProperty(file_index, kpidCTime, &ctime));
-    CHECK_COM(archive->GetProperty(file_index, kpidMTime, &mtime));
-    CHECK_COM(archive->GetProperty(file_index, kpidATime, &atime));
-
-    FILETIME subst_time;
-    if (mtime.vt == VT_FILETIME)
-      subst_time = mtime.filetime;
-    else if (ctime.vt == VT_FILETIME)
-      subst_time = ctime.filetime;
-    else if (atime.vt == VT_FILETIME)
-      subst_time = atime.filetime;
-    else
-      subst_time = archive_file_info.ftLastWriteTime;
-
-    if (mtime.vt == VT_FILETIME)
-      panel_item.FindData.ftLastWriteTime = mtime.filetime;
-    else
-      panel_item.FindData.ftLastWriteTime = subst_time;
-
-    if (ctime.vt == VT_FILETIME)
-      panel_item.FindData.ftCreationTime = ctime.filetime;
-    else
-      panel_item.FindData.ftCreationTime = subst_time;
-
-    if (atime.vt == VT_FILETIME)
-      panel_item.FindData.ftLastAccessTime = atime.filetime;
-    else
-      panel_item.FindData.ftLastAccessTime = subst_time;
-  }
+  return fl_ref;
 }

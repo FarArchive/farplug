@@ -2,7 +2,7 @@
 
 #include "error.hpp"
 
-inline bool check_com(HRESULT hr) {
+inline bool s_ok(HRESULT hr) {
   if (FAILED(hr))
     FAIL(hr);
   return hr == S_OK;
@@ -86,5 +86,10 @@ public:
   }
   ~PropVariant() {
     PropVariantClear(this);
+  }
+  PROPVARIANT* operator&() {
+    if (vt != VT_EMPTY)
+      PropVariantClear(this);
+    return this;
   }
 };
