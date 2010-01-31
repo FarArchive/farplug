@@ -1,5 +1,8 @@
+#include "msg.h"
 #include "utils.hpp"
 #include "sysutils.hpp"
+#include "farutils.hpp"
+#include "ui.hpp"
 #include "archive.hpp"
 
 HRESULT ArcLib::get_bool_prop(UInt32 index, PROPID prop_id, bool& value) const {
@@ -148,8 +151,17 @@ STDMETHODIMP FileStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPositi
   COM_ERROR_HANDLER_END
 }
 
-class ArchiveOpenCallback: public IArchiveOpenCallback, public UnknownImpl {
+class ArchiveOpenCallback: public IArchiveOpenCallback, public UnknownImpl, public ProgressMonitor {
+private:
+  UInt64 total_files;
+  UInt64 total_bytes;
+  UInt64 completed_files;
+  UInt64 completed_bytes;
+  virtual void do_update_ui();
 public:
+  ArchiveOpenCallback(): total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
+  }
+
   UNKNOWN_IMPL_BEGIN
   UNKNOWN_IMPL_ITF(IArchiveOpenCallback)
   UNKNOWN_IMPL_END
@@ -160,14 +172,31 @@ public:
 
 STDMETHODIMP ArchiveOpenCallback::SetTotal(const UInt64 *files, const UInt64 *bytes) {
   COM_ERROR_HANDLER_BEGIN
+  if (files) total_files = *files;
+  if (bytes) total_bytes = *bytes;
+  update_ui();
   return S_OK;
   COM_ERROR_HANDLER_END
 }
 
 STDMETHODIMP ArchiveOpenCallback::SetCompleted(const UInt64 *files, const UInt64 *bytes) {
   COM_ERROR_HANDLER_BEGIN
+  if (files) completed_files = *files;
+  if (bytes) completed_bytes = *bytes;
+  update_ui();
   return S_OK;
   COM_ERROR_HANDLER_END
+}
+
+void ArchiveOpenCallback::do_update_ui() {
+  wostringstream st;
+  st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
+  st << completed_files << L" / " << total_files << L'\n';
+  st << Far::get_progress_bar_str(60, completed_files, total_files) << L'\n';
+  st << L"\x01\n";
+  st << format_data_size(completed_bytes, get_size_suffixes()) << L" / " << format_data_size(total_bytes, get_size_suffixes()) << L'\n';
+  st << Far::get_progress_bar_str(60, completed_bytes, total_bytes) << L'\n';
+  Far::message(st.str(), 0, FMSG_LEFTALIGN);
 }
 
 bool ArchiveReader::open(const ArcFormats& arc_formats, const wstring& file_path) {
@@ -201,6 +230,28 @@ wstring ArchiveReader::get_default_name() const {
 }
 
 void ArchiveReader::make_index() {
+  class Progress: public ProgressMonitor {
+  private:
+    UInt32 completed;
+    UInt32 total;
+    virtual void do_update_ui() {
+      wostringstream st;
+      st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
+      st << completed << L" / " << total << L'\n';
+      st << Far::get_progress_bar_str(60, completed, total) << L'\n';
+      Far::message(st.str(), 0, FMSG_LEFTALIGN);
+    }
+  public:
+    Progress(): completed(0), total(0) {
+    }
+    void update(UInt32 completed, UInt32 total) {
+      this->completed = completed;
+      this->total = total;
+      update_ui();
+    }
+  };
+  Progress progress;
+
   UInt32 num_items = 0;
   CHECK_COM(archive->GetNumberOfItems(&num_items));
   file_list.clear();
@@ -223,9 +274,12 @@ void ArchiveReader::make_index() {
   wstring path;
   PropVariant var;
   for (UInt32 i = 0; i < num_items; i++) {
-    CHECK_COM(archive->GetProperty(i, kpidPath, &var));
-    CHECK(var.vt == VT_BSTR);
-    path.assign(var.bstrVal);
+    progress.update(i, num_items);
+
+    if (s_ok(archive->GetProperty(i, kpidPath, &var)) && var.vt == VT_BSTR)
+      path.assign(var.bstrVal);
+    else
+      path.assign(get_default_name());
 
     file_info.index = i;
 
