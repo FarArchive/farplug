@@ -239,7 +239,7 @@ STDMETHODIMP ArchiveOpenCallback::GetStream(const wchar_t *name, IInStream **inS
 void ArchiveOpenCallback::do_update_ui() {
   wostringstream st;
   st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-  st << add_trailing_slash(dir) + file_info.cFileName << L'\n';
+  st << file_info.cFileName << L'\n';
   st << completed_files << L" / " << total_files << L'\n';
   st << Far::get_progress_bar_str(60, completed_files, total_files) << L'\n';
   st << L"\x01\n";
@@ -248,23 +248,52 @@ void ArchiveOpenCallback::do_update_ui() {
   Far::message(st.str(), 0, FMSG_LEFTALIGN);
 }
 
-bool ArchiveReader::open(const ArcFormats& arc_formats, const wstring& file_path) {
-  archive_file_info = get_find_data(file_path);
-
-  ComObject<FileStream> file_stream(new FileStream(file_path));
-  ComObject<ArchiveOpenCallback> archive_open_callback(new ArchiveOpenCallback(extract_file_path(file_path), archive_file_info));
+bool ArchiveReader::open(const ArcFormats& arc_formats, IInStream* in_stream, IArchiveOpenCallback* callback) {
   for (ArcFormats::const_iterator arc_format = arc_formats.begin(); arc_format != arc_formats.end(); arc_format++) {
     ComObject<IInArchive> in_arc;
     CHECK_COM(arc_format->arc_lib->CreateObject(reinterpret_cast<const GUID*>(arc_format->class_id.data()), &IID_IInArchive, reinterpret_cast<void**>(&in_arc)));
 
     const UInt64 max_check_start_position = 1 << 20;
-    file_stream->Seek(0, STREAM_SEEK_SET, NULL);
-    if (s_ok(in_arc->Open(file_stream, &max_check_start_position, archive_open_callback))) {
-      archive = in_arc;
+    in_stream->Seek(0, STREAM_SEEK_SET, NULL);
+    if (s_ok(in_arc->Open(in_stream, &max_check_start_position, callback))) {
+      archive_stack.push(in_arc);
+
+      UInt32 main_subfile;
+      PropVariant var;
+      if (s_ok(archive()->GetArchiveProperty(kpidMainSubfile, &var)) && var.vt == VT_UI4)
+        main_subfile = var.ulVal;
+      else
+        break;
+      UInt32 num_items;
+      if (!s_ok(archive()->GetNumberOfItems(&num_items)) || main_subfile >= num_items)
+        break;
+
+      ComObject<IInArchiveGetStream> get_stream;
+      if (archive()->QueryInterface(IID_IInArchiveGetStream, reinterpret_cast<void**>(&get_stream)) != S_OK || !get_stream)
+        break;
+
+      ComObject<ISequentialInStream> sub_seq_stream;
+      if (get_stream->GetStream(main_subfile, &sub_seq_stream) != S_OK || !sub_seq_stream)
+        break;
+
+      ComObject<IInStream> sub_stream;
+      if (sub_seq_stream->QueryInterface(IID_IInStream, reinterpret_cast<void**>(&sub_stream)) != S_OK || !sub_stream)
+        break;
+
+      open(arc_formats, sub_stream, callback);
+
       return true;
     }
   }
   return false;
+}
+
+bool ArchiveReader::open(const ArcFormats& arc_formats, const wstring& file_path) {
+  archive_file_info = get_find_data(file_path);
+
+  ComObject<FileStream> file_stream(new FileStream(file_path));
+  ComObject<ArchiveOpenCallback> archive_open_callback(new ArchiveOpenCallback(extract_file_path(file_path), archive_file_info));
+  return open(arc_formats, file_stream, archive_open_callback);
 }
 
 wstring ArchiveReader::get_default_name() const {
@@ -300,7 +329,7 @@ void ArchiveReader::make_index() {
   Progress progress;
 
   UInt32 num_items = 0;
-  CHECK_COM(archive->GetNumberOfItems(&num_items));
+  CHECK_COM(archive()->GetNumberOfItems(&num_items));
   file_list.clear();
   file_list.reserve(num_items);
 
@@ -323,7 +352,7 @@ void ArchiveReader::make_index() {
   for (UInt32 i = 0; i < num_items; i++) {
     progress.update(i, num_items);
 
-    if (s_ok(archive->GetProperty(i, kpidPath, &var)) && var.vt == VT_BSTR)
+    if (s_ok(archive()->GetProperty(i, kpidPath, &var)) && var.vt == VT_BSTR)
       path.assign(var.bstrVal);
     else
       path.assign(get_default_name());
@@ -331,8 +360,8 @@ void ArchiveReader::make_index() {
     file_info.index = i;
 
     // attributes
-    bool is_dir = s_ok(archive->GetProperty(i, kpidIsDir, &var)) && var.vt == VT_BOOL && var.boolVal;
-    if (s_ok(archive->GetProperty(i, kpidAttrib, &var)) && var.vt == VT_UI4)
+    bool is_dir = s_ok(archive()->GetProperty(i, kpidIsDir, &var)) && var.vt == VT_BOOL && var.boolVal;
+    if (s_ok(archive()->GetProperty(i, kpidAttrib, &var)) && var.vt == VT_UI4)
       file_info.attr = var.ulVal;
     else
       file_info.attr = 0;
@@ -342,26 +371,25 @@ void ArchiveReader::make_index() {
       is_dir = file_info.is_dir();
 
     // size
-    if (is_dir) {
-      file_info.size = file_info.psize = 0;
-    }
-    else {
-      if (s_ok(archive->GetProperty(i, kpidSize, &var)) && var.vt == VT_UI8)
-        file_info.size = var.uhVal.QuadPart;
-      if (s_ok(archive->GetProperty(i, kpidPackSize, &var)) && var.vt == VT_UI8)
-        file_info.psize = var.uhVal.QuadPart;
-    }
+    if (!is_dir && s_ok(archive()->GetProperty(i, kpidSize, &var)) && var.vt == VT_UI8)
+      file_info.size = var.uhVal.QuadPart;
+    else
+      file_info.size = 0;
+    if (!is_dir && s_ok(archive()->GetProperty(i, kpidPackSize, &var)) && var.vt == VT_UI8)
+      file_info.psize = var.uhVal.QuadPart;
+    else
+      file_info.psize = 0;
 
     // date & time
-    if (s_ok(archive->GetProperty(i, kpidCTime, &var)) && var.vt == VT_FILETIME)
+    if (s_ok(archive()->GetProperty(i, kpidCTime, &var)) && var.vt == VT_FILETIME)
       file_info.ctime = var.filetime;
     else
       file_info.ctime = archive_file_info.ftCreationTime;
-    if (s_ok(archive->GetProperty(i, kpidMTime, &var)) && var.vt == VT_FILETIME)
+    if (s_ok(archive()->GetProperty(i, kpidMTime, &var)) && var.vt == VT_FILETIME)
       file_info.mtime = var.filetime;
     else
       file_info.mtime = archive_file_info.ftLastWriteTime;
-    if (s_ok(archive->GetProperty(i, kpidATime, &var)) && var.vt == VT_FILETIME)
+    if (s_ok(archive()->GetProperty(i, kpidATime, &var)) && var.vt == VT_FILETIME)
       file_info.atime = var.filetime;
     else
       file_info.atime = archive_file_info.ftLastAccessTime;

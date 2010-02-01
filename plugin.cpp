@@ -99,9 +99,7 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info) {
 void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
   FAR_ERROR_HANDLER_BEGIN;
   static const wchar_t* plugin_menu[1];
-
   Info->StructSize = sizeof(PluginInfo);
-
   plugin_menu[0] = Far::msg_ptr(MSG_PLUGIN_NAME);
   Info->PluginMenuStrings = plugin_menu;
   Info->PluginMenuStringsNumber = ARRAYSIZE(plugin_menu);

@@ -19,7 +19,6 @@ inline bool s_ok(HRESULT hr) {
     return E_FAIL; \
   }
 
-
 class UnknownImpl: public IUnknown {
 protected:
   ULONG ref_cnt;
