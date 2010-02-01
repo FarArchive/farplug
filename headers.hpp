@@ -11,7 +11,6 @@
 #include <string>
 #include <list>
 #include <vector>
-#include <stack>
 #include <set>
 #include <sstream>
 #include <iomanip>

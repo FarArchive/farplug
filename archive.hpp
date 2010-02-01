@@ -62,16 +62,13 @@ typedef pair<FileList::const_iterator, FileList::const_iterator> FileListRef;
 
 class ArchiveReader {
 private:
-  stack<ComObject<IInArchive>> archive_stack;
-  ComObject<IInArchive> archive() {
-    return archive_stack.top();
-  }
+  ComObject<IInArchive> archive;
   FindData archive_file_info;
   FileList file_list;
   FileIndex dir_find_index;
   wstring get_default_name() const;
   void make_index();
-  bool open(const ArcFormats& arc_formats, IInStream* in_stream, IArchiveOpenCallback* callback);
+  void detect(const ArcFormats& arc_formats, IInStream* in_stream, IArchiveOpenCallback* callback, vector<ComObject<IInArchive>>& archives, vector<wstring>& format_names);
 public:
   bool open(const ArcFormats& arc_formats, const wstring& file_path);
   UInt32 dir_find(const wstring& dir);
