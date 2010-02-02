@@ -104,7 +104,7 @@ public:
 
   bool show() {
     label(Far::get_msg(MSG_PASSWORD_PASSWORD));
-    password_ctrl_id = edit_box(password, 30);
+    password_ctrl_id = pwd_edit_box(password);
     new_line();
     separator();
     new_line();

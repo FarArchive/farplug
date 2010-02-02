@@ -3,34 +3,37 @@
 #include "utils.hpp"
 #include "sysutils.hpp"
 #include "farutils.hpp"
-#include "archive.hpp"
 #include "ui.hpp"
+#include "archive.hpp"
 
-class Plugin {
-private:
-  static bool init_done;
-  static ArcLibs libs;
-  static ArcFormats formats;
-  ArchiveReader reader;
-  wstring current_dir;
-public:
-  bool open(const wstring& file_path);
-  void info(OpenPluginInfo* opi);
-  void set_dir(const wstring& dir);
-  void list(PluginPanelItem** panel_item, int* items_number);
-};
+ArcLibs libs;
+ArcFormats formats;
 
-bool Plugin::init_done = false;
-ArcLibs Plugin::libs;
-ArcFormats Plugin::formats;
-
-bool Plugin::open(const wstring& file_path) {
+void load_formats() {
+  static bool init_done = false;
   if (!init_done) {
     libs.load(Far::get_plugin_module_path());
     formats.load(libs);
     init_done = true;
   }
-  return reader.open(formats, file_path);
+}
+
+class Plugin {
+private:
+  ArchiveReader reader;
+  wstring current_dir;
+public:
+  Plugin(const wstring& file_path);
+  void info(OpenPluginInfo* opi);
+  void set_dir(const wstring& dir);
+  void list(PluginPanelItem** panel_item, int* items_number);
+  void extract(PluginPanelItem* panel_items, int items_number, const wchar_t** dest_path);
+};
+
+Plugin::Plugin(const wstring& file_path): reader(formats, file_path) {
+  load_formats();
+  if (!reader.open())
+    FAIL(E_ABORT);
 }
 
 void Plugin::info(OpenPluginInfo* opi) {
@@ -57,7 +60,7 @@ void Plugin::set_dir(const wstring& dir) {
   current_dir = new_dir;
 }
 
-void Plugin::list(PluginPanelItem** panel_item, int* items_number) {
+void Plugin::list(PluginPanelItem** panel_items, int* items_number) {
   UInt32 dir_index = reader.dir_find(current_dir);
   FileListRef fl_ref = reader.dir_list(dir_index);
   unsigned size = fl_ref.second - fl_ref.first;
@@ -74,14 +77,29 @@ void Plugin::list(PluginPanelItem** panel_item, int* items_number) {
       fdata.nFileSize = file_info->size;
       fdata.nPackSize = file_info->psize;
       fdata.lpwszFileName = file_info->name.c_str();
+      items[i].UserData = file_info->index;
     }
   }
   catch (...) {
     delete[] items;
     throw;
   }
-  *panel_item = items;
+  *panel_items = items;
   *items_number = size;
+}
+
+void Plugin::extract(PluginPanelItem* panel_items, int items_number, const wchar_t** dest_path) {
+  ComObject<ArchiveExtractCallback> callback(new ArchiveExtractCallback(reader, *dest_path));
+  if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) {
+    reader.extract(reader.dir_find(current_dir), *dest_path, callback);
+  }
+  else {
+    Far::Selection item_selection(this);
+    for (int i = 0; i < items_number; i++) {
+      reader.extract(panel_items[i].UserData, *dest_path, callback);
+      item_selection.select(i, false);
+    }
+  }
 }
 
 int WINAPI GetMinFarVersion(void) {
@@ -116,16 +134,7 @@ HANDLE WINAPI OpenFilePluginW(const wchar_t *Name,const unsigned char *Data,int 
   FAR_ERROR_HANDLER_BEGIN;
   if (Name == NULL)
     return INVALID_HANDLE_VALUE;
-  Plugin* plugin = new Plugin();
-  try {
-    if (plugin->open(Name))
-      return plugin;
-  }
-  catch (...) {
-    delete plugin;
-    throw;
-  }
-  return INVALID_HANDLE_VALUE;
+  return new Plugin(Name);
   FAR_ERROR_HANDLER_END(return INVALID_HANDLE_VALUE, return INVALID_HANDLE_VALUE, (OpMode & (OPM_SILENT | OPM_FIND)) != 0);
 }
 
@@ -163,7 +172,8 @@ void WINAPI FreeFindDataW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int I
 
 int WINAPI GetFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsNumber,int Move,const wchar_t **DestPath,int OpMode) {
   FAR_ERROR_HANDLER_BEGIN;
-  return 0;
+  reinterpret_cast<Plugin*>(hPlugin)->extract(PanelItem, ItemsNumber, DestPath);
+  return 1;
   FAR_ERROR_HANDLER_END(return 0, return -1, (OpMode & (OPM_FIND | OPM_QUICKVIEW)) != 0);
 }
 

@@ -151,33 +151,76 @@ STDMETHODIMP FileStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPositi
   COM_ERROR_HANDLER_END
 }
 
-class ArchiveOpenCallback: public IArchiveOpenCallback, public IArchiveOpenVolumeCallback, public ICryptoGetTextPassword, public UnknownImpl, public ProgressMonitor {
+class FileOutStream: public IOutStream, public UnknownImpl {
 private:
-  UInt64 total_files;
-  UInt64 total_bytes;
-  UInt64 completed_files;
-  UInt64 completed_bytes;
-  const wstring archive_dir;
-  FindData volume_file_info;
-  virtual void do_update_ui();
+  HANDLE h_file;
+  FileInfo file_info;
 public:
-  ArchiveOpenCallback(const wstring& archive_dir, const FindData& arc_file_info): archive_dir(archive_dir), volume_file_info(arc_file_info), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
-  }
+  FileOutStream(const wstring& file_path, const FileInfo& file_info);
+  ~FileOutStream();
 
   UNKNOWN_IMPL_BEGIN
-  UNKNOWN_IMPL_ITF(IArchiveOpenCallback)
-  UNKNOWN_IMPL_ITF(IArchiveOpenVolumeCallback)
-  UNKNOWN_IMPL_ITF(ICryptoGetTextPassword)
+  UNKNOWN_IMPL_ITF(ISequentialOutStream)
+  UNKNOWN_IMPL_ITF(IOutStream)
   UNKNOWN_IMPL_END
 
-  STDMETHOD(SetTotal)(const UInt64 *files, const UInt64 *bytes);
-  STDMETHOD(SetCompleted)(const UInt64 *files, const UInt64 *bytes);
-
-  STDMETHOD(GetProperty)(PROPID propID, PROPVARIANT *value);
-  STDMETHOD(GetStream)(const wchar_t *name, IInStream **inStream);
-
-  STDMETHOD(CryptoGetTextPassword)(BSTR *password);
+  STDMETHOD(Seek)(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition);
+  STDMETHOD(Write)(const void *data, UInt32 size, UInt32 *processedSize);
+  STDMETHOD(SetSize)(Int64 newSize);
 };
+
+FileOutStream::FileOutStream(const wstring& file_path, const FileInfo& file_info): file_info(file_info) {
+  h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, file_info.attr | FILE_FLAG_POSIX_SEMANTICS, NULL);
+  CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
+}
+
+FileOutStream::~FileOutStream() {
+  SetFileTime(h_file, &file_info.ctime, &file_info.atime, &file_info.mtime);
+  CloseHandle(h_file);
+}
+
+STDMETHODIMP FileOutStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
+  COM_ERROR_HANDLER_BEGIN
+  DWORD move_method;
+  switch (seekOrigin) {
+  case STREAM_SEEK_SET:
+    move_method = FILE_BEGIN;
+    break;
+  case STREAM_SEEK_CUR:
+    move_method = FILE_CURRENT;
+    break;
+  case STREAM_SEEK_END:
+    move_method = FILE_END;
+    break;
+  default:
+    return E_INVALIDARG;
+  }
+  LARGE_INTEGER distance;
+  distance.QuadPart = offset;
+  LARGE_INTEGER new_position;
+  CHECK_SYS(SetFilePointerEx(h_file, distance, &new_position, move_method));
+  if (newPosition)
+    *newPosition = new_position.QuadPart;
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
+
+STDMETHODIMP FileOutStream::Write(const void *data, UInt32 size, UInt32 *processedSize) {
+  COM_ERROR_HANDLER_BEGIN
+  CHECK_SYS(WriteFile(h_file, data, size, reinterpret_cast<LPDWORD>(processedSize), NULL));
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
+
+STDMETHODIMP FileOutStream::SetSize(Int64 newSize) {
+  COM_ERROR_HANDLER_BEGIN
+  LARGE_INTEGER position;
+  position.QuadPart = newSize;
+  CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
+  CHECK_SYS(SetEndOfFile(h_file));
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
 
 STDMETHODIMP ArchiveOpenCallback::SetTotal(const UInt64 *files, const UInt64 *bytes) {
   COM_ERROR_HANDLER_BEGIN
@@ -223,7 +266,7 @@ STDMETHODIMP ArchiveOpenCallback::GetProperty(PROPID propID, PROPVARIANT *value)
 
 STDMETHODIMP ArchiveOpenCallback::GetStream(const wchar_t *name, IInStream **inStream) {
   COM_ERROR_HANDLER_BEGIN
-  wstring file_path = add_trailing_slash(archive_dir) + name;
+  wstring file_path = add_trailing_slash(reader.archive_dir) + name;
   try {
     volume_file_info = get_find_data(file_path);
   }
@@ -241,13 +284,12 @@ STDMETHODIMP ArchiveOpenCallback::GetStream(const wchar_t *name, IInStream **inS
 
 STDMETHODIMP ArchiveOpenCallback::CryptoGetTextPassword(BSTR *password) {
   COM_ERROR_HANDLER_BEGIN
-  wstring pwd;
-  {
+  if (reader.password.empty()) {
     ProgressSuspend ps(*this);
-    if (!password_dialog(pwd))
+    if (!password_dialog(reader.password))
       FAIL(E_ABORT);
   }
-  *password = str_to_bstr(pwd);
+  *password = str_to_bstr(reader.password);
   return S_OK;
   COM_ERROR_HANDLER_END
 }
@@ -264,7 +306,77 @@ void ArchiveOpenCallback::do_update_ui() {
   Far::message(st.str(), 0, FMSG_LEFTALIGN);
 }
 
-void ArchiveReader::detect(const ArcFormats& arc_formats, IInStream* in_stream, IArchiveOpenCallback* callback, vector<ComObject<IInArchive>>& archives, vector<wstring>& format_names) {
+STDMETHODIMP ArchiveExtractCallback::SetTotal(UInt64 total) {
+  COM_ERROR_HANDLER_BEGIN
+  this->total = total;
+  update_ui();
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
+
+STDMETHODIMP ArchiveExtractCallback::SetCompleted(const UInt64 *completeValue) {
+  COM_ERROR_HANDLER_BEGIN
+  if (completeValue) this->completed = *completeValue;
+  update_ui();
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
+
+STDMETHODIMP ArchiveExtractCallback::GetStream(UInt32 index, ISequentialOutStream **outStream,  Int32 askExtractMode) {
+  COM_ERROR_HANDLER_BEGIN
+  DEBUG_OUTPUT(L"ArchiveExtractCallback::GetStream(" + int_to_str(index) + L", " + int_to_str(askExtractMode) + L")");
+  const FileInfo& file_info = reader.file_list[reader.file_id_index[index]];
+  file_path = file_info.name;
+  UInt32 index = file_info.parent;
+  while (index != top_index) {
+    const FileInfo& file_info = reader.file_list[reader.file_id_index[index]];
+    file_path.insert(0, 1, L'\\').insert(0, file_info.name);
+    index = file_info.parent;
+  }
+  file_path.insert(0, 1, L'\\').insert(0, dest_path);
+  ComObject<ISequentialOutStream> file_out_stream(new FileOutStream(file_path, file_info));
+  file_out_stream.detach(outStream);
+  update_ui();
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
+
+STDMETHODIMP ArchiveExtractCallback::PrepareOperation(Int32 askExtractMode) {
+  COM_ERROR_HANDLER_BEGIN
+  DEBUG_OUTPUT(L"ArchiveExtractCallback::PrepareOperation(" + int_to_str(askExtractMode) + L")");
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
+
+STDMETHODIMP ArchiveExtractCallback::SetOperationResult(Int32 resultEOperationResult) {
+  COM_ERROR_HANDLER_BEGIN
+  DEBUG_OUTPUT(L"ArchiveExtractCallback::SetOperationResult(" + int_to_str(resultEOperationResult) + L")");
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
+
+STDMETHODIMP ArchiveExtractCallback::CryptoGetTextPassword(BSTR *password) {
+  COM_ERROR_HANDLER_BEGIN
+  if (reader.password.empty()) {
+    ProgressSuspend ps(*this);
+    if (!password_dialog(reader.password))
+      FAIL(E_ABORT);
+  }
+  *password = str_to_bstr(reader.password);
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
+
+void ArchiveExtractCallback::do_update_ui() {
+  wostringstream st;
+  st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
+  st << fit_str(file_path, 60) << L'\n';
+  st << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L'\n';
+  st << Far::get_progress_bar_str(60, completed, total) << L'\n';
+  Far::message(st.str(), 0, FMSG_LEFTALIGN);
+}
+
+void ArchiveReader::detect(IInStream* in_stream, IArchiveOpenCallback* callback, vector<ComObject<IInArchive>>& archives, vector<wstring>& format_names) {
   wstring parent_prefix;
   if (!format_names.empty()) parent_prefix = format_names.back() + L" -> ";
   for (ArcFormats::const_iterator arc_format = arc_formats.begin(); arc_format != arc_formats.end(); arc_format++) {
@@ -286,9 +398,6 @@ void ArchiveReader::detect(const ArcFormats& arc_formats, IInStream* in_stream, 
       if (in_arc->GetNumberOfItems(&num_items) != S_OK || main_subfile >= num_items)
         continue;
 
-      //if (in_arc->GetProperty(main_subfile, kpidPath, &var) == S_OK && var.vt == VT_BSTR)
-        //format_names.back().append(L" [").append(var.bstrVal).append(L"]");
-
       ComObject<IInArchiveGetStream> get_stream;
       if (in_arc->QueryInterface(IID_IInArchiveGetStream, reinterpret_cast<void**>(&get_stream)) != S_OK || !get_stream)
         continue;
@@ -301,19 +410,17 @@ void ArchiveReader::detect(const ArcFormats& arc_formats, IInStream* in_stream, 
       if (sub_seq_stream->QueryInterface(IID_IInStream, reinterpret_cast<void**>(&sub_stream)) != S_OK || !sub_stream)
         continue;
 
-      detect(arc_formats, sub_stream, callback, archives, format_names);
+      detect(sub_stream, callback, archives, format_names);
     }
   }
 }
 
-bool ArchiveReader::open(const ArcFormats& arc_formats, const wstring& file_path) {
-  archive_file_info = get_find_data(file_path);
-
-  ComObject<FileStream> file_stream(new FileStream(file_path));
-  ComObject<ArchiveOpenCallback> archive_open_callback(new ArchiveOpenCallback(extract_file_path(file_path), archive_file_info));
+bool ArchiveReader::open() {
+  ComObject<FileStream> file_stream(new FileStream(add_trailing_slash(archive_dir) + archive_file_info.cFileName));
+  ComObject<ArchiveOpenCallback> archive_open_callback(new ArchiveOpenCallback(*this));
   vector<ComObject<IInArchive>> archives;
   vector<wstring> format_names;
-  detect(arc_formats, file_stream, archive_open_callback, archives, format_names);
+  detect(file_stream, archive_open_callback, archives, format_names);
 
   if (format_names.size() == 0) return false;
 
@@ -326,6 +433,9 @@ bool ArchiveReader::open(const ArcFormats& arc_formats, const wstring& file_path
 
   archive = archives[format_idx];
   return true;
+}
+
+ArchiveReader::ArchiveReader(const ArcFormats& arc_formats, const wstring& file_path): arc_formats(arc_formats), archive_file_info(get_find_data(file_path)), archive_dir(extract_file_path(file_path)) {
 }
 
 wstring ArchiveReader::get_default_name() const {
@@ -470,6 +580,8 @@ void ArchiveReader::make_index() {
       file_list.push_back(file_info);
     }
   }
+
+  // add directories to file list
   file_list.reserve(file_list.size() + dir_list.size());
   copy(dir_list.begin(), dir_list.end(), back_insert_iterator<FileList>(file_list));
   struct DirListIndexCmp: public binary_function<FileInfo, FileInfo, bool> {
@@ -481,6 +593,18 @@ void ArchiveReader::make_index() {
     }
   };
   sort(file_list.begin(), file_list.end(), DirListIndexCmp());
+
+  // map 7z file indices to internal file indices
+  UInt32 max_index = 0;
+  for (unsigned i = 0; i < file_list.size(); i++) {
+    if (max_index < file_list[i].index)
+      max_index = file_list[i].index;
+  }
+  file_id_index.clear();
+  file_id_index.assign(max_index + 1, -1);
+  for (unsigned i = 0; i < file_list.size(); i++) {
+    file_id_index[file_list[i].index] = i;
+  }
 
   // create directory search index
   dir_find_index.clear();
@@ -559,7 +683,58 @@ FileListRef ArchiveReader::dir_list(UInt32 dir_index) {
   FileInfo dir_info;
   dir_info.parent = dir_index;
   FileListRef fl_ref = equal_range(file_list.begin(), file_list.end(), dir_info, DirListIndexCmp());
-  CHECK(fl_ref.first != file_list.end());
 
   return fl_ref;
+}
+
+void ArchiveReader::prepare_extract(UInt32 dir_index, const wstring& dir_path, FileIndex& indices) {
+  CHECK_SYS(CreateDirectoryW(long_path(dir_path).c_str(), NULL));
+  FileListRef fl = dir_list(dir_index);
+  for (FileList::const_iterator file_info = fl.first; file_info != fl.second; file_info++) {
+    if (file_info->is_dir()) {
+      prepare_extract(file_info->index, add_trailing_slash(dir_path) + file_info->name, indices);
+    }
+    else
+      indices.push_back(file_info->index);
+  }
+}
+
+void ArchiveReader::set_dir_attr(FileInfo dir_info, const wstring& dir_path) {
+  FileListRef fl = dir_list(dir_info.index);
+  for (FileList::const_iterator file_info = fl.first; file_info != fl.second; file_info++) {
+    if (file_info->is_dir()) {
+      set_dir_attr(*file_info, add_trailing_slash(dir_path) + file_info->name);
+    }
+  }
+  {
+    File open_dir(dir_path, FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_POSIX_SEMANTICS);
+    CHECK_SYS(SetFileAttributesW(long_path(dir_path).c_str(), dir_info.attr));
+    open_dir.set_time(&dir_info.ctime, &dir_info.atime, &dir_info.mtime);
+  }
+}
+
+void ArchiveReader::extract(UInt32 index, const wstring& dest_path, ArchiveExtractCallback* callback) {
+  if (index == c_root_index) {
+    FileListRef fl = dir_list(c_root_index);
+    for (FileList::const_iterator file_info = fl.first; file_info != fl.second; file_info++) {
+      extract(file_info->index, dest_path, callback);
+    }
+  }
+  else {
+    FileIndex indices;
+    const FileInfo& file_info = file_list[file_id_index[index]];
+    if (file_info.is_dir()) {
+      indices.reserve(file_list.size());
+      prepare_extract(file_info.index, add_trailing_slash(dest_path) + file_info.name, indices);
+      sort(indices.begin(), indices.end());
+    }
+    else {
+      indices.assign(1, file_info.index);
+    }
+    callback->top_index = file_info.parent;
+    archive->Extract(to_array(indices), indices.size(), 0, callback);
+    if (file_info.is_dir()) {
+      set_dir_attr(file_info, add_trailing_slash(dest_path) + file_info.name);
+    }
+  }
 }

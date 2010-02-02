@@ -60,17 +60,86 @@ const UInt32 c_root_index = -1;
 typedef vector<UInt32> FileIndex;
 typedef pair<FileList::const_iterator, FileList::const_iterator> FileListRef;
 
+class ArchiveExtractCallback;
+
 class ArchiveReader {
 private:
+  const ArcFormats& arc_formats;
   ComObject<IInArchive> archive;
+  wstring archive_dir;
   FindData archive_file_info;
   FileList file_list;
   FileIndex dir_find_index;
+  FileIndex file_id_index;
+  wstring password;
   wstring get_default_name() const;
   void make_index();
-  void detect(const ArcFormats& arc_formats, IInStream* in_stream, IArchiveOpenCallback* callback, vector<ComObject<IInArchive>>& archives, vector<wstring>& format_names);
+  void detect(IInStream* in_stream, IArchiveOpenCallback* callback, vector<ComObject<IInArchive>>& archives, vector<wstring>& format_names);
+  void prepare_extract(UInt32 dir_index, const wstring& parent_dir, FileIndex& indices);
+  void set_dir_attr(FileInfo dir_info, const wstring& dir_path);
 public:
-  bool open(const ArcFormats& arc_formats, const wstring& file_path);
+  ArchiveReader(const ArcFormats& arc_formats, const wstring& file_path);
+  bool open();
   UInt32 dir_find(const wstring& dir);
   FileListRef dir_list(UInt32 dir_index);
+  void extract(UInt32 index, const wstring& dest_path, ArchiveExtractCallback* callback);
+  friend class ArchiveOpenCallback;
+  friend class ArchiveExtractCallback;
+};
+
+class ArchiveOpenCallback: public IArchiveOpenCallback, public IArchiveOpenVolumeCallback, public ICryptoGetTextPassword, public UnknownImpl, public ProgressMonitor {
+private:
+  ArchiveReader& reader;
+  UInt64 total_files;
+  UInt64 total_bytes;
+  UInt64 completed_files;
+  UInt64 completed_bytes;
+  FindData volume_file_info;
+  virtual void do_update_ui();
+public:
+  ArchiveOpenCallback(ArchiveReader& reader): reader(reader), volume_file_info(reader.archive_file_info), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
+  }
+
+  UNKNOWN_IMPL_BEGIN
+  UNKNOWN_IMPL_ITF(IArchiveOpenCallback)
+  UNKNOWN_IMPL_ITF(IArchiveOpenVolumeCallback)
+  UNKNOWN_IMPL_ITF(ICryptoGetTextPassword)
+  UNKNOWN_IMPL_END
+
+  STDMETHOD(SetTotal)(const UInt64 *files, const UInt64 *bytes);
+  STDMETHOD(SetCompleted)(const UInt64 *files, const UInt64 *bytes);
+
+  STDMETHOD(GetProperty)(PROPID propID, PROPVARIANT *value);
+  STDMETHOD(GetStream)(const wchar_t *name, IInStream **inStream);
+
+  STDMETHOD(CryptoGetTextPassword)(BSTR *password);
+};
+
+class ArchiveExtractCallback: public IArchiveExtractCallback, public ICryptoGetTextPassword, public UnknownImpl, public ProgressMonitor {
+private:
+  ArchiveReader& reader;
+  wstring dest_path;
+  UInt64 total;
+  UInt64 completed;
+  wstring file_path;
+  virtual void do_update_ui();
+public:
+  UInt32 top_index;
+  ArchiveExtractCallback(ArchiveReader& reader, const wstring& dest_path): reader(reader), dest_path(dest_path), total(0), completed(0) {
+  }
+
+  UNKNOWN_IMPL_BEGIN
+  UNKNOWN_IMPL_ITF(IProgress)
+  UNKNOWN_IMPL_ITF(IArchiveExtractCallback)
+  UNKNOWN_IMPL_ITF(ICryptoGetTextPassword)
+  UNKNOWN_IMPL_END
+
+  STDMETHOD(SetTotal)(UInt64 total);
+  STDMETHOD(SetCompleted)(const UInt64 *completeValue);
+
+  STDMETHOD(GetStream)(UInt32 index, ISequentialOutStream **outStream,  Int32 askExtractMode);
+  STDMETHOD(PrepareOperation)(Int32 askExtractMode);
+  STDMETHOD(SetOperationResult)(Int32 resultEOperationResult);
+
+  STDMETHOD(CryptoGetTextPassword)(BSTR *password);
 };
