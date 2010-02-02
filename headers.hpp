@@ -21,6 +21,7 @@ using namespace std;
 
 #define INITGUID
 #include "CPP/7zip/Archive/IArchive.h"
+#include "CPP/7zip/IPassword.h"
 
 #include "plugin.hpp"
 #include "farkeys.hpp"

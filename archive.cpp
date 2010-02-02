@@ -151,22 +151,23 @@ STDMETHODIMP FileStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPositi
   COM_ERROR_HANDLER_END
 }
 
-class ArchiveOpenCallback: public IArchiveOpenCallback, public IArchiveOpenVolumeCallback, public UnknownImpl, public ProgressMonitor {
+class ArchiveOpenCallback: public IArchiveOpenCallback, public IArchiveOpenVolumeCallback, public ICryptoGetTextPassword, public UnknownImpl, public ProgressMonitor {
 private:
   UInt64 total_files;
   UInt64 total_bytes;
   UInt64 completed_files;
   UInt64 completed_bytes;
-  const wstring dir;
-  FindData file_info;
+  const wstring archive_dir;
+  FindData volume_file_info;
   virtual void do_update_ui();
 public:
-  ArchiveOpenCallback(const wstring& dir, const FindData& arc_file_info): dir(dir), file_info(arc_file_info), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
+  ArchiveOpenCallback(const wstring& archive_dir, const FindData& arc_file_info): archive_dir(archive_dir), volume_file_info(arc_file_info), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
   UNKNOWN_IMPL_ITF(IArchiveOpenCallback)
   UNKNOWN_IMPL_ITF(IArchiveOpenVolumeCallback)
+  UNKNOWN_IMPL_ITF(ICryptoGetTextPassword)
   UNKNOWN_IMPL_END
 
   STDMETHOD(SetTotal)(const UInt64 *files, const UInt64 *bytes);
@@ -174,6 +175,8 @@ public:
 
   STDMETHOD(GetProperty)(PROPID propID, PROPVARIANT *value);
   STDMETHOD(GetStream)(const wchar_t *name, IInStream **inStream);
+
+  STDMETHOD(CryptoGetTextPassword)(BSTR *password);
 };
 
 STDMETHODIMP ArchiveOpenCallback::SetTotal(const UInt64 *files, const UInt64 *bytes) {
@@ -199,19 +202,19 @@ STDMETHODIMP ArchiveOpenCallback::GetProperty(PROPID propID, PROPVARIANT *value)
   PropVariant var;
   switch (propID) {
   case kpidName:
-    var = file_info.cFileName; break;
+    var = volume_file_info.cFileName; break;
   case kpidIsDir:
-    var = file_info.is_dir(); break;
+    var = volume_file_info.is_dir(); break;
   case kpidSize:
-    var = file_info.size(); break;
+    var = volume_file_info.size(); break;
   case kpidAttrib:
-    var = static_cast<UInt32>(file_info.dwFileAttributes); break;
+    var = static_cast<UInt32>(volume_file_info.dwFileAttributes); break;
   case kpidCTime:
-    var = file_info.ftCreationTime; break;
+    var = volume_file_info.ftCreationTime; break;
   case kpidATime:
-    var = file_info.ftLastAccessTime; break;
+    var = volume_file_info.ftLastAccessTime; break;
   case kpidMTime:
-    var = file_info.ftLastWriteTime; break;
+    var = volume_file_info.ftLastWriteTime; break;
   }
   var.detach(value);
   return S_OK;
@@ -220,14 +223,14 @@ STDMETHODIMP ArchiveOpenCallback::GetProperty(PROPID propID, PROPVARIANT *value)
 
 STDMETHODIMP ArchiveOpenCallback::GetStream(const wchar_t *name, IInStream **inStream) {
   COM_ERROR_HANDLER_BEGIN
-  wstring file_path = add_trailing_slash(dir) + name;
+  wstring file_path = add_trailing_slash(archive_dir) + name;
   try {
-    file_info = get_find_data(file_path);
+    volume_file_info = get_find_data(file_path);
   }
   catch (Error&) {
     return S_FALSE;
   }
-  if (file_info.is_dir())
+  if (volume_file_info.is_dir())
     return S_FALSE;
   ComObject<IInStream> file_stream(new FileStream(file_path));
   file_stream.detach(inStream);
@@ -236,10 +239,23 @@ STDMETHODIMP ArchiveOpenCallback::GetStream(const wchar_t *name, IInStream **inS
   COM_ERROR_HANDLER_END
 }
 
+STDMETHODIMP ArchiveOpenCallback::CryptoGetTextPassword(BSTR *password) {
+  COM_ERROR_HANDLER_BEGIN
+  wstring pwd;
+  {
+    ProgressSuspend ps(*this);
+    if (!password_dialog(pwd))
+      FAIL(E_ABORT);
+  }
+  *password = str_to_bstr(pwd);
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
+
 void ArchiveOpenCallback::do_update_ui() {
   wostringstream st;
   st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-  st << file_info.cFileName << L'\n';
+  st << volume_file_info.cFileName << L'\n';
   st << completed_files << L" / " << total_files << L'\n';
   st << Far::get_progress_bar_str(60, completed_files, total_files) << L'\n';
   st << L"\x01\n";

@@ -158,3 +158,10 @@ public:
     return *this;
   }
 };
+
+inline BSTR str_to_bstr(const wstring& str) {
+  BSTR bstr = SysAllocStringLen(str.data(), str.size());
+  if (bstr == NULL)
+    FAIL(E_OUTOFMEMORY);
+  return bstr;
+}

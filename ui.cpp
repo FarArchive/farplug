@@ -5,12 +5,6 @@
 #include "sysutils.hpp"
 #include "ui.hpp"
 
-  unsigned __int64 cnt_prev;
-  unsigned __int64 cnt_freq;
-  unsigned __int64 time_total;
-  unsigned __int64 time_update;
-
-
 ProgressMonitor::ProgressMonitor(bool lazy): h_scr(NULL) {
   QueryPerformanceCounter(reinterpret_cast<PLARGE_INTEGER>(&time_cnt));
   QueryPerformanceFrequency(reinterpret_cast<PLARGE_INTEGER>(&time_freq));
@@ -83,4 +77,48 @@ const wchar_t** get_speed_suffixes() {
     Far::msg_ptr(MSG_SUFFIX_SPEED_TB),
   };
   return suffixes;
+}
+
+class PasswordDialog: public Far::Dialog {
+private:
+  enum {
+    c_client_xs = 40
+  };
+
+  wstring& password;
+
+  int password_ctrl_id;
+  int ok_ctrl_id;
+  int cancel_ctrl_id;
+
+  LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
+    if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != cancel_ctrl_id)) {
+      password = get_text(password_ctrl_id);
+    }
+    return default_dialog_proc(msg, param1, param2);
+  }
+
+public:
+  PasswordDialog(wstring& password): Far::Dialog(Far::get_msg(MSG_PASSWORD_TITLE), c_client_xs), password(password) {
+  }
+
+  bool show() {
+    label(Far::get_msg(MSG_PASSWORD_PASSWORD));
+    password_ctrl_id = edit_box(password, 30);
+    new_line();
+    separator();
+    new_line();
+
+    ok_ctrl_id = def_button(Far::get_msg(MSG_BUTTON_OK), DIF_CENTERGROUP);
+    cancel_ctrl_id = button(Far::get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
+    new_line();
+
+    int item = Far::Dialog::show();
+
+    return (item != -1) && (item != cancel_ctrl_id);
+  }
+};
+
+bool password_dialog(wstring& password) {
+  return PasswordDialog(password).show();
 }

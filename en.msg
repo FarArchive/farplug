@@ -2,6 +2,14 @@
 
 plugin.name = <(NAME)>
 
+# Password dialog
+password.title = Enter password
+password.password = Password:
+
+# Generic buttons
+button.ok = OK
+button.cancel = Cancel
+
 # Size and speed suffixes
 suffix.size.b = B
 suffix.size.kb = KB
