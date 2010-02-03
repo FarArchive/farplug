@@ -184,16 +184,13 @@ STDMETHODIMP FileOutStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPos
   DWORD move_method;
   switch (seekOrigin) {
   case STREAM_SEEK_SET:
-    move_method = FILE_BEGIN;
-    break;
+    move_method = FILE_BEGIN; break;
   case STREAM_SEEK_CUR:
-    move_method = FILE_CURRENT;
-    break;
+    move_method = FILE_CURRENT; break;
   case STREAM_SEEK_END:
-    move_method = FILE_END;
-    break;
+    move_method = FILE_END; break;
   default:
-    return E_INVALIDARG;
+    FAIL(E_INVALIDARG);
   }
   LARGE_INTEGER distance;
   distance.QuadPart = offset;
@@ -328,12 +325,12 @@ STDMETHODIMP ArchiveExtractCallback::GetStream(UInt32 index, ISequentialOutStrea
   const FileInfo& file_info = reader.file_list[reader.file_id_index[index]];
   file_path = file_info.name;
   UInt32 index = file_info.parent;
-  while (index != top_index) {
+  while (index != src_dir_index) {
     const FileInfo& file_info = reader.file_list[reader.file_id_index[index]];
     file_path.insert(0, 1, L'\\').insert(0, file_info.name);
     index = file_info.parent;
   }
-  file_path.insert(0, 1, L'\\').insert(0, dest_path);
+  file_path.insert(0, 1, L'\\').insert(0, dest_dir);
   ComObject<ISequentialOutStream> file_out_stream(new FileOutStream(file_path, file_info));
   file_out_stream.detach(outStream);
   update_ui();
@@ -687,23 +684,23 @@ FileListRef ArchiveReader::dir_list(UInt32 dir_index) {
   return fl_ref;
 }
 
-void ArchiveReader::prepare_extract(UInt32 dir_index, const wstring& dir_path, FileIndex& indices) {
+void ArchiveReader::prepare_extract(UInt32 dir_index, const wstring& dir_path, list<UInt32>& indices, ArchiveExtractCallback* progress) {
   CHECK_SYS(CreateDirectoryW(long_path(dir_path).c_str(), NULL));
   FileListRef fl = dir_list(dir_index);
   for (FileList::const_iterator file_info = fl.first; file_info != fl.second; file_info++) {
     if (file_info->is_dir()) {
-      prepare_extract(file_info->index, add_trailing_slash(dir_path) + file_info->name, indices);
+      prepare_extract(file_info->index, add_trailing_slash(dir_path) + file_info->name, indices, progress);
     }
     else
       indices.push_back(file_info->index);
   }
 }
 
-void ArchiveReader::set_dir_attr(FileInfo dir_info, const wstring& dir_path) {
+void ArchiveReader::set_dir_attr(FileInfo dir_info, const wstring& dir_path, ArchiveExtractCallback* progress) {
   FileListRef fl = dir_list(dir_info.index);
   for (FileList::const_iterator file_info = fl.first; file_info != fl.second; file_info++) {
     if (file_info->is_dir()) {
-      set_dir_attr(*file_info, add_trailing_slash(dir_path) + file_info->name);
+      set_dir_attr(*file_info, add_trailing_slash(dir_path) + file_info->name, progress);
     }
   }
   {
@@ -713,28 +710,30 @@ void ArchiveReader::set_dir_attr(FileInfo dir_info, const wstring& dir_path) {
   }
 }
 
-void ArchiveReader::extract(UInt32 index, const wstring& dest_path, ArchiveExtractCallback* callback) {
-  if (index == c_root_index) {
-    FileListRef fl = dir_list(c_root_index);
-    for (FileList::const_iterator file_info = fl.first; file_info != fl.second; file_info++) {
-      extract(file_info->index, dest_path, callback);
-    }
-  }
-  else {
-    FileIndex indices;
-    const FileInfo& file_info = file_list[file_id_index[index]];
+void ArchiveReader::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const wstring& dest_dir) {
+  ComObject<ArchiveExtractCallback> callback(new ArchiveExtractCallback(*this, src_dir_index, dest_dir));
+
+  list<UInt32> file_indices;
+  for (unsigned i = 0; i < src_indices.size(); i++) {
+    const FileInfo& file_info = file_list[file_id_index[src_indices[i]]];
     if (file_info.is_dir()) {
-      indices.reserve(file_list.size());
-      prepare_extract(file_info.index, add_trailing_slash(dest_path) + file_info.name, indices);
-      sort(indices.begin(), indices.end());
+      prepare_extract(file_info.index, add_trailing_slash(dest_dir) + file_info.name, file_indices, callback);
     }
     else {
-      indices.assign(1, file_info.index);
+      file_indices.push_back(file_info.index);
     }
-    callback->top_index = file_info.parent;
-    archive->Extract(to_array(indices), indices.size(), 0, callback);
+  }
+
+  vector<UInt32> indices;
+  indices.reserve(file_indices.size());
+  copy(file_indices.begin(), file_indices.end(), back_insert_iterator<vector<UInt32>>(indices));
+  sort(indices.begin(), indices.end());
+  CHECK_COM(archive->Extract(to_array(indices), indices.size(), 0, callback));
+
+  for (unsigned i = 0; i < src_indices.size(); i++) {
+    const FileInfo& file_info = file_list[file_id_index[src_indices[i]]];
     if (file_info.is_dir()) {
-      set_dir_attr(file_info, add_trailing_slash(dest_path) + file_info.name);
+      set_dir_attr(file_info, add_trailing_slash(dest_dir) + file_info.name, callback);
     }
   }
 }

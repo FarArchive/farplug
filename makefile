@@ -59,7 +59,7 @@ $(OUTDIR)\headers.pch: headers.cpp headers.hpp
   $(CPP) $(CPPFLAGS) headers.cpp -Ycheaders.hpp -Fp$(OUTDIR)\headers.pch
 
 depfile: $(OUTDIR) $(OUTDIR)\msg.h
-  $(TOOLSDIR)\gendep.exe $(INCLUDES) > $(OUTDIR)\dep.mak
+  $(TOOLSDIR)\gendep.exe $(INCLUDES) $(COMMONDIR) > $(OUTDIR)\dep.mak
 
 $(OUTDIR)\msg.h $(OUTDIR)\en.lng $(OUTDIR)\ru.lng: $(OUTDIR) $(OUTDIR)\en.msg $(OUTDIR)\ru.msg
   $(TOOLSDIR)\msgc -in $(OUTDIR)\en.msg $(OUTDIR)\ru.msg -out $(OUTDIR)\msg.h $(OUTDIR)\en.lng $(OUTDIR)\ru.lng

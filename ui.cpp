@@ -25,10 +25,7 @@ ProgressMonitor::~ProgressMonitor() {
 }
 
 void ProgressMonitor::update_ui(bool force) {
-  unsigned __int64 time_curr;
-  QueryPerformanceCounter(reinterpret_cast<PLARGE_INTEGER>(&time_curr));
-  time_total += time_curr - time_cnt;
-  time_cnt = time_curr;
+  update_time();
   if ((time_total >= time_update) || force) {
     time_update = time_total + time_freq / c_update_delay_div;
     if (h_scr == NULL) {
@@ -49,12 +46,24 @@ void ProgressMonitor::update_ui(bool force) {
   }
 }
 
-ProgressSuspend::ProgressSuspend(ProgressMonitor& pm): pm(pm) {
-  pm.update_ui();
+void ProgressMonitor::update_time() {
+  unsigned __int64 time_curr;
+  QueryPerformanceCounter(reinterpret_cast<PLARGE_INTEGER>(&time_curr));
+  time_total += time_curr - time_cnt;
+  time_cnt = time_curr;
 }
 
-ProgressSuspend::~ProgressSuspend() {
-  QueryPerformanceCounter(reinterpret_cast<PLARGE_INTEGER>(&pm.time_cnt));
+void ProgressMonitor::discard_time() {
+  QueryPerformanceCounter(reinterpret_cast<PLARGE_INTEGER>(&time_cnt));
+}
+
+unsigned __int64 ProgressMonitor::time_elapsed() {
+  update_time();
+  return time_total;
+}
+
+unsigned __int64 ProgressMonitor::ticks_per_sec() {
+  return time_freq;
 }
 
 const wchar_t** get_size_suffixes() {

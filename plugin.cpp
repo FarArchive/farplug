@@ -89,17 +89,23 @@ void Plugin::list(PluginPanelItem** panel_items, int* items_number) {
 }
 
 void Plugin::extract(PluginPanelItem* panel_items, int items_number, const wchar_t** dest_path) {
-  ComObject<ArchiveExtractCallback> callback(new ArchiveExtractCallback(reader, *dest_path));
+  vector<UInt32> indices;
+  UInt32 src_dir_index = reader.dir_find(current_dir);
   if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) {
-    reader.extract(reader.dir_find(current_dir), *dest_path, callback);
-  }
-  else {
-    Far::Selection item_selection(this);
-    for (int i = 0; i < items_number; i++) {
-      reader.extract(panel_items[i].UserData, *dest_path, callback);
-      item_selection.select(i, false);
+    FileListRef fl = reader.dir_list(src_dir_index);
+    indices.reserve(fl.second - fl.first);
+    for (FileList::const_iterator file_info = fl.first; file_info != fl.second; file_info++) {
+      indices.push_back(file_info->index);
     }
   }
+  else {
+    indices.reserve(items_number);
+    for (int i = 0; i < items_number; i++) {
+      indices.push_back(panel_items[i].UserData);
+    }
+  }
+  reader.extract(src_dir_index, indices, *dest_path);
+  Far::update_panel(this, false);
 }
 
 int WINAPI GetMinFarVersion(void) {

@@ -75,14 +75,14 @@ private:
   wstring get_default_name() const;
   void make_index();
   void detect(IInStream* in_stream, IArchiveOpenCallback* callback, vector<ComObject<IInArchive>>& archives, vector<wstring>& format_names);
-  void prepare_extract(UInt32 dir_index, const wstring& parent_dir, FileIndex& indices);
-  void set_dir_attr(FileInfo dir_info, const wstring& dir_path);
+  void prepare_extract(UInt32 dir_index, const wstring& parent_dir, list<UInt32>& indices, ArchiveExtractCallback* progress);
+  void set_dir_attr(FileInfo dir_info, const wstring& dir_path, ArchiveExtractCallback* progress);
 public:
   ArchiveReader(const ArcFormats& arc_formats, const wstring& file_path);
   bool open();
   UInt32 dir_find(const wstring& dir);
   FileListRef dir_list(UInt32 dir_index);
-  void extract(UInt32 index, const wstring& dest_path, ArchiveExtractCallback* callback);
+  void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const wstring& dest_dir);
   friend class ArchiveOpenCallback;
   friend class ArchiveExtractCallback;
 };
@@ -118,14 +118,14 @@ public:
 class ArchiveExtractCallback: public IArchiveExtractCallback, public ICryptoGetTextPassword, public UnknownImpl, public ProgressMonitor {
 private:
   ArchiveReader& reader;
-  wstring dest_path;
+  UInt32 src_dir_index;
+  wstring dest_dir;
   UInt64 total;
   UInt64 completed;
   wstring file_path;
   virtual void do_update_ui();
 public:
-  UInt32 top_index;
-  ArchiveExtractCallback(ArchiveReader& reader, const wstring& dest_path): reader(reader), dest_path(dest_path), total(0), completed(0) {
+  ArchiveExtractCallback(ArchiveReader& reader, UInt32 src_dir_index, const wstring& dest_dir): reader(reader), src_dir_index(src_dir_index), dest_dir(dest_dir), total(0), completed(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
