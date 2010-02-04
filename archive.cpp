@@ -319,9 +319,23 @@ STDMETHODIMP ArchiveExtractCallback::SetCompleted(const UInt64 *completeValue) {
   COM_ERROR_HANDLER_END
 }
 
+FindData convert_file_info(const FileInfo& file_info) {
+  FindData find_data;
+  memset(&find_data, 0, sizeof(find_data));
+  find_data.dwFileAttributes = file_info.attr;
+  find_data.ftCreationTime = file_info.ctime;
+  find_data.ftLastAccessTime = file_info.atime;
+  find_data.ftLastWriteTime = file_info.mtime;
+  find_data.nFileSizeHigh = file_info.size >> 32;
+  find_data.nFileSizeLow = file_info.size & 0xFFFFFFFF;
+  wcscpy(find_data.cFileName, file_info.name.c_str());
+  return find_data;
+}
+
 STDMETHODIMP ArchiveExtractCallback::GetStream(UInt32 index, ISequentialOutStream **outStream,  Int32 askExtractMode) {
   COM_ERROR_HANDLER_BEGIN
   DEBUG_OUTPUT(L"ArchiveExtractCallback::GetStream(" + int_to_str(index) + L", " + int_to_str(askExtractMode) + L")");
+
   const FileInfo& file_info = reader.file_list[reader.file_id_index[index]];
   file_path = file_info.name;
   UInt32 index = file_info.parent;
@@ -331,6 +345,44 @@ STDMETHODIMP ArchiveExtractCallback::GetStream(UInt32 index, ISequentialOutStrea
     index = file_info.parent;
   }
   file_path.insert(0, 1, L'\\').insert(0, dest_dir);
+
+  FindData dst_file_info;
+  HANDLE h_find = FindFirstFileW(long_path(file_path).c_str(), &dst_file_info);
+  if (h_find != INVALID_HANDLE_VALUE) {
+    FindClose(h_find);
+    bool overwrite;
+    if (oo == ooAsk) {
+      FindData src_file_info = convert_file_info(file_info);
+      OverwriteAction oa = overwrite_dialog(file_path, src_file_info, dst_file_info);
+      if (oa == oaYes)
+        overwrite = true;
+      else if (oa == oaYesAll) {
+        overwrite = true;
+        oo = ooOverwrite;
+      }
+      else if (oa == oaNo)
+        overwrite = false;
+      else if (oa == oaNoAll) {
+        overwrite = false;
+        oo = ooSkip;
+      }
+      else if (oa == oaCancel)
+        return E_ABORT;
+    }
+    else if (oo == ooOverwrite)
+      overwrite = true;
+    else if (oo == ooSkip)
+      overwrite = false;
+
+    if (overwrite) {
+      CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL));
+    }
+    else {
+      *outStream = NULL;
+      return S_OK;
+    }
+  }
+
   ComObject<ISequentialOutStream> file_out_stream(new FileOutStream(file_path, file_info));
   file_out_stream.detach(outStream);
   update_ui();
@@ -685,7 +737,11 @@ FileListRef ArchiveReader::dir_list(UInt32 dir_index) {
 }
 
 void ArchiveReader::prepare_extract(UInt32 dir_index, const wstring& dir_path, list<UInt32>& indices, ArchiveExtractCallback* progress) {
-  CHECK_SYS(CreateDirectoryW(long_path(dir_path).c_str(), NULL));
+  BOOL res = CreateDirectoryW(long_path(dir_path).c_str(), NULL);
+  if (!res) {
+    CHECK_SYS(GetLastError() == ERROR_ALREADY_EXISTS);
+  }
+
   FileListRef fl = dir_list(dir_index);
   for (FileList::const_iterator file_info = fl.first; file_info != fl.second; file_info++) {
     if (file_info->is_dir()) {
@@ -704,6 +760,7 @@ void ArchiveReader::set_dir_attr(FileInfo dir_info, const wstring& dir_path, Arc
     }
   }
   {
+    CHECK_SYS(SetFileAttributesW(long_path(dir_path).c_str(), FILE_ATTRIBUTE_NORMAL));
     File open_dir(dir_path, FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_POSIX_SEMANTICS);
     CHECK_SYS(SetFileAttributesW(long_path(dir_path).c_str(), dir_info.attr));
     open_dir.set_time(&dir_info.ctime, &dir_info.atime, &dir_info.mtime);

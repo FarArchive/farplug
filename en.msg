@@ -6,6 +6,17 @@ plugin.name = <(NAME)>
 password.title = Enter password
 password.password = Password:
 
+# Overwrite dialog
+overwrite.dlg.title = Overwrite file
+overwrite.dlg.question = Destination file already exists. Overwrite?
+overwrite.dlg.source = Source:
+overwrite.dlg.destination = Destination:
+overwrite.dlg.newer = (newer)
+overwrite.dlg.yes = &Yes
+overwrite.dlg.yes.all = Yes to &All
+overwrite.dlg.no = &No
+overwrite.dlg.no.all = No to A&ll
+
 # Generic buttons
 button.ok = OK
 button.cancel = Cancel

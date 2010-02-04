@@ -131,3 +131,76 @@ public:
 bool password_dialog(wstring& password) {
   return PasswordDialog(password).show();
 }
+
+class OverwriteDialog: public Far::Dialog {
+private:
+  enum {
+    c_client_xs = 60
+  };
+
+  int yes_ctrl_id;
+  int yes_all_ctrl_id;
+  int no_ctrl_id;
+  int no_all_ctrl_id;
+  int cancel_ctrl_id;
+
+public:
+  OverwriteDialog(): Far::Dialog(Far::get_msg(MSG_OVERWRITE_DLG_TITLE), c_client_xs) {
+  }
+
+  OverwriteAction show(const wstring& file_path, const FindData& src_file_info, const FindData& dst_file_info) {
+    label(fit_str(file_path, c_client_xs));
+    new_line();
+    label(Far::get_msg(MSG_OVERWRITE_DLG_QUESTION));
+    new_line();
+    separator();
+    new_line();
+
+    label(Far::get_msg(MSG_OVERWRITE_DLG_SOURCE));
+    pad(15);
+    if (!src_file_info.is_dir()) {
+      label(format_data_size(src_file_info.size(), get_size_suffixes()));
+      pad(25);
+    }
+    label(format_file_time(src_file_info.ftLastWriteTime));
+    if (CompareFileTime(&src_file_info.ftLastWriteTime, &dst_file_info.ftLastWriteTime) > 0) {
+      spacer(1);
+      label(Far::get_msg(MSG_OVERWRITE_DLG_NEWER));
+    }
+    new_line();
+
+    label(Far::get_msg(MSG_OVERWRITE_DLG_DESTINATION));
+    pad(15);
+    if (!dst_file_info.is_dir()) {
+      label(format_data_size(dst_file_info.size(), get_size_suffixes()));
+      pad(25);
+    }
+    label(format_file_time(dst_file_info.ftLastWriteTime));
+    if (CompareFileTime(&src_file_info.ftLastWriteTime, &dst_file_info.ftLastWriteTime) < 0) {
+      spacer(1);
+      label(Far::get_msg(MSG_OVERWRITE_DLG_NEWER));
+    }
+    new_line();
+
+    separator();
+    new_line();
+    yes_ctrl_id = def_button(Far::get_msg(MSG_OVERWRITE_DLG_YES), DIF_CENTERGROUP);
+    yes_all_ctrl_id = button(Far::get_msg(MSG_OVERWRITE_DLG_YES_ALL), DIF_CENTERGROUP);
+    no_ctrl_id = button(Far::get_msg(MSG_OVERWRITE_DLG_NO), DIF_CENTERGROUP);
+    no_all_ctrl_id = button(Far::get_msg(MSG_OVERWRITE_DLG_NO_ALL), DIF_CENTERGROUP);
+    cancel_ctrl_id = button(Far::get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
+    new_line();
+
+    int item = Far::Dialog::show();
+
+    if (item == yes_ctrl_id) return oaYes;
+    else if (item == yes_all_ctrl_id) return oaYesAll;
+    else if (item == no_ctrl_id) return oaNo;
+    else if (item == no_all_ctrl_id) return oaNoAll;
+    else return oaCancel;
+  }
+};
+
+OverwriteAction overwrite_dialog(const wstring& file_path, const FindData& src_file_info, const FindData& dst_file_info) {
+  return OverwriteDialog().show(file_path, src_file_info, dst_file_info);
+}

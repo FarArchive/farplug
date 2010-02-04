@@ -39,3 +39,6 @@ const wchar_t** get_size_suffixes();
 const wchar_t** get_speed_suffixes();
 
 bool password_dialog(wstring& password);
+
+enum OverwriteAction { oaYes, oaYesAll, oaNo, oaNoAll, oaCancel };
+OverwriteAction overwrite_dialog(const wstring& file_path, const FindData& src_file_info, const FindData& dst_file_info);

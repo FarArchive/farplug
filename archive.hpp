@@ -115,6 +115,8 @@ public:
   STDMETHOD(CryptoGetTextPassword)(BSTR *password);
 };
 
+enum OverwriteOption { ooAsk, ooOverwrite, ooSkip };
+
 class ArchiveExtractCallback: public IArchiveExtractCallback, public ICryptoGetTextPassword, public UnknownImpl, public ProgressMonitor {
 private:
   ArchiveReader& reader;
@@ -123,9 +125,10 @@ private:
   UInt64 total;
   UInt64 completed;
   wstring file_path;
+  OverwriteOption oo;
   virtual void do_update_ui();
 public:
-  ArchiveExtractCallback(ArchiveReader& reader, UInt32 src_dir_index, const wstring& dest_dir): reader(reader), src_dir_index(src_dir_index), dest_dir(dest_dir), total(0), completed(0) {
+  ArchiveExtractCallback(ArchiveReader& reader, UInt32 src_dir_index, const wstring& dest_dir): reader(reader), src_dir_index(src_dir_index), dest_dir(dest_dir), total(0), completed(0), oo(ooAsk) {
   }
 
   UNKNOWN_IMPL_BEGIN
