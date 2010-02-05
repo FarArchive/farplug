@@ -32,7 +32,7 @@ INCLUDES = -I7z -Ifar -I$(OUTDIR) -I$(COMMONDIR)
 CPPFLAGS = $(CPPFLAGS) -Fo$(OUTDIR)\ -Fd$(OUTDIR)\ $(INCLUDES) $(DEFINES)
 RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
 
-OBJS = $(OUTDIR)\archive.obj $(OUTDIR)\farutils.obj $(OUTDIR)\pathutils.obj $(OUTDIR)\plugin.obj $(OUTDIR)\strutils.obj $(OUTDIR)\sysutils.obj $(OUTDIR)\ui.obj
+OBJS = $(OUTDIR)\archive.obj $(OUTDIR)\farutils.obj $(OUTDIR)\pathutils.obj $(OUTDIR)\plugin.obj $(OUTDIR)\strutils.obj $(OUTDIR)\sysutils.obj $(OUTDIR)\ui.obj $(OUTDIR)\extract.obj
 
 LIBS = user32.lib advapi32.lib ole32.lib oleaut32.lib
 
