@@ -5,6 +5,10 @@
 #include "sysutils.hpp"
 #include "ui.hpp"
 
+wstring get_error_dlg_title() {
+  return Far::get_msg(MSG_PLUGIN_NAME);
+}
+
 ProgressMonitor::ProgressMonitor(bool lazy): h_scr(NULL) {
   QueryPerformanceCounter(reinterpret_cast<PLARGE_INTEGER>(&time_cnt));
   QueryPerformanceFrequency(reinterpret_cast<PLARGE_INTEGER>(&time_freq));

@@ -5,6 +5,7 @@
 #include <winhttp.h>
 #include <shobjidl.h>
 
+#include <assert.h>
 #include <process.h>
 #include <time.h>
 

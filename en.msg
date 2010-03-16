@@ -17,6 +17,11 @@ overwrite.dlg.yes.all = Yes to &All
 overwrite.dlg.no = &No
 overwrite.dlg.no.all = No to A&ll
 
+# Error messages
+error.extract.unsupported_method = Unsupported compression method
+error.extract.data_error = Data error
+error.extract.crc_error = CRC check failed
+
 # Generic buttons
 button.ok = OK
 button.cancel = Cancel

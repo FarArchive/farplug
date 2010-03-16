@@ -20,7 +20,7 @@ void load_formats() {
 
 class Plugin {
 private:
-  ArchiveReader reader;
+  Archive archive;
   wstring current_dir;
 public:
   Plugin(const wstring& file_path);
@@ -30,9 +30,9 @@ public:
   void extract(PluginPanelItem* panel_items, int items_number, const wchar_t** dest_path);
 };
 
-Plugin::Plugin(const wstring& file_path): reader(formats, file_path) {
+Plugin::Plugin(const wstring& file_path): archive(formats, file_path) {
   load_formats();
-  if (!reader.open())
+  if (!archive.open())
     FAIL(E_ABORT);
 }
 
@@ -56,13 +56,13 @@ void Plugin::set_dir(const wstring& dir) {
   if (new_dir == L"\\")
     new_dir.clear();
 
-  reader.dir_find(new_dir);
+  archive.dir_find(new_dir);
   current_dir = new_dir;
 }
 
 void Plugin::list(PluginPanelItem** panel_items, int* items_number) {
-  UInt32 dir_index = reader.dir_find(current_dir);
-  FileListRef fl_ref = reader.dir_list(dir_index);
+  UInt32 dir_index = archive.dir_find(current_dir);
+  FileListRef fl_ref = archive.dir_list(dir_index);
   unsigned size = fl_ref.second - fl_ref.first;
   PluginPanelItem* items = new PluginPanelItem[size];
   memset(items, 0, size * sizeof(PluginPanelItem));
@@ -90,9 +90,9 @@ void Plugin::list(PluginPanelItem** panel_items, int* items_number) {
 
 void Plugin::extract(PluginPanelItem* panel_items, int items_number, const wchar_t** dest_path) {
   vector<UInt32> indices;
-  UInt32 src_dir_index = reader.dir_find(current_dir);
+  UInt32 src_dir_index = archive.dir_find(current_dir);
   if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) {
-    FileListRef fl = reader.dir_list(src_dir_index);
+    FileListRef fl = archive.dir_list(src_dir_index);
     indices.reserve(fl.second - fl.first);
     for (FileList::const_iterator file_info = fl.first; file_info != fl.second; file_info++) {
       indices.push_back(file_info->index);
@@ -104,7 +104,7 @@ void Plugin::extract(PluginPanelItem* panel_items, int items_number, const wchar
       indices.push_back(panel_items[i].UserData);
     }
   }
-  reader.extract(src_dir_index, indices, *dest_path);
+  archive.extract(src_dir_index, indices, *dest_path);
   Far::update_panel(this, false);
 }
 
@@ -177,7 +177,7 @@ void WINAPI FreeFindDataW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int I
 }
 
 int WINAPI GetFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsNumber,int Move,const wchar_t **DestPath,int OpMode) {
-  FAR_ERROR_HANDLER_BEGIN;
+  FAR_ERROR_HANDLER_BEGIN
   reinterpret_cast<Plugin*>(hPlugin)->extract(PanelItem, ItemsNumber, DestPath);
   return 1;
   FAR_ERROR_HANDLER_END(return 0, return -1, (OpMode & (OPM_FIND | OPM_QUICKVIEW)) != 0);

@@ -17,6 +17,11 @@ overwrite.dlg.yes.all = Да для &всех
 overwrite.dlg.no = &Нет
 overwrite.dlg.no.all = Нет для в&сех
 
+# Error messages
+error.extract.unsupported_method = Unsupported compression method
+error.extract.data_error = Data error
+error.extract.crc_error = CRC check failed
+
 # Generic buttons
 button.ok = OK
 button.cancel = Отмена

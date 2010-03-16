@@ -8,16 +8,23 @@ inline bool s_ok(HRESULT hr) {
   return hr == S_OK;
 }
 
-#define COM_ERROR_HANDLER_BEGIN try {
+#define COM_ERROR_HANDLER_BEGIN \
+  try { \
+    try {
 
 #define COM_ERROR_HANDLER_END \
-  } \
-  catch (const Error& e) { \
-    return e.code; \
+    } \
+    catch (const Error& e) { \
+      error = e; \
+    } \
+    catch (const std::exception& e) { \
+      error = e; \
+    } \
   } \
   catch (...) { \
-    return E_FAIL; \
-  }
+    error.code = E_FAIL; \
+  } \
+  return error.code;
 
 class UnknownImpl: public IUnknown {
 protected:
