@@ -12,5 +12,4 @@ EXPORTS
   SetDirectoryW
   ConfigureW
   ProcessKeyW
-  CompareW
   ProcessSynchroEventW

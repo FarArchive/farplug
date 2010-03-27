@@ -140,6 +140,7 @@ void load_plugin_options() {
   g_file_panel_mode.sort_mode = get_int_option(L"FilePanelSortMode", SM_UNSORTED);
   g_file_panel_mode.reverse_sort = get_int_option(L"FilePanelReverseSort", 0);
   g_file_panel_mode.numeric_sort = get_int_option(L"FilePanelNumericSort", 0);
+  g_file_panel_mode.sort_dirs_first = get_int_option(L"FilePanelSortDirsFirst", 0);
   g_file_panel_mode.custom_sort_mode = get_int_option(L"CustomSortMode", 0);
   g_file_panel_mode.show_streams = get_bool_option(L"FilePanelShowStreams", false);
   g_file_panel_mode.show_main_stream = get_bool_option(L"FilePanelShowMainStream", false);
@@ -151,7 +152,9 @@ void load_plugin_options() {
   g_file_panel_mode.backward_mft_scan = get_bool_option(L"FilePanelBackwardMftScan", true);
   g_file_panel_mode.cache_dir = get_str_option(L"FilePanelCacheDir", L"%TEMP%");
   g_file_panel_mode.flat_mode_auto_off = get_bool_option(L"FilePanelFlatModeAutoOff", false);
+#ifdef FARAPI17
   g_file_panel_mode.use_std_sort = get_bool_option(L"FilePanelUseStdSort", false);
+#endif
 };
 
 void store_plugin_options() {
@@ -168,6 +171,7 @@ void store_plugin_options() {
   set_int_option(L"FilePanelSortMode", g_file_panel_mode.sort_mode);
   set_int_option(L"FilePanelReverseSort", g_file_panel_mode.reverse_sort);
   set_int_option(L"FilePanelNumericSort", g_file_panel_mode.numeric_sort);
+  set_int_option(L"FilePanelSortDirsFirst", g_file_panel_mode.sort_dirs_first);
   set_int_option(L"CustomSortMode", g_file_panel_mode.custom_sort_mode);
   set_bool_option(L"FilePanelShowStreams", g_file_panel_mode.show_streams);
   set_bool_option(L"FilePanelShowMainStream", g_file_panel_mode.show_main_stream);
@@ -179,5 +183,7 @@ void store_plugin_options() {
   set_bool_option(L"FilePanelBackwardMftScan", g_file_panel_mode.backward_mft_scan);
   set_str_option(L"FilePanelCacheDir", g_file_panel_mode.cache_dir);
   set_bool_option(L"FilePanelFlatModeAutoOff", g_file_panel_mode.flat_mode_auto_off);
+#ifdef FARAPI17
   set_bool_option(L"FilePanelUseStdSort", g_file_panel_mode.use_std_sort);
+#endif
 }

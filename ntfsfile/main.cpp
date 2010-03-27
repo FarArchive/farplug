@@ -1319,11 +1319,13 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
   END_ERROR_HANDLER(return TRUE, return TRUE);
 }
 
-int WINAPI FAR_EXPORT(Compare)(HANDLE hPlugin, const struct PluginPanelItem *Item1, const struct PluginPanelItem *Item2, unsigned int Mode) {
+#ifdef FARAPI17
+int WINAPI Compare(HANDLE hPlugin, const struct PluginPanelItem *Item1, const struct PluginPanelItem *Item2, unsigned int Mode) {
   FilePanel* panel = (FilePanel*) hPlugin;
-  if (!g_file_panel_mode.use_std_sort && panel->flat_mode && (Mode == SM_NAME)) return FAR_STRCMP(FAR_FILE_NAME(Item1->FindData), FAR_FILE_NAME(Item2->FindData));
+  if (!g_file_panel_mode.use_std_sort && panel->flat_mode && (Mode == SM_NAME)) return strcmp(Item1->FindData.cFileName, Item2->FindData.cFileName);
   else return -2;
 }
+#endif
 
 #ifdef FARAPI18
 int WINAPI ProcessSynchroEventW(int Event, void* Param) {

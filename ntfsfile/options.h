@@ -18,6 +18,7 @@ struct FilePanelMode {
   int sort_mode;
   int reverse_sort;
   int numeric_sort;
+  int sort_dirs_first;
   int custom_sort_mode;
   bool show_streams;
   bool show_main_stream;
@@ -28,7 +29,9 @@ struct FilePanelMode {
   bool default_mft_mode;
   bool backward_mft_scan;
   bool flat_mode_auto_off;
+#ifdef FARAPI17
   bool use_std_sort;
+#endif
   UnicodeString cache_dir;
 };
 

@@ -159,6 +159,7 @@ void FilePanel::apply_saved_state() {
   far_control_int(this, FCTL_SETSORTMODE, g_file_panel_mode.sort_mode);
   far_control_int(this, FCTL_SETSORTORDER, g_file_panel_mode.reverse_sort);
   far_control_int(this, FCTL_SETNUMERICSORT, g_file_panel_mode.numeric_sort);
+  far_control_int(this, FCTL_SETDIRECTORIESFIRST, g_file_panel_mode.sort_dirs_first);
 #endif
   restore_state(this, saved_state);
 }
@@ -183,6 +184,9 @@ void FilePanel::on_close() {
     g_file_panel_mode.sort_mode = pi.SortMode;
     g_file_panel_mode.reverse_sort = pi.Flags & PFLAGS_REVERSESORTORDER ? 1 : 0;
     g_file_panel_mode.numeric_sort = pi.Flags & PFLAGS_NUMERICSORT ? 1 : 0;
+#ifdef FARAPI18
+    g_file_panel_mode.sort_dirs_first = pi.Flags & PFLAGS_DIRECTORIESFIRST ? 1 : 0;
+#endif
   }
   store_plugin_options();
   g_file_panels.remove(g_file_panels.search(this));
@@ -740,7 +744,9 @@ private:
   int cache_dir_lbl_id;
   int cache_dir_ctrl_id;
   int flat_mode_auto_off_ctrl_id;
+#ifdef FARAPI17
   int use_std_sort_ctrl_id;
+#endif
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -764,7 +770,9 @@ private:
       dlg->mode.backward_mft_scan = dlg->get_check(dlg->backward_mft_scan_ctrl_id);
       dlg->mode.cache_dir = dlg->get_text(dlg->cache_dir_ctrl_id);
       dlg->mode.flat_mode_auto_off = dlg->get_check(dlg->flat_mode_auto_off_ctrl_id);
+#ifdef FARAPI17
       dlg->mode.use_std_sort = dlg->get_check(dlg->use_std_sort_ctrl_id);
+#endif
     }
     else if ((msg == DN_BTNCLICK) && (param1 == dlg->show_streams_ctrl_id)) {
       dlg->enable(dlg->show_main_stream_ctrl_id, param2 != 0);
@@ -851,8 +859,10 @@ public:
     new_line();
     use_highlighting_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_HIGHLIGHTING), mode.use_highlighting);
     new_line();
+#ifdef FARAPI17
     use_std_sort_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_STD_SORT), mode.use_std_sort);
     new_line();
+#endif
     separator();
     new_line();
     use_usn_journal_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_USN_JOURNAL), mode.use_usn_journal);
