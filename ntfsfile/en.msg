@@ -30,6 +30,7 @@ menu.content = &Content analysis
 menu.panel.on = Open &panel
 menu.panel.off = Close &panel
 menu.defragment = &Defragment
+menu.file_version = File &version
 menu.flat_mode.on = Flat m&ode
 menu.flat_mode.off = Normal m&ode
 menu.mft_mode.on = MFT &index on
@@ -177,6 +178,34 @@ show_totals.dirs = Directories: %u (%u symbolic links)
 log.title = Error Log
 log.defragment = Defragment
 log.show = &Show error log
+
+# File version
+file_ver.title = File version info
+file_ver.fixed_file_version = &FileVersion
+file_ver.fixed_product_version = &ProductVersion
+file_ver.file_flags = FileFl&ags
+file_ver.file_os = File&OS
+file_ver.file_type = File&Type
+file_ver.file_sub_type = File&SubType
+file_ver.machine = Machine
+file_ver.os_version = OS version
+file_ver.subsystem = Subsystem
+file_ver.image_chars = Characteristics
+file_ver.dll_chars = DLL characteristics
+file_ver.language = &Language
+file_ver.comments = &Comments
+file_ver.company_name = Co&mpanyName
+file_ver.file_description = File&Description
+file_ver.file_version = File&Version
+file_ver.internal_name = &InternalName
+file_ver.legal_copyright = L&egalCopyright
+file_ver.legal_trademarks = Le&galTrademarks
+file_ver.original_file_name = O&riginalFilename
+file_ver.product_name = Product&Name
+file_ver.product_version = ProductVersion
+file_ver.private_build = PrivateB&uild
+file_ver.special_build = Special&Build
+file_ver.no_info = No version information found.
 
 # Generic buttons
 button.ok = OK

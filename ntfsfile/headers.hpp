@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <winioctl.h>
 #include <shobjidl.h>
+#include <imagehlp.h>
 
 #include <process.h>
 #include <string.h>

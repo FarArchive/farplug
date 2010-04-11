@@ -31,9 +31,9 @@
 #define CLEAN(type, object, code) \
   class Clean_##object { \
   private: \
-    type object; \
+    type& object; \
   public: \
-    Clean_##object(type object): object(object) { \
+    Clean_##object(type& object): object(object) { \
     } \
     ~Clean_##object() { \
       code; \

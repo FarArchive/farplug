@@ -19,6 +19,7 @@ void unicode_to_oem(AnsiString& oem_str, const UnicodeString& u_str);
 AnsiString unicode_to_oem(const UnicodeString& str);
 void oem_to_unicode(UnicodeString& u_str, const AnsiString& oem_str);
 UnicodeString oem_to_unicode(const AnsiString& str);
+AnsiString unicode_to_ansi(const UnicodeString& u_str);
 UnicodeString format_inf_amount(u64 size);
 UnicodeString format_inf_amount_short(u64 size, bool speed = false);
 UnicodeString format_time(u64 t /* ms */);

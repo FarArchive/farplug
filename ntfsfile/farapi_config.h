@@ -19,6 +19,7 @@
 #  define FAR_STRCMP strcmp
 #  define FAR_STRCPY strcpy
 #  define PANEL_PASSIVE INVALID_HANDLE_VALUE
+#  define DM_GETDLGITEMSHORT DM_GETDLGITEM
 #endif // FARAPI17
 
 #ifdef FARAPI18

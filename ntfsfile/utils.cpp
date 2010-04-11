@@ -40,6 +40,15 @@ UnicodeString oem_to_unicode(const AnsiString& oem_str) {
   return u_str;
 }
 
+AnsiString unicode_to_ansi(const UnicodeString& u_str) {
+  AnsiString ansi_str;
+  unsigned size = u_str.size() + 1;
+  int res = WideCharToMultiByte(CP_ACP, 0, u_str.data(), size, ansi_str.buf(u_str.size()), size, NULL, NULL);
+  CHECK_SYS(res);
+  ansi_str.set_size(res - 1);
+  return ansi_str;
+}
+
 // format amount of information
 UnicodeString format_inf_amount(u64 size) {
   UnicodeString str1, str2;
@@ -413,7 +422,7 @@ void Log::show() {
     temp_file_path.set_size();
 
     // schedule file deletion
-    CLEAN(const UnicodeString&, temp_file_path, DeleteFileW(temp_file_path.data()));
+    CLEAN(UnicodeString, temp_file_path, DeleteFileW(temp_file_path.data()));
     {
       // open file for writing
       HANDLE h_file = CreateFileW(temp_file_path.data(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);

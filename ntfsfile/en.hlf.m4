@@ -13,16 +13,22 @@ This plugin provides various information about files on NTFS file system. Featur
   - alternate file names (hard links)
   - alternate data streams (named DATA attribute)
   - symbolic link targets
+  Prefix: #nfi#
 
 3. Analyze file fragmentation and perform defragmentation.
+  Prefix: #defrag#
 
 4. Analyze file contents:
   - estimate if compression of file data is possible (using very FAST LZO algorithm)
   - calculate most useful file hashes: crc32, md5, sha1, ed2k (eMule variation).
+  Prefix: #nfc#
 
 5. Perform fast file search over entire volume using MFT index mode.
 
 6. Manage alternate data streams.
+
+7. Examine file version info.
+  Prefix: #nfv#
 
 @metadata
 $ #File information#

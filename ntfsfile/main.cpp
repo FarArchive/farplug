@@ -15,6 +15,7 @@
 #include "file_panel.h"
 #include "log.h"
 #include "defragment.h"
+#include "filever.h"
 
 struct PluginStartupInfo g_far;
 struct FarStandardFunctions g_fsf;
@@ -873,7 +874,7 @@ void WINAPI FAR_EXPORT(SetStartupInfo)(const struct PluginStartupInfo* info) {
   g_version = get_module_version(g_h_module);
 }
 
-const FarCh* c_command_prefix = FAR_T("nfi:nfc:defrag");
+const FarCh* c_command_prefix = FAR_T("nfi:nfc:defrag:nfv");
 void WINAPI FAR_EXPORT(GetPluginInfo)(struct PluginInfo *pi) {
   static const FarCh* plugin_menu[1];
 
@@ -1167,6 +1168,7 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
         far_control_ptr(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, NULL);
         far_control_ptr(PANEL_PASSIVE, FCTL_REDRAWANOTHERPANEL, NULL);
       }
+      else if (prefix == L"nfv") plugin_show_file_version(file_list[0]);
     }
   }
   else { // OPEN_PLUGINSMENU
@@ -1179,6 +1181,7 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
     menu_items += far_get_msg(MSG_MENU_CONTENT);
     menu_items += far_get_msg(active_panel == NULL ? MSG_MENU_PANEL_ON : MSG_MENU_PANEL_OFF);
     menu_items += far_get_msg(MSG_MENU_DEFRAGMENT);
+    menu_items += far_get_msg(MSG_MENU_FILE_VERSION);
     if (active_panel) {
       menu_items += far_get_msg(active_panel->flat_mode ? MSG_MENU_FLAT_MODE_OFF : MSG_MENU_FLAT_MODE_ON);
       menu_items += far_get_msg(active_panel->mft_mode ? MSG_MENU_MFT_MODE_OFF : MSG_MENU_MFT_MODE_ON);
@@ -1216,14 +1219,19 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
       }
     }
     else if (item_idx == 4) {
+      if (file_list_from_panel(file_list, active_panel != NULL)) {
+        plugin_show_file_version(file_list[0]);
+      }
+    }
+    else if (item_idx == 5) {
       active_panel->flat_mode = !active_panel->flat_mode;
       far_control_int(active_panel, FCTL_UPDATEPANEL, 1);
     }
-    else if (item_idx == 5) {
+    else if (item_idx == 6) {
       active_panel->toggle_mft_mode();
       far_control_int(active_panel, FCTL_UPDATEPANEL, 1);
     }
-    else if (item_idx == 6) {
+    else if (item_idx == 7) {
       if (file_list_from_panel(file_list, true)) {
         FilePanel::Totals totals = active_panel->mft_get_totals(file_list);
         UnicodeString msg;
