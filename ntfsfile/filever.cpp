@@ -132,15 +132,32 @@ VersionInfo get_version_info(const UnicodeString& file_name) {
         VarVerInfo var_ver_info;
         var_ver_info.lang = lang_cp_array[i];
         var_ver_info.code_page = lang_cp_array[i + 1];
-        for (unsigned j = 0; j < ARRAYSIZE(c_str_names); j++) {
-          UnicodeString sub_block_name;
-          sub_block_name.copy_fmt(L"\\StringFileInfo\\%Hx%Hx\\%s", var_ver_info.lang, var_ver_info.code_page, c_str_names[j]);
-          wchar_t* str_value;
-          if (VerQueryValueW(ver_block.data(), sub_block_name.data(), reinterpret_cast<LPVOID*>(&str_value), &len) && len) {
-            var_ver_info.strings += NameValue(far_get_msg(c_str_labels[j]), UnicodeString(str_value, len).strip());
+
+        LCID lcid = GetThreadLocale();
+        CLEAN(LCID, lcid, SetThreadLocale(lcid));
+        try {
+          CHECK_SYS(SetThreadLocale(MAKELCID(var_ver_info.lang, SORT_DEFAULT)));
+          DWORD dw_handle;
+          DWORD ver_size = GetFileVersionInfoSizeW(file_name.data(), &dw_handle);
+          CHECK_SYS(ver_size);
+          Array<unsigned char> ver_block;
+          CHECK_SYS(GetFileVersionInfoW(file_name.data(), dw_handle, ver_size, ver_block.buf(ver_size)));
+          ver_block.set_size(ver_size);
+
+          for (unsigned j = 0; j < ARRAYSIZE(c_str_names); j++) {
+            UnicodeString sub_block_name;
+            sub_block_name.copy_fmt(L"\\StringFileInfo\\%Hx%Hx\\%s", var_ver_info.lang, var_ver_info.code_page, c_str_names[j]);
+            wchar_t* str_value;
+            if (VerQueryValueW(ver_block.data(), sub_block_name.data(), reinterpret_cast<LPVOID*>(&str_value), &len) && len) {
+              UnicodeString value = UnicodeString(str_value, len).strip();
+              if (value.size())
+                var_ver_info.strings += NameValue(far_get_msg(c_str_labels[j]), value);
+            }
           }
+          if (var_ver_info.strings.size()) ver_info.var += var_ver_info;
         }
-        ver_info.var += var_ver_info;
+        catch (...) {
+        }
       }
     }
   }
@@ -279,9 +296,8 @@ LONG_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG
 void show_file_version_dialog(const VersionInfo& version_info) {
   FileVersionDialogData dlg_data;
 
-  const unsigned c_language_combo_width = 11;
   unsigned name_width = far_get_msg(MSG_FILE_VER_LANGUAGE).size();
-  unsigned value_width = c_language_combo_width;
+  unsigned value_width = 0;
   for (unsigned i = 0; i < version_info.fixed.size(); i++) {
     if (name_width < version_info.fixed[i].name.size()) name_width = version_info.fixed[i].name.size();
     if (value_width < version_info.fixed[i].value.size()) value_width = version_info.fixed[i].value.size();
@@ -294,6 +310,20 @@ void show_file_version_dialog(const VersionInfo& version_info) {
       if (value_width < version_info.var[i].strings[j].value.size()) value_width = version_info.var[i].strings[j].value.size();
     }
   }
+
+  ObjectArray<UnicodeString> lang_items;
+  for (unsigned i = 0; i < version_info.var.size(); i++) {
+    UnicodeString lang_name;
+    const unsigned c_lang_name_size = 1024;
+    DWORD lang_name_len = VerLanguageNameW(version_info.var[i].lang, lang_name.buf(c_lang_name_size), c_lang_name_size);
+    lang_name.set_size(lang_name_len);
+    if (lang_name_len)
+      lang_items += lang_name;
+    else
+      lang_items += UnicodeString::format(L"0x%Hx%Hx", version_info.var[i].lang, version_info.var[i].code_page);
+    if (value_width < lang_items.last().size()) value_width = lang_items.last().size();
+  }
+
   name_width += 1;
   unsigned max_value_len = value_width;
   value_width += 1;
@@ -318,11 +348,7 @@ void show_file_version_dialog(const VersionInfo& version_info) {
     dlg.separator();
     dlg.new_line();
     dlg.label(far_get_msg(MSG_FILE_VER_LANGUAGE), name_width);
-    ObjectArray<UnicodeString> lang_cp_items;
-    for (unsigned i = 0; i < version_info.var.size(); i++) {
-      lang_cp_items += UnicodeString::format(L"0x%Hx%Hx", version_info.var[i].lang, version_info.var[i].code_page);
-    }
-    dlg_data.lang_cp_ctrl_id = dlg.combo_box(lang_cp_items, 0, 10, c_language_combo_width, DIF_DROPDOWNLIST);
+    dlg_data.lang_cp_ctrl_id = dlg.combo_box(lang_items, 0, 10, value_width, DIF_DROPDOWNLIST);
     dlg.new_line();
 
     for (unsigned i = 0; i < dlg_data.var_cnt; i++) {
