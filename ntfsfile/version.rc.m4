@@ -28,7 +28,7 @@ BEGIN
       VALUE "SpecialBuild", "Debug build.\0"
 #  endif
 #endif
-      VALUE "LegalCopyright", "None.\0"
+      VALUE "LegalCopyright", "http://farplug.googlecode.com/\0"
     END
   END
   BLOCK "VarFileInfo"

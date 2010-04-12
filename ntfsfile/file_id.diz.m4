@@ -15,9 +15,10 @@ FAR Manager Plugin
   - расчёт наиболее полезных хешей для выбранного файла: crc32, md5, sha1, ed2k (вариант eMule).
 5. Быстрый поиск файлов по всему тому в режиме MFT index.
 6. Управление альтернативными потоками данных.
+7. Просмотр информации о версии файла.
 
 Системные требования:
-  - Far m4_ifdef(`__FARAPI17__', `1.71.2411', `2.0.789')
+  - Far m4_ifdef(`__FARAPI17__', `1.71.2411', `2.0.1447')
   - Windows 2000+
 
 Новые версии: http://forum.farmanager.com/viewtopic.php?t=2050
@@ -38,9 +39,10 @@ This plugin provides various information about files on NTFS file system. Featur
   - calculate most useful file hashes: crc32, md5, sha1, ed2k (eMule variation).
 5. Perform fast file search over entire volume using MFT index mode.
 6. Manage alternate data streams.
+7. Examine file version info.
 
 System requirements:
-  - Far m4_ifdef(`__FARAPI17__', `1.71.2411', `2.0.789')
+  - Far m4_ifdef(`__FARAPI17__', `1.71.2411', `2.0.1447')
   - Windows 2000+
 
 New versions: http://forum.farmanager.com/viewtopic.php?t=2050
