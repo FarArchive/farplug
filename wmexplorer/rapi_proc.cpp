@@ -781,7 +781,7 @@ void copy_files(bool src_remote, const UnicodeString& src_dir, const FileList& s
                   CHECK_RAPI(h_dst != INVALID_HANDLE_VALUE);
                 }
                 else {
-                  h_dst = CreateFileW(long_path(dst_path).data(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+                  h_dst = CreateFileW(long_path(dst_path).data(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | (options.use_tmp_files ? FILE_ATTRIBUTE_TEMPORARY : 0), NULL);
                   CHECK_API(h_dst != INVALID_HANDLE_VALUE);
                 }
                 END_RETRY_BLOCK;

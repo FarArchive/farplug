@@ -83,6 +83,7 @@ struct CopyFilesOptions {
   bool show_dialog;
   bool copy_shared;
   bool use_file_filters;
+  bool use_tmp_files;
 };
 
 bool show_copy_files_dlg(CopyFilesOptions& options, bool f_put);

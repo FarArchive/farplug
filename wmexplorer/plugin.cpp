@@ -413,6 +413,7 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
     INT_PTR far_system_settings = g_far.AdvControl(g_far.ModuleNumber, ACTL_GETSYSTEMSETTINGS, NULL);
     options.copy_shared = (far_system_settings & FSS_COPYFILESOPENEDFORWRITING) != 0;
     options.use_file_filters = false;
+    options.use_tmp_files = (OpMode & (OPM_FIND | OPM_VIEW | OPM_QUICKVIEW)) != 0;
     if (show_dialog) {
       options.ignore_errors = g_plugin_options.ignore_errors;
       options.overwrite = g_plugin_options.overwrite;
@@ -641,6 +642,7 @@ int WINAPI FAR_EXPORT(PutFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelIte
     options.move_files = Move != 0;
     INT_PTR far_system_settings = g_far.AdvControl(g_far.ModuleNumber, ACTL_GETSYSTEMSETTINGS, NULL);
     options.copy_shared = (far_system_settings & FSS_COPYFILESOPENEDFORWRITING) != 0;
+    options.use_tmp_files = false;
     if (show_dialog) {
       options.ignore_errors = g_plugin_options.ignore_errors;
       options.overwrite = g_plugin_options.overwrite;
