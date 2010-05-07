@@ -13,8 +13,9 @@ private:
   Error& error;
 public:
   FileExtractStream(const wstring& file_path, const FileInfo& file_info, Error& error): file_path(file_path), file_info(file_info), error(error) {
-    h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, file_info.attr | FILE_FLAG_POSIX_SEMANTICS, NULL);
+    h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_POSIX_SEMANTICS, NULL);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
+    CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), file_info.attr));
   }
   ~FileExtractStream() {
     SetFileTime(h_file, &file_info.ctime, &file_info.atime, &file_info.mtime);
