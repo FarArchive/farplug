@@ -2,6 +2,16 @@
 
 plugin.name = <(NAME)>
 
+# Extract dialog
+extract.dlg.title = Extract files
+extract.dlg.dst_dir = &Extract files to:
+extract.dlg.ignore_errors = &Ignore errors
+extract.dlg.oo = When destination file exists:
+extract.dlg.oo_ask = &Ask
+extract.dlg.oo_overwrite = &Overwrite
+extract.dlg.oo_skip = &Skip
+extract.dlg.move_files = &Move files
+
 # Password dialog
 password.title = Enter password
 password.password = Password:

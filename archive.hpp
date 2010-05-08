@@ -72,6 +72,7 @@ private:
   wstring password;
   wstring get_default_name() const;
   void make_index();
+  void prepare_dst_dir(const wstring& dir_path);
   void prepare_extract(UInt32 dir_index, const wstring& parent_dir, list<UInt32>& indices);
   void set_dir_attr(FileInfo dir_info, const wstring& dir_path);
 public:
@@ -79,7 +80,7 @@ public:
   bool open();
   UInt32 dir_find(const wstring& dir);
   FileListRef dir_list(UInt32 dir_index);
-  void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const wstring& dest_dir);
+  void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options);
   friend class ArchiveOpener;
   friend class ArchiveExtractor;
 };

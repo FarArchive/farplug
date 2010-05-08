@@ -50,13 +50,11 @@ FindData convert_file_info(const FileInfo& file_info) {
   return find_data;
 }
 
-enum OverwriteOption { ooAsk, ooOverwrite, ooSkip };
-
 class ArchiveExtractor: public IArchiveExtractCallback, public ICryptoGetTextPassword, public UnknownImpl, public ProgressMonitor {
 private:
   Archive& archive;
   UInt32 src_dir_index;
-  wstring dest_dir;
+  ExtractOptions options;
   UInt64 total;
   UInt64 completed;
   wstring file_path;
@@ -74,7 +72,7 @@ private:
 public:
   Error error;
 
-  ArchiveExtractor(Archive& archive, UInt32 src_dir_index, const wstring& dest_dir): archive(archive), src_dir_index(src_dir_index), dest_dir(dest_dir), total(0), completed(0), oo(ooAsk) {
+  ArchiveExtractor(Archive& archive, UInt32 src_dir_index, const ExtractOptions& options): archive(archive), src_dir_index(src_dir_index), options(options), total(0), completed(0), oo(options.overwrite) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -108,7 +106,7 @@ public:
       file_path.insert(0, 1, L'\\').insert(0, file_info.name);
       index = file_info.parent;
     }
-    file_path.insert(0, 1, L'\\').insert(0, dest_dir);
+    file_path.insert(0, 1, L'\\').insert(0, options.dst_dir);
 
     ERROR_MESSAGE_BEGIN
     FindData dst_file_info;
@@ -190,6 +188,14 @@ public:
 };
 
 
+void Archive::prepare_dst_dir(const wstring& dir_path) {
+  wstring path = dir_path;
+  if (!is_root_path(path)) {
+    prepare_dst_dir(extract_file_path(dir_path));
+    CreateDirectoryW(long_path(path).c_str(), NULL);
+  }
+}
+
 void Archive::prepare_extract(UInt32 dir_index, const wstring& dir_path, list<UInt32>& indices) {
   ERROR_MESSAGE_BEGIN
   BOOL res = CreateDirectoryW(long_path(dir_path).c_str(), NULL);
@@ -225,14 +231,16 @@ void Archive::set_dir_attr(FileInfo dir_info, const wstring& dir_path) {
   }
 }
 
-void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const wstring& dest_dir) {
-  ComObject<ArchiveExtractor> extractor(new ArchiveExtractor(*this, src_dir_index, dest_dir));
+void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options) {
+  ComObject<ArchiveExtractor> extractor(new ArchiveExtractor(*this, src_dir_index, options));
+
+  prepare_dst_dir(options.dst_dir);
 
   list<UInt32> file_indices;
   for (unsigned i = 0; i < src_indices.size(); i++) {
     const FileInfo& file_info = file_list[file_id_index[src_indices[i]]];
     if (file_info.is_dir()) {
-      prepare_extract(file_info.index, add_trailing_slash(dest_dir) + file_info.name, file_indices);
+      prepare_extract(file_info.index, add_trailing_slash(options.dst_dir) + file_info.name, file_indices);
     }
     else {
       file_indices.push_back(file_info.index);
@@ -253,7 +261,7 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
   for (unsigned i = 0; i < src_indices.size(); i++) {
     const FileInfo& file_info = file_list[file_id_index[src_indices[i]]];
     if (file_info.is_dir()) {
-      set_dir_attr(file_info, add_trailing_slash(dest_dir) + file_info.name);
+      set_dir_attr(file_info, add_trailing_slash(options.dst_dir) + file_info.name);
     }
   }
 }

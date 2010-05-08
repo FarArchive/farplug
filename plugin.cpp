@@ -22,12 +22,13 @@ class Plugin {
 private:
   Archive archive;
   wstring current_dir;
+  wstring extract_dir;
 public:
   Plugin(const wstring& file_path);
   void info(OpenPluginInfo* opi);
   void set_dir(const wstring& dir);
   void list(PluginPanelItem** panel_item, int* items_number);
-  void extract(PluginPanelItem* panel_items, int items_number, const wchar_t** dest_path);
+  void extract(PluginPanelItem* panel_items, int items_number, int move, const wchar_t** dest_path, int op_mode);
 };
 
 Plugin::Plugin(const wstring& file_path): archive(formats, file_path) {
@@ -88,7 +89,25 @@ void Plugin::list(PluginPanelItem** panel_items, int* items_number) {
   *items_number = size;
 }
 
-void Plugin::extract(PluginPanelItem* panel_items, int items_number, const wchar_t** dest_path) {
+void Plugin::extract(PluginPanelItem* panel_items, int items_number, int move, const wchar_t** dest_path, int op_mode) {
+  ExtractOptions options;
+  options.dst_dir = *dest_path;
+  options.ignore_errors = false;
+  options.overwrite = ooAsk;
+  options.move_files = move != 0;
+  options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
+  options.use_tmp_files = (op_mode & (OPM_FIND | OPM_VIEW | OPM_QUICKVIEW)) != 0;
+  if (!options.show_dialog) {
+    options.ignore_errors = true;
+    options.overwrite = ooOverwrite;
+  }
+  if (options.show_dialog) {
+    if (!extract_dialog(options)) FAIL(E_ABORT);
+    if (options.dst_dir != *dest_path) {
+      extract_dir = options.dst_dir;
+      *dest_path = extract_dir.c_str();
+    }
+  }
   vector<UInt32> indices;
   UInt32 src_dir_index = archive.dir_find(current_dir);
   if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) {
@@ -104,7 +123,7 @@ void Plugin::extract(PluginPanelItem* panel_items, int items_number, const wchar
       indices.push_back(panel_items[i].UserData);
     }
   }
-  archive.extract(src_dir_index, indices, *dest_path);
+  archive.extract(src_dir_index, indices, options);
   Far::update_panel(this, false);
 }
 
@@ -178,7 +197,7 @@ void WINAPI FreeFindDataW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int I
 
 int WINAPI GetFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsNumber,int Move,const wchar_t **DestPath,int OpMode) {
   FAR_ERROR_HANDLER_BEGIN
-  reinterpret_cast<Plugin*>(hPlugin)->extract(PanelItem, ItemsNumber, DestPath);
+  reinterpret_cast<Plugin*>(hPlugin)->extract(PanelItem, ItemsNumber, Move, DestPath, OpMode);
   return 1;
   FAR_ERROR_HANDLER_END(return 0, return -1, (OpMode & (OPM_FIND | OPM_QUICKVIEW)) != 0);
 }

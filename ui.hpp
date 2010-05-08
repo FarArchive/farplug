@@ -42,3 +42,20 @@ bool password_dialog(wstring& password);
 
 enum OverwriteAction { oaYes, oaYesAll, oaNo, oaNoAll, oaCancel };
 OverwriteAction overwrite_dialog(const wstring& file_path, const FindData& src_file_info, const FindData& dst_file_info);
+
+enum OverwriteOption {
+  ooAsk = 0,
+  ooOverwrite = 1,
+  ooSkip = 2,
+};
+
+struct ExtractOptions {
+  wstring dst_dir;
+  bool ignore_errors;
+  OverwriteOption overwrite;
+  bool move_files;
+  bool show_dialog;
+  bool use_tmp_files;
+};
+
+bool extract_dialog(ExtractOptions& options);

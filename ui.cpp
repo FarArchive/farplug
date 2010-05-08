@@ -208,3 +208,77 @@ public:
 OverwriteAction overwrite_dialog(const wstring& file_path, const FindData& src_file_info, const FindData& dst_file_info) {
   return OverwriteDialog().show(file_path, src_file_info, dst_file_info);
 }
+
+class ExtractDialog: public Far::Dialog {
+private:
+  enum {
+    c_client_xs = 60
+  };
+
+  ExtractOptions& options;
+
+  int dst_dir_ctrl_id;
+  int ignore_errors_ctrl_id;
+  int oo_ask_ctrl_id;
+  int oo_overwrite_ctrl_id;
+  int oo_skip_ctrl_id;
+  int move_files_ctrl_id;
+  int ok_ctrl_id;
+  int cancel_ctrl_id;
+
+  LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
+    if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != cancel_ctrl_id)) {
+      options.dst_dir = get_text(dst_dir_ctrl_id);
+      options.dst_dir = unquote(strip(options.dst_dir));
+      options.ignore_errors = get_check(ignore_errors_ctrl_id);
+      if (get_check(oo_ask_ctrl_id)) options.overwrite = ooAsk;
+      else if (get_check(oo_overwrite_ctrl_id)) options.overwrite = ooOverwrite;
+      else options.overwrite = ooSkip;
+      options.move_files = get_check(move_files_ctrl_id);
+    }
+    return default_dialog_proc(msg, param1, param2);
+  }
+
+public:
+  ExtractDialog(ExtractOptions& options): Far::Dialog(Far::get_msg(MSG_EXTRACT_DLG_TITLE), c_client_xs), options(options) {
+  }
+
+  bool show() {
+    label(Far::get_msg(MSG_EXTRACT_DLG_DST_DIR));
+    new_line();
+    dst_dir_ctrl_id = edit_box(options.dst_dir, c_client_xs);
+    new_line();
+    separator();
+    new_line();
+
+    ignore_errors_ctrl_id = check_box(Far::get_msg(MSG_EXTRACT_DLG_IGNORE_ERRORS), options.ignore_errors);
+    new_line();
+
+    label(Far::get_msg(MSG_EXTRACT_DLG_OO));
+    new_line();
+    spacer(2);
+    oo_ask_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OO_ASK), options.overwrite == ooAsk);
+    spacer(2);
+    oo_overwrite_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OO_OVERWRITE), options.overwrite == ooOverwrite);
+    spacer(2);
+    oo_skip_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OO_SKIP), options.overwrite == ooSkip);
+    new_line();
+
+    move_files_ctrl_id = check_box(Far::get_msg(MSG_EXTRACT_DLG_MOVE_FILES), options.move_files);
+    new_line();
+
+    separator();
+    new_line();
+    ok_ctrl_id = def_button(Far::get_msg(MSG_BUTTON_OK), DIF_CENTERGROUP);
+    cancel_ctrl_id = button(Far::get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
+    new_line();
+
+    int item = Far::Dialog::show();
+
+    return (item != -1) && (item != cancel_ctrl_id);
+  }
+};
+
+bool extract_dialog(ExtractOptions& options) {
+  return ExtractDialog(options).show();
+}
