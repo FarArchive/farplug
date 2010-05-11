@@ -27,6 +27,17 @@ overwrite.dlg.yes.all = Да для &всех
 overwrite.dlg.no = &Нет
 overwrite.dlg.no.all = Нет для в&сех
 
+# Error retry dialog
+button.retry = &Retry
+button.ignore = &Ignore
+button.ignore_all = Ignore &All
+
+# Log dialog
+log.title = Operation log
+log.info = Operation completed with errors. Do you want to review log file?
+log.close = &Close
+log.show = Show &log
+
 # Error messages
 error.extract.unsupported_method = Unsupported compression method
 error.extract.data_error = Data error

@@ -74,7 +74,7 @@ private:
   void make_index();
   void prepare_dst_dir(const wstring& dir_path);
   void prepare_extract(UInt32 dir_index, const wstring& parent_dir, list<UInt32>& indices);
-  void set_dir_attr(FileInfo dir_info, const wstring& dir_path);
+  void set_attr(const wstring& file_path, const FileInfo& file_info, bool& ignore_errors, ErrorLog& error_log);
 public:
   Archive(const ArcFormats& arc_formats, const wstring& file_path);
   bool open();

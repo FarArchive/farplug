@@ -44,7 +44,7 @@ const wchar_t* msg_ptr(int id);
 wstring get_msg(int id);
 
 unsigned get_optimal_msg_width();
-int message(const wstring& msg, int button_cnt, DWORD flags);
+int message(const wstring& msg, int button_cnt, DWORD flags = 0);
 int menu(const wstring& title, const vector<wstring>& items, const wchar_t* help = NULL);
 
 wstring get_progress_bar_str(unsigned width, unsigned __int64 completed, unsigned __int64 total);

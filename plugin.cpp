@@ -3,6 +3,7 @@
 #include "utils.hpp"
 #include "sysutils.hpp"
 #include "farutils.hpp"
+#include "common_types.hpp"
 #include "ui.hpp"
 #include "archive.hpp"
 
@@ -97,8 +98,8 @@ void Plugin::extract(PluginPanelItem* panel_items, int items_number, int move, c
   options.move_files = move != 0;
   options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
   options.use_tmp_files = (op_mode & (OPM_FIND | OPM_VIEW | OPM_QUICKVIEW)) != 0;
+  options.ignore_errors = (op_mode & (OPM_FIND | OPM_QUICKVIEW)) != 0;
   if (!options.show_dialog) {
-    options.ignore_errors = true;
     options.overwrite = ooOverwrite;
   }
   if (options.show_dialog) {

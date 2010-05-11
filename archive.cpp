@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include "sysutils.hpp"
 #include "farutils.hpp"
+#include "common_types.hpp"
 #include "ui.hpp"
 #include "archive.hpp"
 

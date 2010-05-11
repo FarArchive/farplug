@@ -3,6 +3,7 @@
 #include "utils.hpp"
 #include "farutils.hpp"
 #include "sysutils.hpp"
+#include "common_types.hpp"
 #include "ui.hpp"
 
 wstring get_error_dlg_title() {
@@ -281,4 +282,66 @@ public:
 
 bool extract_dialog(ExtractOptions& options) {
   return ExtractDialog(options).show();
+}
+
+RetryDialogResult error_retry_dialog(const wstring& file_path, const Error& e) {
+  wostringstream st;
+  st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
+  st << fit_str(file_path, Far::get_optimal_msg_width()) << L'\n';
+  if (e.code != E_MESSAGE) {
+    wstring sys_msg = get_system_message(e.code);
+    if (!sys_msg.empty())
+      st << word_wrap(sys_msg, Far::get_optimal_msg_width()) << L'\n';
+  }
+  for (list<wstring>::const_iterator msg = e.messages.begin(); msg != e.messages.end(); msg++) {
+    st << word_wrap(*msg, Far::get_optimal_msg_width()) << L'\n';
+  }
+  st << extract_file_name(widen(e.file)) << L':' << e.line << L'\n';
+  st << Far::get_msg(MSG_BUTTON_RETRY) << L'\n';
+  st << Far::get_msg(MSG_BUTTON_IGNORE) << L'\n';
+  st << Far::get_msg(MSG_BUTTON_IGNORE_ALL) << L'\n';
+  st << Far::get_msg(MSG_BUTTON_CANCEL) << L'\n';
+  switch (Far::message(st.str(), 4, FMSG_WARNING)) {
+  case 0:
+    return rdrRetry;
+  case 1:
+    return rdrIgnore;
+  case 2:
+    return rdrIgnoreAll;
+  default:
+    return rdrCancel;
+  }
+}
+
+void show_error_log(const ErrorLog& error_log) {
+  wstring msg;
+  msg += Far::get_msg(MSG_LOG_TITLE) + L'\n';
+  msg += Far::get_msg(MSG_LOG_INFO) + L'\n';
+  msg += Far::get_msg(MSG_LOG_CLOSE) + L'\n';
+  msg += Far::get_msg(MSG_LOG_SHOW) + L'\n';
+  if (Far::message(msg, 2, FMSG_WARNING) != 1) return;
+
+  TempFile temp_file;
+  File file(temp_file.get_path(), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL);
+
+  const wchar_t sig = 0xFEFF;
+  file.write(&sig, sizeof(sig));
+  wstring line;
+  for (ErrorLog::const_iterator iter = error_log.begin(); iter != error_log.end(); iter++) {
+    const wstring& file_path = iter->first;
+    const Error& error = iter->second;
+    line.assign(file_path).append(1, L'\n');
+    if (error.code != E_MESSAGE) {
+      wstring sys_msg = get_system_message(error.code);
+      if (!sys_msg.empty())
+        line.append(word_wrap(sys_msg, Far::get_optimal_msg_width())).append(1, L'\n');
+    }
+    for (list<wstring>::const_iterator msg = error.messages.begin(); msg != error.messages.end(); msg++) {
+      line.append(word_wrap(*msg, Far::get_optimal_msg_width())).append(1, L'\n');
+    }
+    line.append(1, L'\n');
+    file.write(line.data(), line.size() * sizeof(wchar_t));
+  }
+
+  Far::viewer(temp_file.get_path(), Far::get_msg(MSG_LOG_TITLE));
 }

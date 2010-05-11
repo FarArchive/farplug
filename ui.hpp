@@ -59,3 +59,14 @@ struct ExtractOptions {
 };
 
 bool extract_dialog(ExtractOptions& options);
+
+enum RetryDialogResult {
+  rdrRetry,
+  rdrIgnore,
+  rdrIgnoreAll,
+  rdrCancel,
+};
+
+RetryDialogResult error_retry_dialog(const wstring& file_path, const Error& e);
+
+void show_error_log(const ErrorLog& error_log);
