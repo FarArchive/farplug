@@ -5,3 +5,4 @@ glob:Release.x86\*
 glob:Debug.x64\*
 glob:Release.x64\*
 glob:tools\*
+glob:7z\*

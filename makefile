@@ -8,8 +8,11 @@ DEFINES = -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_W
 LINKFLAGS = -nologo -debug -incremental:no -map -manifest:no -dynamicbase -nxcompat -largeaddressaware -dll
 RCFLAGS = -nologo
 
+7Z_DLL = 7z\CPP\7zip\Bundles\Format7zF
+
 !if "$(CPU)" == "AMD64" || "$(PLATFORM)" == "x64"
 PLATFORM = x64
+7Z_DLL = $(7Z_DLL)\x64
 !else
 PLATFORM = x86
 LINKFLAGS = $(LINKFLAGS) -safeseh
@@ -21,16 +24,20 @@ OUTDIR = Release
 DEFINES = $(DEFINES) -DNDEBUG
 CPPFLAGS = $(CPPFLAGS) -O2 -GL -MT
 LINKFLAGS = $(LINKFLAGS) -opt:ref -opt:icf -LTCG
+7Z_DLL = $(7Z_DLL)\Release
 !else
 OUTDIR = Debug
 DEFINES = $(DEFINES) -DDEBUG
 CPPFLAGS = $(CPPFLAGS) -Od -RTC1 -MTd
 LINKFLAGS = $(LINKFLAGS) -fixed:no
+7Z_DLL = $(7Z_DLL)\Debug
 !endif
+
 OUTDIR = $(OUTDIR).$(PLATFORM)
 INCLUDES = -I$(COMMONDIR) -I$(OUTDIR) -I7z -Ifar
 CPPFLAGS = $(CPPFLAGS) -Fo$(OUTDIR)\ -Fd$(OUTDIR)\ $(INCLUDES) $(DEFINES)
 RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
+7Z_DLL = $(7Z_DLL)\7z.dll
 
 OBJS = $(OUTDIR)\archive.obj $(OUTDIR)\farutils.obj $(OUTDIR)\pathutils.obj $(OUTDIR)\plugin.obj $(OUTDIR)\strutils.obj $(OUTDIR)\sysutils.obj $(OUTDIR)\ui.obj $(OUTDIR)\extract.obj $(OUTDIR)\open.obj
 
@@ -42,7 +49,7 @@ project: depfile
 distrib: depfile
   $(MAKE) -nologo -$(MAKEFLAGS) build_distrib BUILD=1
 
-build_project: $(OUTDIR)\$(MODULE).dll $(OUTDIR)\en.lng $(OUTDIR)\ru.lng $(OUTDIR)\en.hlf $(OUTDIR)\ru.hlf
+build_project: $(OUTDIR)\$(MODULE).dll $(OUTDIR)\en.lng $(OUTDIR)\ru.lng $(OUTDIR)\en.hlf $(OUTDIR)\ru.hlf $(OUTDIR)\7z.dll
 
 $(OUTDIR)\$(MODULE).dll: $(OUTDIR)\plugin.def $(OBJS) $(OUTDIR)\headers.pch $(OUTDIR)\version.res project.ini
   link $(LINKFLAGS) -def:$(OUTDIR)\plugin.def -out:$@ $(OBJS) $(OUTDIR)\headers.obj $(OUTDIR)\version.res $(LIBS)
@@ -86,6 +93,11 @@ $(OUTDIR)\en.hlf: project.ini en.hlf
 
 $(OUTDIR)\ru.hlf: project.ini ru.hlf
   $(PREPROC)
+
+COPY = copy /y $** $@
+
+$(OUTDIR)\7z.dll: $(7Z_DLL)
+  $(COPY)
 
 $(OUTDIR):
   if not exist $(OUTDIR) mkdir $(OUTDIR)
