@@ -158,11 +158,11 @@ public:
   STDMETHODIMP GetStream(UInt32 index, ISequentialOutStream **outStream,  Int32 askExtractMode) {
     COM_ERROR_HANDLER_BEGIN
     if (askExtractMode == NArchive::NExtract::NAskMode::kExtract) {
-      file_info = archive.file_list[archive.file_id_index[index]];
+      file_info = archive.file_list[index];
       file_path = file_info.name;
       UInt32 index = file_info.parent;
       while (index != src_dir_index) {
-        const FileInfo& file_info = archive.file_list[archive.file_id_index[index]];
+        const FileInfo& file_info = archive.file_list[index];
         file_path.insert(0, 1, L'\\').insert(0, file_info.name);
         index = file_info.parent;
       }
@@ -260,32 +260,37 @@ void Archive::prepare_dst_dir(const wstring& dir_path) {
   }
 }
 
-void Archive::prepare_extract(UInt32 dir_index, const wstring& dir_path, list<UInt32>& indices) {
-  ERROR_MESSAGE_BEGIN
-  BOOL res = CreateDirectoryW(long_path(dir_path).c_str(), NULL);
-  if (!res) {
-    CHECK_SYS(GetLastError() == ERROR_ALREADY_EXISTS);
-  }
-  ERROR_MESSAGE_END(dir_path)
-
-  FileListRef fl = dir_list(dir_index);
-  for (FileList::const_iterator file_info = fl.first; file_info != fl.second; file_info++) {
-    if (file_info->is_dir()) {
-      prepare_extract(file_info->index, add_trailing_slash(dir_path) + file_info->name, indices);
+void Archive::prepare_extract(UInt32 file_index, const wstring& parent_dir, list<UInt32>& indices) {
+  const FileInfo& file_info = file_list[file_index];
+  if (file_info.is_dir()) {
+    wstring dir_path = add_trailing_slash(parent_dir) + file_info.name;
+    ERROR_MESSAGE_BEGIN
+    BOOL res = CreateDirectoryW(long_path(dir_path).c_str(), NULL);
+    if (!res) {
+      CHECK_SYS(GetLastError() == ERROR_ALREADY_EXISTS);
     }
-    else
-      indices.push_back(file_info->index);
+    ERROR_MESSAGE_END(dir_path)
+
+    FileIndexRange dir_list = get_dir_list(file_index);
+    for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
+      prepare_extract(file_index, dir_path, indices);
+    });
+  }
+  else {
+    indices.push_back(file_index);
   }
 }
 
-void Archive::set_attr(const wstring& file_path, const FileInfo& file_info, bool& ignore_errors, ErrorLog& error_log) {
+void Archive::set_attr(UInt32 file_index, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log) {
+  const FileInfo& file_info = file_list[file_index];
+  wstring file_path = add_trailing_slash(parent_dir) + file_info.name;
   if (file_info.is_dir()) {
-    FileListRef fl = dir_list(file_info.index);
-    for (FileList::const_iterator file_info = fl.first; file_info != fl.second; file_info++) {
-      if (file_info->is_dir()) {
-        set_attr(add_trailing_slash(file_path) + file_info->name, *file_info, ignore_errors, error_log);
+    FileIndexRange dir_list = get_dir_list(file_index);
+    for_each (dir_list.first, dir_list.second, [&] (UInt32 file_index) {
+      if (file_list[file_index].is_dir()) {
+        set_attr(file_index, file_path, ignore_errors, error_log);
       }
-    }
+    });
   }
   {
     bool error_state = false;
@@ -307,27 +312,21 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
 
   list<UInt32> file_indices;
   for (unsigned i = 0; i < src_indices.size(); i++) {
-    const FileInfo& file_info = file_list[file_id_index[src_indices[i]]];
-    if (file_info.is_dir()) {
-      prepare_extract(file_info.index, add_trailing_slash(options.dst_dir) + file_info.name, file_indices);
-    }
-    else {
-      file_indices.push_back(file_info.index);
-    }
+    prepare_extract(src_indices[i], options.dst_dir, file_indices);
   }
 
   vector<UInt32> indices;
   indices.reserve(file_indices.size());
   copy(file_indices.begin(), file_indices.end(), back_insert_iterator<vector<UInt32>>(indices));
   sort(indices.begin(), indices.end());
-  HRESULT res = in_arc->Extract(to_array(indices), indices.size(), 0, extractor);
+  HRESULT res = in_arc->Extract(indices.data(), indices.size(), 0, extractor);
   if (extractor->error.code != NO_ERROR)
     throw extractor->error;
   CHECK_COM(res);
 
   for (unsigned i = 0; i < src_indices.size(); i++) {
-    const FileInfo& file_info = file_list[file_id_index[src_indices[i]]];
-    set_attr(add_trailing_slash(options.dst_dir) + file_info.name, file_info, ignore_errors, error_log);
+    const FileInfo& file_info = file_list[src_indices[i]];
+    set_attr(src_indices[i], options.dst_dir, ignore_errors, error_log);
   }
 
   if (!error_log.empty() && options.show_dialog)

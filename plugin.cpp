@@ -58,29 +58,31 @@ void Plugin::set_dir(const wstring& dir) {
   if (new_dir == L"\\")
     new_dir.clear();
 
-  archive.dir_find(new_dir);
+  archive.find_dir(new_dir);
   current_dir = new_dir;
 }
 
 void Plugin::list(PluginPanelItem** panel_items, int* items_number) {
-  UInt32 dir_index = archive.dir_find(current_dir);
-  FileListRef fl_ref = archive.dir_list(dir_index);
-  unsigned size = fl_ref.second - fl_ref.first;
+  UInt32 dir_index = archive.find_dir(current_dir);
+  FileIndexRange dir_list = archive.get_dir_list(dir_index);
+  unsigned size = dir_list.second - dir_list.first;
   PluginPanelItem* items = new PluginPanelItem[size];
   memset(items, 0, size * sizeof(PluginPanelItem));
   try {
-    FileList::const_iterator& file_info = fl_ref.first;
-    for (unsigned i = 0; i < size; i++, file_info++) {
-      FAR_FIND_DATA& fdata = items[i].FindData;
-      fdata.dwFileAttributes = file_info->attr;
-      fdata.ftCreationTime = file_info->ctime;
-      fdata.ftLastAccessTime = file_info->atime;
-      fdata.ftLastWriteTime = file_info->mtime;
-      fdata.nFileSize = file_info->size;
-      fdata.nPackSize = file_info->psize;
-      fdata.lpwszFileName = file_info->name.c_str();
-      items[i].UserData = file_info->index;
-    }
+    unsigned idx = 0;
+    for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
+      const FileInfo& file_info = archive.get_file_info(file_index);
+      FAR_FIND_DATA& fdata = items[idx].FindData;
+      fdata.dwFileAttributes = file_info.attr;
+      fdata.ftCreationTime = file_info.ctime;
+      fdata.ftLastAccessTime = file_info.atime;
+      fdata.ftLastWriteTime = file_info.mtime;
+      fdata.nFileSize = file_info.size;
+      fdata.nPackSize = file_info.psize;
+      fdata.lpwszFileName = file_info.name.c_str();
+      items[idx].UserData = file_index;
+      idx++;
+    });
   }
   catch (...) {
     delete[] items;
@@ -110,13 +112,13 @@ void Plugin::extract(PluginPanelItem* panel_items, int items_number, int move, c
     }
   }
   vector<UInt32> indices;
-  UInt32 src_dir_index = archive.dir_find(current_dir);
+  UInt32 src_dir_index = archive.find_dir(current_dir);
   if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) {
-    FileListRef fl = archive.dir_list(src_dir_index);
-    indices.reserve(fl.second - fl.first);
-    for (FileList::const_iterator file_info = fl.first; file_info != fl.second; file_info++) {
-      indices.push_back(file_info->index);
-    }
+    FileIndexRange dir_list = archive.get_dir_list(src_dir_index);
+    indices.reserve(dir_list.second - dir_list.first);
+    for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
+      indices.push_back(file_index);
+    });
   }
   else {
     indices.reserve(items_number);

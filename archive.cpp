@@ -104,6 +104,16 @@ wstring Archive::get_default_name() const {
     return name.substr(0, pos);
 }
 
+bool operator<(const FileInfo& left, const FileInfo& right) {
+  if (left.parent == right.parent)
+    if (left.is_dir() == right.is_dir())
+      return lstrcmpiW(left.name.c_str(), right.name.c_str()) < 0;
+    else
+      return left.is_dir();
+  else
+    return left.parent < right.parent;
+}
+
 void Archive::make_index() {
   class Progress: public ProgressMonitor {
   private:
@@ -127,36 +137,38 @@ void Archive::make_index() {
   };
   Progress progress;
 
-  UInt32 num_items = 0;
-  CHECK_COM(in_arc->GetNumberOfItems(&num_items));
+  UInt32 num_indices = 0;
+  CHECK_COM(in_arc->GetNumberOfItems(&num_indices));
   file_list.clear();
-  file_list.reserve(num_items);
+  file_list.reserve(num_indices);
 
-  struct DirCmp: public binary_function<FileInfo, FileInfo, bool> {
-    bool operator()(const FileInfo& left, const FileInfo& right) const {
-      if (left.parent == right.parent)
-        return left.name < right.name;
+  struct DirInfo {
+    UInt32 index;
+    UInt32 parent;
+    wstring name;
+    bool operator<(const DirInfo& dir_info) const {
+      if (parent == dir_info.parent)
+        return name < dir_info.name;
       else
-        return left.parent < right.parent;
+        return parent < dir_info.parent;
     }
   };
-  typedef set<FileInfo, DirCmp> DirList;
+  typedef set<DirInfo> DirList;
+  map<UInt32, unsigned> dir_index_map;
   DirList dir_list;
 
-  FileInfo dir_info;
-  UInt32 fake_dir_index = num_items;
+  DirInfo dir_info;
+  UInt32 dir_index = 0;
   FileInfo file_info;
   wstring path;
   PropVariant var;
-  for (UInt32 i = 0; i < num_items; i++) {
-    progress.update(i, num_items);
+  for (UInt32 i = 0; i < num_indices; i++) {
+    progress.update(i, num_indices);
 
     if (s_ok(in_arc->GetProperty(i, kpidPath, &var)) && var.vt == VT_BSTR)
       path.assign(var.bstrVal);
     else
       path.assign(get_default_name());
-
-    file_info.index = i;
 
     // attributes
     bool is_dir = s_ok(in_arc->GetProperty(i, kpidIsDir, &var)) && var.vt == VT_BOOL && var.boolVal;
@@ -202,23 +214,16 @@ void Archive::make_index() {
 
     // split path into individual directories and put them into DirList
     dir_info.parent = c_root_index;
-    dir_info.attr = FILE_ATTRIBUTE_DIRECTORY;
-    dir_info.size = dir_info.psize = 0;
-    dir_info.ctime = archive_file_info.ftCreationTime;
-    dir_info.mtime = archive_file_info.ftLastWriteTime;
-    dir_info.atime = archive_file_info.ftLastAccessTime;
     size_t begin_pos = 0;
     while (begin_pos < name_pos) {
-      dir_info.index = fake_dir_index;
+      dir_info.index = dir_index;
       size_t end_pos = begin_pos;
       while (end_pos < name_pos && !is_slash(path[end_pos])) end_pos++;
       if (end_pos != begin_pos) {
         dir_info.name.assign(path.data() + begin_pos, end_pos - begin_pos);
         pair<DirList::iterator, bool> ins_pos = dir_list.insert(dir_info);
-        if (ins_pos.second) {
-          CHECK(fake_dir_index >= num_items && fake_dir_index != c_root_index);
-          fake_dir_index++;
-        }
+        if (ins_pos.second)
+          dir_index++;
         dir_info.parent = ins_pos.first->index;
       }
       begin_pos = end_pos + 1;
@@ -226,120 +231,89 @@ void Archive::make_index() {
     file_info.parent = dir_info.parent;
 
     if (is_dir) {
-      pair<DirList::iterator, bool> ins_pos = dir_list.insert(file_info);
-      if (!ins_pos.second) { // directory already present in DirList
-        UInt32 old_index = ins_pos.first->index;
-        *ins_pos.first = file_info;
-        ins_pos.first->index = old_index;
-      }
+      dir_info.index = dir_index;
+      dir_info.parent = file_info.parent;
+      dir_info.name = file_info.name;
+      pair<DirList::iterator, bool> ins_pos = dir_list.insert(dir_info);
+      dir_index_map[ins_pos.first->index] = i;
     }
-    else {
+
+    file_list.push_back(file_info);
+  }
+
+  // add directories that not present in archive index
+  file_list.reserve(file_list.size() + dir_list.size() - dir_index_map.size());
+  dir_index = num_indices;
+  for_each(dir_list.begin(), dir_list.end(), [&] (const DirInfo& dir_info) {
+    if (dir_index_map.count(dir_info.index) == 0) {
+      dir_index_map[dir_info.index] = dir_index;
+      file_info.parent = dir_info.parent;
+      file_info.name = dir_info.name;
+      file_info.attr = FILE_ATTRIBUTE_DIRECTORY;
+      file_info.size = file_info.psize = 0;
+      file_info.ctime = archive_file_info.ftCreationTime;
+      file_info.mtime = archive_file_info.ftLastWriteTime;
+      file_info.atime = archive_file_info.ftLastAccessTime;
+      dir_index++;
       file_list.push_back(file_info);
     }
-  }
+  });
 
-  // add directories to file list
-  file_list.reserve(file_list.size() + dir_list.size());
-  copy(dir_list.begin(), dir_list.end(), back_insert_iterator<FileList>(file_list));
-  struct DirListIndexCmp: public binary_function<FileInfo, FileInfo, bool> {
-    bool operator()(const FileInfo& left, const FileInfo& right) const {
-      if (left.parent == right.parent)
-        return left.index < right.index;
-      else
-        return left.parent < right.parent;
-    }
-  };
-  sort(file_list.begin(), file_list.end(), DirListIndexCmp());
+  // fix parent references
+  for_each(file_list.begin(), file_list.end(), [&] (FileInfo& file_info) {
+    if (file_info.parent != c_root_index)
+      file_info.parent = dir_index_map[file_info.parent];
+  });
 
-  // map 7z file indices to internal file indices
-  UInt32 max_index = 0;
-  for (unsigned i = 0; i < file_list.size(); i++) {
-    if (max_index < file_list[i].index)
-      max_index = file_list[i].index;
-  }
-  file_id_index.clear();
-  file_id_index.assign(max_index + 1, -1);
-  for (unsigned i = 0; i < file_list.size(); i++) {
-    file_id_index[file_list[i].index] = i;
-  }
-
-  // create directory search index
-  dir_find_index.clear();
-  dir_find_index.reserve(dir_list.size());
+  // create search index
+  file_list_index.clear();
+  file_list_index.reserve(file_list.size());
   for (size_t i = 0; i < file_list.size(); i++) {
-    if (file_list[i].is_dir())
-      dir_find_index.push_back(i);
+    file_list_index.push_back(i);
   }
-  struct DirFindIndexCmp: public binary_function<UInt32, UInt32, bool> {
-  private:
-    const FileList& file_list;
-  public:
-    DirFindIndexCmp(const FileList& file_list): file_list(file_list) {
-    }
-    bool operator()(const UInt32& left, const UInt32& right) const {
-      if (file_list[left].parent == file_list[right].parent)
-        return file_list[left].name < file_list[right].name;
-      else
-        return file_list[left].parent < file_list[right].parent;
-    }
-  };
-  sort(dir_find_index.begin(), dir_find_index.end(), DirFindIndexCmp(file_list));
+  sort(file_list_index.begin(), file_list_index.end(), [&] (UInt32 left, UInt32 right) -> bool {
+    return file_list[left] < file_list[right];
+  });
 }
 
-UInt32 Archive::dir_find(const wstring& path) {
+UInt32 Archive::find_dir(const wstring& path) {
   if (file_list.empty())
     make_index();
 
-  struct DirFindIndexCmp: public binary_function<UInt32, UInt32, bool> {
-  private:
-    const FileList& file_list;
-    FileInfo file_info;
-  public:
-    DirFindIndexCmp(const FileList& file_list, UInt32 parent_index, const wstring& name): file_list(file_list) {
-      file_info.parent = parent_index;
-      file_info.name = name;
-    }
-    bool operator()(const UInt32& left, const UInt32& right) const {
-      const FileInfo& fi_left = left == -1 ? file_info : file_list[left];
-      const FileInfo& fi_right = right == -1 ? file_info : file_list[right];
-      if (fi_left.parent == fi_right.parent)
-        return fi_left.name < fi_right.name;
-      else
-        return fi_left.parent < fi_right.parent;
-    }
-  };
-
-  UInt32 parent_index = c_root_index;
-  wstring name;
+  FileInfo dir_info;
+  dir_info.attr = FILE_ATTRIBUTE_DIRECTORY;
+  dir_info.parent = c_root_index;
   size_t begin_pos = 0;
   while (begin_pos < path.size()) {
     size_t end_pos = begin_pos;
     while (end_pos < path.size() && !is_slash(path[end_pos])) end_pos++;
     if (end_pos != begin_pos) {
-      name.assign(path.data() + begin_pos, end_pos - begin_pos);
-      FileIndex::const_iterator dir_idx = lower_bound(dir_find_index.begin(), dir_find_index.end(), -1, DirFindIndexCmp(file_list, parent_index, name));
-      CHECK(dir_idx != dir_find_index.end());
-      const FileInfo& dir_info = file_list[*dir_idx];
-      CHECK(dir_info.parent == parent_index && dir_info.name == name);
-      parent_index = dir_info.index;
+      dir_info.name.assign(path.data() + begin_pos, end_pos - begin_pos);
+      FileIndexRange fi_range = equal_range(file_list_index.begin(), file_list_index.end(), -1, [&] (UInt32 left, UInt32 right) -> bool {
+        const FileInfo& fi_left = left == -1 ? dir_info : file_list[left];
+        const FileInfo& fi_right = right == -1 ? dir_info : file_list[right];
+        return fi_left < fi_right;
+      });
+      if (fi_range.first == fi_range.second)
+        FAIL(ERROR_PATH_NOT_FOUND);
+      dir_info.parent = *fi_range.first;
     }
     begin_pos = end_pos + 1;
   }
-  return parent_index;
+  return dir_info.parent;
 }
 
-FileListRef Archive::dir_list(UInt32 dir_index) {
+FileIndexRange Archive::get_dir_list(UInt32 dir_index) {
   if (file_list.empty())
     make_index();
 
-  struct DirListIndexCmp: public binary_function<FileInfo, FileInfo, bool> {
-    bool operator()(const FileInfo& left, const FileInfo& right) const {
-      return left.parent < right.parent;
-    }
-  };
-  FileInfo dir_info;
-  dir_info.parent = dir_index;
-  FileListRef fl_ref = equal_range(file_list.begin(), file_list.end(), dir_info, DirListIndexCmp());
+  FileInfo file_info;
+  file_info.parent = dir_index;
+  FileIndexRange index_range = equal_range(file_list_index.begin(), file_list_index.end(), -1, [&] (UInt32 left, UInt32 right) -> bool {
+    const FileInfo& fi_left = left == -1 ? file_info : file_list[left];
+    const FileInfo& fi_right = right == -1 ? file_info : file_list[right];
+    return fi_left.parent < fi_right.parent;
+  });
 
-  return fl_ref;
+  return index_range;
 }

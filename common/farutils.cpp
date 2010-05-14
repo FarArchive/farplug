@@ -60,7 +60,7 @@ int menu(const wstring& title, const vector<wstring>& items, const wchar_t* help
     mi.Text = items[i].c_str();
     menu_items.push_back(mi);
   }
-  return g_far.Menu(g_far.ModuleNumber, -1, -1, 0, FMENU_WRAPMODE, title.c_str(), NULL, help, NULL, NULL, to_array(menu_items), menu_items.size());
+  return g_far.Menu(g_far.ModuleNumber, -1, -1, 0, FMENU_WRAPMODE, title.c_str(), NULL, help, NULL, NULL, menu_items.data(), menu_items.size());
 }
 
 wstring get_progress_bar_str(unsigned width, unsigned __int64 completed, unsigned __int64 total) {

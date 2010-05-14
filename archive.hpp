@@ -42,7 +42,6 @@ struct ArcFormats: public list<ArcFormat> {
 };
 
 struct FileInfo {
-  UInt32 index;
   UInt32 parent;
   wstring name;
   DWORD attr;
@@ -58,7 +57,7 @@ struct FileInfo {
 typedef vector<FileInfo> FileList;
 const UInt32 c_root_index = -1;
 typedef vector<UInt32> FileIndex;
-typedef pair<FileList::const_iterator, FileList::const_iterator> FileListRef;
+typedef pair<FileIndex::const_iterator, FileIndex::const_iterator> FileIndexRange;
 
 class Archive {
 private:
@@ -67,19 +66,21 @@ private:
   wstring archive_dir;
   FindData archive_file_info;
   FileList file_list;
-  FileIndex dir_find_index;
-  FileIndex file_id_index;
+  FileIndex file_list_index;
   wstring password;
   wstring get_default_name() const;
   void make_index();
   void prepare_dst_dir(const wstring& dir_path);
-  void prepare_extract(UInt32 dir_index, const wstring& parent_dir, list<UInt32>& indices);
-  void set_attr(const wstring& file_path, const FileInfo& file_info, bool& ignore_errors, ErrorLog& error_log);
+  void prepare_extract(UInt32 file_index, const wstring& parent_dir, list<UInt32>& indices);
+  void set_attr(UInt32 file_index, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log);
 public:
   Archive(const ArcFormats& arc_formats, const wstring& file_path);
   bool open();
-  UInt32 dir_find(const wstring& dir);
-  FileListRef dir_list(UInt32 dir_index);
+  const FileInfo& get_file_info(UInt32 file_index) const {
+    return file_list[file_index];
+  }
+  UInt32 find_dir(const wstring& dir);
+  FileIndexRange get_dir_list(UInt32 dir_index);
   void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options);
   friend class ArchiveOpener;
   friend class ArchiveExtractor;

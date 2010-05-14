@@ -66,10 +66,3 @@ public:
     memset(buffer, 0, buf_size * sizeof(Type));
   }
 };
-
-template<class T> const T* to_array(const vector<T>& v) {
-  if (v.empty())
-    return NULL;
-  else
-    return &v[0];
-}
