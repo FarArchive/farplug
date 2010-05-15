@@ -92,7 +92,7 @@ void ArcFormats::load(const ArcLibs& arc_libs) {
 }
 
 
-Archive::Archive(const ArcFormats& arc_formats, const wstring& file_path): arc_formats(arc_formats), archive_file_info(get_find_data(file_path)), archive_dir(extract_file_path(file_path)) {
+Archive::Archive(const ArcFormats& arc_formats): arc_formats(arc_formats) {
 }
 
 wstring Archive::get_default_name() const {
@@ -137,7 +137,7 @@ void Archive::make_index() {
   };
   Progress progress;
 
-  UInt32 num_indices = 0;
+  num_indices = 0;
   CHECK_COM(in_arc->GetNumberOfItems(&num_indices));
   file_list.clear();
   file_list.reserve(num_indices);

@@ -32,9 +32,9 @@ public:
   void extract(PluginPanelItem* panel_items, int items_number, int move, const wchar_t** dest_path, int op_mode);
 };
 
-Plugin::Plugin(const wstring& file_path): archive(formats, file_path) {
+Plugin::Plugin(const wstring& file_path): archive(formats) {
   load_formats();
-  if (!archive.open())
+  if (!archive.open(file_path))
     FAIL(E_ABORT);
 }
 
@@ -97,7 +97,8 @@ void Plugin::extract(PluginPanelItem* panel_items, int items_number, int move, c
   options.dst_dir = *dest_path;
   options.ignore_errors = false;
   options.overwrite = ooAsk;
-  options.move_files = move != 0;
+  options.move_enabled = archive.updatable();
+  options.move_files = move != 0 && options.move_enabled;
   options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
   options.use_tmp_files = (op_mode & (OPM_FIND | OPM_VIEW | OPM_QUICKVIEW)) != 0;
   options.ignore_errors = (op_mode & (OPM_FIND | OPM_QUICKVIEW)) != 0;
@@ -129,8 +130,25 @@ void Plugin::extract(PluginPanelItem* panel_items, int items_number, int move, c
 
   ErrorLog error_log;
   archive.extract(src_dir_index, indices, options, error_log);
-  if (!error_log.empty() && options.show_dialog)
-    show_error_log(error_log);
+  if (!error_log.empty()) {
+    if (options.show_dialog)
+      show_error_log(error_log);
+  }
+  else {
+    if (options.move_files) {
+      wstring temp_arc_name = archive.get_temp_file_name();
+      try {
+        archive.delete_files(indices, temp_arc_name);
+        archive.close();
+        CHECK_SYS(MoveFileExW(temp_arc_name.c_str(), archive.get_file_name().c_str(), MOVEFILE_REPLACE_EXISTING));
+      }
+      catch (...) {
+        DeleteFileW(temp_arc_name.c_str());
+        throw;
+      }
+      archive.reopen();
+    }
+  }
 
   Far::update_panel(this, false);
 }

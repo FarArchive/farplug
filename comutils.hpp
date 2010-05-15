@@ -51,7 +51,7 @@ template<class Itf> class ComObject {
 private:
   Itf* obj;
 public:
-  ComObject(): obj(NULL) {}
+  ComObject(): obj(nullptr) {}
   ComObject(Itf* param): obj(param) {
     if (obj)
       obj->AddRef();
@@ -61,21 +61,26 @@ public:
       obj->AddRef();
   }
   ~ComObject() {
-    if (obj)
+    Release();
+  }
+  void Release() {
+    if (obj) {
       obj->Release();
+      obj = nullptr;
+    }
   }
   operator Itf*() const {
     return obj;
   }
   Itf** operator&() {
+    Release();
     return &obj;
   }
   Itf* operator->() const {
     return obj;
   }
   Itf* operator=(Itf* param) {
-    if (obj)
-      obj->Release();
+    Release();
     obj = param;
     if (obj)
       obj->AddRef();
@@ -86,7 +91,7 @@ public:
   }
   void detach(Itf** param) {
     *param = obj;
-    obj = NULL;
+    obj = nullptr;
   }
 };
 

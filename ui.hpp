@@ -54,6 +54,7 @@ struct ExtractOptions {
   wstring dst_dir;
   bool ignore_errors;
   OverwriteOption overwrite;
+  bool move_enabled;
   bool move_files;
   bool show_dialog;
   bool use_tmp_files;

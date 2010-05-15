@@ -344,7 +344,7 @@ public:
     COM_ERROR_HANDLER_END
   }
 
-  void process() {
+  void extract() {
     update_progress(ptCreateDirs);
     prepare_dst_dir(options.dst_dir);
 
@@ -373,5 +373,5 @@ public:
 
 void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log) {
   ComObject<ArchiveExtractor> extractor(new ArchiveExtractor(*this, src_dir_index, src_indices, options, error_log));
-  extractor->process();
+  extractor->extract();
 }

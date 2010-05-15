@@ -63,22 +63,35 @@ class Archive {
 private:
   const ArcFormats& arc_formats;
   ComObject<IInArchive> in_arc;
+  vector<ArcFormat> formats;
   wstring archive_dir;
   FindData archive_file_info;
+  UInt32 num_indices;
   FileList file_list;
   FileIndex file_list_index;
   wstring password;
   wstring get_default_name() const;
   void make_index();
 public:
-  Archive(const ArcFormats& arc_formats, const wstring& file_path);
-  bool open();
+  Archive(const ArcFormats& arc_formats);
+  bool open(const wstring& file_path);
+  void close();
+  void reopen();
   const FileInfo& get_file_info(UInt32 file_index) const {
     return file_list[file_index];
   }
+  bool updatable() const {
+    return formats.size() == 1 && formats.back().update;
+  }
+  wstring get_file_name() const {
+    return add_trailing_slash(archive_dir) + archive_file_info.cFileName;
+  }
+  wstring get_temp_file_name() const;
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);
   void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
+  void delete_files(const vector<UInt32>& src_indices, const wstring& dst_file_name);
   friend class ArchiveOpener;
   friend class ArchiveExtractor;
+  friend class ArchiveUpdater;
 };
