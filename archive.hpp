@@ -70,9 +70,6 @@ private:
   wstring password;
   wstring get_default_name() const;
   void make_index();
-  void prepare_dst_dir(const wstring& dir_path);
-  void prepare_extract(UInt32 file_index, const wstring& parent_dir, list<UInt32>& indices);
-  void set_attr(UInt32 file_index, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log);
 public:
   Archive(const ArcFormats& arc_formats, const wstring& file_path);
   bool open();
@@ -81,7 +78,7 @@ public:
   }
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);
-  void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options);
+  void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
   friend class ArchiveOpener;
   friend class ArchiveExtractor;
 };

@@ -6,7 +6,7 @@
 #include "ui.hpp"
 #include "archive.hpp"
 
-/* ERROR_RETRY_BLOCK(const wstring& file_path, bool& ignore_errors, bool& error_state, ErrorLog& error_log) */
+/* ERROR_RETRY_BLOCK(const wstring& file_path, bool& ignore_errors, bool& error_state, ErrorLog& error_log, ProgressMonitor& progress) */
 
 #define BEGIN_ERROR_RETRY_BLOCK \
   if (!error_state) { \
@@ -20,6 +20,7 @@
         error_state = true; \
         bool ignore = ignore_errors; \
         if (!ignore) { \
+          ProgressSuspend ps(progress); \
           switch (error_retry_dialog(file_path, e)) { \
           case rdrRetry: \
             break; \
@@ -59,22 +60,60 @@ class ArchiveExtractor: public IArchiveExtractCallback, public ICryptoGetTextPas
 private:
   Archive& archive;
   UInt32 src_dir_index;
+  const vector<UInt32>& src_indices;
   const ExtractOptions& options;
-  UInt64 total;
-  UInt64 completed;
   wstring file_path;
   FileInfo file_info;
   OverwriteOption oo;
-  bool& ignore_errors;
+  bool ignore_errors;
+  Error error;
   ErrorLog& error_log;
 
+  enum ProgressType { ptCreateDirs, ptExtract, ptSetAttr };
+  ProgressType progress_type;
+  UInt64 completed;
+  UInt64 total;
+  const wstring* progress_path;
   virtual void do_update_ui() {
+    const unsigned c_width = 60;
     wostringstream st;
     st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-    st << fit_str(file_path, 60) << L'\n';
-    st << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L'\n';
-    st << Far::get_progress_bar_str(60, completed, total) << L'\n';
+    if (progress_type == ptExtract) {
+      unsigned percent;
+      if (total == 0) percent = 0;
+      else percent = static_cast<unsigned>(static_cast<double>(completed) * 100 / total);
+      unsigned __int64 speed;
+      if (time_elapsed() == 0) speed = 0;
+      else speed = static_cast<unsigned>(static_cast<double>(completed) / time_elapsed() * ticks_per_sec());
+      st << Far::get_msg(MSG_PROGRESS_EXTRACT) << L'\n';
+      st << fit_str(file_path, c_width) << L'\n';
+      st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L" @ " << setw(9) << format_data_size(speed, get_speed_suffixes()) << L'\n';
+      st << Far::get_progress_bar_str(c_width, percent, 100) << L'\n';
+      Far::set_progress_state(TBPF_NORMAL);
+      Far::set_progress_value(percent, 100);
+      SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(MSG_PROGRESS_EXTRACT)).c_str());
+    }
+    else if (progress_type == ptCreateDirs) {
+      st << Far::get_msg(MSG_PROGRESS_CREATE_DIRS) << L'\n';
+      st << left << setw(c_width) << fit_str(*progress_path, c_width) << L'\n';
+      Far::set_progress_state(TBPF_INDETERMINATE);
+      SetConsoleTitleW(Far::get_msg(MSG_PROGRESS_CREATE_DIRS).c_str());
+    }
+    else if (progress_type == ptSetAttr) {
+      st << Far::get_msg(MSG_PROGRESS_SET_ATTR) << L'\n';
+      st << left << setw(c_width) << fit_str(*progress_path, c_width) << L'\n';
+      Far::set_progress_state(TBPF_INDETERMINATE);
+      SetConsoleTitleW(Far::get_msg(MSG_PROGRESS_SET_ATTR).c_str());
+    }
     Far::message(st.str(), 0, FMSG_LEFTALIGN);
+  }
+  void update_progress(const wstring& path) {
+    progress_path = &path;
+    update_ui();
+  }
+  void update_progress(ProgressType pt) {
+    progress_type = pt;
+    reset_ui();
   }
 
   class FileExtractStream: public ISequentialOutStream, public UnknownImpl {
@@ -88,8 +127,9 @@ private:
     FileExtractStream(ArchiveExtractor& extractor, const wstring& file_path, const FileInfo& file_info): extractor(extractor), h_file(INVALID_HANDLE_VALUE), file_path(file_path), file_info(file_info), error_state(false) {
       bool& ignore_errors = extractor.ignore_errors;
       ErrorLog& error_log = extractor.error_log;
+      ProgressMonitor& progress = extractor;
       BEGIN_ERROR_RETRY_BLOCK
-      h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_POSIX_SEMANTICS, NULL);
+      h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
       CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
       END_ERROR_RETRY_BLOCK
     }
@@ -107,6 +147,7 @@ private:
       COM_ERROR_HANDLER_BEGIN
       bool& ignore_errors = extractor.ignore_errors;
       ErrorLog& error_log = extractor.error_log;
+      ProgressMonitor& progress = extractor;
       BEGIN_ERROR_RETRY_BLOCK
       CHECK_SYS(WriteFile(h_file, data, size, reinterpret_cast<LPDWORD>(processedSize), NULL));
       END_ERROR_RETRY_BLOCK
@@ -128,10 +169,62 @@ private:
     }
   };
 
-public:
-  Error error;
+  void prepare_dst_dir(const wstring& path) {
+    if (!is_root_path(path)) {
+      prepare_dst_dir(extract_file_path(path));
+      CreateDirectoryW(long_path(path).c_str(), NULL);
+    }
+  }
 
-  ArchiveExtractor(Archive& archive, UInt32 src_dir_index, const ExtractOptions& options, bool& ignore_errors, ErrorLog& error_log): archive(archive), src_dir_index(src_dir_index), options(options), total(0), completed(0), oo(options.overwrite), ignore_errors(ignore_errors), error_log(error_log) {
+  void prepare(UInt32 file_index, const wstring& parent_dir, list<UInt32>& indices) {
+    const FileInfo& file_info = archive.file_list[file_index];
+    if (file_info.is_dir()) {
+      wstring dir_path = add_trailing_slash(parent_dir) + file_info.name;
+      update_progress(dir_path);
+      ERROR_MESSAGE_BEGIN
+      BOOL res = CreateDirectoryW(long_path(dir_path).c_str(), NULL);
+      if (!res) {
+        CHECK_SYS(GetLastError() == ERROR_ALREADY_EXISTS);
+      }
+      ERROR_MESSAGE_END(file_path)
+
+      FileIndexRange dir_list = archive.get_dir_list(file_index);
+      for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
+        prepare(file_index, dir_path, indices);
+      });
+    }
+    else {
+      indices.push_back(file_index);
+    }
+  }
+
+  void set_attr(UInt32 file_index, const wstring& parent_dir) {
+    const FileInfo& file_info = archive.file_list[file_index];
+    wstring file_path = add_trailing_slash(parent_dir) + file_info.name;
+    if (file_info.is_dir()) {
+      FileIndexRange dir_list = archive.get_dir_list(file_index);
+      for_each (dir_list.first, dir_list.second, [&] (UInt32 file_index) {
+        if (archive.file_list[file_index].is_dir()) {
+          set_attr(file_index, file_path);
+        }
+      });
+    }
+    {
+      update_progress(file_path);
+      bool error_state = false;
+      ProgressMonitor& progress = *this;
+      BEGIN_ERROR_RETRY_BLOCK
+      CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL));
+      File file(file_path, FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS);
+      CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), file_info.attr));
+      file.set_time(&file_info.ctime, &file_info.atime, &file_info.mtime);
+      END_ERROR_RETRY_BLOCK
+    }
+  }
+
+public:
+
+  ArchiveExtractor(Archive& archive, UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log): archive(archive), src_dir_index(src_dir_index), src_indices(src_indices), options(options), total(0), completed(0), oo(options.overwrite), ignore_errors(options.ignore_errors), error_log(error_log) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -160,11 +253,11 @@ public:
     if (askExtractMode == NArchive::NExtract::NAskMode::kExtract) {
       file_info = archive.file_list[index];
       file_path = file_info.name;
-      UInt32 index = file_info.parent;
-      while (index != src_dir_index) {
-        const FileInfo& file_info = archive.file_list[index];
+      UInt32 parent_index = file_info.parent;
+      while (parent_index != src_dir_index) {
+        const FileInfo& file_info = archive.file_list[parent_index];
         file_path.insert(0, 1, L'\\').insert(0, file_info.name);
-        index = file_info.parent;
+        parent_index = file_info.parent;
       }
       file_path.insert(0, 1, L'\\').insert(0, options.dst_dir);
 
@@ -175,6 +268,7 @@ public:
         bool overwrite;
         if (oo == ooAsk) {
           FindData src_file_info = convert_file_info(file_info);
+          ProgressSuspend ps(*this);
           OverwriteAction oa = overwrite_dialog(file_path, src_file_info, dst_file_info);
           if (oa == oaYes)
             overwrite = true;
@@ -218,13 +312,13 @@ public:
   }
   STDMETHODIMP PrepareOperation(Int32 askExtractMode) {
     COM_ERROR_HANDLER_BEGIN
-    update_ui();
     return S_OK;
     COM_ERROR_HANDLER_END
   }
   STDMETHODIMP SetOperationResult(Int32 resultEOperationResult) {
     COM_ERROR_HANDLER_BEGIN
     bool error_state = false;
+    ProgressMonitor& progress = *this;
     BEGIN_ERROR_RETRY_BLOCK
     if (resultEOperationResult == NArchive::NExtract::NOperationResult::kUnSupportedMethod)
       FAIL_MSG(Far::get_msg(MSG_ERROR_EXTRACT_UNSUPPORTED_METHOD));
@@ -249,86 +343,35 @@ public:
     return S_OK;
     COM_ERROR_HANDLER_END
   }
+
+  void process() {
+    update_progress(ptCreateDirs);
+    prepare_dst_dir(options.dst_dir);
+
+    list<UInt32> file_indices;
+    for (unsigned i = 0; i < src_indices.size(); i++) {
+      prepare(src_indices[i], options.dst_dir, file_indices);
+    }
+
+    update_progress(ptExtract);
+    vector<UInt32> indices;
+    indices.reserve(file_indices.size());
+    copy(file_indices.begin(), file_indices.end(), back_insert_iterator<vector<UInt32>>(indices));
+    sort(indices.begin(), indices.end());
+    HRESULT res = archive.in_arc->Extract(indices.data(), indices.size(), 0, this);
+    if (error.code != NO_ERROR)
+      throw error;
+    CHECK_COM(res);
+
+    update_progress(ptSetAttr);
+    for (unsigned i = 0; i < src_indices.size(); i++) {
+      const FileInfo& file_info = archive.file_list[src_indices[i]];
+      set_attr(src_indices[i], options.dst_dir);
+    }
+  }
 };
 
-
-void Archive::prepare_dst_dir(const wstring& dir_path) {
-  wstring path = dir_path;
-  if (!is_root_path(path)) {
-    prepare_dst_dir(extract_file_path(dir_path));
-    CreateDirectoryW(long_path(path).c_str(), NULL);
-  }
-}
-
-void Archive::prepare_extract(UInt32 file_index, const wstring& parent_dir, list<UInt32>& indices) {
-  const FileInfo& file_info = file_list[file_index];
-  if (file_info.is_dir()) {
-    wstring dir_path = add_trailing_slash(parent_dir) + file_info.name;
-    ERROR_MESSAGE_BEGIN
-    BOOL res = CreateDirectoryW(long_path(dir_path).c_str(), NULL);
-    if (!res) {
-      CHECK_SYS(GetLastError() == ERROR_ALREADY_EXISTS);
-    }
-    ERROR_MESSAGE_END(dir_path)
-
-    FileIndexRange dir_list = get_dir_list(file_index);
-    for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
-      prepare_extract(file_index, dir_path, indices);
-    });
-  }
-  else {
-    indices.push_back(file_index);
-  }
-}
-
-void Archive::set_attr(UInt32 file_index, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log) {
-  const FileInfo& file_info = file_list[file_index];
-  wstring file_path = add_trailing_slash(parent_dir) + file_info.name;
-  if (file_info.is_dir()) {
-    FileIndexRange dir_list = get_dir_list(file_index);
-    for_each (dir_list.first, dir_list.second, [&] (UInt32 file_index) {
-      if (file_list[file_index].is_dir()) {
-        set_attr(file_index, file_path, ignore_errors, error_log);
-      }
-    });
-  }
-  {
-    bool error_state = false;
-    BEGIN_ERROR_RETRY_BLOCK
-    CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL));
-    File file(file_path, FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_POSIX_SEMANTICS);
-    CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), file_info.attr));
-    file.set_time(&file_info.ctime, &file_info.atime, &file_info.mtime);
-    END_ERROR_RETRY_BLOCK
-  }
-}
-
-void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options) {
-  ErrorLog error_log;
-  bool ignore_errors = options.ignore_errors;
-  ComObject<ArchiveExtractor> extractor(new ArchiveExtractor(*this, src_dir_index, options, ignore_errors, error_log));
-
-  prepare_dst_dir(options.dst_dir);
-
-  list<UInt32> file_indices;
-  for (unsigned i = 0; i < src_indices.size(); i++) {
-    prepare_extract(src_indices[i], options.dst_dir, file_indices);
-  }
-
-  vector<UInt32> indices;
-  indices.reserve(file_indices.size());
-  copy(file_indices.begin(), file_indices.end(), back_insert_iterator<vector<UInt32>>(indices));
-  sort(indices.begin(), indices.end());
-  HRESULT res = in_arc->Extract(indices.data(), indices.size(), 0, extractor);
-  if (extractor->error.code != NO_ERROR)
-    throw extractor->error;
-  CHECK_COM(res);
-
-  for (unsigned i = 0; i < src_indices.size(); i++) {
-    const FileInfo& file_info = file_list[src_indices[i]];
-    set_attr(src_indices[i], options.dst_dir, ignore_errors, error_log);
-  }
-
-  if (!error_log.empty() && options.show_dialog)
-    show_error_log(error_log);
+void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log) {
+  ComObject<ArchiveExtractor> extractor(new ArchiveExtractor(*this, src_dir_index, src_indices, options, error_log));
+  extractor->process();
 }

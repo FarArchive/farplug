@@ -38,6 +38,11 @@ log.info = Operation completed with errors. Do you want to review log file?
 log.close = &Close
 log.show = Show &log
 
+# Progress messages
+progress.extract = Extracting files...
+progress.create_dirs = Creating directories...
+progress.set_attr = Setting attributes...
+
 # Error messages
 error.extract.unsupported_method = Unsupported compression method
 error.extract.data_error = Data error

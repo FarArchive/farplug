@@ -10,14 +10,15 @@ private:
   unsigned __int64 time_freq;
   unsigned __int64 time_total;
   unsigned __int64 time_update;
+  void update_time();
+  void discard_time();
 protected:
   virtual void do_update_ui() = 0;
 public:
   ProgressMonitor(bool lazy = true);
   virtual ~ProgressMonitor();
   void update_ui(bool force = false);
-  void update_time();
-  void discard_time();
+  void reset_ui();
   unsigned __int64 time_elapsed();
   unsigned __int64 ticks_per_sec();
   friend class ProgressSuspend;
@@ -25,13 +26,13 @@ public:
 
 class ProgressSuspend: private NonCopyable {
 private:
-  ProgressMonitor& pm;
+  ProgressMonitor& progress;
 public:
-  ProgressSuspend::ProgressSuspend(ProgressMonitor& pm): pm(pm) {
-    pm.update_time();
+  ProgressSuspend::ProgressSuspend(ProgressMonitor& progress): progress(progress) {
+    progress.update_time();
   }
   ProgressSuspend::~ProgressSuspend() {
-    pm.discard_time();
+    progress.discard_time();
   }
 };
 

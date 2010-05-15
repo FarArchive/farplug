@@ -126,7 +126,12 @@ void Plugin::extract(PluginPanelItem* panel_items, int items_number, int move, c
       indices.push_back(panel_items[i].UserData);
     }
   }
-  archive.extract(src_dir_index, indices, options);
+
+  ErrorLog error_log;
+  archive.extract(src_dir_index, indices, options, error_log);
+  if (!error_log.empty() && options.show_dialog)
+    show_error_log(error_log);
+
   Far::update_panel(this, false);
 }
 

@@ -13,7 +13,7 @@ private:
   Error& error;
 public:
   FileStream(const wstring& file_path, Error& error): file_path(file_path), error(error) {
-    h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_POSIX_SEMANTICS, NULL);
+    h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
   ~FileStream() {

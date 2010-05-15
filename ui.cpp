@@ -10,7 +10,7 @@ wstring get_error_dlg_title() {
   return Far::get_msg(MSG_PLUGIN_NAME);
 }
 
-ProgressMonitor::ProgressMonitor(bool lazy): h_scr(NULL) {
+ProgressMonitor::ProgressMonitor(bool lazy): h_scr(nullptr) {
   QueryPerformanceCounter(reinterpret_cast<PLARGE_INTEGER>(&time_cnt));
   QueryPerformanceFrequency(reinterpret_cast<PLARGE_INTEGER>(&time_freq));
   time_total = 0;
@@ -33,7 +33,7 @@ void ProgressMonitor::update_ui(bool force) {
   update_time();
   if ((time_total >= time_update) || force) {
     time_update = time_total + time_freq / c_update_delay_div;
-    if (h_scr == NULL) {
+    if (h_scr == nullptr) {
       Far::flush_screen();
       h_scr = Far::save_screen();
       con_title = get_console_title();
@@ -48,6 +48,14 @@ void ProgressMonitor::update_ui(bool force) {
       if ((rec.EventType == KEY_EVENT) && (rec.Event.KeyEvent.wVirtualKeyCode == VK_ESCAPE) && rec.Event.KeyEvent.bKeyDown && ((rec.Event.KeyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | LEFT_CTRL_PRESSED | RIGHT_ALT_PRESSED | RIGHT_CTRL_PRESSED | SHIFT_PRESSED)) == 0)) FAIL(E_ABORT);
     }
     do_update_ui();
+  }
+}
+
+void ProgressMonitor::reset_ui() {
+  time_total = time_update = 0;
+  if (h_scr) {
+    Far::restore_screen(h_scr);
+    h_scr = nullptr;
   }
 }
 
@@ -336,8 +344,8 @@ void show_error_log(const ErrorLog& error_log) {
       if (!sys_msg.empty())
         line.append(word_wrap(sys_msg, Far::get_optimal_msg_width())).append(1, L'\n');
     }
-    for (list<wstring>::const_iterator msg = error.messages.begin(); msg != error.messages.end(); msg++) {
-      line.append(word_wrap(*msg, Far::get_optimal_msg_width())).append(1, L'\n');
+    for (list<wstring>::const_iterator err_msg = error.messages.begin(); err_msg != error.messages.end(); err_msg++) {
+      line.append(word_wrap(*err_msg, Far::get_optimal_msg_width())).append(1, L'\n');
     }
     line.append(1, L'\n');
     file.write(line.data(), line.size() * sizeof(wchar_t));
