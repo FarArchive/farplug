@@ -69,26 +69,26 @@ public:
   void delete_value(const wchar_t* name);
 };
 
-class FileEnum: private NonCopyable {
-protected:
-  wstring dir_path;
-  HANDLE h_find;
-  WIN32_FIND_DATAW find_data;
-public:
-  FileEnum(const wstring& dir_path);
-  ~FileEnum();
-  bool next();
-  const WIN32_FIND_DATAW& data() const {
-    return find_data;
-  }
-};
-
 struct FindData: public WIN32_FIND_DATAW {
   bool is_dir() const {
     return (dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
   }
   unsigned __int64 size() const {
     return (static_cast<unsigned __int64>(nFileSizeHigh) << 32) | nFileSizeLow;
+  }
+};
+
+class FileEnum: private NonCopyable {
+protected:
+  wstring dir_path;
+  HANDLE h_find;
+  FindData find_data;
+public:
+  FileEnum(const wstring& dir_path);
+  ~FileEnum();
+  bool next();
+  const FindData& data() const {
+    return find_data;
   }
 };
 

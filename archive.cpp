@@ -104,14 +104,14 @@ wstring Archive::get_default_name() const {
     return name.substr(0, pos);
 }
 
-bool operator<(const FileInfo& left, const FileInfo& right) {
-  if (left.parent == right.parent)
-    if (left.is_dir() == right.is_dir())
-      return lstrcmpiW(left.name.c_str(), right.name.c_str()) < 0;
+bool FileInfo::operator<(const FileInfo& file_info) const {
+  if (parent == file_info.parent)
+    if (is_dir() == file_info.is_dir())
+      return lstrcmpiW(name.c_str(), file_info.name.c_str()) < 0;
     else
-      return left.is_dir();
+      return is_dir();
   else
-    return left.parent < right.parent;
+    return parent < file_info.parent;
 }
 
 void Archive::make_index() {

@@ -53,6 +53,7 @@ struct FileInfo {
   bool is_dir() const {
     return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
   }
+  bool operator<(const FileInfo& file_info) const;
 };
 typedef vector<FileInfo> FileList;
 const UInt32 c_root_index = -1;
@@ -90,8 +91,10 @@ public:
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);
   void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
-  void delete_files(const vector<UInt32>& src_indices, const wstring& dst_file_name);
+  void delete_files(const vector<UInt32>& src_indices);
+  void update(const wstring& src_dir, PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir);
   friend class ArchiveOpener;
   friend class ArchiveExtractor;
+  friend class ArchiveFileDeleter;
   friend class ArchiveUpdater;
 };

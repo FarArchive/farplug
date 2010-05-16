@@ -34,6 +34,11 @@ public:
   }
 };
 
+#define UNKNOWN_DECL \
+  STDMETHOD(QueryInterface)(REFIID riid, void** object); \
+  STDMETHOD_(ULONG, AddRef)(); \
+  STDMETHOD_(ULONG, Release)();
+
 #define UNKNOWN_IMPL_BEGIN \
   STDMETHOD(QueryInterface)(REFIID riid, void** object) {
 
