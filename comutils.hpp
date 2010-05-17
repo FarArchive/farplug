@@ -50,7 +50,7 @@ public:
     *object = NULL; return E_NOINTERFACE; \
   } \
   STDMETHOD_(ULONG, AddRef)() { return ++ref_cnt; } \
-  STDMETHOD_(ULONG, Release)() { if (--ref_cnt == 0) delete this; return ref_cnt; }
+  STDMETHOD_(ULONG, Release)() { if (--ref_cnt == 0) { delete this; return 0; } else return ref_cnt; }
 
 template<class Itf> class ComObject {
 private:
