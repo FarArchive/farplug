@@ -1,7 +1,7 @@
 @mkdir .build
 @cd .build
 
-@call setenv /x86
+@call vcvarsall.bat x86
 @echo on
 
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
@@ -16,7 +16,7 @@ nmake distrib
 @copy *.7z ..
 @rm -r *
 
-@call setenv /x64
+@call vcvarsall.bat x86_amd64
 @echo on
 
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
