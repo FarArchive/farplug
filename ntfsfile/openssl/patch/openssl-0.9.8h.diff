@@ -2,7 +2,7 @@ diff -ruN openssl-0.9.8h/build.bat openssl-0.9.8h-patched/build.bat
 --- openssl-0.9.8h/build.bat	Thu Jan  1 02:00:00 1970
 +++ openssl-0.9.8h-patched/build.bat	Thu Mar  5 14:24:48 2009
 @@ -0,0 +1,23 @@
-+call setenv /x86
++call vcvarsall.bat x86
 +perl Configure VC-WIN32
 +call ms\do_ms debug
 +nmake -f ms\nt.mak
@@ -10,7 +10,7 @@ diff -ruN openssl-0.9.8h/build.bat openssl-0.9.8h-patched/build.bat
 +call ms\do_masm
 +nmake -f ms\nt.mak
 +@if errorlevel 1 goto end
-+call setenv /x64
++call vcvarsall.bat x86_amd64
 +perl Configure VC-WIN64A
 +call ms\do_win64a debug
 +nmake -f ms\nt.mak
