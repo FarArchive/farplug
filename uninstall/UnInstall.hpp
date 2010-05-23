@@ -44,7 +44,6 @@ FarList FL;
 FarListItem* FLI = NULL;
 int ListSize;
 HANDLE hStdout;
-CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
 
 struct KeyInfo
 {

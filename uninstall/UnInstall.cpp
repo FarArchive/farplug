@@ -60,16 +60,17 @@ void WINAPI GetPluginInfo(struct PluginInfo *Info)
 }
 
 void ResizeDialog(HANDLE hDlg) {
-  GetConsoleScreenBufferInfo(hStdout, &csbiInfo);
-  #define MAXITEMS (csbiInfo.dwSize.Y-7)
-  int s = ((ListSize>0) && (ListSize<MAXITEMS) ? ListSize : (ListSize>0 ? MAXITEMS : 0));
-  #undef MAXITEMS
-  SMALL_RECT NewPos = { 2, 1, csbiInfo.dwSize.X - 7, s + 2 };
+  CONSOLE_SCREEN_BUFFER_INFO con_info;
+  GetConsoleScreenBufferInfo(hStdout, &con_info);
+  unsigned con_sx = con_info.srWindow.Right - con_info.srWindow.Left + 1;
+  int max_items = con_info.srWindow.Bottom - con_info.srWindow.Top + 1 - 7;
+  int s = ((ListSize>0) && (ListSize<max_items) ? ListSize : (ListSize>0 ? max_items : 0));
+  SMALL_RECT NewPos = { 2, 1, con_sx - 7, s + 2 };
   SMALL_RECT OldPos;
   Info.SendDlgMessage(hDlg,DM_GETITEMPOSITION,LIST_BOX,reinterpret_cast<LONG_PTR>(&OldPos));
   if (NewPos.Right!=OldPos.Right || NewPos.Bottom!=OldPos.Bottom) {
     COORD coord;
-    coord.X = csbiInfo.dwSize.X - 4;
+    coord.X = con_sx - 4;
     coord.Y = s + 4;
     Info.SendDlgMessage(hDlg,DM_RESIZEDIALOG,0,reinterpret_cast<LONG_PTR>(&coord));
     coord.X = -1;
