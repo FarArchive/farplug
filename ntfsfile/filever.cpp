@@ -167,12 +167,12 @@ VersionInfo get_version_info(const UnicodeString& file_name) {
     CLEAN(LOADED_IMAGE*, exec_image, ImageUnload(exec_image));
     UnicodeString machine;
     #define MACHINE(name) \
-    if (exec_image->FileHeader->FileHeader.Machine == name) { \
+    if (exec_image->FileHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_##name) { \
       machine = L#name; \
     }
-    MACHINE(IMAGE_FILE_MACHINE_I386)
-    MACHINE(IMAGE_FILE_MACHINE_AMD64)
-    MACHINE(IMAGE_FILE_MACHINE_IA64)
+    MACHINE(I386)
+    MACHINE(AMD64)
+    MACHINE(IA64)
     #undef MACHINE
     if (machine.size()) ver_info.fixed += NameValue(far_get_msg(MSG_FILE_VER_MACHINE), machine);
 
@@ -180,63 +180,63 @@ VersionInfo get_version_info(const UnicodeString& file_name) {
 
     UnicodeString sub_system;
     #define SUB_SYSTEM(name) \
-    if (exec_image->FileHeader->OptionalHeader.Subsystem == name) { \
+    if (exec_image->FileHeader->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_##name) { \
       sub_system = L#name; \
     }
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_UNKNOWN)
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_NATIVE)
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_WINDOWS_GUI)
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_WINDOWS_CUI)
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_OS2_CUI)
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_POSIX_CUI)
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_EFI_APPLICATION)
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER)
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER)
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_EFI_ROM)
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_XBOX)
-    SUB_SYSTEM(IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION)
+    SUB_SYSTEM(UNKNOWN)
+    SUB_SYSTEM(NATIVE)
+    SUB_SYSTEM(WINDOWS_GUI)
+    SUB_SYSTEM(WINDOWS_CUI)
+    SUB_SYSTEM(OS2_CUI)
+    SUB_SYSTEM(POSIX_CUI)
+    SUB_SYSTEM(WINDOWS_CE_GUI)
+    SUB_SYSTEM(EFI_APPLICATION)
+    SUB_SYSTEM(EFI_BOOT_SERVICE_DRIVER)
+    SUB_SYSTEM(EFI_RUNTIME_DRIVER)
+    SUB_SYSTEM(EFI_ROM)
+    SUB_SYSTEM(XBOX)
+    SUB_SYSTEM(WINDOWS_BOOT_APPLICATION)
     #undef SUB_SYSTEM
     if (sub_system.size()) ver_info.fixed += NameValue(far_get_msg(MSG_FILE_VER_SUBSYSTEM), sub_system);
 
     UnicodeString image_chars;
     #define IMAGE_CHAR_FLAG(name) \
-    if (exec_image->FileHeader->FileHeader.Characteristics & name) { \
+    if (exec_image->FileHeader->FileHeader.Characteristics & IMAGE_FILE_##name) { \
       if (image_chars.size()) image_chars += L", "; \
       image_chars += L#name; \
     }
-    IMAGE_CHAR_FLAG(IMAGE_FILE_RELOCS_STRIPPED)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_EXECUTABLE_IMAGE)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_LINE_NUMS_STRIPPED)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_LOCAL_SYMS_STRIPPED)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_AGGRESIVE_WS_TRIM)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_LARGE_ADDRESS_AWARE)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_BYTES_REVERSED_LO)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_32BIT_MACHINE)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_DEBUG_STRIPPED)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_NET_RUN_FROM_SWAP)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_SYSTEM)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_DLL)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_UP_SYSTEM_ONLY)
-    IMAGE_CHAR_FLAG(IMAGE_FILE_BYTES_REVERSED_HI)
+    IMAGE_CHAR_FLAG(RELOCS_STRIPPED)
+    IMAGE_CHAR_FLAG(EXECUTABLE_IMAGE)
+    IMAGE_CHAR_FLAG(LINE_NUMS_STRIPPED)
+    IMAGE_CHAR_FLAG(LOCAL_SYMS_STRIPPED)
+    IMAGE_CHAR_FLAG(AGGRESIVE_WS_TRIM)
+    IMAGE_CHAR_FLAG(LARGE_ADDRESS_AWARE)
+    IMAGE_CHAR_FLAG(BYTES_REVERSED_LO)
+    IMAGE_CHAR_FLAG(32BIT_MACHINE)
+    IMAGE_CHAR_FLAG(DEBUG_STRIPPED)
+    IMAGE_CHAR_FLAG(REMOVABLE_RUN_FROM_SWAP)
+    IMAGE_CHAR_FLAG(NET_RUN_FROM_SWAP)
+    IMAGE_CHAR_FLAG(SYSTEM)
+    IMAGE_CHAR_FLAG(DLL)
+    IMAGE_CHAR_FLAG(UP_SYSTEM_ONLY)
+    IMAGE_CHAR_FLAG(BYTES_REVERSED_HI)
     #undef IMAGE_CHAR_FLAG
     if (image_chars.size()) ver_info.fixed += NameValue(far_get_msg(MSG_FILE_VER_IMAGE_CHARS), image_chars);
 
     UnicodeString dll_chars;
     #define DLL_CHAR_FLAG(name) \
-    if (exec_image->FileHeader->OptionalHeader.DllCharacteristics & name) { \
+    if (exec_image->FileHeader->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_##name) { \
       if (dll_chars.size()) dll_chars += L", "; \
       dll_chars += L#name; \
     }
-    DLL_CHAR_FLAG(IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE)
-    DLL_CHAR_FLAG(IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY)
-    DLL_CHAR_FLAG(IMAGE_DLLCHARACTERISTICS_NX_COMPAT)
-    DLL_CHAR_FLAG(IMAGE_DLLCHARACTERISTICS_NO_ISOLATION)
-    DLL_CHAR_FLAG(IMAGE_DLLCHARACTERISTICS_NO_SEH)
-    DLL_CHAR_FLAG(IMAGE_DLLCHARACTERISTICS_NO_BIND)
-    DLL_CHAR_FLAG(IMAGE_DLLCHARACTERISTICS_WDM_DRIVER)
-    DLL_CHAR_FLAG(IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE)
+    DLL_CHAR_FLAG(DYNAMIC_BASE)
+    DLL_CHAR_FLAG(FORCE_INTEGRITY)
+    DLL_CHAR_FLAG(NX_COMPAT)
+    DLL_CHAR_FLAG(NO_ISOLATION)
+    DLL_CHAR_FLAG(NO_SEH)
+    DLL_CHAR_FLAG(NO_BIND)
+    DLL_CHAR_FLAG(WDM_DRIVER)
+    DLL_CHAR_FLAG(TERMINAL_SERVER_AWARE)
     #undef DLL_CHAR_FLAG
     if (dll_chars.size()) ver_info.fixed += NameValue(far_get_msg(MSG_FILE_VER_DLL_CHARS), dll_chars);
   }
@@ -259,8 +259,11 @@ LONG_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG
     return FALSE;
   }
   else if (msg == DN_EDITCHANGE && param1 == dlg_data->lang_cp_ctrl_id) {
-    if (dlg_data->lang_cp_ctrl_id != -1) {
-      unsigned lang_cp_idx = dlg->get_list_pos(dlg_data->lang_cp_ctrl_id);
+    if (version_info->var.size()) {
+      unsigned lang_cp_idx;
+      if (version_info->var.size() == 1) lang_cp_idx = 0;
+      else lang_cp_idx = dlg->get_list_pos(dlg_data->lang_cp_ctrl_id);
+
       int ctrl_id = dlg_data->lang_cp_ctrl_id + 1;
       for (unsigned i = 0; i < version_info->var[lang_cp_idx].strings.size(); i++) {
         dlg->set_text(ctrl_id, version_info->var[lang_cp_idx].strings[i].name);
@@ -348,7 +351,10 @@ void show_file_version_dialog(const VersionInfo& version_info) {
     dlg.separator();
     dlg.new_line();
     dlg.label(far_get_msg(MSG_FILE_VER_LANGUAGE), name_width);
-    dlg_data.lang_cp_ctrl_id = dlg.combo_box(lang_items, 0, 10, value_width, DIF_DROPDOWNLIST);
+    if (version_info.var.size() == 1)
+      dlg_data.lang_cp_ctrl_id = dlg.var_edit_box(lang_items[0], lang_items[0].size(), value_width, DIF_READONLY | DIF_SELECTONENTRY);
+    else
+      dlg_data.lang_cp_ctrl_id = dlg.combo_box(lang_items, 0, 10, value_width, DIF_DROPDOWNLIST | DIF_SELECTONENTRY);
     dlg.new_line();
 
     for (unsigned i = 0; i < dlg_data.var_cnt; i++) {
