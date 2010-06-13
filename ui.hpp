@@ -72,3 +72,13 @@ enum RetryDialogResult {
 RetryDialogResult error_retry_dialog(const wstring& file_path, const Error& e);
 
 void show_error_log(const ErrorLog& error_log);
+
+struct UpdateOptions {
+  wstring arc_path;
+  unsigned level;
+  wstring method;
+  bool move_files;
+  bool show_dialog;
+};
+
+bool update_dialog(UpdateOptions& options);

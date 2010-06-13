@@ -39,6 +39,7 @@ struct ArcFormat {
 
 struct ArcFormats: public list<ArcFormat> {
   void load(const ArcLibs& arc_libs);
+  const ArcFormat* find_by_name(const wstring& arc_name) const;
 };
 
 struct FileInfo {
@@ -87,12 +88,16 @@ public:
   wstring get_file_name() const {
     return add_trailing_slash(archive_dir) + archive_file_info.cFileName;
   }
+  bool is_empty() const {
+    return !in_arc;
+  }
   wstring get_temp_file_name() const;
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);
   void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
   void delete_files(const vector<UInt32>& src_indices);
-  void update(const wstring& src_dir, PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir);
+  void create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options);
+  void update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options);
   friend class ArchiveOpener;
   friend class ArchiveExtractor;
   friend class ArchiveFileDeleter;

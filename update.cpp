@@ -123,7 +123,7 @@ public:
     else {
       *newData = 1;
       *newProperties = 1;
-      *indexInArchive = found->first;
+      *indexInArchive = found->first < archive.num_indices ? found->first : -1;
     }
     return S_OK;
     COM_ERROR_HANDLER_END
@@ -156,8 +156,9 @@ public:
   }
   STDMETHODIMP GetStream(UInt32 index, ISequentialInStream **inStream) {
     COM_ERROR_HANDLER_BEGIN
-    wstring rel_file_path = file_index_map.at(index).rel_path;
-    ComObject<ISequentialInStream> stream(new FileInStream(add_trailing_slash(src_dir) + rel_file_path, error));
+    const FileIndexInfo& file_index_info = file_index_map.at(index);
+    wstring file_path = add_trailing_slash(add_trailing_slash(src_dir) + file_index_info.rel_path) + file_index_info.find_data.cFileName;
+    ComObject<ISequentialInStream> stream(new FileInStream(file_path, error));
     stream.detach(inStream);
     update_ui();
     return S_OK;
@@ -212,9 +213,9 @@ public:
     }
   }
 
-  void update(PluginPanelItem* panel_items, unsigned items_number, const wstring& arc_name) {
+  void update(const PluginPanelItem* panel_items, unsigned items_number, const wstring& arc_name) {
     UInt32 new_index = archive.num_indices;
-    UInt32 dst_dir_index = archive.find_dir(dst_dir);
+    UInt32 dst_dir_index = archive.is_empty() ? c_root_index : archive.find_dir(dst_dir);
     for (unsigned i = 0; i < items_number; i++) {
       const FAR_FIND_DATA& find_data = panel_items[i].FindData;
       scan_file(wstring(), get_find_data(add_trailing_slash(src_dir) + find_data.lpwszFileName), dst_dir_index, new_index);
@@ -223,19 +224,37 @@ public:
       }
     }
 
-    ComObject<FileUpdateStream> update_stream(new FileUpdateStream(arc_name, error));
-    const ArcFormat& format = archive.formats.back();
     ComObject<IOutArchive> out_arc;
-    CHECK_COM(archive.in_arc->QueryInterface(IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
+    if (archive.is_empty()) {
+      const ArcFormat* arc_format = archive.arc_formats.find_by_name(L"7z");
+      CHECK(arc_format);
+      CHECK_COM(arc_format->arc_lib->CreateObject(reinterpret_cast<const GUID*>(arc_format->class_id.data()), &IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
+    }
+    else {
+      CHECK_COM(archive.in_arc->QueryInterface(IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
+    }
+
+    ComObject<FileUpdateStream> update_stream(new FileUpdateStream(arc_name, error));
     HRESULT res = out_arc->UpdateItems(update_stream, new_index, this);
     if (error.code != NO_ERROR)
       throw error;
     CHECK_COM(res);
   }
+
 };
 
 
-void Archive::update(const wstring& src_dir, PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir) {
+void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options) {
+  num_indices = 0;
+  formats.assign(1, *arc_formats.find_by_name(L"7z"));
+  archive_dir = extract_file_path(options.arc_path);
+  wcscpy(archive_file_info.cFileName, extract_file_name(options.arc_path).c_str());
+  ComObject<ArchiveUpdater> updater(new ArchiveUpdater(*this, src_dir, wstring()));
+  updater->update(panel_items, items_number, get_file_name());
+  reopen();
+}
+
+void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options) {
   wstring temp_arc_name = get_temp_file_name();
   try {
     ComObject<ArchiveUpdater> updater(new ArchiveUpdater(*this, src_dir, dst_dir));

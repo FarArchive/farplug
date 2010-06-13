@@ -353,3 +353,107 @@ void show_error_log(const ErrorLog& error_log) {
 
   Far::viewer(temp_file.get_path(), Far::get_msg(MSG_LOG_TITLE));
 }
+
+struct CompressionLevel {
+  unsigned name_id;
+  unsigned value;
+};
+
+const CompressionLevel c_levels[] = {
+  { MSG_COMPRESSION_LEVEL_STORE, 0 },
+  { MSG_COMPRESSION_LEVEL_FASTEST, 1 },
+  { MSG_COMPRESSION_LEVEL_FAST, 3 },
+  { MSG_COMPRESSION_LEVEL_NORMAL, 5 },
+  { MSG_COMPRESSION_LEVEL_MAXIMUM, 7 },
+  { MSG_COMPRESSION_LEVEL_ULTRA, 9 },
+};
+
+const wchar_t* c_methods[] = {
+  L"LZMA",
+  L"LZMA2",
+  L"PPMd",
+};
+
+class UpdateDialog: public Far::Dialog {
+private:
+  enum {
+    c_client_xs = 60
+  };
+
+  UpdateOptions& options;
+
+  int arc_path_ctrl_id;
+  int level_ctrl_id;
+  int method_ctrl_id;
+  int move_files_ctrl_id;
+  int ok_ctrl_id;
+  int cancel_ctrl_id;
+
+  LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
+    if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != cancel_ctrl_id)) {
+      options.arc_path = unquote(strip(get_text(arc_path_ctrl_id)));
+      options.level = c_levels[get_list_pos(level_ctrl_id)].value;
+      options.method = c_methods[get_list_pos(method_ctrl_id)];
+      options.move_files = get_check(move_files_ctrl_id);
+    }
+    return default_dialog_proc(msg, param1, param2);
+  }
+
+public:
+  UpdateDialog(UpdateOptions& options): Far::Dialog(Far::get_msg(MSG_UPDATE_DLG_TITLE), c_client_xs), options(options) {
+  }
+
+  bool show() {
+    label(Far::get_msg(MSG_UPDATE_DLG_ARC_PATH));
+    new_line();
+    arc_path_ctrl_id = edit_box(options.arc_path, c_client_xs);
+    new_line();
+    separator();
+    new_line();
+
+    move_files_ctrl_id = check_box(Far::get_msg(MSG_EXTRACT_DLG_MOVE_FILES), options.move_files);
+    new_line();
+    separator();
+    new_line();
+
+    label(Far::get_msg(MSG_UPDATE_DLG_LEVEL));
+    spacer(1);
+    vector<wstring> level_items;
+    level_items.reserve(ARRAYSIZE(c_levels));
+    unsigned sel_level_idx = 0;
+    for (unsigned i = 0; i < ARRAYSIZE(c_levels); i++) {
+      level_items.push_back(Far::get_msg(c_levels[i].name_id));
+      if (options.level == c_levels[i].value)
+        sel_level_idx = i;
+    }
+    level_ctrl_id = combo_box(level_items, sel_level_idx, AUTO_SIZE, DIF_DROPDOWNLIST);
+    new_line();
+
+    label(Far::get_msg(MSG_UPDATE_DLG_METHOD));
+    spacer(1);
+    vector<wstring> method_items;
+    method_items.reserve(ARRAYSIZE(c_methods));
+    unsigned sel_method_idx = 0;
+    for (unsigned i = 0; i < ARRAYSIZE(c_methods); i++) {
+      method_items.push_back(c_methods[i]);
+      if (options.method == c_methods[i])
+        sel_method_idx = i;
+    }
+    method_ctrl_id = combo_box(method_items, sel_method_idx, AUTO_SIZE, DIF_DROPDOWNLIST);
+    new_line();
+
+    separator();
+    new_line();
+    ok_ctrl_id = def_button(Far::get_msg(MSG_BUTTON_OK), DIF_CENTERGROUP);
+    cancel_ctrl_id = button(Far::get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
+    new_line();
+
+    int item = Far::Dialog::show();
+
+    return (item != -1) && (item != cancel_ctrl_id);
+  }
+};
+
+bool update_dialog(UpdateOptions& options) {
+  return UpdateDialog(options).show();
+}

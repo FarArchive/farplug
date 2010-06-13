@@ -77,6 +77,9 @@ public:
   operator Itf*() const {
     return obj;
   }
+  operator bool() const {
+    return obj != nullptr;
+  }
   Itf** operator&() {
     Release();
     return &obj;

@@ -12,6 +12,12 @@ extract.dlg.oo_overwrite = &Overwrite
 extract.dlg.oo_skip = &Skip
 extract.dlg.move_files = &Move files
 
+# Update dialog
+update.dlg.title = Add files to archive
+update.dlg.arc_path = &Add files to archive:
+update.dlg.level = Compression &level:
+update.dlg.method = Compression &method:
+
 # Password dialog
 password.title = Enter password
 password.password = Password:
@@ -37,6 +43,14 @@ log.title = Operation log
 log.info = Operation completed with errors. Do you want to review log file?
 log.close = &Close
 log.show = Show &log
+
+# Compression levels
+compression.level.store = Store
+compression.level.fastest = Fastest
+compression.level.fast = Fast
+compression.level.normal = Normal
+compression.level.maximum = Maximum
+compression.level.ultra = Ultra
 
 # Progress messages
 progress.extract = Extracting files...

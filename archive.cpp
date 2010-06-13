@@ -91,6 +91,14 @@ void ArcFormats::load(const ArcLibs& arc_libs) {
   }
 }
 
+const ArcFormat* ArcFormats::find_by_name(const wstring& arc_name) const {
+  for (const_iterator arc_format = begin(); arc_format != end(); arc_format++) {
+    if (arc_format->name == arc_name)
+      return &*arc_format;
+  }
+  return nullptr;
+}
+
 
 Archive::Archive(const ArcFormats& arc_formats): arc_formats(arc_formats) {
 }

@@ -26,6 +26,10 @@ private:
   wstring extract_dir;
 public:
 
+  Plugin(): archive(formats) {
+    load_formats();
+  }
+
   Plugin(const wstring& file_path): archive(formats) {
     load_formats();
     if (!archive.open(file_path))
@@ -86,7 +90,8 @@ public:
     *items_number = size;
   }
 
-  void extract(PluginPanelItem* panel_items, int items_number, int move, const wchar_t** dest_path, int op_mode) {
+  void extract(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t** dest_path, int op_mode) {
+    if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
     ExtractOptions options;
     options.dst_dir = *dest_path;
     options.ignore_errors = false;
@@ -108,18 +113,9 @@ public:
     }
     vector<UInt32> indices;
     UInt32 src_dir_index = archive.find_dir(current_dir);
-    if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) {
-      FileIndexRange dir_list = archive.get_dir_list(src_dir_index);
-      indices.reserve(dir_list.second - dir_list.first);
-      for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
-        indices.push_back(file_index);
-      });
-    }
-    else {
-      indices.reserve(items_number);
-      for (int i = 0; i < items_number; i++) {
-        indices.push_back(panel_items[i].UserData);
-      }
+    indices.reserve(items_number);
+    for (int i = 0; i < items_number; i++) {
+      indices.push_back(panel_items[i].UserData);
     }
 
     ErrorLog error_log;
@@ -136,7 +132,33 @@ public:
     Far::update_panel(this, false);
   }
 
-  void update(PluginPanelItem* panel_items, int items_number, int move, const wchar_t* src_path, int op_mode) {
+  void update(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t* src_path, int op_mode) {
+    if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
+    UpdateOptions options;
+    if (archive.is_empty()) {
+      if (items_number == 1 || is_root_path(src_path))
+        options.arc_path = add_trailing_slash(src_path) + panel_items[0].FindData.lpwszFileName;
+      else
+        options.arc_path = add_trailing_slash(src_path) + extract_file_name(src_path);
+      const ArcFormat* arc_format = formats.find_by_name(L"7z");
+      CHECK(arc_format);
+      options.arc_path = options.arc_path + L"." + arc_format->extension;
+    }
+    options.level = 5;
+    options.method = L"LZMA";
+    options.move_files = move != 0;
+    options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
+    if (options.show_dialog) {
+      if (!update_dialog(options)) FAIL(E_ABORT);
+    }
+
+    if (archive.is_empty())
+      archive.create(src_path, panel_items, items_number, options);
+    else
+      archive.update(src_path, panel_items, items_number, current_dir, options);
+
+    Far::update_panel(PANEL_ACTIVE, false);
+    Far::update_panel(PANEL_PASSIVE, false);
   }
 };
 
@@ -171,8 +193,9 @@ HANDLE WINAPI OpenPluginW(int OpenFrom,INT_PTR Item) {
 HANDLE WINAPI OpenFilePluginW(const wchar_t *Name,const unsigned char *Data,int DataSize,int OpMode) {
   FAR_ERROR_HANDLER_BEGIN;
   if (Name == NULL)
-    return INVALID_HANDLE_VALUE;
-  return new Plugin(Name);
+    return new Plugin();
+  else
+    return new Plugin(Name);
   FAR_ERROR_HANDLER_END(return INVALID_HANDLE_VALUE, return INVALID_HANDLE_VALUE, (OpMode & (OPM_SILENT | OPM_FIND)) != 0);
 }
 
