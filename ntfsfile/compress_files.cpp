@@ -9,6 +9,7 @@
 #include "dlgapi.h"
 #include "log.h"
 #include "options.h"
+#include "volume.h"
 #include "defragment.h"
 #include "compress_files.h"
 
@@ -16,8 +17,6 @@ extern struct PluginStartupInfo g_far;
 extern Array<unsigned char> g_colors;
 
 CompressFilesParams g_compress_files_params;
-
-const unsigned c_cluster_size = 4 * 1024;
 
 typedef NTSTATUS (NTAPI *PRtlCompressBuffer)(USHORT CompressionFormatAndEngine, PUCHAR UncompressedBuffer, ULONG UncompressedBufferSize, PUCHAR CompressedBuffer, ULONG CompressedBufferSize, ULONG UncompressedChunkSize, PULONG FinalCompressedSize, PVOID WorkSpace);
 typedef NTSTATUS (NTAPI *PRtlGetCompressionWorkSpaceSize)(USHORT CompressionFormatAndEngine, PULONG CompressBufferWorkSpaceSize, PULONG CompressFragmentWorkSpaceSize);
@@ -42,6 +41,15 @@ unsigned get_cpu_count() {
   SYSTEM_INFO sys_info;
   GetSystemInfo(&sys_info);
   return sys_info.dwNumberOfProcessors;
+}
+
+unsigned get_cluster_size(const UnicodeString& file_name) {
+  try {
+    return VolumeInfo(file_name).cluster_size;
+  }
+  catch (...) {
+    return 4 * 1024;
+  }
 }
 
 u64 get_time() {
@@ -95,9 +103,9 @@ public:
   unsigned io_buffer_size; // I/O buffer size
   unsigned comp_buffer_size;
   unsigned comp_work_buffer_size;
-  BufferArray(unsigned num_buf):
+  BufferArray(unsigned num_buf, unsigned cluster_size):
     num_buf(num_buf),
-    io_buffer_size(16 * c_cluster_size), // NTFS compression unit = 16 clusters
+    io_buffer_size(16 * cluster_size), // NTFS compression unit = 16 clusters
     comp_buffer_size(io_buffer_size + io_buffer_size / 16 + 64 + 3),
     comp_work_buffer_size(get_comp_work_buffer_size())
   {
@@ -138,6 +146,7 @@ struct CompressionState: private NonCopyable, private ProgressMonitor, public ID
 
   unsigned num_th; // number of worker threads
   unsigned num_buf; // number of I/O buffers
+  unsigned cluster_size;
   BufferArray buffers; // I/O buffers
   Event stop_event;
   CriticalSection sync;
@@ -177,7 +186,7 @@ struct CompressionState: private NonCopyable, private ProgressMonitor, public ID
   void estimate_directory_size(const UnicodeString& dir_name);
   void compress_file(const UnicodeString& file_name, const FindData& find_data);
   void compress_directory(const UnicodeString& dir_name);
-  CompressionState(const CompressFilesParams& params, Log& log, unsigned num_th): ProgressMonitor(true), params(params), log(log), num_th(num_th), num_buf(num_th * 2), stop_event(true, false), io_ready_sem(num_buf, num_buf), proc_ready_sem(0, num_buf), buffers(num_buf) {
+  CompressionState(const CompressFilesParams& params, Log& log, unsigned num_th, unsigned cluster_size): ProgressMonitor(true), params(params), log(log), num_th(num_th), num_buf(num_th * 2), cluster_size(cluster_size), stop_event(true, false), io_ready_sem(num_buf, num_buf), proc_ready_sem(0, num_buf), buffers(num_buf, cluster_size) {
   }
   void process(const ObjectArray<UnicodeString>& file_list);
 };
@@ -356,7 +365,9 @@ void CompressionState::estimate_directory_size(const UnicodeString& dir_name) {
   UnicodeString file_name;
   FileEnum file_enum(dir_name);
   while (file_enum.next()) {
-    if (file_enum.data().is_dir()) {
+    if (file_enum.data().dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+    }
+    else if (file_enum.data().is_dir()) {
       try {
         estimate_directory_size(add_trailing_slash(dir_name) + file_enum.data().cFileName);
       }
@@ -389,10 +400,10 @@ void CompressionState::run_compression_thread() {
       assert(buf);
 
       ULONG final_compressed_size;
-      NTSTATUS status = RtlCompressBuffer(COMPRESSION_FORMAT_LZNT1 | COMPRESSION_ENGINE_STANDARD, buf->io_buffer, buf->data_size, buf->comp_buffer, buffers.comp_buffer_size, c_cluster_size, &final_compressed_size, buf->comp_work_buffer);
+      NTSTATUS status = RtlCompressBuffer(COMPRESSION_FORMAT_LZNT1 | COMPRESSION_ENGINE_STANDARD, buf->io_buffer, buf->data_size, buf->comp_buffer, buffers.comp_buffer_size, cluster_size, &final_compressed_size, buf->comp_work_buffer);
       if (status != STATUS_SUCCESS && status != STATUS_BUFFER_ALL_ZEROS)
         FAIL(MsgError(L"RtlCompressBuffer"));
-      u64 comp_size = final_compressed_size / c_cluster_size * c_cluster_size + (final_compressed_size % c_cluster_size ? c_cluster_size : 0);
+      u64 comp_size = final_compressed_size / cluster_size * cluster_size + (final_compressed_size % cluster_size ? cluster_size : 0);
 
       {
         CriticalSectionLock sync(sync);
@@ -500,7 +511,9 @@ void CompressionState::compress_directory(const UnicodeString& dir_name) {
     while (file_enum.next()) {
       file_name = add_trailing_slash(dir_name) + file_enum.data().cFileName;
 
-      if (file_enum.data().is_dir()) {
+      if (file_enum.data().dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+      }
+      else if (file_enum.data().is_dir()) {
         compress_directory(file_name);
       }
       else {
@@ -576,7 +589,7 @@ void CompressionState::process(const ObjectArray<UnicodeString>& file_list) {
 
 void plugin_compress_files(const ObjectArray<UnicodeString>& file_list, const CompressFilesParams& params, Log& log) {
   init_comp_api();
-  CompressionState st(params, log, get_cpu_count());
+  CompressionState st(params, log, get_cpu_count(), get_cluster_size(file_list[0]));
   st.process(file_list);
 }
 
