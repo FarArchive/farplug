@@ -1227,17 +1227,17 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
     }
     else if (item_idx == 5) {
       if (file_list_from_panel(file_list, active_panel != NULL)) {
-        Log log;
-        CompressFilesParams params;
-        params.min_file_size = 0;
-        params.max_compression_ratio = 100;
-        plugin_compress_files(file_list, params, log);
-        if (log.size()) {
-          if (far_message(far_get_msg(MSG_PLUGIN_NAME) + L"\n" + word_wrap(far_get_msg(MSG_COMPRESS_FILES_ERRORS), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK) + L"\n" + far_get_msg(MSG_LOG_SHOW), 2, FMSG_WARNING) == 1)
-            log.show();
+        if (show_compress_files_dialog(g_compress_files_params)) {
+          store_plugin_options();
+          Log log;
+          plugin_compress_files(file_list, g_compress_files_params, log);
+          if (log.size()) {
+            if (far_message(far_get_msg(MSG_PLUGIN_NAME) + L"\n" + word_wrap(far_get_msg(MSG_COMPRESS_FILES_ERRORS), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK) + L"\n" + far_get_msg(MSG_LOG_SHOW), 2, FMSG_WARNING) == 1)
+              log.show();
+          }
+          far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
+          far_control_int(PANEL_PASSIVE, FCTL_UPDATEANOTHERPANEL, 1);
         }
-        far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
-        far_control_int(PANEL_PASSIVE, FCTL_UPDATEANOTHERPANEL, 1);
       }
     }
     else if (item_idx == 6) {

@@ -155,6 +155,8 @@ void load_plugin_options() {
 #ifdef FARAPI17
   g_file_panel_mode.use_std_sort = get_bool_option(L"FilePanelUseStdSort", false);
 #endif
+  g_compress_files_params.min_file_size = get_int_option(L"CompressFilesMinFileSize", 10);
+  g_compress_files_params.max_compression_ratio = get_int_option(L"CompressFilesMaxCompressionRatio", 80);
 };
 
 void store_plugin_options() {
@@ -186,4 +188,6 @@ void store_plugin_options() {
 #ifdef FARAPI17
   set_bool_option(L"FilePanelUseStdSort", g_file_panel_mode.use_std_sort);
 #endif
+  set_int_option(L"CompressFilesMinFileSize", g_compress_files_params.min_file_size);
+  set_int_option(L"CompressFilesMaxCompressionRatio", g_compress_files_params.max_compression_ratio);
 }

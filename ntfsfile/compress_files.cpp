@@ -8,11 +8,14 @@
 #include "utils.h"
 #include "dlgapi.h"
 #include "log.h"
+#include "options.h"
 #include "defragment.h"
 #include "compress_files.h"
 
 extern struct PluginStartupInfo g_far;
 extern Array<unsigned char> g_colors;
+
+CompressFilesParams g_compress_files_params;
 
 const unsigned c_cluster_size = 4 * 1024;
 
@@ -342,7 +345,7 @@ void CompressionState::do_update_ui() {
 
 void CompressionState::estimate_file_size(const FindData& find_data) {
   unsigned __int64 file_size = find_data.size();
-  if (file_size >= params.min_file_size && (find_data.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED) == 0) {
+  if (file_size >= params.min_file_size * 1024 * 1024 && (find_data.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED) == 0) {
     total_size += file_size;
     total_file_cnt++;
   }
@@ -408,7 +411,7 @@ void CompressionState::run_compression_thread() {
 }
 
 void CompressionState::compress_file(const UnicodeString& file_name, const FindData& find_data) {
-  if (find_data.size() < params.min_file_size || (find_data.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED) == FILE_ATTRIBUTE_COMPRESSED)
+  if (find_data.size() < params.min_file_size * 1024 * 1024 || (find_data.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED) == FILE_ATTRIBUTE_COMPRESSED)
     return;
   try {
     File file(file_name, FILE_READ_DATA | FILE_WRITE_DATA, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_NO_BUFFERING | FILE_FLAG_POSIX_SEMANTICS | FILE_FLAG_SEQUENTIAL_SCAN);
@@ -564,4 +567,59 @@ void plugin_compress_files(const ObjectArray<UnicodeString>& file_list, const Co
   init_comp_api();
   CompressionState st(params, log, get_cpu_count());
   st.process(file_list);
+}
+
+
+class CompressFilesDialog: public FarDialog {
+private:
+  enum {
+    c_client_xs = 40
+  };
+
+  CompressFilesParams& params;
+
+  int min_file_size_ctrl_id;
+  int max_compression_ratio_ctrl_id;
+  int ok_ctrl_id;
+  int cancel_ctrl_id;
+
+  static LONG_PTR WINAPI dialog_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
+    BEGIN_ERROR_HANDLER;
+    CompressFilesDialog* dlg = static_cast<CompressFilesDialog*>(FarDialog::get_dlg(h_dlg));
+    if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != dlg->cancel_ctrl_id)) {
+      dlg->params.min_file_size = str_to_int(dlg->get_text(dlg->min_file_size_ctrl_id));
+      dlg->params.max_compression_ratio = str_to_int(dlg->get_text(dlg->max_compression_ratio_ctrl_id));
+    }
+    END_ERROR_HANDLER(;,;);
+    return g_far.DefDlgProc(h_dlg, msg, param1, param2);
+  }
+
+public:
+  CompressFilesDialog(CompressFilesParams& params): FarDialog(far_get_msg(MSG_COMPRESS_FILES_TITLE), c_client_xs), params(params) {
+  }
+
+  bool show() {
+    label(far_get_msg(MSG_COMPRESS_FILES_MIN_FILE_SIZE));
+    spacer(1);
+    min_file_size_ctrl_id = var_edit_box(int_to_str(params.min_file_size), 5, 5);
+    new_line();
+    label(far_get_msg(MSG_COMPRESS_FILES_MAX_COMPRESSION_RATIO));
+    spacer(1);
+    max_compression_ratio_ctrl_id = var_edit_box(int_to_str(params.max_compression_ratio), 5, 5);
+    new_line();
+    separator();
+    new_line();
+
+    ok_ctrl_id = def_button(far_get_msg(MSG_BUTTON_OK), DIF_CENTERGROUP);
+    cancel_ctrl_id = button(far_get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
+    new_line();
+
+    int item = FarDialog::show(dialog_proc);
+
+    return (item != -1) && (item != cancel_ctrl_id);
+  }
+};
+
+bool show_compress_files_dialog(CompressFilesParams& params) {
+  return CompressFilesDialog(params).show();
 }

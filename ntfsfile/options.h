@@ -35,10 +35,16 @@ struct FilePanelMode {
   UnicodeString cache_dir;
 };
 
+struct CompressFilesParams {
+  unsigned min_file_size; // MB
+  unsigned max_compression_ratio; // 75% = comp_size / file_size
+};
+
 /* plugin options */
 extern bool g_use_standard_inf_units;
 extern ContentOptions g_content_options;
 extern FilePanelMode g_file_panel_mode;
+extern CompressFilesParams g_compress_files_params;
 
 void load_plugin_options();
 void store_plugin_options();

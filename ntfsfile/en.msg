@@ -208,6 +208,9 @@ file_ver.special_build = Special &build
 file_ver.no_info = No version information found.
 
 # Compress files
+compress_files.title = Compress files
+compress_files.min_file_size = Min. file size (MB):
+compress_files.max_compression_ratio = Max. compression ratio (%):
 compress_files.errors = Some files were not processed because of errors. See log for details.
 compress_files.progress.title = Processing
 compress_files.progress.console_title = {%u%%} Processing...
