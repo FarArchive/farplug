@@ -30,6 +30,8 @@ This plugin provides various information about files on NTFS file system. Featur
 7. Examine file version info.
   Prefix: #nfv#
 
+7. Compress files using NTFS compression.
+
 @metadata
 $ #File information#
     Displays NTFS file attribute (file component) table.
@@ -88,3 +90,12 @@ $ #Plugin menu#
     #Flat mode# - enables simultaneous display of all files found in current directory and its subdirectories.
     #MFT index# - enables alternative way of getting file lists. All information is read
 from MFT instead of using traditional directory listing methods.
+
+@compress_files
+$ #Compress files#
+
+Compress files using NTFS compression. Files are selected using specified criteria:
+    #Min. file size# - minimum allowed file size in megabytes.
+    #Max. compression ratio# - compressed/uncompressed size ratio should not exceed specified percent value.
+
+Files are defragmented after compression.

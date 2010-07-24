@@ -215,14 +215,14 @@ compress_files.errors = Some files were not processed because of errors. See log
 compress_files.progress.title = Processing
 compress_files.progress.console_title = {%u%%} Processing...
 compress_files.progress.file_name = File:
-compress_files.progress.estimation = Estimating compression ratio: %S / %S = %u%%
-compress_files.progress.estimation.size = Processed %S from %S [%u%%]
-compress_files.progress.estimation.speed = at %S
+compress_files.progress.estimation = Estimating compression ratio: %7S / %7S = %3u%%
+compress_files.progress.estimation.size = Processed %7S from %7S [%3u%%]
+compress_files.progress.estimation.speed = at %9S
 compress_files.progress.compression = Compressing file...
 compress_files.progress.compression.ratio = Projected compression ratio: %S / %S = %u%%
 compress_files.progress.defragment = Reducing number of extents from %u to %u
 compress_files.progress.defragment.clusters = Moved %Lu clusters from %Lu total
-compress_files.progress.defragment.analyze = Analyzing volume
+compress_files.progress.defragment.analyze = Analyzing volume...
 compress_files.progress.files = Files processed: %u from %u
 compress_files.progress.errors = Errors (objects skipped): %S
 

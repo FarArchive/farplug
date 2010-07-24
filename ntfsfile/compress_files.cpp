@@ -197,7 +197,7 @@ private:
   CompressionState& st;
   void stop_threads() {
     SetEvent(st.stop_event.handle());
-    WaitForMultipleObjects(size(), data(), TRUE, INFINITE);
+    WaitForMultipleObjects(static_cast<DWORD>(size()), data(), TRUE, INFINITE);
     for (unsigned i = 0; i < size(); i++)
       CloseHandle(at(i));
   }
@@ -434,7 +434,7 @@ void CompressionState::compress_file(const UnicodeString& file_name, const FindD
 
     bool eof = false;
     while (!eof) {
-      DWORD w = WaitForMultipleObjects(wait_handles.size(), wait_handles.data(), FALSE, INFINITE);
+      DWORD w = WaitForMultipleObjects(static_cast<DWORD>(wait_handles.size()), wait_handles.data(), FALSE, INFINITE);
       CHECK_SYS(w != WAIT_FAILED);
       if (w == WAIT_OBJECT_0) {
         BREAK;
@@ -638,7 +638,7 @@ public:
     cancel_ctrl_id = button(far_get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
     new_line();
 
-    int item = FarDialog::show(dialog_proc);
+    int item = FarDialog::show(dialog_proc, FAR_T("compress_files"));
 
     return (item != -1) && (item != cancel_ctrl_id);
   }
