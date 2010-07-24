@@ -256,7 +256,7 @@ void CompressionState::do_update_ui() {
     if (progress_phase == phase_estimate) {
       // file compression ratio
       unsigned compression_ratio;
-      if (local_file_proc_size)
+      if (local_file_proc_size == 0)
         compression_ratio = 100;
       else
         compression_ratio = static_cast<unsigned>(static_cast<double>(local_file_comp_size) / local_file_proc_size * 100);
@@ -429,26 +429,37 @@ void CompressionState::compress_file(const UnicodeString& file_name, const FindD
         BREAK;
       }
       else if (w == WAIT_OBJECT_0 + 1) {
-        // find buffer ready for I/O
         Buffer* buf;
         {
           CriticalSectionLock lock(sync);
+          // try to predict comp. ratio
+          u64 file_remain_size = file_size - file_proc_size;
+          double pred_worst_ratio = static_cast<double>(file_comp_size + file_remain_size) / file_size * 100;
+          double pred_best_ratio = static_cast<double>(file_comp_size + 0) / file_size * 100;
+          if (pred_worst_ratio <= params.max_compression_ratio || pred_best_ratio > params.max_compression_ratio) {
+            eof = true;
+            total_proc_size += file_size - file.pos();
+          }
+          // find buffer ready for I/O
           buf = buffers.find(bs_io_ready);
           assert(buf);
           buf->state = bs_processing;
         }
 
-        unsigned buffer_data_size = file.read(buf->io_buffer, buffers.io_buffer_size);
-        buf->data_size = buffer_data_size;
-        eof = buffer_data_size == 0;
+        if (!eof) {
+          unsigned buffer_data_size = file.read(buf->io_buffer, buffers.io_buffer_size);
+          buf->data_size = buffer_data_size;
+          eof = buffer_data_size == 0;
 
-        update_progress(phase_estimate);
+          update_progress(phase_estimate);
+        }
 
-        // mark buffer ready for processing and signal worker threads
         {
           CriticalSectionLock lock(sync);
+          // mark buffer ready for processing
           buf->state = eof ? bs_io_ready : bs_proc_ready;
         }
+        // signal worker threads
         CHECK_SYS(ReleaseSemaphore(eof ? io_ready_sem.handle() : proc_ready_sem.handle(), 1, NULL));
       }
       else {

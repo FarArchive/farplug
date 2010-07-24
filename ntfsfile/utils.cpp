@@ -618,6 +618,14 @@ File::~File() {
   CloseHandle(h_file);
 }
 
+unsigned __int64 File::pos() {
+  LARGE_INTEGER p;
+  p.QuadPart = 0;
+  LARGE_INTEGER file_pos;
+  CHECK_SYS(SetFilePointerEx(h_file, p, &file_pos, FILE_CURRENT));
+  return file_pos.QuadPart;
+}
+
 unsigned __int64 File::size() {
   LARGE_INTEGER file_size;
   CHECK_SYS(GetFileSizeEx(h_file, &file_size));

@@ -178,6 +178,7 @@ public:
   HANDLE handle() const {
     return h_file;
   }
+  unsigned __int64 pos();
   unsigned __int64 size();
   unsigned read(void* data, unsigned size);
   void write(const void* data, unsigned size);
