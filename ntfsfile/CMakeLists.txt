@@ -61,3 +61,30 @@ gen_ver()
 m4_process(${src}/version.rc.m4 ${bin}/version.rc)
 
 gen_distrib(${bin}/history_ru.txt ${bin}/file_id.diz ${bin}/en.hlf ${bin}/ru.hlf ${bin}/en.lng)
+
+MACRO(gen_installer)
+  FILE(READ ${src}/version version)
+  SET(distr_suffix "${version}")
+  IF(FARAPI18)
+    SET(distr_suffix "${distr_suffix}_uni")
+  ENDIF(FARAPI18)
+  SET(platform "x86")
+  IF(CMAKE_CL_64)
+    SET(distr_suffix "${distr_suffix}_x64")
+    SET(platform "x64")
+  ENDIF(CMAKE_CL_64)
+  IF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    SET(distr_suffix "${distr_suffix}_dbg")
+  ENDIF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+  SET(distrib_package "${bin}/${PROJECT_NAME}_${distr_suffix}")
+  GET_TARGET_PROPERTY(library_path ${PROJECT_NAME} LOCATION)
+  SET(distrib_files ${library_path} ${bin}/${PROJECT_NAME}.map ${ARGV})
+  ADD_CUSTOM_TARGET(installer
+    COMMAND ${CMAKE_COMMAND} -E remove ${distrib_package}.msi
+    COMMAND nmake -f ${src}/installer/makefile DISTRIB=${distrib_package} INSTALLER=${src}/installer OUTDIR=${bin} PLATFORM=${platform} VERSION=${version} FAR_VERSION="2.0.1447"
+    DEPENDS ${PROJECT_NAME} ${distrib_files}
+    VERBATIM)
+  ADD_DEPENDENCIES(installer check_rev)
+ENDMACRO(gen_installer)
+
+gen_installer(${bin}/history_ru.txt ${bin}/file_id.diz ${bin}/en.hlf ${bin}/ru.hlf ${bin}/en.lng)

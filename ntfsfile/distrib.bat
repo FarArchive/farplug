@@ -10,9 +10,10 @@ nmake -nologo distrib
 @rm -r *
 
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DFARAPI18=1 ..
-nmake -nologo distrib
+nmake -nologo distrib installer
 @if errorlevel 1 goto error
 @copy *.7z ..
+@copy *.msi ..
 @rm -r *
 
 @call vcvarsall.bat x86_amd64
@@ -24,9 +25,10 @@ nmake -nologo distrib
 @rm -r *
 
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DFARAPI18=1 ..
-nmake -nologo distrib
+nmake -nologo distrib installer
 @if errorlevel 1 goto error
 @copy *.7z ..
+@copy *.msi ..
 @rm -r *
 
 @goto end
