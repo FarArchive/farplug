@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ntstatus.h>
+#define WIN32_NO_STATUS
 #include <windows.h>
 #include <winioctl.h>
 #include <shobjidl.h>
@@ -11,10 +13,13 @@
 #include <math.h>
 #include <time.h>
 
+#include <string>
+#include <vector>
 #include <list>
 #include <set>
 #include <map>
 #include <algorithm>
+using namespace std;
 
 #include "lzo/lzo1x.h"
 #include "lzo/lzo_asm.h"

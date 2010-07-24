@@ -31,6 +31,7 @@ menu.panel.on = Open &panel
 menu.panel.off = Close &panel
 menu.defragment = &Defragment
 menu.file_version = File &version
+menu.compress_files = Comp&ress files
 menu.flat_mode.on = Flat m&ode
 menu.flat_mode.off = Normal m&ode
 menu.mft_mode.on = MFT &index on
@@ -176,7 +177,6 @@ show_totals.dirs = Directories: %u (%u symbolic links)
 
 # Error log
 log.title = Error Log
-log.defragment = Defragment
 log.show = &Show error log
 
 # File version
@@ -206,6 +206,22 @@ file_ver.product_version = Product version
 file_ver.private_build = Private b&uild
 file_ver.special_build = Special &build
 file_ver.no_info = No version information found.
+
+# Compress files
+compress_files.errors = Some files were not processed because of errors. See log for details.
+compress_files.progress.title = Processing
+compress_files.progress.console_title = {%u%%} Processing...
+compress_files.progress.file_name = File:
+compress_files.progress.estimation = Estimating compression ratio: %S / %S = %u%%
+compress_files.progress.estimation.size = Processed %S from %S [%u%%]
+compress_files.progress.estimation.speed = at %S
+compress_files.progress.compression = Compressing file...
+compress_files.progress.compression.ratio = Projected compression ratio: %S / %S = %u%%
+compress_files.progress.defragment = Reducing number of extents from %u to %u
+compress_files.progress.defragment.clusters = Moved %Lu clusters from %Lu total
+compress_files.progress.defragment.analyze = Analyzing volume
+compress_files.progress.files = Files processed: %u from %u
+compress_files.progress.errors = Errors (objects skipped): %S
 
 # Generic buttons
 button.ok = OK

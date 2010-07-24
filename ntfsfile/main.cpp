@@ -16,6 +16,7 @@
 #include "log.h"
 #include "defragment.h"
 #include "filever.h"
+#include "compress_files.h"
 
 struct PluginStartupInfo g_far;
 struct FarStandardFunctions g_fsf;
@@ -1182,6 +1183,7 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
     menu_items += far_get_msg(active_panel == NULL ? MSG_MENU_PANEL_ON : MSG_MENU_PANEL_OFF);
     menu_items += far_get_msg(MSG_MENU_DEFRAGMENT);
     menu_items += far_get_msg(MSG_MENU_FILE_VERSION);
+    menu_items += far_get_msg(MSG_MENU_COMPRESS_FILES);
     if (active_panel) {
       menu_items += far_get_msg(active_panel->flat_mode ? MSG_MENU_FLAT_MODE_OFF : MSG_MENU_FLAT_MODE_ON);
       menu_items += far_get_msg(active_panel->mft_mode ? MSG_MENU_MFT_MODE_OFF : MSG_MENU_MFT_MODE_ON);
@@ -1224,14 +1226,29 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR item) {
       }
     }
     else if (item_idx == 5) {
+      if (file_list_from_panel(file_list, active_panel != NULL)) {
+        Log log;
+        CompressFilesParams params;
+        params.min_file_size = 0;
+        params.max_compression_ratio = 100;
+        plugin_compress_files(file_list, params, log);
+        if (log.size()) {
+          if (far_message(far_get_msg(MSG_PLUGIN_NAME) + L"\n" + word_wrap(far_get_msg(MSG_COMPRESS_FILES_ERRORS), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK) + L"\n" + far_get_msg(MSG_LOG_SHOW), 2, FMSG_WARNING) == 1)
+            log.show();
+        }
+        far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 1);
+        far_control_int(PANEL_PASSIVE, FCTL_UPDATEANOTHERPANEL, 1);
+      }
+    }
+    else if (item_idx == 6) {
       active_panel->flat_mode = !active_panel->flat_mode;
       far_control_int(active_panel, FCTL_UPDATEPANEL, 1);
     }
-    else if (item_idx == 6) {
+    else if (item_idx == 7) {
       active_panel->toggle_mft_mode();
       far_control_int(active_panel, FCTL_UPDATEPANEL, 1);
     }
-    else if (item_idx == 7) {
+    else if (item_idx == 8) {
       if (file_list_from_panel(file_list, true)) {
         FilePanel::Totals totals = active_panel->mft_get_totals(file_list);
         UnicodeString msg;

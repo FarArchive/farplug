@@ -436,9 +436,7 @@ void Log::show() {
       // write log data
       UnicodeString line;
       for (unsigned i = 0; i < size(); i++) {
-        UnicodeString op;
-        if (citem(i).type == lotDefragment) op = far_get_msg(MSG_LOG_DEFRAGMENT);
-        line.copy_fmt(L"%S: '%S' (%S)\n", &op, &citem(i).object, &citem(i).message);
+        line.copy_fmt(L"'%S': %S\n", &citem(i).object, &citem(i).message);
         CHECK_SYS(WriteFile(h_file, line.data(), line.size() * sizeof(wchar_t), &size_written, NULL));
       }
     }
@@ -591,4 +589,84 @@ UnicodeString get_temp_path() {
   CHECK_SYS(len != 0);
   temp_path.set_size(len);
   return temp_path;
+}
+
+Event::Event(bool manual_reset, bool initial_state) {
+  h_event = CreateEvent(NULL, manual_reset, initial_state, NULL);
+  CHECK_SYS(h_event);
+}
+
+Event::~Event() {
+  CloseHandle(h_event);
+}
+
+Semaphore::Semaphore(unsigned init_cnt, unsigned max_cnt) {
+  h_sem = CreateSemaphore(NULL, init_cnt, max_cnt, NULL);
+  CHECK_SYS(h_sem);
+}
+
+Semaphore::~Semaphore() {
+  CloseHandle(h_sem);
+}
+
+File::File(const UnicodeString& file_path, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes) {
+  h_file = CreateFileW(long_path(file_path).data(), dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, dwFlagsAndAttributes, NULL);
+  CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
+}
+
+File::~File() {
+  CloseHandle(h_file);
+}
+
+unsigned __int64 File::size() {
+  LARGE_INTEGER file_size;
+  CHECK_SYS(GetFileSizeEx(h_file, &file_size));
+  return file_size.QuadPart;
+}
+
+unsigned File::read(void* data, unsigned size) {
+  DWORD size_read;
+  CHECK_SYS(ReadFile(h_file, data, size, &size_read, NULL));
+  return size_read;
+}
+
+FileEnum::FileEnum(const UnicodeString& dir_path): dir_path(dir_path), h_find(INVALID_HANDLE_VALUE) {
+}
+
+FileEnum::~FileEnum() {
+  if (h_find != INVALID_HANDLE_VALUE)
+    FindClose(h_find);
+}
+
+bool FileEnum::next() {
+  while (true) {
+    if (h_find == INVALID_HANDLE_VALUE) {
+      h_find = FindFirstFileW(long_path(add_trailing_slash(dir_path) + L'*').data(), &find_data);
+      if (h_find == INVALID_HANDLE_VALUE) {
+        if (GetLastError() == ERROR_NO_MORE_FILES)
+          return false;
+        CHECK_SYS(false);
+      }
+    }
+    else {
+      if (!FindNextFileW(h_find, &find_data)) {
+        if (GetLastError() == ERROR_NO_MORE_FILES)
+          return false;
+        CHECK_SYS(false);
+      }
+    }
+    if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+      if ((find_data.cFileName[0] == L'.') && ((find_data.cFileName[1] == 0) || ((find_data.cFileName[1] == L'.') && (find_data.cFileName[2] == 0))))
+        continue;
+    }
+    return true;
+  }
+}
+
+FindData get_find_data(const UnicodeString& path) {
+  FindData find_data;
+  HANDLE h_find = FindFirstFileW(long_path(path).data(), &find_data);
+  CHECK_SYS(h_find != INVALID_HANDLE_VALUE);
+  FindClose(h_find);
+  return find_data;
 }

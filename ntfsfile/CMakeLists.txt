@@ -14,7 +14,7 @@ IF(DEFINED MSVC)
 ENDIF(DEFINED MSVC)
 
 # project source files
-SET(cpp_sources main.cpp content.cpp file_panel.cpp ntfs_file.cpp options.cpp utils.cpp volume.cpp dlgapi.cpp defragment.cpp mftindex.cpp filever.cpp)
+SET(cpp_sources main.cpp content.cpp file_panel.cpp ntfs_file.cpp options.cpp utils.cpp volume.cpp dlgapi.cpp defragment.cpp mftindex.cpp filever.cpp compress_files.cpp)
 add_precomp_header("headers.hpp" "headers.cpp" cpp_sources)
 SET(sources ${cpp_sources} ${bin}/version.rc ${bin}/msg.h)
 IF(FARAPI18)

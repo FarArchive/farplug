@@ -15,6 +15,15 @@ typedef __int64 s64;
 #  define DBG_LOG(msg)
 #endif
 
+class NonCopyable {
+protected:
+  NonCopyable() {}
+  ~NonCopyable() {}
+private:
+  NonCopyable(const NonCopyable&);
+  NonCopyable& operator=(const NonCopyable&);
+};
+
 void unicode_to_oem(AnsiString& oem_str, const UnicodeString& u_str);
 AnsiString unicode_to_oem(const UnicodeString& str);
 void oem_to_unicode(UnicodeString& u_str, const AnsiString& oem_str);
@@ -113,3 +122,88 @@ void error_dlg(const Error& e);
 void error_dlg(const std::exception& e);
 
 UnicodeString get_temp_path();
+
+class CriticalSection: private NonCopyable, private CRITICAL_SECTION {
+public:
+  CriticalSection() {
+    InitializeCriticalSection(this);
+  }
+  virtual ~CriticalSection() {
+    DeleteCriticalSection(this);
+  }
+  friend class CriticalSectionLock;
+};
+
+class CriticalSectionLock: private NonCopyable {
+private:
+  CriticalSection& cs;
+public:
+  CriticalSectionLock(CriticalSection& cs): cs(cs) {
+    EnterCriticalSection(&cs);
+  }
+  ~CriticalSectionLock() {
+    LeaveCriticalSection(&cs);
+  }
+};
+
+class Event: private NonCopyable {
+protected:
+  HANDLE h_event;
+public:
+  Event(bool manual_reset, bool initial_state);
+  ~Event();
+  HANDLE handle() const {
+    return h_event;
+  }
+};
+
+class Semaphore: private NonCopyable {
+protected:
+  HANDLE h_sem;
+public:
+  Semaphore(unsigned init_cnt, unsigned max_cnt);
+  ~Semaphore();
+  HANDLE handle() const {
+    return h_sem;
+  }
+};
+
+class File: private NonCopyable {
+protected:
+  HANDLE h_file;
+public:
+  File(const UnicodeString& file_path, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes);
+  File(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTransaction);
+  ~File();
+  HANDLE handle() const {
+    return h_file;
+  }
+  unsigned __int64 size();
+  unsigned read(void* data, unsigned size);
+  void write(const void* data, unsigned size);
+};
+
+struct FindData: public WIN32_FIND_DATAW {
+  bool is_dir() const {
+    return (dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+  }
+  unsigned __int64 size() const {
+    return (static_cast<unsigned __int64>(nFileSizeHigh) << 32) | nFileSizeLow;
+  }
+};
+
+class FileEnum: private NonCopyable {
+protected:
+  UnicodeString dir_path;
+  HANDLE h_find;
+  FindData find_data;
+public:
+  FileEnum(const UnicodeString& dir_path);
+  ~FileEnum();
+  bool next();
+  const FindData& data() const {
+    return find_data;
+  }
+};
+
+FindData get_find_data(const UnicodeString& path);
