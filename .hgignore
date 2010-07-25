@@ -1,4 +1,6 @@
 glob:*.exe
+glob:*.7z
+glob:*.msi
 glob:SciTE*
 glob:todo.tdl
 glob:Debug.*\*
