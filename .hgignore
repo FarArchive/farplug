@@ -1,8 +1,12 @@
 glob:*.exe
 glob:SciTE*
 glob:todo.tdl
-glob:Debug.x86\*
-glob:Release.x86\*
-glob:Debug.x64\*
-glob:Release.x64\*
-glob:7z\*
+glob:Debug.*\*
+glob:Release.*\*
+glob:arclite\7z\*
+glob:lzo\include\*
+glob:lzo\lib\*
+glob:lzo\src\*
+glob:openssl\include\*
+glob:openssl\lib\*
+glob:openssl\src\*

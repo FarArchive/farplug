@@ -5,4 +5,5 @@ build:
   $(CPP) $(CPPFLAGS) msgc.cpp
   $(CPP) $(CPPFLAGS) preproc.cpp
   $(CPP) $(CPPFLAGS) farver.cpp
+  $(CPP) $(CPPFLAGS) convcp.cpp
   del /q *.obj

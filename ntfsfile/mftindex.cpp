@@ -603,7 +603,7 @@ void FilePanel::load_mft_index() {
 
   Array<unsigned char> buffer;
   buffer.extend(buffer_size + 3);
-#ifdef WIN64
+#ifdef _WIN64
 #  define decompress lzo1x_decompress
 #else
 #  define decompress lzo1x_decompress_asm_fast

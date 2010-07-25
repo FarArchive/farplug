@@ -64,7 +64,7 @@ wstring load_file(const wstring& file_name, unsigned* code_page = NULL) {
   }
 }
 
-void save_file(const wstring& file_name, const wstring& text, unsigned code_page = 0) {
+void save_file(const wstring& file_name, const wstring& text, unsigned code_page = CP_ACP) {
   File file(get_full_path_name(file_name), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
   if (code_page == CP_UTF16) {
     const char c_sig[] = { '\xFF', '\xFE' };

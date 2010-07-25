@@ -854,15 +854,10 @@ bool panel_go_to_file(const FarStr& file_name) {
   return true;
 }
 
-#ifdef FARAPI17
-int WINAPI GetMinFarVersion(void) {
-  return MAKEFARVERSION(1, 71, 2411);
-}
-#endif
-#ifdef FARAPI18
 int WINAPI GetMinFarVersion(void) {
   return FARMANAGERVERSION;
 }
+#ifdef FARAPI18
 int WINAPI GetMinFarVersionW(void) {
   return FARMANAGERVERSION;
 }

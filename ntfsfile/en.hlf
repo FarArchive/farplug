@@ -1,9 +1,8 @@
-m4_include(`version.m4')m4_dnl
-.Language=English,English
-.PluginContents=NTFS File Information
+﻿.Language=English,English
+.PluginContents=<(NAME)>
 
 @Contents
-$^#NTFS File Information __VER_MAJOR__.__VER_MINOR__.__VER_PATCH__#
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 
 This plugin provides various information about files on NTFS file system. Features:
 
@@ -30,9 +29,10 @@ This plugin provides various information about files on NTFS file system. Featur
 7. Examine file version info.
   Prefix: #nfv#
 
-7. Compress files using NTFS compression.
+8. Compress files using NTFS compression.
 
 @metadata
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #File information#
     Displays NTFS file attribute (file component) table.
 
@@ -61,6 +61,7 @@ Summary is shown for directories and multiple files:
     #Non-Resident Total# - non-resident attributes totals.
 
 @file_panel_mode
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #File panel mode#
 ~Customizing file panel view modes~@<..\..\>PanelViewModes@
 
@@ -85,6 +86,7 @@ into USN journal thus cache can contain incorrect information after using such u
     #Cache directory# - directory to store cache files in. Environment variables are expanded.
 
 @plugin_menu
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #Plugin menu#
 
     #Flat mode# - enables simultaneous display of all files found in current directory and its subdirectories.
@@ -92,6 +94,7 @@ $ #Plugin menu#
 from MFT instead of using traditional directory listing methods.
 
 @compress_files
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #Compress files#
 
 Compress files using NTFS compression. Files are selected using specified criteria:

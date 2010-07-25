@@ -1,6 +1,6 @@
-.Language=English,English
+﻿.Language=English,English
 
-plugin.name = NTFS File Information
+plugin.name = <(NAME)>
 
 # File metadata
 metadata.col.type = Type
