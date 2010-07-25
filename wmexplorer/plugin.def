@@ -1,4 +1,4 @@
-LIBRARY wmexplorer BASE=0x74000000
+LIBRARY <(MODULE)> BASE=0x74000000
 EXPORTS
   GetMinFarVersion
   SetStartupInfo

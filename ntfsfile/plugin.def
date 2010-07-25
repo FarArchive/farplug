@@ -1,4 +1,4 @@
-LIBRARY ntfsfile BASE=0x61000000
+LIBRARY <(MODULE)> BASE=0x61000000
 EXPORTS
   GetMinFarVersion
   SetStartupInfo

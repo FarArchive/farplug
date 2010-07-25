@@ -1,4 +1,4 @@
-LIBRARY UnInstall BASE=0x68000000
+LIBRARY <(MODULE)> BASE=0x68000000
 EXPORTS
   GetMinFarVersion
   SetStartupInfo

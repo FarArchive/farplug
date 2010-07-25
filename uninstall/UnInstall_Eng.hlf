@@ -1,9 +1,8 @@
-m4_include(`version.m4')m4_dnl
-.Language=English,English
-.PluginContents=Uninstall programs
+﻿.Language=English,English
+.PluginContents=<(NAME)>
 
 @Contents
-$^#UnInstall __VER_MAJOR__.__VER_MINOR__.__VER_PATCH__#
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $^#Contents#
 
  To add a symbol to the filter                            #Symbolical keys#
