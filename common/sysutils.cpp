@@ -377,9 +377,9 @@ wstring format_file_time(const FILETIME& file_time) {
   SYSTEMTIME st;
   CHECK_SYS(FileTimeToSystemTime(&local_ft, &st));
   Buffer<wchar_t> buf(1024);
-  CHECK_SYS(GetDateFormatW(LOCALE_USER_DEFAULT, DATE_SHORTDATE, &st, NULL, buf.data(), buf.size()));
+  CHECK_SYS(GetDateFormatW(LOCALE_USER_DEFAULT, DATE_SHORTDATE, &st, NULL, buf.data(), static_cast<int>(buf.size())));
   wstring date_str = buf.data();
-  CHECK_SYS(GetTimeFormatW(LOCALE_USER_DEFAULT, 0, &st, NULL, buf.data(), buf.size()));
+  CHECK_SYS(GetTimeFormatW(LOCALE_USER_DEFAULT, 0, &st, NULL, buf.data(), static_cast<int>(buf.size())));
   wstring time_str = buf.data();
   return date_str + L' ' + time_str;
 }
