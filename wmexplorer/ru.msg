@@ -1,193 +1,193 @@
-.Language=Russian,Russian (Русский)
+я╗┐.Language=Russian,Russian (╨а╤Г╤Б╤Б╨║╨╕╨╣)
 
 # Plugin name
-plugin.name = WM Проводник
+plugin.name = <(NAME)>
 
 # Device list menu
-device.list.title = Список устройств
+device.list.title = ╨б╨┐╨╕╤Б╨╛╨║ ╤Г╤Б╤В╤А╨╛╨╣╤Б╤В╨▓
 
 # Disk menu
-disk.menu.pda = кпк
-disk.menu.smartphone = смартфон
+disk.menu.pda = ╨║╨┐╨║
+disk.menu.smartphone = ╤Б╨╝╨░╤А╤В╤Д╨╛╨╜
 
 # Create file list
-create.list.progress.title = Обработка каталогов...
-create.list.progress.objects = Файлы: %u; Каталоги: %u; Ошибки: %c%c%u
-create.list.progress.size = Общий размер данных: %S
+create.list.progress.title = ╨Ю╨▒╤А╨░╨▒╨╛╤В╨║╨░ ╨║╨░╤В╨░╨╗╨╛╨│╨╛╨▓...
+create.list.progress.objects = ╨д╨░╨╣╨╗╤Л: %u; ╨Ъ╨░╤В╨░╨╗╨╛╨│╨╕: %u; ╨Ю╤И╨╕╨▒╨║╨╕: %c%c%u
+create.list.progress.size = ╨Ю╨▒╤Й╨╕╨╣ ╤А╨░╨╖╨╝╨╡╤А ╨┤╨░╨╜╨╜╤Л╤Е: %S
 
 # Copy files
-copy.files.dlg.title = Копирование файлов
-copy.files.dlg.path = &Копировать файлы в:
-copy.files.dlg.oo = Когда целевой файл существует:
-copy.files.dlg.oo.skip = П&ропускать
-copy.files.dlg.oo.overwrite = &Перезаписывать
-copy.files.dlg.oo.ask = &Спрашивать
-copy.files.dlg.move.files = П&еремещать файлы
-copy.files.dlg.copy.shared = Копировать открытые для &записи файлы
+copy.files.dlg.title = ╨Ъ╨╛╨┐╨╕╤А╨╛╨▓╨░╨╜╨╕╨╡ ╤Д╨░╨╣╨╗╨╛╨▓
+copy.files.dlg.path = &╨Ъ╨╛╨┐╨╕╤А╨╛╨▓╨░╤В╤М ╤Д╨░╨╣╨╗╤Л ╨▓:
+copy.files.dlg.oo = ╨Ъ╨╛╨│╨┤╨░ ╤Ж╨╡╨╗╨╡╨▓╨╛╨╣ ╤Д╨░╨╣╨╗ ╤Б╤Г╤Й╨╡╤Б╤В╨▓╤Г╨╡╤В:
+copy.files.dlg.oo.skip = ╨Я&╤А╨╛╨┐╤Г╤Б╨║╨░╤В╤М
+copy.files.dlg.oo.overwrite = &╨Я╨╡╤А╨╡╨╖╨░╨┐╨╕╤Б╤Л╨▓╨░╤В╤М
+copy.files.dlg.oo.ask = &╨б╨┐╤А╨░╤И╨╕╨▓╨░╤В╤М
+copy.files.dlg.move.files = ╨Я&╨╡╤А╨╡╨╝╨╡╤Й╨░╤В╤М ╤Д╨░╨╣╨╗╤Л
+copy.files.dlg.copy.shared = ╨Ъ╨╛╨┐╨╕╤А╨╛╨▓╨░╤В╤М ╨╛╤В╨║╤А╤Л╤В╤Л╨╡ ╨┤╨╗╤П &╨╖╨░╨┐╨╕╤Б╨╕ ╤Д╨░╨╣╨╗╤Л
 
-copy.files.progress.title = Идет копирование...
-move.files.progress.title = Идет перемещение...
-move.remote.files.progress.title = Идет перемещение...
-copy.files.progress.src = Из:
-copy.files.progress.dst = В:
-copy.files.progress.size = Обработано %7S из %7S [%3u%%] на скорости %9S
-copy.files.progress.file.size = Обработано %7S из %7S [%3u%%] на скорости %9S
-copy.files.progress.time = Прошло: %8S  Осталось: %8S  Всего: %8S
-move.remote.files.progress.time = Прошло: %8S
-copy.files.progress.stats = Файлы: %u(%u/%u); Каталоги: %u; Ошибки: %c%c%u
-move.remote.files.progress.stats = Файлы: %u; Каталоги: %u
+copy.files.progress.title = ╨Ш╨┤╨╡╤В ╨║╨╛╨┐╨╕╤А╨╛╨▓╨░╨╜╨╕╨╡...
+move.files.progress.title = ╨Ш╨┤╨╡╤В ╨┐╨╡╤А╨╡╨╝╨╡╤Й╨╡╨╜╨╕╨╡...
+move.remote.files.progress.title = ╨Ш╨┤╨╡╤В ╨┐╨╡╤А╨╡╨╝╨╡╤Й╨╡╨╜╨╕╨╡...
+copy.files.progress.src = ╨Ш╨╖:
+copy.files.progress.dst = ╨Т:
+copy.files.progress.size = ╨Ю╨▒╤А╨░╨▒╨╛╤В╨░╨╜╨╛ %7S ╨╕╨╖ %7S [%3u%%] ╨╜╨░ ╤Б╨║╨╛╤А╨╛╤Б╤В╨╕ %9S
+copy.files.progress.file.size = ╨Ю╨▒╤А╨░╨▒╨╛╤В╨░╨╜╨╛ %7S ╨╕╨╖ %7S [%3u%%] ╨╜╨░ ╤Б╨║╨╛╤А╨╛╤Б╤В╨╕ %9S
+copy.files.progress.time = ╨Я╤А╨╛╤И╨╗╨╛: %8S  ╨Ю╤Б╤В╨░╨╗╨╛╤Б╤М: %8S  ╨Т╤Б╨╡╨│╨╛: %8S
+move.remote.files.progress.time = ╨Я╤А╨╛╤И╨╗╨╛: %8S
+copy.files.progress.stats = ╨д╨░╨╣╨╗╤Л: %u(%u/%u); ╨Ъ╨░╤В╨░╨╗╨╛╨│╨╕: %u; ╨Ю╤И╨╕╨▒╨║╨╕: %c%c%u
+move.remote.files.progress.stats = ╨д╨░╨╣╨╗╤Л: %u; ╨Ъ╨░╤В╨░╨╗╨╛╨│╨╕: %u
 
-overwrite.dlg.title = Перезапись файла
-overwrite.dlg.directory.title = Перезапись каталога
-overwrite.dlg.question = Целевой файл уже существует. Заменить?
-overwrite.dlg.directory.question = Целевой каталог уже существует. Заменить?
-overwrite.dlg.source = Источник:
-overwrite.dlg.destination = Цель:
-overwrite.dlg.newer = (более новый)
-overwrite.dlg.yes = &Да
-overwrite.dlg.yes.all = Да для &всех
-overwrite.dlg.no = &Нет
-overwrite.dlg.no.all = Нет для в&сех
+overwrite.dlg.title = ╨Я╨╡╤А╨╡╨╖╨░╨┐╨╕╤Б╤М ╤Д╨░╨╣╨╗╨░
+overwrite.dlg.directory.title = ╨Я╨╡╤А╨╡╨╖╨░╨┐╨╕╤Б╤М ╨║╨░╤В╨░╨╗╨╛╨│╨░
+overwrite.dlg.question = ╨ж╨╡╨╗╨╡╨▓╨╛╨╣ ╤Д╨░╨╣╨╗ ╤Г╨╢╨╡ ╤Б╤Г╤Й╨╡╤Б╤В╨▓╤Г╨╡╤В. ╨Ч╨░╨╝╨╡╨╜╨╕╤В╤М?
+overwrite.dlg.directory.question = ╨ж╨╡╨╗╨╡╨▓╨╛╨╣ ╨║╨░╤В╨░╨╗╨╛╨│ ╤Г╨╢╨╡ ╤Б╤Г╤Й╨╡╤Б╤В╨▓╤Г╨╡╤В. ╨Ч╨░╨╝╨╡╨╜╨╕╤В╤М?
+overwrite.dlg.source = ╨Ш╤Б╤В╨╛╤З╨╜╨╕╨║:
+overwrite.dlg.destination = ╨ж╨╡╨╗╤М:
+overwrite.dlg.newer = (╨▒╨╛╨╗╨╡╨╡ ╨╜╨╛╨▓╤Л╨╣)
+overwrite.dlg.yes = &╨Ф╨░
+overwrite.dlg.yes.all = ╨Ф╨░ ╨┤╨╗╤П &╨▓╤Б╨╡╤Е
+overwrite.dlg.no = &╨Э╨╡╤В
+overwrite.dlg.no.all = ╨Э╨╡╤В ╨┤╨╗╤П ╨▓&╤Б╨╡╤Е
 
-copy.files.stats.title = Копирование завершено
-copy.files.stats.errors = Ошибок при копировании: %u
-copy.files.stats.files = Скопировано(перезаписано/пропущено) файлов: %u(%u/%u)
-copy.files.stats.dirs = Обработано каталогов: %u
+copy.files.stats.title = ╨Ъ╨╛╨┐╨╕╤А╨╛╨▓╨░╨╜╨╕╨╡ ╨╖╨░╨▓╨╡╤А╤И╨╡╨╜╨╛
+copy.files.stats.errors = ╨Ю╤И╨╕╨▒╨╛╨║ ╨┐╤А╨╕ ╨║╨╛╨┐╨╕╤А╨╛╨▓╨░╨╜╨╕╨╕: %u
+copy.files.stats.files = ╨б╨║╨╛╨┐╨╕╤А╨╛╨▓╨░╨╜╨╛(╨┐╨╡╤А╨╡╨╖╨░╨┐╨╕╤Б╨░╨╜╨╛/╨┐╤А╨╛╨┐╤Г╤Й╨╡╨╜╨╛) ╤Д╨░╨╣╨╗╨╛╨▓: %u(%u/%u)
+copy.files.stats.dirs = ╨Ю╨▒╤А╨░╨▒╨╛╤В╨░╨╜╨╛ ╨║╨░╤В╨░╨╗╨╛╨│╨╛╨▓: %u
 
 # Delete files
-delete.files.dlg.title = Удалить файлы
-delete.files.dlg.label = Удалить выделенные файлы
+delete.files.dlg.title = ╨г╨┤╨░╨╗╨╕╤В╤М ╤Д╨░╨╣╨╗╤Л
+delete.files.dlg.label = ╨г╨┤╨░╨╗╨╕╤В╤М ╨▓╤Л╨┤╨╡╨╗╨╡╨╜╨╜╤Л╨╡ ╤Д╨░╨╣╨╗╤Л
 
-delete.files.progress.title = Идет удаление...
-delete.files.progress.time = Прошло: %8S  Осталось: %8S  Всего: %8S
-delete.files.progress.stats = Файлы: %u; Каталоги: %u; Ошибки: %c%c%u
+delete.files.progress.title = ╨Ш╨┤╨╡╤В ╤Г╨┤╨░╨╗╨╡╨╜╨╕╨╡...
+delete.files.progress.time = ╨Я╤А╨╛╤И╨╗╨╛: %8S  ╨Ю╤Б╤В╨░╨╗╨╛╤Б╤М: %8S  ╨Т╤Б╨╡╨│╨╛: %8S
+delete.files.progress.stats = ╨д╨░╨╣╨╗╤Л: %u; ╨Ъ╨░╤В╨░╨╗╨╛╨│╨╕: %u; ╨Ю╤И╨╕╨▒╨║╨╕: %c%c%u
 
-delete.files.stats.title = Удаление завершено
-delete.files.stats.errors = Ошибок при удалении: %u
-delete.files.stats.files = Удалено файлов: %u
-delete.files.stats.dirs = Удалено каталогов: %u
+delete.files.stats.title = ╨г╨┤╨░╨╗╨╡╨╜╨╕╨╡ ╨╖╨░╨▓╨╡╤А╤И╨╡╨╜╨╛
+delete.files.stats.errors = ╨Ю╤И╨╕╨▒╨╛╨║ ╨┐╤А╨╕ ╤Г╨┤╨░╨╗╨╡╨╜╨╕╨╕: %u
+delete.files.stats.files = ╨г╨┤╨░╨╗╨╡╨╜╨╛ ╤Д╨░╨╣╨╗╨╛╨▓: %u
+delete.files.stats.dirs = ╨г╨┤╨░╨╗╨╡╨╜╨╛ ╨║╨░╤В╨░╨╗╨╛╨│╨╛╨▓: %u
 
 # Create directory
-create.dir.dlg.title = Создать каталог
-create.dir.dlg.path = &Создать каталог:
+create.dir.dlg.title = ╨б╨╛╨╖╨┤╨░╤В╤М ╨║╨░╤В╨░╨╗╨╛╨│
+create.dir.dlg.path = &╨б╨╛╨╖╨┤╨░╤В╤М ╨║╨░╤В╨░╨╗╨╛╨│:
 
 # Plugin options
-options.dlg.title = Параметры
-options.dlg.disk.menu = Добавить в меню &дисков
-options.dlg.plugin.menu = Добавить в меню &плагинов
-options.dlg.disk.menu.number = &Номер элемента в меню дисков:
-options.dlg.hide.copy.dlg = Н&е показывать собственный диалог копирования
-options.dlg.save.last.dir = &Сохранять последний открытый каталог
-options.dlg.use.file.filters = &Использовать файловые фильтры ActiveSync
-options.dlg.access.method = Способ подключения (нужен перезапуск Фара):
+options.dlg.title = ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л
+options.dlg.disk.menu = ╨Ф╨╛╨▒╨░╨▓╨╕╤В╤М ╨▓ ╨╝╨╡╨╜╤О &╨┤╨╕╤Б╨║╨╛╨▓
+options.dlg.plugin.menu = ╨Ф╨╛╨▒╨░╨▓╨╕╤В╤М ╨▓ ╨╝╨╡╨╜╤О &╨┐╨╗╨░╨│╨╕╨╜╨╛╨▓
+options.dlg.disk.menu.number = &╨Э╨╛╨╝╨╡╤А ╤Н╨╗╨╡╨╝╨╡╨╜╤В╨░ ╨▓ ╨╝╨╡╨╜╤О ╨┤╨╕╤Б╨║╨╛╨▓:
+options.dlg.hide.copy.dlg = ╨Э&╨╡ ╨┐╨╛╨║╨░╨╖╤Л╨▓╨░╤В╤М ╤Б╨╛╨▒╤Б╤В╨▓╨╡╨╜╨╜╤Л╨╣ ╨┤╨╕╨░╨╗╨╛╨│ ╨║╨╛╨┐╨╕╤А╨╛╨▓╨░╨╜╨╕╤П
+options.dlg.save.last.dir = &╨б╨╛╤Е╤А╨░╨╜╤П╤В╤М ╨┐╨╛╤Б╨╗╨╡╨┤╨╜╨╕╨╣ ╨╛╤В╨║╤А╤Л╤В╤Л╨╣ ╨║╨░╤В╨░╨╗╨╛╨│
+options.dlg.use.file.filters = &╨Ш╤Б╨┐╨╛╨╗╤М╨╖╨╛╨▓╨░╤В╤М ╤Д╨░╨╣╨╗╨╛╨▓╤Л╨╡ ╤Д╨╕╨╗╤М╤В╤А╤Л ActiveSync
+options.dlg.access.method = ╨б╨┐╨╛╤Б╨╛╨▒ ╨┐╨╛╨┤╨║╨╗╤О╤З╨╡╨╜╨╕╤П (╨╜╤Г╨╢╨╡╨╜ ╨┐╨╡╤А╨╡╨╖╨░╨┐╤Г╤Б╨║ ╨д╨░╤А╨░):
 options.dlg.rapi = &RAPI
 options.dlg.rapi2 = RAPI&2
-options.dlg.hide.rom.files = Не п&оказывать файлы в ROM
-options.dlg.buffer.size = &Размер буфера:
-options.dlg.auto.buf.size = &Автоматический
-options.dlg.prefix = Пре&фикс плагина (нужен перезапуск):
-options.dlg.save.def.values = Со&хранять опции, указанные в диалогах
-options.dlg.def.option.values.title = Значения опций по умолчанию
-options.dlg.def.option.values = Допо&лнительно
-options.dlg.hot.keys.title = Клавиатурные команды
-options.dlg.hot.keys = &Клавиатурные команды
-options.dlg.hot.key.execute = &Запуск файла на устройстве:
-options.dlg.hot.key.attr = &Смена атрибутов файла:
-options.dlg.hot.key.hide.rom.files = &Показ/сокрытие файлов в ROM:
-options.dlg.exit.on.dot.dot = &Выход из плагина по ".." в корне
-options.dlg.show.free.space = Пока&зывать свободное место в заголовке панели
+options.dlg.hide.rom.files = ╨Э╨╡ ╨┐&╨╛╨║╨░╨╖╤Л╨▓╨░╤В╤М ╤Д╨░╨╣╨╗╤Л ╨▓ ROM
+options.dlg.buffer.size = &╨а╨░╨╖╨╝╨╡╤А ╨▒╤Г╤Д╨╡╤А╨░:
+options.dlg.auto.buf.size = &╨Р╨▓╤В╨╛╨╝╨░╤В╨╕╤З╨╡╤Б╨║╨╕╨╣
+options.dlg.prefix = ╨Я╤А╨╡&╤Д╨╕╨║╤Б ╨┐╨╗╨░╨│╨╕╨╜╨░ (╨╜╤Г╨╢╨╡╨╜ ╨┐╨╡╤А╨╡╨╖╨░╨┐╤Г╤Б╨║):
+options.dlg.save.def.values = ╨б╨╛&╤Е╤А╨░╨╜╤П╤В╤М ╨╛╨┐╤Ж╨╕╨╕, ╤Г╨║╨░╨╖╨░╨╜╨╜╤Л╨╡ ╨▓ ╨┤╨╕╨░╨╗╨╛╨│╨░╤Е
+options.dlg.def.option.values.title = ╨Ч╨╜╨░╤З╨╡╨╜╨╕╤П ╨╛╨┐╤Ж╨╕╨╣ ╨┐╨╛ ╤Г╨╝╨╛╨╗╤З╨░╨╜╨╕╤О
+options.dlg.def.option.values = ╨Ф╨╛╨┐╨╛&╨╗╨╜╨╕╤В╨╡╨╗╤М╨╜╨╛
+options.dlg.hot.keys.title = ╨Ъ╨╗╨░╨▓╨╕╨░╤В╤Г╤А╨╜╤Л╨╡ ╨║╨╛╨╝╨░╨╜╨┤╤Л
+options.dlg.hot.keys = &╨Ъ╨╗╨░╨▓╨╕╨░╤В╤Г╤А╨╜╤Л╨╡ ╨║╨╛╨╝╨░╨╜╨┤╤Л
+options.dlg.hot.key.execute = &╨Ч╨░╨┐╤Г╤Б╨║ ╤Д╨░╨╣╨╗╨░ ╨╜╨░ ╤Г╤Б╤В╤А╨╛╨╣╤Б╤В╨▓╨╡:
+options.dlg.hot.key.attr = &╨б╨╝╨╡╨╜╨░ ╨░╤В╤А╨╕╨▒╤Г╤В╨╛╨▓ ╤Д╨░╨╣╨╗╨░:
+options.dlg.hot.key.hide.rom.files = &╨Я╨╛╨║╨░╨╖/╤Б╨╛╨║╤А╤Л╤В╨╕╨╡ ╤Д╨░╨╣╨╗╨╛╨▓ ╨▓ ROM:
+options.dlg.exit.on.dot.dot = &╨Т╤Л╤Е╨╛╨┤ ╨╕╨╖ ╨┐╨╗╨░╨│╨╕╨╜╨░ ╨┐╨╛ ".." ╨▓ ╨║╨╛╤А╨╜╨╡
+options.dlg.show.free.space = ╨Я╨╛╨║╨░&╨╖╤Л╨▓╨░╤В╤М ╤Б╨▓╨╛╨▒╨╛╨┤╨╜╨╛╨╡ ╨╝╨╡╤Б╤В╨╛ ╨▓ ╨╖╨░╨│╨╛╨╗╨╛╨▓╨║╨╡ ╨┐╨░╨╜╨╡╨╗╨╕
 
 # Common options
-options.ignore.errors = &Игнорировать ошибки
-options.show.stats = Показывать статистику по завершении:
-options.show.stats.always = &Всегда
-options.show.stats.never = &Никогда
-options.show.stats.if.error = Когда есть &ошибки
+options.ignore.errors = &╨Ш╨│╨╜╨╛╤А╨╕╤А╨╛╨▓╨░╤В╤М ╨╛╤И╨╕╨▒╨║╨╕
+options.show.stats = ╨Я╨╛╨║╨░╨╖╤Л╨▓╨░╤В╤М ╤Б╤В╨░╤В╨╕╤Б╤В╨╕╨║╤Г ╨┐╨╛ ╨╖╨░╨▓╨╡╤А╤И╨╡╨╜╨╕╨╕:
+options.show.stats.always = &╨Т╤Б╨╡╨│╨┤╨░
+options.show.stats.never = &╨Э╨╕╨║╨╛╨│╨┤╨░
+options.show.stats.if.error = ╨Ъ╨╛╨│╨┤╨░ ╨╡╤Б╤В╤М &╨╛╤И╨╕╨▒╨║╨╕
 
 # File attributes
-attr.dlg.title = Атрибуты файла
-attr.dlg.read.only = &Только для чтения
-attr.dlg.sparse = &Разреженный
-attr.dlg.archive = &Архивный
-attr.dlg.temporary = &Временный
-attr.dlg.hidden = &Скрытый
-attr.dlg.reparse.point = Св&язь
-attr.dlg.system = С&истемный
-attr.dlg.in.rom = &Файл в ROM
-attr.dlg.compressed = С&жатый
-attr.dlg.rom.module = &Модуль в ROM
-attr.dlg.encrypted = &Зашифрованный
+attr.dlg.title = ╨Р╤В╤А╨╕╨▒╤Г╤В╤Л ╤Д╨░╨╣╨╗╨░
+attr.dlg.read.only = &╨в╨╛╨╗╤М╨║╨╛ ╨┤╨╗╤П ╤З╤В╨╡╨╜╨╕╤П
+attr.dlg.sparse = &╨а╨░╨╖╤А╨╡╨╢╨╡╨╜╨╜╤Л╨╣
+attr.dlg.archive = &╨Р╤А╤Е╨╕╨▓╨╜╤Л╨╣
+attr.dlg.temporary = &╨Т╤А╨╡╨╝╨╡╨╜╨╜╤Л╨╣
+attr.dlg.hidden = &╨б╨║╤А╤Л╤В╤Л╨╣
+attr.dlg.reparse.point = ╨б╨▓&╤П╨╖╤М
+attr.dlg.system = ╨б&╨╕╤Б╤В╨╡╨╝╨╜╤Л╨╣
+attr.dlg.in.rom = &╨д╨░╨╣╨╗ ╨▓ ROM
+attr.dlg.compressed = ╨б&╨╢╨░╤В╤Л╨╣
+attr.dlg.rom.module = &╨Ь╨╛╨┤╤Г╨╗╤М ╨▓ ROM
+attr.dlg.encrypted = &╨Ч╨░╤И╨╕╤Д╤А╨╛╨▓╨░╨╜╨╜╤Л╨╣
 
 # System info
-sysinfo.device.info = Информация об устройстве
-sysinfo.os.version = Версия ОС:
-sysinfo.program.memory = Оперативная память
-sysinfo.storage.memory = Постоянная память
-sysinfo.storage.card = Карта памяти
-sysinfo.total = Всего:
-sysinfo.free = Свободно:
-sysinfo.power = Питание
-sysinfo.power.type = Тип:
-sysinfo.power.online = электросеть
-sysinfo.power.offline = батарея
-sysinfo.power.backup = резервная батарея
-sysinfo.power.battery.level = Заряд батареи:
-sysinfo.power.backup.battery.level = Заряд резервной батареи:
+sysinfo.device.info = ╨Ш╨╜╤Д╨╛╤А╨╝╨░╤Ж╨╕╤П ╨╛╨▒ ╤Г╤Б╤В╤А╨╛╨╣╤Б╤В╨▓╨╡
+sysinfo.os.version = ╨Т╨╡╤А╤Б╨╕╤П ╨Ю╨б:
+sysinfo.program.memory = ╨Ю╨┐╨╡╤А╨░╤В╨╕╨▓╨╜╨░╤П ╨┐╨░╨╝╤П╤В╤М
+sysinfo.storage.memory = ╨Я╨╛╤Б╤В╨╛╤П╨╜╨╜╨░╤П ╨┐╨░╨╝╤П╤В╤М
+sysinfo.storage.card = ╨Ъ╨░╤А╤В╨░ ╨┐╨░╨╝╤П╤В╨╕
+sysinfo.total = ╨Т╤Б╨╡╨│╨╛:
+sysinfo.free = ╨б╨▓╨╛╨▒╨╛╨┤╨╜╨╛:
+sysinfo.power = ╨Я╨╕╤В╨░╨╜╨╕╨╡
+sysinfo.power.type = ╨в╨╕╨┐:
+sysinfo.power.online = ╤Н╨╗╨╡╨║╤В╤А╨╛╤Б╨╡╤В╤М
+sysinfo.power.offline = ╨▒╨░╤В╨░╤А╨╡╤П
+sysinfo.power.backup = ╤А╨╡╨╖╨╡╤А╨▓╨╜╨░╤П ╨▒╨░╤В╨░╤А╨╡╤П
+sysinfo.power.battery.level = ╨Ч╨░╤А╤П╨┤ ╨▒╨░╤В╨░╤А╨╡╨╕:
+sysinfo.power.backup.battery.level = ╨Ч╨░╤А╤П╨┤ ╤А╨╡╨╖╨╡╤А╨▓╨╜╨╛╨╣ ╨▒╨░╤В╨░╤А╨╡╨╕:
 
 # Run dialog
-run.dlg.title = Выполнить
-run.dlg.cmd.line = &Командная строка:
+run.dlg.title = ╨Т╤Л╨┐╨╛╨╗╨╜╨╕╤В╤М
+run.dlg.cmd.line = &╨Ъ╨╛╨╝╨░╨╜╨┤╨╜╨░╤П ╤Б╤В╤А╨╛╨║╨░:
 
 # File filters
-filter.dlg.title = Файловые фильтры
-filter.dlg.select.files = Выберите типы файлов для конвертации:
-filter.dlg.to = в
+filter.dlg.title = ╨д╨░╨╣╨╗╨╛╨▓╤Л╨╡ ╤Д╨╕╨╗╤М╤В╤А╤Л
+filter.dlg.select.files = ╨Т╤Л╨▒╨╡╤А╨╕╤В╨╡ ╤В╨╕╨┐╤Л ╤Д╨░╨╣╨╗╨╛╨▓ ╨┤╨╗╤П ╨║╨╛╨╜╨▓╨╡╤А╤В╨░╤Ж╨╕╨╕:
+filter.dlg.to = ╨▓
 
 # Generic buttons
-button.ok = Продолжить
-button.cancel = Отмена
-button.retry = &Повтор
-button.ignore = &Игнорировать
-button.ignore.all = Игнорировать &все
+button.ok = ╨Я╤А╨╛╨┤╨╛╨╗╨╢╨╕╤В╤М
+button.cancel = ╨Ю╤В╨╝╨╡╨╜╨░
+button.retry = &╨Я╨╛╨▓╤В╨╛╤А
+button.ignore = &╨Ш╨│╨╜╨╛╤А╨╕╤А╨╛╨▓╨░╤В╤М
+button.ignore.all = ╨Ш╨│╨╜╨╛╤А╨╕╤А╨╛╨▓╨░╤В╤М &╨▓╤Б╨╡
 
 # Size and speed suffixes
-suffix.size.b = Б
-suffix.size.kb = КБ
-suffix.size.mb = МБ
-suffix.size.gb = ГБ
-suffix.size.tb = ТБ
-suffix.speed.b = Б/с
-suffix.speed.kb = КБ/с
-suffix.speed.mb = МБ/с
-suffix.speed.gb = ГБ/с
-suffix.speed.tb = ТБ/с
+suffix.size.b = ╨С
+suffix.size.kb = ╨Ъ╨С
+suffix.size.mb = ╨Ь╨С
+suffix.size.gb = ╨У╨С
+suffix.size.tb = ╨в╨С
+suffix.speed.b = ╨С/╤Б
+suffix.speed.kb = ╨Ъ╨С/╤Б
+suffix.speed.mb = ╨Ь╨С/╤Б
+suffix.speed.gb = ╨У╨С/╤Б
+suffix.speed.tb = ╨в╨С/╤Б
 
 # Error log
-log.title = Список ошибок
-log.scan.dir = Чтение каталога
-log.create.dir = Создание каталога
-log.copy.file = Копирование файла
-log.delete.file = Удаление файла
-log.delete.dir = Удаление каталога
-log.show = &Показать ошибки
+log.title = ╨б╨┐╨╕╤Б╨╛╨║ ╨╛╤И╨╕╨▒╨╛╨║
+log.scan.dir = ╨з╤В╨╡╨╜╨╕╨╡ ╨║╨░╤В╨░╨╗╨╛╨│╨░
+log.create.dir = ╨б╨╛╨╖╨┤╨░╨╜╨╕╨╡ ╨║╨░╤В╨░╨╗╨╛╨│╨░
+log.copy.file = ╨Ъ╨╛╨┐╨╕╤А╨╛╨▓╨░╨╜╨╕╨╡ ╤Д╨░╨╣╨╗╨░
+log.delete.file = ╨г╨┤╨░╨╗╨╡╨╜╨╕╨╡ ╤Д╨░╨╣╨╗╨░
+log.delete.dir = ╨г╨┤╨░╨╗╨╡╨╜╨╕╨╡ ╨║╨░╤В╨░╨╗╨╛╨│╨░
+log.show = &╨Я╨╛╨║╨░╨╖╨░╤В╤М ╨╛╤И╨╕╨▒╨║╨╕
 
 # Information & progress messages
-progress.prepare = Подготовка...
-progress.filter = Идёт обработка в файловом фильтре...
-progress.interrupt = Прервать текущую операцию?
+progress.prepare = ╨Я╨╛╨┤╨│╨╛╤В╨╛╨▓╨║╨░...
+progress.filter = ╨Ш╨┤╤С╤В ╨╛╨▒╤А╨░╨▒╨╛╤В╨║╨░ ╨▓ ╤Д╨░╨╣╨╗╨╛╨▓╨╛╨╝ ╤Д╨╕╨╗╤М╤В╤А╨╡...
+progress.interrupt = ╨Я╤А╨╡╤А╨▓╨░╤В╤М ╤В╨╡╨║╤Г╤Й╤Г╤О ╨╛╨┐╨╡╤А╨░╤Ж╨╕╤О?
 
 # Error messages
-err.no.activesync = ActiveSync не установлен либо установлена старая версия
-err.no.device = Устройство не подключено
-err.plugin.init = Невозможно создать экземпляр плагина
-err.self.copy = Нельзя копировать файл в самого себя
-err.device.disconnected = Устройство было отключено
-err.invalid.cmd.line = Командная строка составлена неверно
-err.fatal = Неожиданное исключение, вероятно это ошибка в плагине.
-err.fatal.dump = Minidump успешно сохранен в каталоге плагина.
-err.fatal.no.dump = Установите dbghelp.dll чтобы иметь возможность записать minidump.
-err.com.model = Другой плагин уже инициализировал подсистему COM в однопоточном режиме. Это препятствует корректной работе WMDC на Windows Vista. Рекомендуется включить режим RAPI в настройках плагина.
-err.not.activesync.user = ActiveSync установлен но не инициализирован для текущего пользователя.
-err.same.name.exists = Объект другого типа с таким же именем уже существует.
-err.invalid.hot.key = Некорректная комбинация клавиш: '%s'.
-err.invalid.prefix = Неверно указан префикс плагина.
+err.no.activesync = ActiveSync ╨╜╨╡ ╤Г╤Б╤В╨░╨╜╨╛╨▓╨╗╨╡╨╜ ╨╗╨╕╨▒╨╛ ╤Г╤Б╤В╨░╨╜╨╛╨▓╨╗╨╡╨╜╨░ ╤Б╤В╨░╤А╨░╤П ╨▓╨╡╤А╤Б╨╕╤П
+err.no.device = ╨г╤Б╤В╤А╨╛╨╣╤Б╤В╨▓╨╛ ╨╜╨╡ ╨┐╨╛╨┤╨║╨╗╤О╤З╨╡╨╜╨╛
+err.plugin.init = ╨Э╨╡╨▓╨╛╨╖╨╝╨╛╨╢╨╜╨╛ ╤Б╨╛╨╖╨┤╨░╤В╤М ╤Н╨║╨╖╨╡╨╝╨┐╨╗╤П╤А ╨┐╨╗╨░╨│╨╕╨╜╨░
+err.self.copy = ╨Э╨╡╨╗╤М╨╖╤П ╨║╨╛╨┐╨╕╤А╨╛╨▓╨░╤В╤М ╤Д╨░╨╣╨╗ ╨▓ ╤Б╨░╨╝╨╛╨│╨╛ ╤Б╨╡╨▒╤П
+err.device.disconnected = ╨г╤Б╤В╤А╨╛╨╣╤Б╤В╨▓╨╛ ╨▒╤Л╨╗╨╛ ╨╛╤В╨║╨╗╤О╤З╨╡╨╜╨╛
+err.invalid.cmd.line = ╨Ъ╨╛╨╝╨░╨╜╨┤╨╜╨░╤П ╤Б╤В╤А╨╛╨║╨░ ╤Б╨╛╤Б╤В╨░╨▓╨╗╨╡╨╜╨░ ╨╜╨╡╨▓╨╡╤А╨╜╨╛
+err.fatal = ╨Э╨╡╨╛╨╢╨╕╨┤╨░╨╜╨╜╨╛╨╡ ╨╕╤Б╨║╨╗╤О╤З╨╡╨╜╨╕╨╡, ╨▓╨╡╤А╨╛╤П╤В╨╜╨╛ ╤Н╤В╨╛ ╨╛╤И╨╕╨▒╨║╨░ ╨▓ ╨┐╨╗╨░╨│╨╕╨╜╨╡.
+err.fatal.dump = Minidump ╤Г╤Б╨┐╨╡╤И╨╜╨╛ ╤Б╨╛╤Е╤А╨░╨╜╨╡╨╜ ╨▓ ╨║╨░╤В╨░╨╗╨╛╨│╨╡ ╨┐╨╗╨░╨│╨╕╨╜╨░.
+err.fatal.no.dump = ╨г╤Б╤В╨░╨╜╨╛╨▓╨╕╤В╨╡ dbghelp.dll ╤З╤В╨╛╨▒╤Л ╨╕╨╝╨╡╤В╤М ╨▓╨╛╨╖╨╝╨╛╨╢╨╜╨╛╤Б╤В╤М ╨╖╨░╨┐╨╕╤Б╨░╤В╤М minidump.
+err.com.model = ╨Ф╤А╤Г╨│╨╛╨╣ ╨┐╨╗╨░╨│╨╕╨╜ ╤Г╨╢╨╡ ╨╕╨╜╨╕╤Ж╨╕╨░╨╗╨╕╨╖╨╕╤А╨╛╨▓╨░╨╗ ╨┐╨╛╨┤╤Б╨╕╤Б╤В╨╡╨╝╤Г COM ╨▓ ╨╛╨┤╨╜╨╛╨┐╨╛╤В╨╛╤З╨╜╨╛╨╝ ╤А╨╡╨╢╨╕╨╝╨╡. ╨н╤В╨╛ ╨┐╤А╨╡╨┐╤П╤В╤Б╤В╨▓╤Г╨╡╤В ╨║╨╛╤А╤А╨╡╨║╤В╨╜╨╛╨╣ ╤А╨░╨▒╨╛╤В╨╡ WMDC ╨╜╨░ Windows Vista. ╨а╨╡╨║╨╛╨╝╨╡╨╜╨┤╤Г╨╡╤В╤Б╤П ╨▓╨║╨╗╤О╤З╨╕╤В╤М ╤А╨╡╨╢╨╕╨╝ RAPI ╨▓ ╨╜╨░╤Б╤В╤А╨╛╨╣╨║╨░╤Е ╨┐╨╗╨░╨│╨╕╨╜╨░.
+err.not.activesync.user = ActiveSync ╤Г╤Б╤В╨░╨╜╨╛╨▓╨╗╨╡╨╜ ╨╜╨╛ ╨╜╨╡ ╨╕╨╜╨╕╤Ж╨╕╨░╨╗╨╕╨╖╨╕╤А╨╛╨▓╨░╨╜ ╨┤╨╗╤П ╤В╨╡╨║╤Г╤Й╨╡╨│╨╛ ╨┐╨╛╨╗╤М╨╖╨╛╨▓╨░╤В╨╡╨╗╤П.
+err.same.name.exists = ╨Ю╨▒╤К╨╡╨║╤В ╨┤╤А╤Г╨│╨╛╨│╨╛ ╤В╨╕╨┐╨░ ╤Б ╤В╨░╨║╨╕╨╝ ╨╢╨╡ ╨╕╨╝╨╡╨╜╨╡╨╝ ╤Г╨╢╨╡ ╤Б╤Г╤Й╨╡╤Б╤В╨▓╤Г╨╡╤В.
+err.invalid.hot.key = ╨Э╨╡╨║╨╛╤А╤А╨╡╨║╤В╨╜╨░╤П ╨║╨╛╨╝╨▒╨╕╨╜╨░╤Ж╨╕╤П ╨║╨╗╨░╨▓╨╕╤И: '%s'.
+err.invalid.prefix = ╨Э╨╡╨▓╨╡╤А╨╜╨╛ ╤Г╨║╨░╨╖╨░╨╜ ╨┐╤А╨╡╤Д╨╕╨║╤Б ╨┐╨╗╨░╨│╨╕╨╜╨░.

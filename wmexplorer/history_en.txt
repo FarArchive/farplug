@@ -1,4 +1,4 @@
-Version: 1.11.11 10/12/2009
+﻿Version: 1.11.11 10/12/2009
 - support plugin API changes in Far 2.0.1160
 
 Version: 1.11.10 10/08/2009

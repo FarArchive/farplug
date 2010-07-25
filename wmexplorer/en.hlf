@@ -1,9 +1,8 @@
-m4_include(`version.m4')m4_dnl
-.Language=English,English
-.PluginContents=WM Explorer
+﻿.Language=English,English
+.PluginContents=<(NAME)>
 
 @Contents
-$^#WM Explorer __VER_MAJOR__.__VER_MINOR__.__VER_PATCH__#
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 
     This plugin is designed for file management of Windows Mobile
 based PDA/SmartPhones connected through ActiveSync.
@@ -40,6 +39,7 @@ care about Esc reaction time you can specify larger buffer
 size and thus improve copy speed of large files a little bit.
 
 @Config
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #Plugin Configuration#
 
     #Device access method#
@@ -61,6 +61,7 @@ copying files from disk. This way one can avoid showing
 two dialogs (Far copy dialog first, plugin dialog second).
 
 @copy.files.dlg
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #File Copy Dialog#
 
     #Copy files to:#
@@ -108,6 +109,7 @@ Take care when using this option because file could be in process
 of modification. Default value is taken from Far system settings.
 
 @delete.files.dlg
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #Delete Files Dialog#
 
     For description of options see ~File Copy Dialog~@copy.files.dlg@.

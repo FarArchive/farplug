@@ -1,35 +1,30 @@
-@mkdir .build
-@cd .build
-
 @call vcvarsall.bat x86
-@echo on
 
-cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
-nmake distrib
+nmake -nologo RELEASE=1 OLDFAR=1 clean
+nmake -nologo RELEASE=1 OLDFAR=1 distrib
 @if errorlevel 1 goto error
-@copy *.7z ..
-@rm -r *
+@copy Release.x86.1\*.7z .
+nmake -nologo RELEASE=1 OLDFAR=1 clean
 
-cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DFARAPI18=1 ..
-nmake distrib
+nmake -nologo RELEASE=1 clean
+nmake -nologo RELEASE=1 distrib
 @if errorlevel 1 goto error
-@copy *.7z ..
-@rm -r *
+@copy Release.x86.2\*.7z .
+nmake -nologo RELEASE=1 clean
 
 @call vcvarsall.bat x86_amd64
-@echo on
 
-cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
-nmake distrib
+nmake -nologo RELEASE=1 OLDFAR=1 clean
+nmake -nologo RELEASE=1 OLDFAR=1 distrib
 @if errorlevel 1 goto error
-@copy *.7z ..
-@rm -r *
+@copy Release.x64.1\*.7z .
+nmake -nologo RELEASE=1 OLDFAR=1 clean
 
-cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DFARAPI18=1 ..
-nmake distrib
+nmake -nologo RELEASE=1 clean
+nmake -nologo RELEASE=1 distrib
 @if errorlevel 1 goto error
-@copy *.7z ..
-@rm -r *
+@copy Release.x64.2\*.7z .
+nmake -nologo RELEASE=1 clean
 
 @goto end
 
@@ -37,6 +32,3 @@ nmake distrib
 @echo TERMINATED WITH ERRORS
 
 :end
-
-@cd ..
-@rm -r .build

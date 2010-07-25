@@ -86,16 +86,10 @@ struct SetFileApis {
   }
 };
 
-#ifdef FARAPI17
-int WINAPI GetMinFarVersion(void) {
-  return MAKEFARVERSION(1, 70, 2087);
-}
-#endif // FARAPI17
-
-#ifdef FARAPI18
 int WINAPI GetMinFarVersion(void) {
   return FARMANAGERVERSION;
 }
+#ifdef FARAPI18
 int WINAPI GetMinFarVersionW(void) {
   return FARMANAGERVERSION;
 }

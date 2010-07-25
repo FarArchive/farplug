@@ -1,7 +1,7 @@
-.Language=English,English
+﻿.Language=English,English
 
 # Plugin name
-plugin.name = WM Explorer
+plugin.name = <(NAME)>
 
 # Device list menu
 device.list.title = Device list
