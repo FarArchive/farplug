@@ -1,0 +1,6 @@
+glob:tools\*.exe
+glob:msiupdate\SciTE*
+glob:msiupdate\Debug.x86\*
+glob:msiupdate\Release.x86\*
+glob:msiupdate\Debug.x64\*
+glob:msiupdate\Release.x64\*

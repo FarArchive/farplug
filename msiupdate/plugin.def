@@ -1,0 +1,10 @@
+LIBRARY <(MODULE)> BASE=0x64800000
+EXPORTS
+  GetMinFarVersion
+  GetMinFarVersionW
+  SetStartupInfoW
+  GetPluginInfoW
+  OpenPluginW
+  ProcessSynchroEventW
+  ConfigureW
+  ExitFARW
