@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef DEBUG
+  #define DEBUG_OUTPUT(msg) OutputDebugStringW(((msg) + L"\n").c_str())
+#else
+  #define DEBUG_OUTPUT(msg)
+#endif
+
 extern HINSTANCE g_h_instance;
 
 wstring get_system_message(HRESULT hr);
@@ -44,6 +50,7 @@ public:
   unsigned __int64 size();
   unsigned read(Buffer<char>& buffer);
   void write(const void* data, unsigned size);
+  void set_time(const FILETIME* ctime, const FILETIME* atime, const FILETIME* mtime);
 };
 
 class Key: private NonCopyable {
@@ -62,15 +69,30 @@ public:
   void delete_value(const wchar_t* name);
 };
 
-class FindFile: private NonCopyable {
-protected:
-  wstring file_path;
-  HANDLE h_find;
-public:
-  FindFile(const wstring& file_path);
-  ~FindFile();
-  bool next(WIN32_FIND_DATAW& find_data);
+struct FindData: public WIN32_FIND_DATAW {
+  bool is_dir() const {
+    return (dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+  }
+  unsigned __int64 size() const {
+    return (static_cast<unsigned __int64>(nFileSizeHigh) << 32) | nFileSizeLow;
+  }
 };
+
+class FileEnum: private NonCopyable {
+protected:
+  wstring dir_path;
+  HANDLE h_find;
+  FindData find_data;
+public:
+  FileEnum(const wstring& dir_path);
+  ~FileEnum();
+  bool next();
+  const FindData& data() const {
+    return find_data;
+  }
+};
+
+FindData get_find_data(const wstring& path);
 
 class TempFile: private NonCopyable {
 private:
@@ -140,3 +162,5 @@ public:
   Icon(HMODULE h_module, WORD icon_id, int width, int height);
   ~Icon();
 };
+
+wstring format_file_time(const FILETIME& file_time);

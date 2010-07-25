@@ -1,4 +1,3 @@
-#include "msg.h"
 #include "utils.hpp"
 #include "sysutils.hpp"
 #include "farutils.hpp"
@@ -50,6 +49,18 @@ unsigned get_optimal_msg_width() {
 
 int message(const wstring& msg, int button_cnt, DWORD flags) {
   return g_far.Message(g_far.ModuleNumber, flags | FMSG_ALLINONE, NULL, reinterpret_cast<const wchar_t* const*>(msg.c_str()), 0, button_cnt);
+}
+
+int menu(const wstring& title, const vector<wstring>& items, const wchar_t* help) {
+  vector<FarMenuItem> menu_items;
+  menu_items.reserve(items.size());
+  FarMenuItem mi;
+  for (unsigned i = 0; i < items.size(); i++) {
+    memset(&mi, 0, sizeof(mi));
+    mi.Text = items[i].c_str();
+    menu_items.push_back(mi);
+  }
+  return g_far.Menu(g_far.ModuleNumber, -1, -1, 0, FMENU_WRAPMODE, title.c_str(), NULL, help, NULL, NULL, menu_items.data(), menu_items.size());
 }
 
 wstring get_progress_bar_str(unsigned width, unsigned __int64 completed, unsigned __int64 total) {
@@ -105,10 +116,14 @@ int viewer(const wstring& file_name, const wstring& title) {
   return g_far.Viewer(file_name.c_str(), title.c_str(), 0, 0, -1, -1, VF_DISABLEHISTORY | VF_ENABLE_F6, CP_UNICODE);
 }
 
-void error_dlg(const Error& e) {
+int update_panel(HANDLE h_plugin, bool keep_selection) {
+  return g_far.Control(h_plugin, FCTL_UPDATEPANEL, keep_selection ? 1 : 0, 0);
+}
+
+void error_dlg(const wstring& title, const Error& e) {
   wostringstream st;
-  st << get_msg(MSG_PLUGIN_NAME) << L'\n';
-  if (e.code != NO_ERROR) {
+  st << title << L'\n';
+  if (e.code != E_MESSAGE) {
     wstring sys_msg = get_system_message(e.code);
     if (!sys_msg.empty())
       st << word_wrap(sys_msg, get_optimal_msg_width()) << L'\n';
@@ -120,19 +135,8 @@ void error_dlg(const Error& e) {
   message(st.str(), 0, FMSG_WARNING | FMSG_MB_OK);
 }
 
-void error_dlg(const std::exception& e) {
-  wostringstream st;
-  st << get_msg(MSG_PLUGIN_NAME) << L'\n';
-  st << word_wrap(widen(e.what()), get_optimal_msg_width()) << L'\n';
-  message(st.str(), 0, FMSG_WARNING | FMSG_MB_OK);
-}
-
-void error_dlg(const wstring& msg) {
-  message(get_msg(MSG_PLUGIN_NAME) + L'\n' + msg, 0, FMSG_WARNING | FMSG_MB_OK);
-}
-
-void info_dlg(const wstring& msg) {
-  message(get_msg(MSG_PLUGIN_NAME) + L'\n' + msg, 0, FMSG_MB_OK);
+void info_dlg(const wstring& title, const wstring& msg) {
+  message(title + L'\n' + msg, 0, FMSG_MB_OK);
 }
 
 unsigned get_label_len(const wstring& str) {
@@ -178,10 +182,9 @@ unsigned Dialog::new_item(const DialogItem& di) {
 LONG_PTR WINAPI Dialog::internal_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
   Dialog* dlg = reinterpret_cast<Dialog*>(g_far.SendDlgMessage(h_dlg, DM_GETDLGDATA, 0, 0));
   dlg->h_dlg = h_dlg;
-  FAR_ERROR_HANDLER_BEGIN;
+  FAR_ERROR_HANDLER_BEGIN
   return dlg->dialog_proc(msg, param1, param2);
-  FAR_ERROR_HANDLER_END( , , false);
-  return dlg->default_dialog_proc(msg, param1, param2);
+  FAR_ERROR_HANDLER_END(return 0, return 0, false)
 }
 
 LONG_PTR Dialog::default_dialog_proc(int msg, int param1, LONG_PTR param2) {
@@ -274,6 +277,24 @@ unsigned Dialog::fix_edit_box(const wstring& text, unsigned boxsize, DWORD flags
   di.y1 = y;
   if (boxsize == AUTO_SIZE)
     x += static_cast<unsigned>(text.size());
+  else
+    x += boxsize;
+  if (x - c_x_frame > client_xs)
+    client_xs = x - c_x_frame;
+  di.x2 = x - 1;
+  di.y2 = y;
+  di.flags = flags;
+  di.text_idx = new_value(text);
+  return new_item(di);
+}
+
+unsigned Dialog::pwd_edit_box(const wstring& text, unsigned boxsize, DWORD flags) {
+  DialogItem di;
+  di.type = DI_PSWEDIT;
+  di.x1 = x;
+  di.y1 = y;
+  if (boxsize == AUTO_SIZE)
+    x = c_x_frame + client_xs;
   else
     x += boxsize;
   if (x - c_x_frame > client_xs)
@@ -492,6 +513,18 @@ size_t Regex::search(const wstring& expr, const wstring& text) {
     return regex_search.Match[0].start;
   else
     return -1;
+}
+
+Selection::Selection(HANDLE h_plugin): h_plugin(h_plugin) {
+  g_far.Control(h_plugin, FCTL_BEGINSELECTION, 0, 0);
+}
+
+Selection::~Selection() {
+  g_far.Control(h_plugin, FCTL_ENDSELECTION, 0, 0);
+}
+
+void Selection::select(unsigned idx, bool value) {
+  g_far.Control(h_plugin, FCTL_SETSELECTION, idx, value ? TRUE : FALSE);
 }
 
 };

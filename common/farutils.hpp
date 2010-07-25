@@ -1,32 +1,34 @@
 #pragma once
 
-namespace Far {
+extern wstring get_error_dlg_title();
 
-#define FAR_ERROR_HANDLER_BEGIN try {
+#define FAR_ERROR_HANDLER_BEGIN \
+  try { \
+    try {
 
 #define FAR_ERROR_HANDLER_END(return_error, return_cancel, silent) \
-  } \
-  catch (const Error& e) { \
-    if (e.code == E_ABORT) { \
-      return_cancel; \
     } \
-    else { \
-      if (!silent) { \
-        Far::error_dlg(e); \
+    catch (const Error& e) { \
+      if (e.code == E_ABORT) { \
+        return_cancel; \
       } \
+      else { \
+        if (!silent) \
+          Far::error_dlg(get_error_dlg_title(), e); \
+        return_error; \
+      } \
+    } \
+    catch (const std::exception& e) { \
+      if (!silent) \
+        Far::error_dlg(get_error_dlg_title(), e); \
       return_error; \
     } \
   } \
-  catch (const std::exception& e) { \
-    if (!silent) { \
-      Far::error_dlg(e); \
-    } \
-    return_error; \
-  } \
   catch (...) { \
-    Far::error_dlg(L"Unknown exception"); \
     return_error; \
   }
+
+namespace Far {
 
 void init(const PluginStartupInfo* psi);
 wstring get_plugin_module_path();
@@ -42,7 +44,9 @@ const wchar_t* msg_ptr(int id);
 wstring get_msg(int id);
 
 unsigned get_optimal_msg_width();
-int message(const wstring& msg, int button_cnt, DWORD flags);
+int message(const wstring& msg, int button_cnt, DWORD flags = 0);
+int menu(const wstring& title, const vector<wstring>& items, const wchar_t* help = NULL);
+
 wstring get_progress_bar_str(unsigned width, unsigned __int64 completed, unsigned __int64 total);
 void set_progress_state(TBPFLAG state);
 void set_progress_value(unsigned __int64 completed, unsigned __int64 total);
@@ -56,10 +60,10 @@ void flush_screen();
 
 int viewer(const wstring& file_name, const wstring& title);
 
-void error_dlg(const Error& e);
-void error_dlg(const std::exception& e);
-void error_dlg(const wstring& msg);
-void info_dlg(const wstring& msg);
+int update_panel(HANDLE h_plugin, bool keep_selection);
+
+void error_dlg(const wstring& title, const Error& e);
+void info_dlg(const wstring& title, const wstring& msg);
 
 #define AUTO_SIZE (-1)
 const unsigned c_x_frame = 5;
@@ -120,6 +124,7 @@ public:
   unsigned edit_box(const wstring& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned mask_edit_box(const wstring& text, const wstring& mask, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned fix_edit_box(const wstring& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
+  unsigned pwd_edit_box(const wstring& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned button(const wstring& text, DWORD flags = 0, bool def = false);
   unsigned def_button(const wstring& text, DWORD flags = 0) {
     return button(text, flags, true);
@@ -150,6 +155,15 @@ public:
   Regex();
   ~Regex();
   size_t search(const wstring& expr, const wstring& text);
+};
+
+class Selection {
+private:  
+  HANDLE h_plugin;
+public:  
+  Selection(HANDLE h_plugin);
+  ~Selection();
+  void select(unsigned idx, bool value);
 };
 
 };

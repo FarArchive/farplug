@@ -1,0 +1,18 @@
+LIBRARY <(MODULE)> BASE=0x64000000
+EXPORTS
+  GetMinFarVersion
+  GetMinFarVersionW
+  SetStartupInfoW
+  GetPluginInfoW
+  OpenPluginW
+  OpenFilePluginW
+  ClosePluginW
+  GetOpenPluginInfoW
+  SetDirectoryW
+  GetFindDataW
+  FreeFindDataW
+  GetFilesW
+  PutFilesW
+  DeleteFilesW
+  ProcessKeyW
+  ConfigureW

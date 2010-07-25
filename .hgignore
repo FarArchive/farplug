@@ -4,3 +4,10 @@ glob:msiupdate\Debug.x86\*
 glob:msiupdate\Release.x86\*
 glob:msiupdate\Debug.x64\*
 glob:msiupdate\Release.x64\*
+glob:SciTE*
+glob:todo.tdl
+glob:Debug.x86\*
+glob:Release.x86\*
+glob:Debug.x64\*
+glob:Release.x64\*
+glob:7z\*

@@ -158,3 +158,14 @@ wstring format_data_size(unsigned __int64 value, const wchar_t* suffixes[5]) {
   }
   return result;
 }
+
+bool is_slash(wchar_t c) {
+  return c == L'\\' || c == L'/';
+}
+
+wstring unquote(const wstring& str) {
+  if (str.size() >= 2 && str[0] == L'"' && str[str.size() - 1] == L'"')
+    return str.substr(1, str.size() - 2);
+  else
+    return str;
+}

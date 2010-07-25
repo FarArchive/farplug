@@ -9,9 +9,10 @@ wstring get_system_message(HRESULT hr) {
   DWORD len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, NULL);
   if (!len) {
     if (HRESULT_FACILITY(hr) == FACILITY_WIN32) {
-      HMODULE h_winhttp = LoadLibrary("winhttp");
-      len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, h_winhttp, HRESULT_CODE(hr), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, NULL);
-      FreeLibrary(h_winhttp);
+      HMODULE h_winhttp = GetModuleHandle("winhttp");
+      if (h_winhttp) {
+        len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, h_winhttp, HRESULT_CODE(hr), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, NULL);
+      }
     }
   }
   if (len) {
@@ -130,6 +131,10 @@ void File::write(const void* data, unsigned size) {
   CHECK_SYS(WriteFile(h_file, data, size, &size_written, NULL));
 }
 
+void File::set_time(const FILETIME* ctime, const FILETIME* atime, const FILETIME* mtime) {
+  CHECK_SYS(SetFileTime(h_file, ctime, atime, mtime));
+};
+
 Key::Key(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired) {
   CHECK_ADVSYS(RegCreateKeyExW(hKey, lpSubKey, 0, NULL, REG_OPTION_NON_VOLATILE, samDesired, NULL, &h_key, NULL));
 }
@@ -190,18 +195,18 @@ void Key::delete_value(const wchar_t* name) {
   CHECK_ADVSYS(RegDeleteValueW(h_key, name));
 }
 
-FindFile::FindFile(const wstring& file_path): file_path(file_path), h_find(INVALID_HANDLE_VALUE) {
+FileEnum::FileEnum(const wstring& dir_path): dir_path(dir_path), h_find(INVALID_HANDLE_VALUE) {
 }
 
-FindFile::~FindFile() {
+FileEnum::~FileEnum() {
   if (h_find != INVALID_HANDLE_VALUE)
     FindClose(h_find);
 }
 
-bool FindFile::next(WIN32_FIND_DATAW& find_data) {
+bool FileEnum::next() {
   while (true) {
     if (h_find == INVALID_HANDLE_VALUE) {
-      h_find = FindFirstFileW(long_path(add_trailing_slash(file_path) + L'*').c_str(), &find_data);
+      h_find = FindFirstFileW(long_path(add_trailing_slash(dir_path) + L'*').c_str(), &find_data);
       CHECK_SYS(h_find != INVALID_HANDLE_VALUE);
     }
     else {
@@ -217,6 +222,14 @@ bool FindFile::next(WIN32_FIND_DATAW& find_data) {
     }
     return true;
   }
+}
+
+FindData get_find_data(const wstring& path) {
+  FindData find_data;
+  HANDLE h_find = FindFirstFileW(long_path(path).c_str(), &find_data);
+  CHECK_SYS(h_find != INVALID_HANDLE_VALUE);
+  FindClose(h_find);
+  return find_data;
 }
 
 TempFile::TempFile() {
@@ -239,21 +252,16 @@ unsigned __stdcall Thread::thread_proc(void* arg) {
     try {
       thread->run();
       return TRUE;
-    }
-    catch (const Error&) {
-      throw;
+    }  
+    catch (const Error& e) {
+      thread->error = e;
     }
     catch (const std::exception& e) {
-      FAIL_MSG(widen(e.what()));
+      thread->error = e;
     }
-    catch (...) {
-      FAIL(E_FAIL);
-    }
-  }
-  catch (const Error& e) {
-    thread->error = e;
   }
   catch (...) {
+    thread->error.code = E_FAIL;
   }
   return FALSE;
 }
@@ -361,4 +369,17 @@ Icon::Icon(HMODULE h_module, WORD icon_id, int width, int height) {
 
 Icon::~Icon() {
   DestroyIcon(h_icon);
+}
+
+wstring format_file_time(const FILETIME& file_time) {
+  FILETIME local_ft;
+  CHECK_SYS(FileTimeToLocalFileTime(&file_time, &local_ft));
+  SYSTEMTIME st;
+  CHECK_SYS(FileTimeToSystemTime(&local_ft, &st));
+  Buffer<wchar_t> buf(1024);
+  CHECK_SYS(GetDateFormatW(LOCALE_USER_DEFAULT, DATE_SHORTDATE, &st, NULL, buf.data(), buf.size()));
+  wstring date_str = buf.data();
+  CHECK_SYS(GetTimeFormatW(LOCALE_USER_DEFAULT, 0, &st, NULL, buf.data(), buf.size()));
+  wstring time_str = buf.data();
+  return date_str + L' ' + time_str;
 }
