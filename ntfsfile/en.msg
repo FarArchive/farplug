@@ -219,7 +219,7 @@ compress_files.progress.estimation = Estimating compression ratio: %7S / %7S = %
 compress_files.progress.estimation.size = Processed %7S from %7S [%3u%%]
 compress_files.progress.estimation.speed = at %9S
 compress_files.progress.compression = Compressing file...
-compress_files.progress.compression.ratio = Projected compression ratio: %S / %S = %u%%
+compress_files.progress.compression.ratio = Projected compression ratio: %u%% - %u%%
 compress_files.progress.defragment = Reducing number of extents from %u to %u
 compress_files.progress.defragment.clusters = Moved %Lu clusters from %Lu total
 compress_files.progress.defragment.analyze = Analyzing volume...

@@ -34,8 +34,6 @@ UnicodeString format_inf_amount_short(u64 size, bool speed = false);
 UnicodeString format_time(u64 t /* ms */);
 UnicodeString format_time2(u64 t /* ms */);
 UnicodeString format_hex_array(const Array<u8>& a);
-unsigned nod(unsigned a, unsigned b);
-unsigned nok(unsigned a, unsigned b);
 bool check_for_esc(void);
 UnicodeString word_wrap(const UnicodeString& message, unsigned wrap_bound);
 struct ModuleVersion {
@@ -67,6 +65,8 @@ extern ObjectArray<UnicodeString> speed_suffixes;
 extern ObjectArray<UnicodeString> short_size_suffixes;
 void load_suffixes();
 UnicodeString format_data_size(unsigned __int64 value, const ObjectArray<UnicodeString>& suffixes);
+
+int round(double d);
 
 class ProgressMonitor {
 private:

@@ -375,6 +375,18 @@ ObjectArray<UnicodeString> split_str(const UnicodeString& str, wchar_t split_ch)
   return list;
 }
 
+int round(double d) {
+  double a = fabs(d);
+  int res = static_cast<int>(a);
+  double frac = a - res;
+  if (frac >= 0.5)
+    res++;
+  if (d >= 0)
+    return res;
+  else
+    return -res;
+}
+
 ProgressMonitor::ProgressMonitor(bool lazy): h_scr(NULL) {
   QueryPerformanceCounter((PLARGE_INTEGER) &t_curr);
   t_start = t_curr;

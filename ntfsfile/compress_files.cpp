@@ -181,6 +181,7 @@ struct CompressionState: private NonCopyable, private ProgressMonitor, public ID
   virtual void update_defrag_ui(bool force) {
     update_progress(phase_defragment, force);
   }
+  u64 clustered_size(u64 size);
   void run_compression_thread();
   void estimate_file_size(const FindData& find_data);
   void estimate_directory_size(const UnicodeString& dir_name);
@@ -268,7 +269,7 @@ void CompressionState::do_update_ui() {
       if (local_file_proc_size == 0)
         compression_ratio = 100;
       else
-        compression_ratio = static_cast<unsigned>(static_cast<double>(local_file_comp_size) / local_file_proc_size * 100);
+        compression_ratio = round(static_cast<double>(local_file_comp_size) / local_file_proc_size * 100);
       lines += UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_ESTIMATION).data(), &format_inf_amount_short(local_file_comp_size), &format_inf_amount_short(local_file_proc_size), compression_ratio);
 
       // file percent done
@@ -276,7 +277,7 @@ void CompressionState::do_update_ui() {
       if (file_size == 0)
         file_percent_done = 100;
       else
-        file_percent_done = static_cast<unsigned>(static_cast<double>(local_file_proc_size) / file_size * 100);
+        file_percent_done = round(static_cast<double>(local_file_proc_size) / file_size * 100);
       if (file_percent_done > 100)
         file_percent_done = 100;
       lines += UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_ESTIMATION_SIZE).data(), &format_inf_amount_short(local_file_proc_size), &format_inf_amount_short(file_size), file_percent_done);
@@ -284,11 +285,11 @@ void CompressionState::do_update_ui() {
       // processing speed
       u64 time = get_time() - start_time;
       if (time)
-        lines.item(lines.size() - 1).add(L' ').add_fmt(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_ESTIMATION_SPEED).data(), &format_inf_amount_short(static_cast<unsigned>(static_cast<double>(local_file_proc_size) / time * get_time_freq()), true));
+        lines.item(lines.size() - 1).add(L' ').add_fmt(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_ESTIMATION_SPEED).data(), &format_inf_amount_short(round(static_cast<double>(local_file_proc_size) / time * get_time_freq()), true));
 
       // file progress bar
       if (file_size) {
-        unsigned len1 = static_cast<unsigned>(static_cast<double>(local_file_proc_size) / file_size * c_client_xs);
+        unsigned len1 = round(static_cast<double>(local_file_proc_size) / file_size * c_client_xs);
         if (len1 > c_client_xs)
           len1 = c_client_xs;
         unsigned len2 = c_client_xs - len1;
@@ -297,15 +298,19 @@ void CompressionState::do_update_ui() {
     }
     else if (progress_phase == phase_compress) {
       lines += far_get_msg(MSG_COMPRESS_FILES_PROGRESS_COMPRESSION);
-      if (local_file_proc_size)
-        lines += UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_COMPRESSION_RATIO).data(), &format_inf_amount_short(local_file_comp_size), &format_inf_amount_short(local_file_proc_size), static_cast<unsigned>(static_cast<double>(local_file_comp_size) / local_file_proc_size * 100));
+
+      u64 file_remain_size = file_size - local_file_proc_size;
+      int worst_ratio = round(static_cast<double>(local_file_comp_size + file_remain_size) / file_size * 100);
+      int best_ratio = round(static_cast<double>(local_file_comp_size + 0) / file_size * 100);
+      lines += UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_COMPRESSION_RATIO).data(), best_ratio, worst_ratio);
+
       lines += UnicodeString::format(L"%.*c", c_client_xs, c_pb_white);
     }
     else if (progress_phase == phase_defragment) {
       if (total_clusters) {
         lines += UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_DEFRAGMENT).data(), extents_before, extents_after);
         lines += UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_DEFRAGMENT_CLUSTERS).data(), moved_clusters, total_clusters);
-        unsigned len1 = static_cast<unsigned>(static_cast<double>(moved_clusters) / total_clusters * c_client_xs);
+        unsigned len1 = round(static_cast<double>(moved_clusters) / total_clusters * c_client_xs);
         if (len1 > c_client_xs)
           len1 = c_client_xs;
         unsigned len2 = c_client_xs - len1;
@@ -325,7 +330,7 @@ void CompressionState::do_update_ui() {
     if (total_size == 0)
       total_percent_done = 100;
     else
-      total_percent_done = static_cast<unsigned>(local_total_proc_size * 100 / total_size);
+      total_percent_done = round(static_cast<double>(local_total_proc_size) / total_size * 100);
     if (total_percent_done > 100)
       total_percent_done = 100;
     SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_CONSOLE_TITLE).data(), total_percent_done).data());
@@ -336,7 +341,7 @@ void CompressionState::do_update_ui() {
     lines += UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_FILES).data(), file_cnt, total_file_cnt);
     // total progress bar
     if (total_size) {
-      unsigned len1 = static_cast<unsigned>(static_cast<double>(local_total_proc_size) / total_size * c_client_xs);
+      unsigned len1 = round(static_cast<double>(local_total_proc_size) / total_size * c_client_xs);
       if (len1 > c_client_xs)
         len1 = c_client_xs;
       unsigned len2 = c_client_xs - len1;
@@ -355,7 +360,7 @@ void CompressionState::do_update_ui() {
 void CompressionState::estimate_file_size(const FindData& find_data) {
   unsigned __int64 file_size = find_data.size();
   if (file_size >= params.min_file_size * 1024 * 1024 && (find_data.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED) == 0) {
-    total_size += file_size;
+    total_size += clustered_size(file_size);
     total_file_cnt++;
   }
   update_progress(phase_enum);
@@ -381,6 +386,10 @@ void CompressionState::estimate_directory_size(const UnicodeString& dir_name) {
   }
 }
 
+u64 CompressionState::clustered_size(u64 size) {
+  return size / cluster_size * cluster_size + (size % cluster_size ? cluster_size : 0);
+}
+
 void CompressionState::run_compression_thread() {
   while (true) {
     HANDLE h[2] = { stop_event.handle(), proc_ready_sem.handle() };
@@ -403,14 +412,15 @@ void CompressionState::run_compression_thread() {
       NTSTATUS status = RtlCompressBuffer(COMPRESSION_FORMAT_LZNT1 | COMPRESSION_ENGINE_STANDARD, buf->io_buffer, buf->data_size, buf->comp_buffer, buffers.comp_buffer_size, cluster_size, &final_compressed_size, buf->comp_work_buffer);
       if (status != STATUS_SUCCESS && status != STATUS_BUFFER_ALL_ZEROS)
         FAIL(MsgError(L"RtlCompressBuffer"));
-      u64 comp_size = final_compressed_size / cluster_size * cluster_size + (final_compressed_size % cluster_size ? cluster_size : 0);
+      u64 comp_size = clustered_size(final_compressed_size);
+      u64 data_size = clustered_size(buf->data_size);
 
       {
         CriticalSectionLock sync(sync);
         // update stats
-        total_proc_size += buf->data_size;
-        file_comp_size += min(comp_size, buf->data_size);
-        file_proc_size += buf->data_size;
+        total_proc_size += data_size;
+        file_comp_size += min(comp_size, data_size);
+        file_proc_size += data_size;
         // mark buffer ready for I/O
         buf->state = bs_io_ready;
       }
@@ -429,7 +439,7 @@ void CompressionState::compress_file(const UnicodeString& file_name, const FindD
 
     current_file_name = file_name;
     file_comp_size = file_proc_size = 0;
-    file_size = file.size();
+    file_size = clustered_size(file.size());
     start_time = get_time();
 
     bool eof = false;
