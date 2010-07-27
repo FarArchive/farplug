@@ -431,10 +431,29 @@ void CompressionState::run_compression_thread() {
   }
 }
 
+class ReadOnlyFileAccess {
+private:
+  DWORD attr;
+  const UnicodeString& file_name;
+public:
+  ReadOnlyFileAccess(const UnicodeString& file_name): file_name(file_name) {
+    attr = GetFileAttributesW(long_path(file_name).data());
+    CHECK_SYS(attr != INVALID_FILE_ATTRIBUTES);
+    if (attr & FILE_ATTRIBUTE_READONLY)
+      CHECK_SYS(SetFileAttributesW(long_path(file_name).data(), attr & ~INVALID_FILE_ATTRIBUTES));
+  }
+  ~ReadOnlyFileAccess() {
+    if (attr & FILE_ATTRIBUTE_READONLY)
+      CHECK_SYS(SetFileAttributesW(long_path(file_name).data(), attr));
+  }
+};
+
 void CompressionState::compress_file(const UnicodeString& file_name, const FindData& find_data) {
   if (find_data.size() < params.min_file_size * 1024 * 1024 || (find_data.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED) == FILE_ATTRIBUTE_COMPRESSED)
     return;
   try {
+    ReadOnlyFileAccess ro_access(file_name);
+
     File file(file_name, FILE_READ_DATA | FILE_WRITE_DATA, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_NO_BUFFERING | FILE_FLAG_POSIX_SEMANTICS | FILE_FLAG_SEQUENTIAL_SCAN);
 
     current_file_name = file_name;
