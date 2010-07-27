@@ -140,7 +140,7 @@ enum ProgressPhase {
   phase_defragment,
 };
 
-struct CompressionState: private NonCopyable, private ProgressMonitor, public IDefragProgress {
+struct CompressFiles: private NonCopyable, private ProgressMonitor, public IDefragProgress {
   const CompressFilesParams& params;
   Log& log;
 
@@ -187,7 +187,7 @@ struct CompressionState: private NonCopyable, private ProgressMonitor, public ID
   void estimate_directory_size(const UnicodeString& dir_name);
   void compress_file(const UnicodeString& file_name, const FindData& find_data);
   void compress_directory(const UnicodeString& dir_name);
-  CompressionState(const CompressFilesParams& params, Log& log, unsigned num_th, unsigned cluster_size): ProgressMonitor(true), params(params), log(log), num_th(num_th), num_buf(num_th * 2), cluster_size(cluster_size), stop_event(true, false), io_ready_sem(num_buf, num_buf), proc_ready_sem(0, num_buf), buffers(num_buf, cluster_size) {
+  CompressFiles(const CompressFilesParams& params, Log& log, unsigned num_th, unsigned cluster_size): ProgressMonitor(true), params(params), log(log), num_th(num_th), num_buf(num_th * 2), cluster_size(cluster_size), stop_event(true, false), io_ready_sem(num_buf, num_buf), proc_ready_sem(0, num_buf), buffers(num_buf, cluster_size) {
   }
   void process(const ObjectArray<UnicodeString>& file_list);
 };
@@ -195,17 +195,17 @@ struct CompressionState: private NonCopyable, private ProgressMonitor, public ID
 
 class WorkerThreads: private NonCopyable, public vector<HANDLE> {
 private:
-  CompressionState& st;
+  CompressFiles& cf;
   void stop_threads() {
-    SetEvent(st.stop_event.handle());
+    SetEvent(cf.stop_event.handle());
     WaitForMultipleObjects(static_cast<DWORD>(size()), data(), TRUE, INFINITE);
     for (unsigned i = 0; i < size(); i++)
       CloseHandle(at(i));
   }
   static unsigned __stdcall thread_proc(void* wth_param) {
     try {
-      CompressionState* st = static_cast<CompressionState*>(wth_param);
-      st->run_compression_thread();
+      CompressFiles* cf = static_cast<CompressFiles*>(wth_param);
+      cf->run_compression_thread();
       return TRUE;
     }
     catch (...) {
@@ -213,12 +213,12 @@ private:
     }
   }
 public:
-  WorkerThreads(CompressionState& st): st(st) {
-    reserve(st.num_th);
-    for (unsigned i = 0; i < st.num_th; i++) {
+  WorkerThreads(CompressFiles& cf): cf(cf) {
+    reserve(cf.num_th);
+    for (unsigned i = 0; i < cf.num_th; i++) {
       try {
         unsigned th_id;
-        HANDLE h_thread = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, thread_proc, &st, 0, &th_id));
+        HANDLE h_thread = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, thread_proc, &cf, 0, &th_id));
         CHECK_SYS(h_thread);
         push_back(h_thread); // should not fail
       }
@@ -234,7 +234,7 @@ public:
 };
 
 
-void CompressionState::do_update_ui() {
+void CompressFiles::do_update_ui() {
   const unsigned c_client_xs = 60;
   ObjectArray<UnicodeString> lines;
 
@@ -357,7 +357,7 @@ void CompressionState::do_update_ui() {
   }
 }
 
-void CompressionState::estimate_file_size(const FindData& find_data) {
+void CompressFiles::estimate_file_size(const FindData& find_data) {
   unsigned __int64 file_size = find_data.size();
   if (file_size >= params.min_file_size * 1024 * 1024 && (find_data.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED) == 0) {
     total_size += clustered_size(file_size);
@@ -366,7 +366,7 @@ void CompressionState::estimate_file_size(const FindData& find_data) {
   update_progress(phase_enum);
 }
 
-void CompressionState::estimate_directory_size(const UnicodeString& dir_name) {
+void CompressFiles::estimate_directory_size(const UnicodeString& dir_name) {
   UnicodeString file_name;
   FileEnum file_enum(dir_name);
   while (file_enum.next()) {
@@ -386,11 +386,11 @@ void CompressionState::estimate_directory_size(const UnicodeString& dir_name) {
   }
 }
 
-u64 CompressionState::clustered_size(u64 size) {
+u64 CompressFiles::clustered_size(u64 size) {
   return size / cluster_size * cluster_size + (size % cluster_size ? cluster_size : 0);
 }
 
-void CompressionState::run_compression_thread() {
+void CompressFiles::run_compression_thread() {
   while (true) {
     HANDLE h[2] = { stop_event.handle(), proc_ready_sem.handle() };
     DWORD w = WaitForMultipleObjects(2, h, FALSE, INFINITE);
@@ -448,7 +448,7 @@ public:
   }
 };
 
-void CompressionState::compress_file(const UnicodeString& file_name, const FindData& find_data) {
+void CompressFiles::compress_file(const UnicodeString& file_name, const FindData& find_data) {
   if (find_data.size() < params.min_file_size * 1024 * 1024 || (find_data.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED) == FILE_ATTRIBUTE_COMPRESSED)
     return;
   try {
@@ -533,7 +533,7 @@ void CompressionState::compress_file(const UnicodeString& file_name, const FindD
   }
 }
 
-void CompressionState::compress_directory(const UnicodeString& dir_name) {
+void CompressFiles::compress_directory(const UnicodeString& dir_name) {
   try {
     UnicodeString file_name;
     FileEnum file_enum(dir_name);
@@ -558,7 +558,7 @@ void CompressionState::compress_directory(const UnicodeString& dir_name) {
   }
 }
 
-void CompressionState::process(const ObjectArray<UnicodeString>& file_list) {
+void CompressFiles::process(const ObjectArray<UnicodeString>& file_list) {
   {
     start_time = get_time();
     total_size = 0;
@@ -618,8 +618,8 @@ void CompressionState::process(const ObjectArray<UnicodeString>& file_list) {
 
 void plugin_compress_files(const ObjectArray<UnicodeString>& file_list, const CompressFilesParams& params, Log& log) {
   init_comp_api();
-  CompressionState st(params, log, get_cpu_count(), get_cluster_size(file_list[0]));
-  st.process(file_list);
+  CompressFiles compress_files(params, log, get_cpu_count(), get_cluster_size(file_list[0]));
+  compress_files.process(file_list);
 }
 
 
