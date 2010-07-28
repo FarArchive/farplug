@@ -440,7 +440,7 @@ public:
     attr = GetFileAttributesW(long_path(file_name).data());
     CHECK_SYS(attr != INVALID_FILE_ATTRIBUTES);
     if (attr & FILE_ATTRIBUTE_READONLY)
-      CHECK_SYS(SetFileAttributesW(long_path(file_name).data(), attr & ~INVALID_FILE_ATTRIBUTES));
+      CHECK_SYS(SetFileAttributesW(long_path(file_name).data(), FILE_ATTRIBUTE_NORMAL));
   }
   ~ReadOnlyFileAccess() {
     if (attr & FILE_ATTRIBUTE_READONLY)
@@ -460,6 +460,7 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
     file_comp_size = file_proc_size = 0;
     file_size = clustered_size(file.size());
     start_time = get_time();
+    bool good_ratio = false;
 
     bool eof = false;
     while (!eof) {
@@ -473,12 +474,15 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
         {
           CriticalSectionLock lock(sync);
           // try to predict comp. ratio
-          u64 file_remain_size = file_size - file_proc_size;
-          double pred_worst_ratio = static_cast<double>(file_comp_size + file_remain_size) / file_size * 100;
-          double pred_best_ratio = static_cast<double>(file_comp_size + 0) / file_size * 100;
-          if (pred_worst_ratio <= params.max_compression_ratio || pred_best_ratio > params.max_compression_ratio) {
-            eof = true;
-            total_proc_size += file_size - file.pos();
+          if (file_size) {
+            u64 file_remain_size = file_size - file_proc_size;
+            double worst_ratio = static_cast<double>(file_comp_size + file_remain_size) / file_size * 100;
+            double best_ratio = static_cast<double>(file_comp_size + 0) / file_size * 100;
+            good_ratio = worst_ratio <= params.max_compression_ratio;
+            if (good_ratio || best_ratio > params.max_compression_ratio) {
+              eof = true;
+              total_proc_size += file_size - file.pos();
+            }
           }
           // find buffer ready for I/O
           buf = buffers.find(bs_io_ready);
@@ -503,7 +507,7 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
         CHECK_SYS(ReleaseSemaphore(eof ? io_ready_sem.handle() : proc_ready_sem.handle(), 1, NULL));
       }
       else {
-        FAIL(MsgError(L"Unexpected thread death"));
+        FAIL(MsgError(L"Compression thread failure"));
       }
     } // end file read loop
 
@@ -514,7 +518,10 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
     // release IO buffers
     CHECK_SYS(ReleaseSemaphore(io_ready_sem.handle(), num_buf, NULL));
 
-    if (file_proc_size && static_cast<double>(file_comp_size) / file_proc_size * 100 <= params.max_compression_ratio) {
+    if (file_proc_size && static_cast<double>(file_comp_size) / file_proc_size * 100 <= params.max_compression_ratio)
+      good_ratio = true;
+
+    if (good_ratio) {
       // compress file
       update_progress(phase_compress, true);
       USHORT format = COMPRESSION_FORMAT_LZNT1;
