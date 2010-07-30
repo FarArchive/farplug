@@ -479,10 +479,8 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
             double worst_ratio = static_cast<double>(file_comp_size + file_remain_size) / file_size * 100;
             double best_ratio = static_cast<double>(file_comp_size + 0) / file_size * 100;
             good_ratio = worst_ratio <= params.max_compression_ratio;
-            if (good_ratio || best_ratio > params.max_compression_ratio) {
+            if (good_ratio || best_ratio > params.max_compression_ratio)
               eof = true;
-              total_proc_size += file_size - file.pos();
-            }
           }
           // find buffer ready for I/O
           buf = buffers.find(bs_io_ready);
@@ -517,6 +515,9 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
     }
     // release IO buffers
     CHECK_SYS(ReleaseSemaphore(io_ready_sem.handle(), num_buf, NULL));
+
+    if (file_proc_size < file_size)
+      total_proc_size += file_size - file_proc_size;
 
     if (file_proc_size && static_cast<double>(file_comp_size) / file_proc_size * 100 <= params.max_compression_ratio)
       good_ratio = true;
