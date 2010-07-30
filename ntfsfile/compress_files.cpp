@@ -77,7 +77,7 @@ struct Buffer: private NonCopyable {
   u8* io_buffer; // I/O buffer
   u8* comp_buffer; // compression buffer
   u8* comp_work_buffer;  // compression work buffer
-  Buffer(): state(bs_io_ready), data_size(0), io_buffer(nullptr), comp_buffer(nullptr), comp_work_buffer(nullptr) {
+  Buffer(): state(bs_io_ready), data_size(0), io_buffer(NULL), comp_buffer(NULL), comp_work_buffer(NULL) {
   }
   ~Buffer() {
     if (io_buffer)
@@ -128,7 +128,7 @@ public:
       if (buffers[i].state == state)
         return buffers + i;
     }
-    return nullptr;
+    return NULL;
   }
 };
 
@@ -198,7 +198,7 @@ private:
   CompressFiles& cf;
   void stop_threads() {
     SetEvent(cf.stop_event.handle());
-    WaitForMultipleObjects(static_cast<DWORD>(size()), data(), TRUE, INFINITE);
+    WaitForMultipleObjects(static_cast<DWORD>(size()), to_array(*this), TRUE, INFINITE);
     for (unsigned i = 0; i < size(); i++)
       CloseHandle(at(i));
   }
@@ -464,7 +464,7 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
 
     bool eof = false;
     while (!eof) {
-      DWORD w = WaitForMultipleObjects(static_cast<DWORD>(wait_handles.size()), wait_handles.data(), FALSE, INFINITE);
+      DWORD w = WaitForMultipleObjects(static_cast<DWORD>(wait_handles.size()), to_array(wait_handles), FALSE, INFINITE);
       CHECK_SYS(w != WAIT_FAILED);
       if (w == WAIT_OBJECT_0) {
         BREAK;

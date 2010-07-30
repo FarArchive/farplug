@@ -68,6 +68,13 @@ UnicodeString format_data_size(unsigned __int64 value, const ObjectArray<Unicode
 
 int round(double d);
 
+template<class T> const T* to_array(const vector<T>& v) {
+  if (v.size())
+    return &v[0];
+  else
+    return NULL;
+}
+
 class ProgressMonitor {
 private:
   HANDLE h_scr;
