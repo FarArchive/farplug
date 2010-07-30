@@ -1,8 +1,8 @@
-diff -ruN openssl-1.0.0/build.bat openssl-1.0.0-patched/build.bat
---- openssl-1.0.0/build.bat	1970-01-01 02:00:00.000000000 +0200
-+++ openssl-1.0.0-patched/build.bat	2010-05-24 02:13:36.718750000 +0300
-@@ -0,0 +1,23 @@
-+call vcvarsall.bat x86
+diff -ruN openssl-1.0.0a/build.bat openssl-1.0.0a-patched/build.bat
+--- openssl-1.0.0a/build.bat	1970-01-01 02:00:00.000000000 +0200
++++ openssl-1.0.0a-patched/build.bat	2010-07-30 22:34:17.962044500 +0300
+@@ -0,0 +1,26 @@
++call "%VCINSTALLDIR%\vcvarsall.bat" x86
 +perl Configure VC-WIN32
 +call ms\do_nasm debug
 +nmake -f ms\nt.mak
@@ -10,7 +10,7 @@ diff -ruN openssl-1.0.0/build.bat openssl-1.0.0-patched/build.bat
 +call ms\do_nasm
 +nmake -f ms\nt.mak
 +@if errorlevel 1 goto end
-+call vcvarsall.bat x86_amd64
++call "%VCINSTALLDIR%\vcvarsall.bat" x86_amd64
 +perl Configure VC-WIN64A
 +call ms\do_win64a debug
 +nmake -f ms\nt.mak
@@ -19,15 +19,18 @@ diff -ruN openssl-1.0.0/build.bat openssl-1.0.0-patched/build.bat
 +nmake -f ms\nt.mak
 +@if errorlevel 1 goto end
 +copy /y out32\*.lib ..\lib
++copy /y out32\*.pdb ..\lib
 +copy /y out32d\*.lib ..\lib
++copy /y out32d\*.pdb ..\lib
 +copy /y out64\*.lib ..\lib
++copy /y out64\*.pdb ..\lib
 +copy /y out64d\*.lib ..\lib
-+copy /y *.pdb ..\lib
++copy /y out64d\*.pdb ..\lib
 +xcopy /e /i /y inc32\*.h ..\include
 +:end
-diff -ruN openssl-1.0.0/Configure openssl-1.0.0-patched/Configure
---- openssl-1.0.0/Configure	2010-01-19 23:40:54.000000000 +0200
-+++ openssl-1.0.0-patched/Configure	2010-05-24 02:12:27.968750000 +0300
+diff -ruN openssl-1.0.0a/Configure openssl-1.0.0a-patched/Configure
+--- openssl-1.0.0a/Configure	2010-06-01 08:53:35.000000000 +0300
++++ openssl-1.0.0a-patched/Configure	2010-07-30 22:35:02.743294500 +0300
 @@ -491,10 +491,10 @@
  #
  # Win64 targets, WIN64I denotes IA-64 and WIN64A - AMD64
@@ -41,9 +44,9 @@ diff -ruN openssl-1.0.0/Configure openssl-1.0.0-patched/Configure
  # Unified CE target
  "debug-VC-WIN32","cl:-W3 -WX -Gs0 -GF -Gy -Zi -nologo -DOPENSSL_SYSNAME_WIN32 -DWIN32_LEAN_AND_MEAN -DL_ENDIAN -D_CRT_SECURE_NO_DEPRECATE:::WIN32::BN_LLONG RC4_INDEX EXPORT_VAR_AS_FN ${x86_gcc_opts}:${x86_asm}:win32n:win32",
  "VC-CE","cl::::WINCE::BN_LLONG RC4_INDEX EXPORT_VAR_AS_FN ${x86_gcc_opts}:${no_asm}:win32",
-diff -ruN openssl-1.0.0/ms/do_nasm.bat openssl-1.0.0-patched/ms/do_nasm.bat
---- openssl-1.0.0/ms/do_nasm.bat	2008-01-06 02:36:21.000000000 +0200
-+++ openssl-1.0.0-patched/ms/do_nasm.bat	2010-05-24 02:12:51.468750000 +0300
+diff -ruN openssl-1.0.0a/ms/do_nasm.bat openssl-1.0.0a-patched/ms/do_nasm.bat
+--- openssl-1.0.0a/ms/do_nasm.bat	2008-01-06 02:36:21.000000000 +0200
++++ openssl-1.0.0a-patched/ms/do_nasm.bat	2010-07-30 22:35:02.743294500 +0300
 @@ -1,6 +1,6 @@
  
  perl util\mkfiles.pl >MINFO
@@ -52,9 +55,9 @@ diff -ruN openssl-1.0.0/ms/do_nasm.bat openssl-1.0.0-patched/ms/do_nasm.bat
  perl util\mk1mf.pl dll nasm VC-WIN32 >ms\ntdll.mak
  perl util\mk1mf.pl nasm BC-NT >ms\bcb.mak
  
-diff -ruN openssl-1.0.0/ms/do_win64a.bat openssl-1.0.0-patched/ms/do_win64a.bat
---- openssl-1.0.0/ms/do_win64a.bat	2010-01-15 17:26:32.000000000 +0200
-+++ openssl-1.0.0-patched/ms/do_win64a.bat	2010-05-24 02:12:27.968750000 +0300
+diff -ruN openssl-1.0.0a/ms/do_win64a.bat openssl-1.0.0a-patched/ms/do_win64a.bat
+--- openssl-1.0.0a/ms/do_win64a.bat	2010-01-15 17:26:32.000000000 +0200
++++ openssl-1.0.0a-patched/ms/do_win64a.bat	2010-07-30 22:35:02.743294500 +0300
 @@ -2,7 +2,7 @@
  perl util\mkfiles.pl >MINFO
  perl ms\uplink.pl win64a > ms\uptable.asm
@@ -64,9 +67,9 @@ diff -ruN openssl-1.0.0/ms/do_win64a.bat openssl-1.0.0-patched/ms/do_win64a.bat
  perl util\mk1mf.pl dll no-asm VC-WIN64A >ms\ntdll.mak
  
  perl util\mkdef.pl 32 libeay > ms\libeay32.def
-diff -ruN openssl-1.0.0/util/mk1mf.pl openssl-1.0.0-patched/util/mk1mf.pl
---- openssl-1.0.0/util/mk1mf.pl	2009-09-20 15:47:04.000000000 +0300
-+++ openssl-1.0.0-patched/util/mk1mf.pl	2010-05-24 02:12:27.984375000 +0300
+diff -ruN openssl-1.0.0a/util/mk1mf.pl openssl-1.0.0a-patched/util/mk1mf.pl
+--- openssl-1.0.0a/util/mk1mf.pl	2009-09-20 15:47:04.000000000 +0300
++++ openssl-1.0.0a-patched/util/mk1mf.pl	2010-07-30 22:35:02.743294500 +0300
 @@ -227,8 +227,8 @@
  	$cflags.=' -DTERMIO';
  	}
@@ -87,9 +90,9 @@ diff -ruN openssl-1.0.0/util/mk1mf.pl openssl-1.0.0-patched/util/mk1mf.pl
  
  banner:
  $banner
-diff -ruN openssl-1.0.0/util/pl/VC-32.pl openssl-1.0.0-patched/util/pl/VC-32.pl
---- openssl-1.0.0/util/pl/VC-32.pl	2010-01-20 16:04:55.000000000 +0200
-+++ openssl-1.0.0-patched/util/pl/VC-32.pl	2010-05-24 02:12:27.984375000 +0300
+diff -ruN openssl-1.0.0a/util/pl/VC-32.pl openssl-1.0.0a-patched/util/pl/VC-32.pl
+--- openssl-1.0.0a/util/pl/VC-32.pl	2010-06-01 09:03:20.000000000 +0300
++++ openssl-1.0.0a-patched/util/pl/VC-32.pl	2010-07-30 22:33:36.368294500 +0300
 @@ -3,9 +3,6 @@
  # Win64 and WinCE [follow $FLAVOR variable to trace the differences].
  #
@@ -106,49 +109,47 @@ diff -ruN openssl-1.0.0/util/pl/VC-32.pl openssl-1.0.0-patched/util/pl/VC-32.pl
      $lib_cflag='/Zl' if (!$shlib);	# remove /DEFAULTLIBs from static lib
 -    $opt_cflags=$f.' /Ox';
 -    $dbg_cflags=$f.'d /Od -DDEBUG -D_DEBUG';
-+    $opt_cflags=' /MT /O2 /GL -DNDEBUG';
-+    $dbg_cflags=' /MTd /Od -DDEBUG -D_DEBUG /RTC1 /GS';
++    $opt_cflags=$f.' /O2 /GL -DNDEBUG';
++    $dbg_cflags=$f.'d /Od -DDEBUG -D_DEBUG /RTC1 /GS';
      $lflags="/nologo /subsystem:console /opt:ref";
 +    $suffix='64';
  
      *::perlasm_compile_target = sub {
  	my ($target,$source,$bname)=@_;
-@@ -116,27 +114,32 @@
+@@ -116,15 +114,23 @@
      $base_cflags= " $mf_cflag";
      my $f = $shlib?' /MD':' /MT';
      $lib_cflag='/Zl' if (!$shlib);	# remove /DEFAULTLIBs from static lib
 -    $opt_cflags=$f.' /Ox /O2 /Ob2';
 -    $dbg_cflags=$f.'d /Od -DDEBUG -D_DEBUG';
-+    $opt_cflags=' /MT /O2 /GL -DNDEBUG';
-+    $dbg_cflags=' /MTd /Od -DDEBUG -D_DEBUG /RTC1 /GS';
++    $opt_cflags=$f.' /O2 /GL -DNDEBUG';
++    $dbg_cflags=$f.'d /Od -DDEBUG -D_DEBUG /RTC1 /GS';
      $lflags="/nologo /subsystem:console /opt:ref";
 +    $suffix='32';
      }
  $mlflags='';
  
--$out_def="out32"; $out_def.='_$(TARGETCPU)' if ($FLAVOR =~ /CE/);
--$tmp_def="tmp32"; $tmp_def.='_$(TARGETCPU)' if ($FLAVOR =~ /CE/);
--$inc_def="inc32";
--
- if ($debug)
- 	{
- 	$cflags=$dbg_cflags.$base_cflags;
- 	$lflags.=" /debug";
- 	$mlflags.=' /debug';
+-$out_def ="out32";	$out_def.="dll"			if ($shlib);
++if ($debug)
++	{
 +	$suffix=$suffix.'d';
- 	}
- else
- 	{
- 	$cflags=$opt_cflags.$base_cflags;
- 	}
- 
++	}
 +$ssl="ssleay$suffix";
 +$crypto="libeay$suffix";
-+ 
-+$out_def="out$suffix";
-+$tmp_def="tmp$suffix";
-+$inc_def="inc32";
 +
++$out_def ="out$suffix";	$out_def.="dll"			if ($shlib);
+ 			$out_def.='_$(TARGETCPU)'	if ($FLAVOR =~ /CE/);
+-$tmp_def ="tmp32";	$tmp_def.="dll"			if ($shlib);
++$tmp_def ="tmp$suffix";	$tmp_def.="dll"			if ($shlib);
+ 			$tmp_def.='_$(TARGETCPU)'	if ($FLAVOR =~ /CE/);
+ $inc_def="inc32";
+ 
+@@ -139,7 +145,7 @@
+ 
+ # generate symbols.pdb unconditionally
+ $app_cflag.=" /Zi /Fd$tmp_def/app";
+-$lib_cflag.=" /Zi /Fd$tmp_def/lib";
++$lib_cflag.=" /Zi /Fd$out_def/lib$suffix";
+ $lflags.=" /debug";
+ 
  $obj='.obj';
- $asm_suffix='.asm';
- $ofile="/Fo";

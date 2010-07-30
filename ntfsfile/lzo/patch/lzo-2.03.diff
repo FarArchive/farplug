@@ -156,10 +156,10 @@ diff -ruN lzo-2.03/build.bat lzo-2.03-patched/build.bat
 --- lzo-2.03/build.bat	Thu Jan  1 02:00:00 1970
 +++ lzo-2.03-patched/build.bat	Wed Mar 11 18:11:40 2009
 @@ -0,0 +1,9 @@
-+call vcvarsall.bat x86
++call "%VCINSTALLDIR%\vcvarsall.bat" x86
 +call B\win32\vc.bat debug
 +call B\win32\vc.bat
-+call vcvarsall.bat x86_amd64
++call "%VCINSTALLDIR%\vcvarsall.bat" x86_amd64
 +call B\win64\vc.bat debug
 +call B\win64\vc.bat
 +xcopy /i /y lzo2_*.lib ..\lib
