@@ -451,6 +451,7 @@ public:
 void CompressFiles::compress_file(const UnicodeString& file_name, const FindData& find_data) {
   if (find_data.size() < params.min_file_size * 1024 * 1024 || (find_data.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED) == FILE_ATTRIBUTE_COMPRESSED)
     return;
+  bool fatal_error = false;
   try {
     ReadOnlyFileAccess ro_access(file_name);
 
@@ -462,6 +463,7 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
     start_time = get_time();
     bool good_ratio = false;
 
+    fatal_error = true;
     bool eof = false;
     while (!eof) {
       DWORD w = WaitForMultipleObjects(static_cast<DWORD>(wait_handles.size()), to_array(wait_handles), FALSE, INFINITE);
@@ -488,12 +490,22 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
           buf->state = bs_processing;
         }
 
-        if (!eof) {
-          unsigned buffer_data_size = file.read(buf->io_buffer, buffers.io_buffer_size);
-          buf->data_size = buffer_data_size;
-          eof = buffer_data_size == 0;
-
-          update_progress(phase_estimate);
+        try {
+          if (!eof) {
+            unsigned buffer_data_size = file.read(buf->io_buffer, buffers.io_buffer_size);
+            buf->data_size = buffer_data_size;
+            eof = buffer_data_size == 0;
+          }
+        }
+        catch (...) {
+          {
+            CriticalSectionLock lock(sync);
+            buf->state = bs_io_ready;
+          }
+          // signal worker threads
+          CHECK_SYS(ReleaseSemaphore(io_ready_sem.handle(), 1, NULL));
+          fatal_error = false;
+          throw;
         }
 
         {
@@ -507,6 +519,8 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
       else {
         FAIL(MsgError(L"Compression thread failure"));
       }
+
+      update_progress(phase_estimate);
     } // end file read loop
 
     // wait for all buffers to be processed
@@ -515,6 +529,8 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
     }
     // release IO buffers
     CHECK_SYS(ReleaseSemaphore(io_ready_sem.handle(), num_buf, NULL));
+
+    fatal_error = false;
 
     if (file_proc_size < file_size)
       total_proc_size += file_size - file_proc_size;
@@ -538,31 +554,36 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
   catch (const Error& e) {
     log.add(file_name, e.message());
     err_cnt++;
+    if (fatal_error)
+      throw;
   }
 }
 
 void CompressFiles::compress_directory(const UnicodeString& dir_name) {
-  try {
-    UnicodeString file_name;
-    FileEnum file_enum(dir_name);
-    while (file_enum.next()) {
-      file_name = add_trailing_slash(dir_name) + file_enum.data().cFileName;
-
-      if (file_enum.data().dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
-      }
-      else if (file_enum.data().is_dir()) {
-        compress_directory(file_name);
-      }
-      else {
-        compress_file(file_name, file_enum.data());
-      }
-
-      update_progress(phase_compress);
+  UnicodeString file_name;
+  FileEnum file_enum(dir_name);
+  while (true) {
+    try {
+      if (!file_enum.next())
+        break;
     }
-  }
-  catch (const Error& e) {
-    log.add(dir_name, e.message());
-    err_cnt++;
+    catch (const Error& e) {
+      log.add(dir_name, e.message());
+      err_cnt++;
+      break;
+    }
+    file_name = add_trailing_slash(dir_name) + file_enum.data().cFileName;
+
+    if (file_enum.data().dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+    }
+    else if (file_enum.data().is_dir()) {
+      compress_directory(file_name);
+    }
+    else {
+      compress_file(file_name, file_enum.data());
+    }
+
+    update_progress(phase_compress);
   }
 }
 
