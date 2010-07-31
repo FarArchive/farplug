@@ -160,6 +160,26 @@ public:
     Far::update_panel(PANEL_ACTIVE, false);
     Far::update_panel(PANEL_PASSIVE, false);
   }
+
+  void delete_files(const PluginPanelItem* panel_items, int items_number, int op_mode) {
+    if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
+
+    bool show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
+    if (show_dialog) {
+      if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_DELETE_DLG_CONFIRM), 0, FMSG_MB_OKCANCEL) != 0)
+        FAIL(E_ABORT);
+    }
+
+    vector<UInt32> indices;
+    indices.reserve(items_number);
+    for (int i = 0; i < items_number; i++) {
+      indices.push_back(panel_items[i].UserData);
+    }
+    archive.delete_files(indices);
+
+    Far::update_panel(PANEL_ACTIVE, false);
+    Far::update_panel(PANEL_PASSIVE, false);
+  }
 };
 
 int WINAPI GetMinFarVersion(void) {
@@ -247,7 +267,8 @@ int WINAPI PutFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsN
 
 int WINAPI DeleteFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsNumber,int OpMode) {
   FAR_ERROR_HANDLER_BEGIN;
-  return FALSE;
+  reinterpret_cast<Plugin*>(hPlugin)->delete_files(PanelItem, ItemsNumber, OpMode);
+  return TRUE;
   FAR_ERROR_HANDLER_END(return FALSE, return FALSE, (OpMode & OPM_SILENT) != 0);
 }
 

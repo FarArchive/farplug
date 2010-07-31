@@ -152,14 +152,12 @@ public:
 private:
   void enum_deleted_indices(UInt32 file_index, vector<UInt32>& indices) {
     const FileInfo& file_info = archive.file_list[file_index];
+    indices.push_back(file_index);
     if (file_info.is_dir()) {
       FileIndexRange dir_list = archive.get_dir_list(file_index);
       for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
         enum_deleted_indices(file_index, indices);
       });
-    }
-    else {
-      indices.push_back(file_index);
     }
   }
 

@@ -18,6 +18,9 @@ update.dlg.arc_path = &Add files to archive:
 update.dlg.level = Compression &level:
 update.dlg.method = Compression &method:
 
+# Delete files
+delete.dlg.confirm = Do you want to delete selected files?
+
 # Password dialog
 password.title = Enter password
 password.password = Password:
