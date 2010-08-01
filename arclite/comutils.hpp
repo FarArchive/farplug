@@ -123,7 +123,8 @@ public:
   void detach(PROPVARIANT* var) {
     if (var->vt != VT_EMPTY)
       CHECK_COM(PropVariantClear(var));
-    CHECK_COM(PropVariantCopy(var, this));
+    *var = *this;
+    vt = VT_EMPTY;
   }
   PropVariant& operator=(const wstring& val) {
     clear();

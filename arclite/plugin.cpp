@@ -128,6 +128,8 @@ public:
       CHECK(arc_format);
       options.arc_path = options.arc_path + L"." + arc_format->extension;
     }
+    options.create = is_empty();
+    options.arc_type = L"7z";
     options.level = 5;
     options.method = L"LZMA";
     options.move_files = move != 0;

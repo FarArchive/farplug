@@ -213,7 +213,7 @@ public:
     }
   }
 
-  void update(const PluginPanelItem* panel_items, unsigned items_number, const wstring& arc_name, const wstring& arc_type) {
+  void update(const PluginPanelItem* panel_items, unsigned items_number, const wstring& arc_name, const UpdateOptions& options) {
     UInt32 new_index = archive.num_indices;
     UInt32 dst_dir_index = archive.is_empty() ? c_root_index : archive.find_dir(dst_dir);
     for (unsigned i = 0; i < items_number; i++) {
@@ -226,7 +226,7 @@ public:
 
     ComObject<IOutArchive> out_arc;
     if (archive.is_empty()) {
-      const ArcFormat* arc_format = ArcAPI::get()->find_format(arc_type);
+      const ArcFormat* arc_format = ArcAPI::get()->find_format(options.arc_type);
       const ArcLib& arc_lib = ArcAPI::get()->libs()[arc_format->lib_index];
       CHECK(arc_format);
       CHECK_COM(arc_lib.CreateObject(reinterpret_cast<const GUID*>(arc_format->class_id.data()), &IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
@@ -235,13 +235,28 @@ public:
       CHECK_COM(archive.in_arc->QueryInterface(IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
     }
 
+    ComObject<ISetProperties> set_props;
+    if (SUCCEEDED(out_arc->QueryInterface(IID_ISetProperties, reinterpret_cast<void**>(&set_props)))) {
+      vector<const wchar_t*> names;
+      PropVariant var;
+      vector<PROPVARIANT> values;
+      names.push_back(L"x");
+      var = options.level;
+      values.push_back(var);
+      if (options.arc_type == L"7z") {
+        names.push_back(L"0");
+        var = options.method;
+        values.push_back(var);
+      }
+      CHECK_COM(set_props->SetProperties(names.data(), values.data(), names.size()));
+    }
+
     ComObject<FileUpdateStream> update_stream(new FileUpdateStream(arc_name, error));
     HRESULT res = out_arc->UpdateItems(update_stream, new_index, this);
     if (error.code != NO_ERROR)
       throw error;
     CHECK_COM(res);
   }
-
 };
 
 
@@ -251,7 +266,7 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
   archive_dir = extract_file_path(options.arc_path);
   wcscpy(archive_file_info.cFileName, extract_file_name(options.arc_path).c_str());
   ComObject<ArchiveUpdater> updater(new ArchiveUpdater(*this, src_dir, wstring()));
-  updater->update(panel_items, items_number, get_file_name(), options.arc_type);
+  updater->update(panel_items, items_number, get_file_name(), options);
   reopen();
 }
 
@@ -259,7 +274,7 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
   wstring temp_arc_name = get_temp_file_name();
   try {
     ComObject<ArchiveUpdater> updater(new ArchiveUpdater(*this, src_dir, dst_dir));
-    updater->update(panel_items, items_number, temp_arc_name, options.arc_type);
+    updater->update(panel_items, items_number, temp_arc_name, options);
     close();
     CHECK_SYS(MoveFileExW(temp_arc_name.c_str(), get_file_name().c_str(), MOVEFILE_REPLACE_EXISTING));
   }
