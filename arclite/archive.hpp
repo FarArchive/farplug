@@ -23,13 +23,8 @@ struct ArcLib {
   HRESULT get_bytes_prop(UInt32 index, PROPID prop_id, string& value) const;
 };
 
-struct ArcLibs: public list<ArcLib> {
-  ~ArcLibs();
-  void load(const wstring& path);
-};
-
 struct ArcFormat {
-  const ArcLib* arc_lib;
+  unsigned lib_index;
   wstring name;
   string class_id;
   bool update;
@@ -37,9 +32,27 @@ struct ArcFormat {
   wstring extension;
 };
 
-struct ArcFormats: public list<ArcFormat> {
-  void load(const ArcLibs& arc_libs);
-  const ArcFormat* find_by_name(const wstring& arc_name) const;
+typedef vector<ArcLib> ArcLibs;
+typedef vector<ArcFormat> ArcFormats;
+
+class ArcAPI {
+private:
+  ArcLibs arc_libs;
+  ArcFormats arc_formats;
+  static ArcAPI* arc_api;
+  ArcAPI() {}
+  ~ArcAPI();
+  void load();
+public:
+  static ArcAPI* get();
+  const ArcLibs& libs() const {
+    return arc_libs;
+  }
+  const ArcFormats& formats() const {
+    return arc_formats;
+  }
+  const ArcFormat* find_format(const wstring& name) const;
+  static void free();
 };
 
 struct FileInfo {
@@ -62,8 +75,7 @@ typedef vector<UInt32> FileIndex;
 typedef pair<FileIndex::const_iterator, FileIndex::const_iterator> FileIndexRange;
 
 class Archive {
-private:
-  const ArcFormats& arc_formats;
+protected:
   ComObject<IInArchive> in_arc;
   vector<ArcFormat> formats;
   wstring archive_dir;
@@ -75,7 +87,6 @@ private:
   wstring get_default_name() const;
   void make_index();
 public:
-  Archive(const ArcFormats& arc_formats);
   bool open(const wstring& file_path);
   void close();
   void reopen();

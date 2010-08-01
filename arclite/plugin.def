@@ -16,3 +16,4 @@ EXPORTS
   DeleteFilesW
   ProcessKeyW
   ConfigureW
+  ExitFARW

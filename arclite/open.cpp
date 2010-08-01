@@ -197,8 +197,8 @@ public:
     return true;
   }
 
-  bool open_archive(const ArcFormat& format, IInStream* in_stream, ComObject<IInArchive>& archive) {
-    CHECK_COM(format.arc_lib->CreateObject(reinterpret_cast<const GUID*>(format.class_id.data()), &IID_IInArchive, reinterpret_cast<void**>(&archive)));
+  bool open_archive(const ArcLib& arc_lib, const ArcFormat& format, IInStream* in_stream, ComObject<IInArchive>& archive) {
+    CHECK_COM(arc_lib.CreateObject(reinterpret_cast<const GUID*>(format.class_id.data()), &IID_IInArchive, reinterpret_cast<void**>(&archive)));
 
     CHECK_COM(in_stream->Seek(0, STREAM_SEEK_SET, NULL));
 
@@ -215,9 +215,11 @@ public:
   void detect(IInStream* in_stream, vector<ComObject<IInArchive>>& archives, vector<vector<ArcFormat>>& formats) {
     vector<ArcFormat> parent_format;
     if (!formats.empty()) parent_format = formats.back();
-    for_each(archive.arc_formats.begin(), archive.arc_formats.end(), [&] (const ArcFormat& arc_format) {
+    const ArcLibs& arc_libs = ArcAPI::get()->libs();
+    const ArcFormats& arc_formats = ArcAPI::get()->formats();
+    for_each(arc_formats.begin(), arc_formats.end(), [&] (const ArcFormat& arc_format) {
       ComObject<IInArchive> archive;
-      if (open_archive(arc_format, in_stream, archive)) {
+      if (open_archive(arc_libs[arc_format.lib_index], arc_format, in_stream, archive)) {
         archives.push_back(archive);
         vector<ArcFormat> new_format(parent_format);
         new_format.push_back(arc_format);
@@ -236,14 +238,15 @@ public:
   }
 
   void reopen() {
+    const ArcLibs& arc_libs = ArcAPI::get()->libs();
     ComObject<ArchiveOpenStream> stream(new ArchiveOpenStream(*this, archive.get_file_name()));
     vector<ArcFormat>::const_iterator format = archive.formats.begin();
-    CHECK(open_archive(*format, stream, archive.in_arc));
+    CHECK(open_archive(arc_libs[format->lib_index], *format, stream, archive.in_arc));
     format++;
     while (format != archive.formats.end()) {
       ComObject<IInStream> sub_stream;
       CHECK(open_sub_stream(archive.in_arc, sub_stream));
-      CHECK(open_archive(*format, stream, archive.in_arc));
+      CHECK(open_archive(arc_libs[format->lib_index], *format, stream, archive.in_arc));
       format++;
     }
   }

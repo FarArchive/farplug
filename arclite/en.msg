@@ -10,13 +10,31 @@ extract.dlg.oo = When destination file exists:
 extract.dlg.oo_ask = &Ask
 extract.dlg.oo_overwrite = &Overwrite
 extract.dlg.oo_skip = &Skip
-extract.dlg.move_files = &Move files
+extract.dlg.move_files = &Delete files after archiving
 
 # Update dialog
 update.dlg.title = Add files to archive
-update.dlg.arc_path = &Add files to archive:
-update.dlg.level = Compression &level:
-update.dlg.method = Compression &method:
+update.dlg.arc_path = &Archive path:
+update.dlg.arc_type = Select archiver:
+update.dlg.level = Compression level:
+update.dlg.method = Compression method:
+
+# Archive types
+compression.archive.7z = &7z
+compression.archive.zip = &zip
+
+# Compression levels
+compression.level.store = &Store
+compression.level.fastest = Fas&test
+compression.level.fast = &Fast
+compression.level.normal = &Normal
+compression.level.maximum = &Maximum
+compression.level.ultra = &Ultra
+
+# Compression methods
+compression.method.lzma = &LZMA
+compression.method.lzma2 = LZMA&2
+compression.method.ppmd = &PPMD
 
 # Delete files
 delete.dlg.confirm = Do you want to delete selected files?
@@ -46,14 +64,6 @@ log.title = Operation log
 log.info = Operation completed with errors. Do you want to review log file?
 log.close = &Close
 log.show = Show &log
-
-# Compression levels
-compression.level.store = Store
-compression.level.fastest = Fastest
-compression.level.fast = Fast
-compression.level.normal = Normal
-compression.level.maximum = Maximum
-compression.level.ultra = Ultra
 
 # Progress messages
 progress.extract = Extracting files...

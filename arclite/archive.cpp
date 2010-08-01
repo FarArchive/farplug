@@ -44,7 +44,25 @@ HRESULT ArcLib::get_bytes_prop(UInt32 index, PROPID prop_id, string& value) cons
   return S_OK;
 }
 
-void ArcLibs::load(const wstring& path) {
+
+ArcAPI* ArcAPI::arc_api = nullptr;
+
+ArcAPI::~ArcAPI() {
+  for_each(arc_libs.begin(), arc_libs.end(), [&] (const ArcLib& arc_lib) {
+    FreeLibrary(arc_lib.h_module);
+  });
+}
+
+ArcAPI* ArcAPI::get() {
+  if (arc_api == nullptr) {
+    arc_api = new ArcAPI();
+    arc_api->load();
+  }
+  return arc_api;
+}
+
+void ArcAPI::load() {
+  wstring path = Far::get_plugin_module_path();
   FileEnum file_enum(path);
   while (file_enum.next()) {
     ArcLib arc_lib;
@@ -57,51 +75,46 @@ void ArcLibs::load(const wstring& path) {
       arc_lib.GetHandlerProperty = reinterpret_cast<ArcLib::FGetHandlerProperty>(GetProcAddress(arc_lib.h_module, "GetHandlerProperty"));
       arc_lib.GetHandlerProperty2 = reinterpret_cast<ArcLib::FGetHandlerProperty2>(GetProcAddress(arc_lib.h_module, "GetHandlerProperty2"));
       if (arc_lib.CreateObject && arc_lib.GetNumberOfFormats && arc_lib.GetHandlerProperty2) {
-        push_back(arc_lib);
+        arc_libs.push_back(arc_lib);
       }
       else {
         FreeLibrary(arc_lib.h_module);
       }
     }
   }
-}
-
-ArcLibs::~ArcLibs() {
-  for (const_iterator arc_lib = begin(); arc_lib != end(); arc_lib++) {
-    FreeLibrary(arc_lib->h_module);
-  }
-  clear();
-}
-
-void ArcFormats::load(const ArcLibs& arc_libs) {
-  for (ArcLibs::const_iterator arc_lib = arc_libs.begin(); arc_lib != arc_libs.end(); arc_lib++) {
+  for (unsigned i = 0; i < arc_libs.size(); i++) {
+    const ArcLib& arc_lib = arc_libs[i];
     UInt32 num_formats;
-    if (arc_lib->GetNumberOfFormats(&num_formats) == S_OK) {
+    if (arc_lib.GetNumberOfFormats(&num_formats) == S_OK) {
       for (UInt32 idx = 0; idx < num_formats; idx++) {
         ArcFormat arc_format;
-        arc_format.arc_lib = &*arc_lib;
-        CHECK_COM(arc_lib->get_string_prop(idx, NArchive::kName, arc_format.name));
-        CHECK_COM(arc_lib->get_bytes_prop(idx, NArchive::kClassID, arc_format.class_id));
-        CHECK_COM(arc_lib->get_bool_prop(idx, NArchive::kUpdate, arc_format.update));
-        arc_lib->get_bytes_prop(idx, NArchive::kStartSignature, arc_format.start_signature);
-        arc_lib->get_string_prop(idx, NArchive::kExtension, arc_format.extension);
-        push_back(arc_format);
+        arc_format.lib_index = i;
+        CHECK_COM(arc_lib.get_string_prop(idx, NArchive::kName, arc_format.name));
+        CHECK_COM(arc_lib.get_bytes_prop(idx, NArchive::kClassID, arc_format.class_id));
+        CHECK_COM(arc_lib.get_bool_prop(idx, NArchive::kUpdate, arc_format.update));
+        arc_lib.get_bytes_prop(idx, NArchive::kStartSignature, arc_format.start_signature);
+        arc_lib.get_string_prop(idx, NArchive::kExtension, arc_format.extension);
+        arc_formats.push_back(arc_format);
       }
     }
   }
 }
 
-const ArcFormat* ArcFormats::find_by_name(const wstring& arc_name) const {
-  for (const_iterator arc_format = begin(); arc_format != end(); arc_format++) {
-    if (arc_format->name == arc_name)
-      return &*arc_format;
+const ArcFormat* ArcAPI::find_format(const wstring& name) const {
+  for (unsigned i = 0; i < arc_formats.size(); i++) {
+    if (arc_formats[i].name == name)
+      return &arc_formats[i];
   }
   return nullptr;
 }
 
-
-Archive::Archive(const ArcFormats& arc_formats): arc_formats(arc_formats) {
+void ArcAPI::free() {
+  if (arc_api) {
+    delete arc_api;
+    arc_api = nullptr;
+  }
 }
+
 
 wstring Archive::get_default_name() const {
   wstring name = archive_file_info.cFileName;
