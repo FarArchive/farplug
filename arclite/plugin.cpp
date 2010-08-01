@@ -6,6 +6,7 @@
 #include "common_types.hpp"
 #include "ui.hpp"
 #include "archive.hpp"
+#include "options.hpp"
 
 class Plugin: private Archive {
 private:
@@ -78,22 +79,25 @@ public:
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
     ExtractOptions options;
     options.dst_dir = *dest_path;
-    options.ignore_errors = false;
-    options.overwrite = ooAsk;
+    options.ignore_errors = g_options.extract_ignore_errors;
+    options.overwrite = static_cast<OverwriteOption>(g_options.extract_overwrite);
     options.move_enabled = updatable();
     options.move_files = move != 0 && options.move_enabled;
     options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
     options.use_tmp_files = (op_mode & (OPM_FIND | OPM_VIEW | OPM_QUICKVIEW)) != 0;
-    options.ignore_errors = (op_mode & (OPM_FIND | OPM_QUICKVIEW)) != 0;
-    if (!options.show_dialog) {
+    if (op_mode & (OPM_FIND | OPM_QUICKVIEW))
+      options.ignore_errors = true;
+    if (!options.show_dialog)
       options.overwrite = ooOverwrite;
-    }
     if (options.show_dialog) {
       if (!extract_dialog(options)) FAIL(E_ABORT);
       if (options.dst_dir != *dest_path) {
         extract_dir = options.dst_dir;
         *dest_path = extract_dir.c_str();
       }
+      g_options.extract_ignore_errors = options.ignore_errors;
+      g_options.extract_overwrite = options.overwrite;
+      g_options.save();
     }
     vector<UInt32> indices;
     UInt32 src_dir_index = find_dir(current_dir);
@@ -119,7 +123,8 @@ public:
   void put_files(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t* src_path, int op_mode) {
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
     UpdateOptions options;
-    if (is_empty()) {
+    options.create = !in_arc;
+    if (options.create) {
       if (items_number == 1 || is_root_path(src_path))
         options.arc_path = add_trailing_slash(src_path) + panel_items[0].FindData.lpwszFileName;
       else
@@ -128,17 +133,20 @@ public:
       CHECK(arc_format);
       options.arc_path = options.arc_path + L"." + arc_format->extension;
     }
-    options.create = is_empty();
-    options.arc_type = L"7z";
-    options.level = 5;
-    options.method = L"LZMA";
+    options.arc_type = g_options.update_arc_type;
+    options.level = g_options.update_level;
+    options.method = g_options.update_method;
     options.move_files = move != 0;
     options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
     if (options.show_dialog) {
       if (!update_dialog(options)) FAIL(E_ABORT);
+      g_options.update_arc_type = options.arc_type;
+      g_options.update_level = options.level;
+      g_options.update_method = options.method;
+      g_options.save();
     }
 
-    if (is_empty())
+    if (options.create)
       create(src_path, panel_items, items_number, options);
     else
       update(src_path, panel_items, items_number, current_dir, options);
@@ -178,6 +186,7 @@ int WINAPI GetMinFarVersionW(void) {
 
 void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info) {
   Far::init(Info);
+  g_options.load();
 }
 
 void WINAPI GetPluginInfoW(struct PluginInfo *Info) {

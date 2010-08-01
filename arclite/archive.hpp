@@ -99,9 +99,6 @@ public:
   wstring get_file_name() const {
     return add_trailing_slash(archive_dir) + archive_file_info.cFileName;
   }
-  bool is_empty() const {
-    return !in_arc;
-  }
   wstring get_temp_file_name() const;
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);

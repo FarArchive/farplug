@@ -215,7 +215,7 @@ public:
 
   void update(const PluginPanelItem* panel_items, unsigned items_number, const wstring& arc_name, const UpdateOptions& options) {
     UInt32 new_index = archive.num_indices;
-    UInt32 dst_dir_index = archive.is_empty() ? c_root_index : archive.find_dir(dst_dir);
+    UInt32 dst_dir_index = options.create ? c_root_index : archive.find_dir(dst_dir);
     for (unsigned i = 0; i < items_number; i++) {
       const FAR_FIND_DATA& find_data = panel_items[i].FindData;
       scan_file(wstring(), get_find_data(add_trailing_slash(src_dir) + find_data.lpwszFileName), dst_dir_index, new_index);
@@ -225,7 +225,7 @@ public:
     }
 
     ComObject<IOutArchive> out_arc;
-    if (archive.is_empty()) {
+    if (options.create) {
       const ArcFormat* arc_format = ArcAPI::get()->find_format(options.arc_type);
       const ArcLib& arc_lib = ArcAPI::get()->libs()[arc_format->lib_index];
       CHECK(arc_format);
