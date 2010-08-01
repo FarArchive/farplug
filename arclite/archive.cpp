@@ -100,12 +100,12 @@ void ArcAPI::load() {
   }
 }
 
-const ArcFormat* ArcAPI::find_format(const wstring& name) const {
+const ArcFormat& ArcAPI::find_format(const wstring& name) const {
   for (unsigned i = 0; i < arc_formats.size(); i++) {
     if (arc_formats[i].name == name)
-      return &arc_formats[i];
+      return arc_formats[i];
   }
-  return nullptr;
+  CHECK(false);
 }
 
 void ArcAPI::free() {

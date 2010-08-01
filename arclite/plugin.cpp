@@ -125,15 +125,19 @@ public:
     UpdateOptions options;
     options.create = !in_arc;
     if (options.create) {
-      if (items_number == 1 || is_root_path(src_path))
-        options.arc_path = add_trailing_slash(src_path) + panel_items[0].FindData.lpwszFileName;
+      wstring arc_dir;
+      if (!Far::get_panel_dir(PANEL_PASSIVE, arc_dir))
+        arc_dir = src_path;
+      if (items_number == 1 || is_root_path(arc_dir))
+        options.arc_path = add_trailing_slash(arc_dir) + panel_items[0].FindData.lpwszFileName;
       else
-        options.arc_path = add_trailing_slash(src_path) + extract_file_name(src_path);
-      const ArcFormat* arc_format = ArcAPI::get()->find_format(L"7z");
-      CHECK(arc_format);
-      options.arc_path = options.arc_path + L"." + arc_format->extension;
+        options.arc_path = add_trailing_slash(arc_dir) + extract_file_name(src_path);
+      options.arc_type = g_options.update_arc_type;
+      options.arc_path += L"." + ArcAPI::get()->find_format(options.arc_type).extension;
     }
-    options.arc_type = g_options.update_arc_type;
+    else {
+      options.arc_type = formats.back().name;
+    }
     options.level = g_options.update_level;
     options.method = g_options.update_method;
     options.move_files = move != 0;

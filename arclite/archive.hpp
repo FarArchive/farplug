@@ -51,7 +51,7 @@ public:
   const ArcFormats& formats() const {
     return arc_formats;
   }
-  const ArcFormat* find_format(const wstring& name) const;
+  const ArcFormat& find_format(const wstring& name) const;
   static void free();
 };
 

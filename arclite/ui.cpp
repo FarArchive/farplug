@@ -5,6 +5,7 @@
 #include "sysutils.hpp"
 #include "common_types.hpp"
 #include "ui.hpp"
+#include "archive.hpp"
 
 wstring get_error_dlg_title() {
   return Far::get_msg(MSG_PLUGIN_NAME);
@@ -405,6 +406,34 @@ private:
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
+  wstring old_ext;
+  wstring get_ext(const wstring& arc_type) {
+    wstring ext = L"." + ArcAPI::get()->find_format(arc_type).extension;
+    size_t pos = ext.find(L' ');
+    if (pos != wstring::npos)
+      ext.erase(pos);
+    return ext;
+  }
+  bool change_extension(const wstring& new_ext) {
+    if (old_ext.size() == 0 || new_ext.size() == 0)
+      return false;
+
+    wstring arc_path = get_text(arc_path_ctrl_id);
+    wstring file_name = extract_file_name(strip(unquote(strip(arc_path))));
+    size_t pos = file_name.find_last_of(L'.');
+    if (pos == wstring::npos)
+      return false;
+    wstring ext = file_name.substr(pos);
+    if (_wcsicmp(old_ext.c_str(), ext.c_str()) != 0)
+      return false;
+    pos = arc_path.find_last_of(ext) - (ext.size() - 1);
+    arc_path.replace(pos, ext.size(), new_ext);
+    set_text(arc_path_ctrl_id, arc_path);
+
+    old_ext = new_ext;
+    return true;
+  }
+
   LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
     if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
       if (options.create) {
@@ -438,17 +467,19 @@ private:
     }
     else if (msg == DN_BTNCLICK && param1 >= arc_type_ctrl_id && param1 < arc_type_ctrl_id + static_cast<int>(ARRAYSIZE(c_archive_types))) {
       if (param2) {
-        bool enabled = wstring(c_archive_types[param1 - arc_type_ctrl_id].value) == L"7z";
+        wstring arc_type = c_archive_types[param1 - arc_type_ctrl_id].value;
+        bool enabled = arc_type == L"7z";
         for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
           enable(i, enabled);
         }
+        change_extension(get_ext(arc_type));
       }
     }
     return default_dialog_proc(msg, param1, param2);
   }
 
 public:
-  UpdateDialog(UpdateOptions& options): Far::Dialog(Far::get_msg(MSG_UPDATE_DLG_TITLE), c_client_xs), options(options) {
+  UpdateDialog(UpdateOptions& options): Far::Dialog(Far::get_msg(MSG_UPDATE_DLG_TITLE), c_client_xs), options(options), old_ext(get_ext(options.arc_type)) {
   }
 
   bool show() {

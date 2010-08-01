@@ -226,10 +226,9 @@ public:
 
     ComObject<IOutArchive> out_arc;
     if (options.create) {
-      const ArcFormat* arc_format = ArcAPI::get()->find_format(options.arc_type);
-      const ArcLib& arc_lib = ArcAPI::get()->libs()[arc_format->lib_index];
-      CHECK(arc_format);
-      CHECK_COM(arc_lib.CreateObject(reinterpret_cast<const GUID*>(arc_format->class_id.data()), &IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
+      const ArcFormat& arc_format = ArcAPI::get()->find_format(options.arc_type);
+      const ArcLib& arc_lib = ArcAPI::get()->libs()[arc_format.lib_index];
+      CHECK_COM(arc_lib.CreateObject(reinterpret_cast<const GUID*>(arc_format.class_id.data()), &IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
     }
     else {
       CHECK_COM(archive.in_arc->QueryInterface(IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
@@ -262,7 +261,7 @@ public:
 
 void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options) {
   num_indices = 0;
-  formats.assign(1, *ArcAPI::get()->find_format(options.arc_type));
+  formats.assign(1, ArcAPI::get()->find_format(options.arc_type));
   archive_dir = extract_file_path(options.arc_path);
   wcscpy(archive_file_info.cFileName, extract_file_name(options.arc_path).c_str());
   ComObject<ArchiveUpdater> updater(new ArchiveUpdater(*this, src_dir, wstring()));
