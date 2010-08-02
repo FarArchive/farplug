@@ -123,8 +123,8 @@ public:
   void put_files(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t* src_path, int op_mode) {
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
     UpdateOptions options;
-    options.create = !in_arc;
-    if (options.create) {
+    bool new_arc = !in_arc;
+    if (new_arc) {
       wstring arc_dir;
       if (!Far::get_panel_dir(PANEL_PASSIVE, arc_dir))
         arc_dir = src_path;
@@ -143,14 +143,14 @@ public:
     options.move_files = move != 0;
     options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
     if (options.show_dialog) {
-      if (!update_dialog(options)) FAIL(E_ABORT);
+      if (!update_dialog(new_arc, options)) FAIL(E_ABORT);
       g_options.update_arc_type = options.arc_type;
       g_options.update_level = options.level;
       g_options.update_method = options.method;
       g_options.save();
     }
 
-    if (options.create)
+    if (new_arc)
       create(src_path, panel_items, items_number, options);
     else
       update(src_path, panel_items, items_number, current_dir, options);

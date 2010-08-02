@@ -52,6 +52,7 @@ public:
     return arc_formats;
   }
   const ArcFormat& find_format(const wstring& name) const;
+  void create_out_archive(const wstring& format, IOutArchive** out_arc);
   static void free();
 };
 
@@ -73,6 +74,11 @@ typedef vector<FileInfo> FileList;
 const UInt32 c_root_index = -1;
 typedef vector<UInt32> FileIndex;
 typedef pair<FileIndex::const_iterator, FileIndex::const_iterator> FileIndexRange;
+struct FileIndexInfo {
+  wstring rel_path;
+  FindData find_data;
+};
+typedef map<UInt32, FileIndexInfo> FileIndexMap;
 
 class Archive {
 protected:
@@ -86,6 +92,10 @@ protected:
   wstring password;
   wstring get_default_name() const;
   void make_index();
+  UInt32 scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
+  void scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
+  void prepare_file_index_map(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
+  void set_properties(IOutArchive* out_arc, const UpdateOptions& options);
 public:
   bool open(const wstring& file_path);
   void close();

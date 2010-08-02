@@ -108,6 +108,12 @@ const ArcFormat& ArcAPI::find_format(const wstring& name) const {
   CHECK(false);
 }
 
+void ArcAPI::create_out_archive(const wstring& format, IOutArchive** out_arc) {
+  const ArcFormat& arc_format = find_format(format);
+  const ArcLib& arc_lib = arc_libs[arc_format.lib_index];
+  CHECK_COM(arc_lib.CreateObject(reinterpret_cast<const GUID*>(arc_format.class_id.data()), &IID_IOutArchive, reinterpret_cast<void**>(out_arc)));
+}
+
 void ArcAPI::free() {
   if (arc_api) {
     delete arc_api;

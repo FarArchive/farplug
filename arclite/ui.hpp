@@ -74,7 +74,6 @@ RetryDialogResult error_retry_dialog(const wstring& file_path, const Error& e);
 void show_error_log(const ErrorLog& error_log);
 
 struct UpdateOptions {
-  bool create;
   wstring arc_path;
   wstring arc_type;
   unsigned level;
@@ -83,4 +82,4 @@ struct UpdateOptions {
   bool show_dialog;
 };
 
-bool update_dialog(UpdateOptions& options);
+bool update_dialog(bool new_arc, UpdateOptions& options);

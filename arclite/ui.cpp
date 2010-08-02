@@ -396,6 +396,7 @@ private:
     c_client_xs = 60
   };
 
+  bool new_arc;
   UpdateOptions& options;
 
   int arc_path_ctrl_id;
@@ -436,7 +437,7 @@ private:
 
   LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
     if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
-      if (options.create) {
+      if (new_arc) {
         options.arc_path = unquote(strip(get_text(arc_path_ctrl_id)));
         for(unsigned i = 0; i < ARRAYSIZE(c_archive_types); i++) {
           if (get_check(arc_type_ctrl_id + i)) {
@@ -479,11 +480,11 @@ private:
   }
 
 public:
-  UpdateDialog(UpdateOptions& options): Far::Dialog(Far::get_msg(MSG_UPDATE_DLG_TITLE), c_client_xs), options(options), old_ext(get_ext(options.arc_type)) {
+  UpdateDialog(bool new_arc, UpdateOptions& options): Far::Dialog(Far::get_msg(MSG_UPDATE_DLG_TITLE), c_client_xs), new_arc(new_arc), options(options), old_ext(get_ext(options.arc_type)) {
   }
 
   bool show() {
-    if (options.create) {
+    if (new_arc) {
       label(Far::get_msg(MSG_UPDATE_DLG_ARC_PATH));
       new_line();
       arc_path_ctrl_id = edit_box(options.arc_path, c_client_xs);
@@ -540,6 +541,6 @@ public:
   }
 };
 
-bool update_dialog(UpdateOptions& options) {
-  return UpdateDialog(options).show();
+bool update_dialog(bool new_arc, UpdateOptions& options) {
+  return UpdateDialog(new_arc, options).show();
 }
