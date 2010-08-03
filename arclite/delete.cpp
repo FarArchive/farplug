@@ -22,11 +22,8 @@ public:
 
 class ArchiveFileDeleter: public IArchiveUpdateCallback, public ProgressMonitor, public UnknownImpl {
 private:
-  Archive& archive;
-  const vector<UInt32>& src_indices;
-  const wstring& dst_file_name;
   vector<UInt32> new_indices;
-  Error error;
+  Error& error;
 
   UInt64 total;
   UInt64 completed;
@@ -36,11 +33,15 @@ private:
     wostringstream st;
     st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
     unsigned percent;
-    if (total == 0) percent = 0;
-    else percent = static_cast<unsigned>(static_cast<double>(completed) * 100 / total);
+    if (total == 0)
+      percent = 0;
+    else
+      percent = round(static_cast<double>(completed) * 100 / total);
     unsigned __int64 speed;
-    if (time_elapsed() == 0) speed = 0;
-    else speed = static_cast<unsigned>(static_cast<double>(completed) / time_elapsed() * ticks_per_sec());
+    if (time_elapsed() == 0)
+      speed = 0;
+    else
+      speed = round(static_cast<double>(completed) / time_elapsed() * ticks_per_sec());
     st << Far::get_msg(MSG_PROGRESS_UPDATE) << L'\n';
     st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L" @ " << setw(9) << format_data_size(speed, get_speed_suffixes()) << L'\n';
     st << Far::get_progress_bar_str(c_width, percent, 100) << L'\n';
@@ -51,7 +52,7 @@ private:
   }
 
 public:
-  ArchiveFileDeleter(Archive& archive, const vector<UInt32>& src_indices, const wstring& dst_file_name): archive(archive), src_indices(src_indices), dst_file_name(dst_file_name), completed(0), total(0) {
+  ArchiveFileDeleter(const vector<UInt32>& new_indices, Error& error): new_indices(new_indices), error(error), completed(0), total(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -100,50 +101,52 @@ public:
     return S_OK;
     COM_ERROR_HANDLER_END
   }
-
-private:
-  void enum_deleted_indices(UInt32 file_index, vector<UInt32>& indices) {
-    const FileInfo& file_info = archive.file_list[file_index];
-    indices.push_back(file_index);
-    if (file_info.is_dir()) {
-      FileIndexRange dir_list = archive.get_dir_list(file_index);
-      for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
-        enum_deleted_indices(file_index, indices);
-      });
-    }
-  }
-
-public:
-
-  void delete_files() {
-    vector<UInt32> deleted_indices;
-    deleted_indices.reserve(archive.file_list.size());
-    for_each(src_indices.begin(), src_indices.end(), [&] (UInt32 src_index) {
-      enum_deleted_indices(src_index, deleted_indices);
-    });
-    sort(deleted_indices.begin(), deleted_indices.end());
-    vector<UInt32> file_indices;
-    file_indices.reserve(archive.num_indices);
-    for(UInt32 i = 0; i < archive.num_indices; i++) file_indices.push_back(i);
-    new_indices.reserve(archive.num_indices);
-    set_difference(file_indices.begin(), file_indices.end(), deleted_indices.begin(), deleted_indices.end(), back_insert_iterator<vector<UInt32>>(new_indices));
-    ComObject<FileUpdateStream> update_stream(new FileUpdateStream(dst_file_name, this->error));
-    const ArcFormat& format = archive.formats.back();
-    ComObject<IOutArchive> out_arc;
-    CHECK_COM(archive.in_arc->QueryInterface(IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
-    HRESULT res = out_arc->UpdateItems(update_stream, new_indices.size(), this);
-    if (error.code != NO_ERROR)
-      throw error;
-    CHECK_COM(res);
-  }
 };
 
 
+void Archive::enum_deleted_indices(UInt32 file_index, vector<UInt32>& indices) {
+  const FileInfo& file_info = file_list[file_index];
+  indices.push_back(file_index);
+  if (file_info.is_dir()) {
+    FileIndexRange dir_list = get_dir_list(file_index);
+    for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
+      enum_deleted_indices(file_index, indices);
+    });
+  }
+}
+
 void Archive::delete_files(const vector<UInt32>& src_indices) {
+  vector<UInt32> deleted_indices;
+  deleted_indices.reserve(file_list.size());
+  for_each(src_indices.begin(), src_indices.end(), [&] (UInt32 src_index) {
+    enum_deleted_indices(src_index, deleted_indices);
+  });
+  sort(deleted_indices.begin(), deleted_indices.end());
+
+  vector<UInt32> file_indices;
+  file_indices.reserve(num_indices);
+  for(UInt32 i = 0; i < num_indices; i++)
+    file_indices.push_back(i);
+
+  vector<UInt32> new_indices;
+  new_indices.reserve(num_indices);
+  set_difference(file_indices.begin(), file_indices.end(), deleted_indices.begin(), deleted_indices.end(), back_insert_iterator<vector<UInt32>>(new_indices));
+
+  ComObject<IOutArchive> out_arc;
+  CHECK_COM(in_arc->QueryInterface(IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
+
+  Error error;
+  ComObject<ArchiveFileDeleter> deleter(new ArchiveFileDeleter(new_indices, error));
   wstring temp_arc_name = get_temp_file_name();
+  ComObject<FileUpdateStream> update_stream(new FileUpdateStream(temp_arc_name, error));
   try {
-    ComObject<ArchiveFileDeleter> deleter(new ArchiveFileDeleter(*this, src_indices, temp_arc_name));
-    deleter->delete_files();
+    HRESULT res = out_arc->UpdateItems(update_stream, new_indices.size(), deleter);
+    if (FAILED(res)) {
+      if (error.code != NO_ERROR)
+        throw error;
+      else
+        FAIL(res);
+    }
     close();
     CHECK_SYS(MoveFileExW(temp_arc_name.c_str(), get_file_name().c_str(), MOVEFILE_REPLACE_EXISTING));
   }
@@ -151,13 +154,6 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
     DeleteFileW(temp_arc_name.c_str());
     throw;
   }
-  reopen();
-}
 
-wstring Archive::get_temp_file_name() const {
-  GUID guid;
-  CHECK_COM(CoCreateGuid(&guid));
-  wchar_t guid_str[50];
-  CHECK(StringFromGUID2(guid, guid_str, ARRAYSIZE(guid_str)));
-  return add_trailing_slash(archive_dir) + guid_str + L".tmp";
+  reopen();
 }

@@ -92,10 +92,6 @@ protected:
   wstring password;
   wstring get_default_name() const;
   void make_index();
-  UInt32 scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
-  void scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
-  void prepare_file_index_map(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
-  void set_properties(IOutArchive* out_arc, const UpdateOptions& options);
 public:
   bool open(const wstring& file_path);
   void close();
@@ -113,11 +109,24 @@ public:
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);
   void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
-  void delete_files(const vector<UInt32>& src_indices);
-  void create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options);
-  void update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options);
   friend class ArchiveOpener;
   friend class ArchiveExtractor;
-  friend class ArchiveFileDeleter;
+
+  // create & update archive
+private:
+  UInt32 scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
+  void scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
+  void prepare_file_index_map(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
+  void set_properties(IOutArchive* out_arc, const UpdateOptions& options);
+public:
+  void create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options);
+  void update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options);
   friend class ArchiveUpdater;
+
+  // delete files in archive
+private:
+  void enum_deleted_indices(UInt32 file_index, vector<UInt32>& indices);
+public:
+  void delete_files(const vector<UInt32>& src_indices);
+  friend class ArchiveFileDeleter;
 };

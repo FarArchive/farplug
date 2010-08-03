@@ -131,6 +131,14 @@ wstring Archive::get_default_name() const {
     return name.substr(0, pos);
 }
 
+wstring Archive::get_temp_file_name() const {
+  GUID guid;
+  CHECK_COM(CoCreateGuid(&guid));
+  wchar_t guid_str[50];
+  CHECK(StringFromGUID2(guid, guid_str, ARRAYSIZE(guid_str)));
+  return add_trailing_slash(archive_dir) + guid_str + L".tmp";
+}
+
 bool FileInfo::operator<(const FileInfo& file_info) const {
   if (parent == file_info.parent)
     if (is_dir() == file_info.is_dir())
