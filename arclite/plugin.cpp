@@ -17,7 +17,7 @@ public:
   }
 
   Plugin(const wstring& file_path) {
-    if (!open(file_path))
+    if (!open_file(file_path))
       FAIL(E_ABORT);
   }
 
@@ -25,6 +25,38 @@ public:
     opi->StructSize = sizeof(OpenPluginInfo);
     opi->Flags = OPIF_USEFILTER | OPIF_USESORTGROUPS | OPIF_USEHIGHLIGHTING | OPIF_ADDDOTS;
     opi->CurDir = current_dir.c_str();
+  }
+
+  bool open_file(const wstring& file_path) {
+    vector<ArcFormatChain> format_chains = detect(file_path);
+
+    if (format_chains.size() == 0)
+      return false;
+
+    int format_idx;
+    if (format_chains.size() == 1) {
+      format_idx = 0;
+    }
+    else {
+      vector<wstring> format_names;
+      for (unsigned i = 0; i < format_chains.size(); i++) {
+        wstring name;
+        for (unsigned j = 0; j < format_chains[i].size(); j++) {
+          if (!name.empty())
+            name += L"->";
+          name += format_chains[i][j].name;
+        }
+        format_names.push_back(name);
+      }
+      format_idx = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), format_names);
+      if (format_idx == -1)
+        return false;
+    }
+
+    if (!open(file_path, format_chains[format_idx]))
+      return false;
+
+    return true;
   }
 
   void set_dir(const wstring& dir) {
@@ -123,7 +155,7 @@ public:
   void put_files(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t* src_path, int op_mode) {
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
     UpdateOptions options;
-    bool new_arc = !in_arc;
+    bool new_arc = !is_open();
     if (new_arc) {
       wstring arc_dir;
       if (!Far::get_panel_dir(PANEL_PASSIVE, arc_dir))
@@ -134,9 +166,6 @@ public:
         options.arc_path = add_trailing_slash(arc_dir) + extract_file_name(src_path);
       options.arc_type = g_options.update_arc_type;
       options.arc_path += L"." + ArcAPI::get()->find_format(options.arc_type).extension;
-    }
-    else {
-      options.arc_type = formats.back().name;
     }
     options.level = g_options.update_level;
     options.method = g_options.update_method;

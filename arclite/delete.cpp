@@ -136,9 +136,9 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
   CHECK_COM(in_arc->QueryInterface(IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
 
   Error error;
-  ComObject<ArchiveFileDeleter> deleter(new ArchiveFileDeleter(new_indices, error));
+  ComObject<IArchiveUpdateCallback> deleter(new ArchiveFileDeleter(new_indices, error));
   wstring temp_arc_name = get_temp_file_name();
-  ComObject<FileUpdateStream> update_stream(new FileUpdateStream(temp_arc_name, error));
+  ComObject<IOutStream> update_stream(new FileUpdateStream(temp_arc_name, error));
   try {
     HRESULT res = out_arc->UpdateItems(update_stream, new_indices.size(), deleter);
     if (FAILED(res)) {
@@ -148,7 +148,7 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
         FAIL(res);
     }
     close();
-    CHECK_SYS(MoveFileExW(temp_arc_name.c_str(), get_file_name().c_str(), MOVEFILE_REPLACE_EXISTING));
+    CHECK_SYS(MoveFileExW(temp_arc_name.c_str(), get_archive_path().c_str(), MOVEFILE_REPLACE_EXISTING));
   }
   catch (...) {
     DeleteFileW(temp_arc_name.c_str());

@@ -30,6 +30,8 @@ bool is_unc_path(const wstring& path);
 bool is_absolute_path(const wstring& path);
 wstring remove_path_root(const wstring& path);
 
+int round(double d);
+
 class NonCopyable {
 protected:
   NonCopyable() {}

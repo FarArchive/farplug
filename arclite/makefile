@@ -28,7 +28,7 @@ LINKFLAGS = $(LINKFLAGS) -opt:ref -opt:icf -LTCG
 !else
 OUTDIR = Debug
 DEFINES = $(DEFINES) -DDEBUG
-CPPFLAGS = $(CPPFLAGS) -Od -RTC1 -MTd -analyze
+CPPFLAGS = $(CPPFLAGS) -Od -RTC1 -MTd
 LINKFLAGS = $(LINKFLAGS) -fixed:no
 7Z_DLL = $(7Z_DLL)\Debug
 !endif

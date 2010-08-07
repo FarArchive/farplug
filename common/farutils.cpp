@@ -120,6 +120,19 @@ int update_panel(HANDLE h_plugin, bool keep_selection) {
   return g_far.Control(h_plugin, FCTL_UPDATEPANEL, keep_selection ? 1 : 0, 0);
 }
 
+bool get_panel_dir(HANDLE h_panel, wstring& dir) {
+  Buffer<wchar_t> buf(MAX_PATH);
+  int size = g_far.Control(h_panel, FCTL_GETPANELDIR, buf.size(), reinterpret_cast<LONG_PTR>(buf.data()));
+  if (size > MAX_PATH) {
+    buf.resize(size);
+    size = g_far.Control(h_panel, FCTL_GETPANELDIR, buf.size(), reinterpret_cast<LONG_PTR>(buf.data()));
+  }
+  if (size == 0)
+    return false;
+  dir.assign(buf.data(), size - 1);
+  return true;
+}
+
 void error_dlg(const wstring& title, const Error& e) {
   wostringstream st;
   st << title << L'\n';

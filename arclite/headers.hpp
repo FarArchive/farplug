@@ -4,6 +4,7 @@
 #include <msi.h>
 #include <winhttp.h>
 #include <shobjidl.h>
+#undef max
 
 #include <assert.h>
 #include <process.h>
@@ -19,6 +20,7 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <limits>
 using namespace std;
 
 #define INITGUID

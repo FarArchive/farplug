@@ -289,13 +289,13 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
   prepare_file_index_map(src_dir, panel_items, items_number, c_root_index, new_index, file_index_map);
 
   ComObject<IOutArchive> out_arc;
-  ArcAPI::get()->create_out_archive(options.arc_type, &out_arc);
+  ArcAPI::get()->create_out_archive(ArcAPI::get()->find_format(options.arc_type), &out_arc);
 
   set_properties(out_arc, options);
 
   Error error;
-  ComObject<ArchiveUpdater> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, error));
-  ComObject<FileUpdateStream> update_stream(new FileUpdateStream(options.arc_path, error));
+  ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, error));
+  ComObject<IOutStream> update_stream(new FileUpdateStream(options.arc_path, error));
   try {
     HRESULT res = out_arc->UpdateItems(update_stream, new_index, updater);
     if (FAILED(res)) {
@@ -322,9 +322,9 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
   set_properties(out_arc, options);
 
   Error error;
-  ComObject<ArchiveUpdater> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, error));
+  ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, error));
   wstring temp_arc_name = get_temp_file_name();
-  ComObject<FileUpdateStream> update_stream(new FileUpdateStream(temp_arc_name, error));
+  ComObject<IOutStream> update_stream(new FileUpdateStream(temp_arc_name, error));
   try {
     HRESULT res = out_arc->UpdateItems(update_stream, new_index, updater);
     if (FAILED(res)) {
@@ -334,7 +334,7 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
         FAIL(res);
     }
     close();
-    CHECK_SYS(MoveFileExW(temp_arc_name.c_str(), get_file_name().c_str(), MOVEFILE_REPLACE_EXISTING));
+    CHECK_SYS(MoveFileExW(temp_arc_name.c_str(), get_archive_path().c_str(), MOVEFILE_REPLACE_EXISTING));
   }
   catch (...) {
     DeleteFileW(temp_arc_name.c_str());

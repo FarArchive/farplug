@@ -34,6 +34,7 @@ struct ArcFormat {
 
 typedef vector<ArcLib> ArcLibs;
 typedef vector<ArcFormat> ArcFormats;
+typedef vector<ArcFormat> ArcFormatChain;
 
 class ArcAPI {
 private:
@@ -52,7 +53,8 @@ public:
     return arc_formats;
   }
   const ArcFormat& find_format(const wstring& name) const;
-  void create_out_archive(const wstring& format, IOutArchive** out_arc);
+  void create_in_archive(const ArcFormat& format, IInArchive** in_arc);
+  void create_out_archive(const ArcFormat& format, IOutArchive** out_arc);
   static void free();
 };
 
@@ -71,9 +73,12 @@ struct FileInfo {
   bool operator<(const FileInfo& file_info) const;
 };
 typedef vector<FileInfo> FileList;
+
 const UInt32 c_root_index = -1;
+
 typedef vector<UInt32> FileIndex;
 typedef pair<FileIndex::const_iterator, FileIndex::const_iterator> FileIndexRange;
+
 struct FileIndexInfo {
   wstring rel_path;
   FindData find_data;
@@ -81,36 +86,51 @@ struct FileIndexInfo {
 typedef map<UInt32, FileIndexInfo> FileIndexMap;
 
 class Archive {
-protected:
-  ComObject<IInArchive> in_arc;
-  vector<ArcFormat> formats;
+private:
+  wstring password;
+  wstring get_default_name() const;
+public:
+  bool updatable() const {
+    return format_chain.size() == 1 && format_chain.back().update;
+  }
+  wstring get_temp_file_name() const;
+  void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
+  friend class ArchiveExtractor;
+
+  // open & create
+private:
   wstring archive_dir;
   FindData archive_file_info;
+  wstring get_archive_path() const {
+    return add_trailing_slash(archive_dir) + archive_file_info.cFileName;
+  }
+private:
+  ComObject<IInArchive> in_arc;
+  ArcFormatChain format_chain;
+  bool open_sub_stream(IInArchive* in_arc, IInStream** sub_stream);
+  bool open_archive(IInStream* in_stream, IInArchive* archive);
+  void detect(IInStream* in_stream, vector<ArcFormatChain>& format_chains);
+public:
+  vector<ArcFormatChain> detect(const wstring& file_path);
+  bool open(const wstring& file_path, const ArcFormatChain& format_chain);
+  void close();
+  void reopen();
+  bool is_open() const {
+    return in_arc;
+  }
+
+  // archive contents
+private:
   UInt32 num_indices;
   FileList file_list;
   FileIndex file_list_index;
-  wstring password;
-  wstring get_default_name() const;
   void make_index();
 public:
-  bool open(const wstring& file_path);
-  void close();
-  void reopen();
+  UInt32 find_dir(const wstring& dir);
+  FileIndexRange get_dir_list(UInt32 dir_index);
   const FileInfo& get_file_info(UInt32 file_index) const {
     return file_list[file_index];
   }
-  bool updatable() const {
-    return formats.size() == 1 && formats.back().update;
-  }
-  wstring get_file_name() const {
-    return add_trailing_slash(archive_dir) + archive_file_info.cFileName;
-  }
-  wstring get_temp_file_name() const;
-  UInt32 find_dir(const wstring& dir);
-  FileIndexRange get_dir_list(UInt32 dir_index);
-  void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
-  friend class ArchiveOpener;
-  friend class ArchiveExtractor;
 
   // create & update archive
 private:
@@ -121,12 +141,10 @@ private:
 public:
   void create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options);
   void update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options);
-  friend class ArchiveUpdater;
 
   // delete files in archive
 private:
   void enum_deleted_indices(UInt32 file_index, vector<UInt32>& indices);
 public:
   void delete_files(const vector<UInt32>& src_indices);
-  friend class ArchiveFileDeleter;
 };
