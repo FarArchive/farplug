@@ -12,26 +12,19 @@ class Plugin: private Archive {
 private:
   wstring current_dir;
   wstring extract_dir;
-public:
-  Plugin() {
-  }
+  wstring host_file;
+  wstring panel_title;
 
-  Plugin(const wstring& file_path) {
-    if (!open_file(file_path))
-      FAIL(E_ABORT);
-  }
-
-  void info(OpenPluginInfo* opi) {
-    opi->StructSize = sizeof(OpenPluginInfo);
-    opi->Flags = OPIF_USEFILTER | OPIF_USESORTGROUPS | OPIF_USEHIGHLIGHTING | OPIF_ADDDOTS;
-    opi->CurDir = current_dir.c_str();
-  }
-
-  bool open_file(const wstring& file_path) {
-    vector<ArcFormatChain> format_chains = detect(file_path);
+  bool open_file(const wstring& file_path, bool auto_detect) {
+    max_check_size = g_options.max_check_size;
+    vector<ArcFormatChain> format_chains = detect(file_path, !auto_detect);
 
     if (format_chains.size() == 0)
       return false;
+
+    if (auto_detect) {
+      format_chains.erase(format_chains.begin(), format_chains.end() - 1);
+    }
 
     int format_idx;
     if (format_chains.size() == 1) {
@@ -40,13 +33,7 @@ public:
     else {
       vector<wstring> format_names;
       for (unsigned i = 0; i < format_chains.size(); i++) {
-        wstring name;
-        for (unsigned j = 0; j < format_chains[i].size(); j++) {
-          if (!name.empty())
-            name += L"->";
-          name += format_chains[i][j].name;
-        }
-        format_names.push_back(name);
+        format_names.push_back(format_chains[i].to_string());
       }
       format_idx = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), format_names);
       if (format_idx == -1)
@@ -57,6 +44,41 @@ public:
       return false;
 
     return true;
+  }
+
+public:
+  Plugin() {
+  }
+
+  Plugin(const wstring& file_path) {
+    if (!open_file(file_path, true))
+      FAIL(E_ABORT);
+  }
+
+  Plugin(int open_from, INT_PTR item) {
+    PanelInfo panel_info;
+    if (!Far::get_panel_info(PANEL_ACTIVE, panel_info) || !Far::is_real_file_panel(panel_info))
+      FAIL(E_ABORT);
+    wstring name = Far::get_current_file_name(PANEL_ACTIVE);
+    if (name == L"..")
+      FAIL(E_ABORT);
+    wstring dir = Far::get_panel_dir(PANEL_ACTIVE);
+    wstring path = add_trailing_slash(dir) + name;
+    if (!open_file(path, false))
+      FAIL(E_ABORT);
+  }
+
+  void info(OpenPluginInfo* opi) {
+    opi->StructSize = sizeof(OpenPluginInfo);
+    opi->Flags = OPIF_USEFILTER | OPIF_USESORTGROUPS | OPIF_USEHIGHLIGHTING | OPIF_ADDDOTS;
+    opi->CurDir = current_dir.c_str();
+    panel_title = Far::get_msg(MSG_PLUGIN_NAME);
+    if (is_open()) {
+      panel_title += L":" + format_chain.back().name + L":" + archive_file_info.cFileName;
+      host_file = archive_file_info.cFileName;
+    }
+    opi->HostFile = host_file.c_str();
+    opi->PanelTitle = panel_title.c_str();
   }
 
   void set_dir(const wstring& dir) {
@@ -158,7 +180,10 @@ public:
     bool new_arc = !is_open();
     if (new_arc) {
       wstring arc_dir;
-      if (!Far::get_panel_dir(PANEL_PASSIVE, arc_dir))
+      PanelInfo panel_info;
+      if (Far::get_panel_info(PANEL_PASSIVE, panel_info) && Far::is_real_file_panel(panel_info))
+        arc_dir = Far::get_panel_dir(PANEL_PASSIVE);
+      else
         arc_dir = src_path;
       if (items_number == 1 || is_root_path(arc_dir))
         options.arc_path = add_trailing_slash(arc_dir) + panel_items[0].FindData.lpwszFileName;
@@ -234,7 +259,7 @@ void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
 
 HANDLE WINAPI OpenPluginW(int OpenFrom,INT_PTR Item) {
   FAR_ERROR_HANDLER_BEGIN;
-  return INVALID_HANDLE_VALUE;
+  return new Plugin(OpenFrom, Item);
   FAR_ERROR_HANDLER_END(return INVALID_HANDLE_VALUE, return INVALID_HANDLE_VALUE, false);
 }
 

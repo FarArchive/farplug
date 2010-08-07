@@ -60,8 +60,12 @@ void flush_screen();
 
 int viewer(const wstring& file_name, const wstring& title);
 
-int update_panel(HANDLE h_plugin, bool keep_selection);
-bool get_panel_dir(HANDLE h_panel, wstring& dir);
+int update_panel(HANDLE h_panel, bool keep_selection);
+
+bool get_panel_info(HANDLE h_panel, PanelInfo& panel_info);
+bool is_real_file_panel(const PanelInfo& panel_info);
+wstring get_panel_dir(HANDLE h_panel);
+wstring get_current_file_name(HANDLE h_panel);
 
 void error_dlg(const wstring& title, const Error& e);
 void info_dlg(const wstring& title, const wstring& msg);

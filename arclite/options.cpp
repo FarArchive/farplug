@@ -7,12 +7,14 @@ Options g_options;
 
 const wchar_t* c_plugin_key_name = L"arclite";
 
+const wchar_t* c_param_max_check_size = L"max_check_size";
 const wchar_t* c_param_extract_ignore_errors = L"extract_ignore_errors";
 const wchar_t* c_param_extract_overwrite = L"extract_overwrite";
 const wchar_t* c_param_update_arc_type = L"update_arc_type";
 const wchar_t* c_param_update_level = L"update_level";
 const wchar_t* c_param_update_method = L"update_method";
 
+const unsigned c_def_max_check_size = 1 << 20;
 const bool c_def_extract_ignore_errors = false;
 const unsigned c_def_extract_overwrite = 0;
 const wchar_t* c_def_update_arc_type = L"7z";
@@ -63,6 +65,7 @@ void Options::set_str(const wchar_t* name, const wstring& value, const wstring& 
 }
 
 void Options::load() {
+  max_check_size = get_int(c_param_max_check_size, c_def_max_check_size);
   extract_ignore_errors = get_bool(c_param_extract_ignore_errors, c_def_extract_ignore_errors);
   extract_overwrite = get_int(c_param_extract_overwrite, c_def_extract_overwrite);
   update_arc_type = get_str(c_param_update_arc_type, c_def_update_arc_type);
@@ -71,6 +74,7 @@ void Options::load() {
 };
 
 void Options::save() {
+  set_int(c_param_max_check_size, max_check_size);
   set_bool(c_param_extract_ignore_errors, extract_ignore_errors);
   set_int(c_param_extract_overwrite, extract_overwrite);
   set_str(c_param_update_arc_type, update_arc_type);

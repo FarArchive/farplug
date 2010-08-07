@@ -116,21 +116,39 @@ int viewer(const wstring& file_name, const wstring& title) {
   return g_far.Viewer(file_name.c_str(), title.c_str(), 0, 0, -1, -1, VF_DISABLEHISTORY | VF_ENABLE_F6, CP_UNICODE);
 }
 
-int update_panel(HANDLE h_plugin, bool keep_selection) {
-  return g_far.Control(h_plugin, FCTL_UPDATEPANEL, keep_selection ? 1 : 0, 0);
+int update_panel(HANDLE h_panel, bool keep_selection) {
+  return g_far.Control(h_panel, FCTL_UPDATEPANEL, keep_selection ? 1 : 0, 0);
 }
 
-bool get_panel_dir(HANDLE h_panel, wstring& dir) {
+bool get_panel_info(HANDLE h_panel, PanelInfo& panel_info) {
+  return g_far.Control(h_panel, FCTL_GETPANELINFO, 0, reinterpret_cast<LONG_PTR>(&panel_info)) == TRUE;
+}
+
+bool is_real_file_panel(const PanelInfo& panel_info) {
+  return panel_info.PanelType == PTYPE_FILEPANEL && (panel_info.Flags & PFLAGS_REALNAMES);
+}
+
+wstring get_panel_dir(HANDLE h_panel) {
   Buffer<wchar_t> buf(MAX_PATH);
-  int size = g_far.Control(h_panel, FCTL_GETPANELDIR, buf.size(), reinterpret_cast<LONG_PTR>(buf.data()));
-  if (size > MAX_PATH) {
+  unsigned size = g_far.Control(h_panel, FCTL_GETPANELDIR, buf.size(), reinterpret_cast<LONG_PTR>(buf.data()));
+  if (size > buf.size()) {
     buf.resize(size);
     size = g_far.Control(h_panel, FCTL_GETPANELDIR, buf.size(), reinterpret_cast<LONG_PTR>(buf.data()));
   }
-  if (size == 0)
-    return false;
-  dir.assign(buf.data(), size - 1);
-  return true;
+  CHECK(size)
+  return wstring(buf.data(), size - 1);
+}
+
+wstring get_current_file_name(HANDLE h_panel) {
+  Buffer<unsigned char> buf(0x10000);
+  unsigned size = g_far.Control(h_panel, FCTL_GETCURRENTPANELITEM, buf.size(), reinterpret_cast<LONG_PTR>(buf.data()));
+  if (size > buf.size()) {
+    buf.resize(size);
+    size = g_far.Control(h_panel, FCTL_GETCURRENTPANELITEM, buf.size(), reinterpret_cast<LONG_PTR>(buf.data()));
+  }
+  CHECK(size)
+  const PluginPanelItem* panel_item = reinterpret_cast<const PluginPanelItem*>(buf.data());
+  return panel_item->FindData.lpwszFileName;
 }
 
 void error_dlg(const wstring& title, const Error& e) {

@@ -45,6 +45,17 @@ HRESULT ArcLib::get_bytes_prop(UInt32 index, PROPID prop_id, string& value) cons
 }
 
 
+wstring ArcFormatChain::to_string() const {
+  wstring result;
+  for (unsigned i = 0; i < size(); i++) {
+    if (!result.empty())
+      result += L"->";
+    result += at(i).name;
+  }
+  return result;
+}
+
+
 ArcAPI* ArcAPI::arc_api = nullptr;
 
 ArcAPI::~ArcAPI() {
@@ -109,7 +120,7 @@ const ArcFormat& ArcAPI::find_format(const wstring& name) const {
 }
 
 void ArcAPI::create_in_archive(const ArcFormat& format, IInArchive** in_arc) {
-  CHECK_COM(arc_libs[format.lib_index].CreateObject(reinterpret_cast<const GUID*>(format.class_id.data()), &IID_IInArchive, reinterpret_cast<void**>(&in_arc)));
+  CHECK_COM(arc_libs[format.lib_index].CreateObject(reinterpret_cast<const GUID*>(format.class_id.data()), &IID_IInArchive, reinterpret_cast<void**>(in_arc)));
 }
 
 void ArcAPI::create_out_archive(const ArcFormat& format, IOutArchive** out_arc) {

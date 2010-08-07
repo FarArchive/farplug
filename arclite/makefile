@@ -40,7 +40,7 @@ RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
 7Z_DLL = $(7Z_DLL)\7z.dll
 
 COMMON_OBJS = $(OUTDIR)\farutils.obj $(OUTDIR)\pathutils.obj $(OUTDIR)\strutils.obj $(OUTDIR)\sysutils.obj $(OUTDIR)\numutils.obj
-OBJS = $(OUTDIR)\archive.obj $(OUTDIR)\plugin.obj $(OUTDIR)\ui.obj $(OUTDIR)\extract.obj $(OUTDIR)\open.obj $(OUTDIR)\update.obj $(OUTDIR)\delete.obj $(OUTDIR)\options.obj $(COMMON_OBJS)
+OBJS = $(COMMON_OBJS) $(OUTDIR)\archive.obj $(OUTDIR)\plugin.obj $(OUTDIR)\ui.obj $(OUTDIR)\extract.obj $(OUTDIR)\open.obj $(OUTDIR)\update.obj $(OUTDIR)\delete.obj $(OUTDIR)\options.obj $(OUTDIR)\msearch.obj
 
 LIBS = user32.lib advapi32.lib ole32.lib oleaut32.lib
 

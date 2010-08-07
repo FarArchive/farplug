@@ -206,7 +206,7 @@ bool Archive::open_archive(IInStream* in_stream, IInArchive* archive) {
 
   Error error;
   ComObject<IArchiveOpenCallback> opener(new ArchiveOpener(archive_dir, archive_file_info, password, error));
-  const UInt64 max_check_start_position = 1 << 20;
+  const UInt64 max_check_start_position = max_check_size;
   HRESULT res = archive->Open(in_stream, &max_check_start_position, opener);
   if (FAILED(res)) {
     if (error.code != NO_ERROR)
@@ -217,12 +217,26 @@ bool Archive::open_archive(IInStream* in_stream, IInArchive* archive) {
   return res == S_OK;
 }
 
-void Archive::detect(IInStream* in_stream, vector<ArcFormatChain>& format_chains) {
+void Archive::detect(IInStream* in_stream, bool all, vector<ArcFormatChain>& format_chains) {
   ArcFormatChain parent_format_chain;
   if (!format_chains.empty())
     parent_format_chain = format_chains.back();
   const ArcFormats& arc_formats = ArcAPI::get()->formats();
+
+  vector<string> signatures;
+  signatures.reserve(arc_formats.size());
   for_each(arc_formats.begin(), arc_formats.end(), [&] (const ArcFormat& arc_format) {
+    signatures.push_back(arc_format.start_signature);
+  });
+
+  Buffer<unsigned char> buffer(max_check_size);
+  UInt32 size;
+  CHECK_COM(in_stream->Read(buffer.data(), buffer.size(), &size));
+
+  vector<StrPos> sig_positions = msearch(buffer.data(), size, signatures);
+
+  for (vector<StrPos>::const_iterator sig_pos = sig_positions.begin(); sig_pos != sig_positions.end(); sig_pos++) {
+    const ArcFormat& arc_format = arc_formats[sig_pos->idx];
     ComObject<IInArchive> archive;
     ArcAPI::get()->create_in_archive(arc_format, &archive);
     if (open_archive(in_stream, archive)) {
@@ -232,24 +246,25 @@ void Archive::detect(IInStream* in_stream, vector<ArcFormatChain>& format_chains
 
       ComObject<IInStream> sub_stream;
       if (open_sub_stream(archive, &sub_stream))
-        detect(sub_stream, format_chains);
+        detect(sub_stream, all, format_chains);
+
+      if (!all) break;
     }
-  });
+  };
 }
 
-vector<ArcFormatChain> Archive::detect(const wstring& file_path) {
+vector<ArcFormatChain> Archive::detect(const wstring& file_path, bool all) {
   archive_file_info = get_find_data(file_path);
   archive_dir = extract_file_path(file_path);
   vector<ArcFormatChain> format_chains;
   Error error;
   ComObject<IInStream> stream(new ArchiveOpenStream(get_archive_path(), error));
-  detect(stream, format_chains);
+  detect(stream, all, format_chains);
   return format_chains;
 }
 
 bool Archive::open(const wstring& file_path, const ArcFormatChain& format_chain) {
   Error error;
-  const ArcLibs& arc_libs = ArcAPI::get()->libs();
   ComObject<IInStream> stream(new ArchiveOpenStream(get_archive_path(), error));
   vector<ArcFormat>::const_iterator format = format_chain.begin();
   ArcAPI::get()->create_in_archive(*format, &in_arc);
@@ -260,10 +275,11 @@ bool Archive::open(const wstring& file_path, const ArcFormatChain& format_chain)
     ComObject<IInStream> sub_stream;
     CHECK(open_sub_stream(in_arc, &sub_stream));
     ArcAPI::get()->create_in_archive(*format, &in_arc);
-    if (!open_archive(stream, in_arc))
+    if (!open_archive(sub_stream, in_arc))
       return false;
     format++;
   }
+  this->format_chain = format_chain;
   return true;
 }
 

@@ -11,6 +11,7 @@ private:
   static void set_bool(const wchar_t* name, bool value, bool def_value = false);
   static void set_str(const wchar_t* name, const wstring& value, const wstring& def_value = wstring());
 public:
+  unsigned max_check_size;
   bool extract_ignore_errors;
   unsigned extract_overwrite;
   wstring update_arc_type;

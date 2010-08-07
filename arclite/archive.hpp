@@ -34,7 +34,11 @@ struct ArcFormat {
 
 typedef vector<ArcLib> ArcLibs;
 typedef vector<ArcFormat> ArcFormats;
-typedef vector<ArcFormat> ArcFormatChain;
+
+class ArcFormatChain: public vector<ArcFormat> {
+public:
+  wstring to_string() const;
+};
 
 class ArcAPI {
 private:
@@ -97,21 +101,22 @@ public:
   void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
   friend class ArchiveExtractor;
 
-  // open & create
+  // open
 private:
   wstring archive_dir;
-  FindData archive_file_info;
   wstring get_archive_path() const {
     return add_trailing_slash(archive_dir) + archive_file_info.cFileName;
   }
-private:
   ComObject<IInArchive> in_arc;
-  ArcFormatChain format_chain;
   bool open_sub_stream(IInArchive* in_arc, IInStream** sub_stream);
   bool open_archive(IInStream* in_stream, IInArchive* archive);
-  void detect(IInStream* in_stream, vector<ArcFormatChain>& format_chains);
+  void detect(IInStream* in_stream, bool all, vector<ArcFormatChain>& format_chains);
+protected:
+  FindData archive_file_info;
+  unsigned max_check_size;
+  ArcFormatChain format_chain;
 public:
-  vector<ArcFormatChain> detect(const wstring& file_path);
+  vector<ArcFormatChain> detect(const wstring& file_path, bool all);
   bool open(const wstring& file_path, const ArcFormatChain& format_chain);
   void close();
   void reopen();
