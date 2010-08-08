@@ -82,6 +82,8 @@ public:
   }
 
   void set_dir(const wstring& dir) {
+    if (!is_open())
+      FAIL(E_ABORT);
     wstring new_dir;
     if (dir == L"\\")
       new_dir.assign(dir);
@@ -100,6 +102,8 @@ public:
   }
 
   void list(PluginPanelItem** panel_items, int* items_number) {
+    if (!is_open())
+      FAIL(E_ABORT);
     UInt32 dir_index = find_dir(current_dir);
     FileIndexRange dir_list = get_dir_list(dir_index);
     unsigned size = dir_list.second - dir_list.first;
@@ -211,7 +215,7 @@ public:
     if (new_arc)
       create(src_path, panel_items, items_number, options);
     else
-      update(src_path, panel_items, items_number, current_dir, options);
+      update(src_path, panel_items, items_number, remove_path_root(current_dir), options);
 
     Far::update_panel(PANEL_ACTIVE, false);
     Far::update_panel(PANEL_PASSIVE, false);

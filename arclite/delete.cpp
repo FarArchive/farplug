@@ -156,6 +156,7 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
         FAIL(res);
     }
     close();
+    update_stream.Release();
     CHECK_SYS(MoveFileExW(temp_arc_name.c_str(), get_archive_path().c_str(), MOVEFILE_REPLACE_EXISTING));
   }
   catch (...) {

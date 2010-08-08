@@ -24,7 +24,6 @@ ProgressMonitor::ProgressMonitor(bool lazy): h_scr(nullptr) {
 ProgressMonitor::~ProgressMonitor() {
   if (h_scr) {
     Far::restore_screen(h_scr);
-    Far::flush_screen();
     SetConsoleTitleW(con_title.data());
     Far::set_progress_state(TBPF_NOPROGRESS);
   }
@@ -35,7 +34,6 @@ void ProgressMonitor::update_ui(bool force) {
   if ((time_total >= time_update) || force) {
     time_update = time_total + time_freq / c_update_delay_div;
     if (h_scr == nullptr) {
-      Far::flush_screen();
       h_scr = Far::save_screen();
       con_title = get_console_title();
     }

@@ -107,11 +107,6 @@ void restore_screen(HANDLE h_scr) {
   g_far.RestoreScreen(h_scr);
 }
 
-void flush_screen() {
-  g_far.Text(0, 0, 0, NULL); // flush buffer hack
-  g_far.AdvControl(g_far.ModuleNumber, ACTL_REDRAWALL, 0);
-}
-
 int viewer(const wstring& file_name, const wstring& title) {
   return g_far.Viewer(file_name.c_str(), title.c_str(), 0, 0, -1, -1, VF_DISABLEHISTORY | VF_ENABLE_F6, CP_UNICODE);
 }

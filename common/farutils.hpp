@@ -56,7 +56,6 @@ void quit();
 
 HANDLE save_screen();
 void restore_screen(HANDLE h_scr);
-void flush_screen();
 
 int viewer(const wstring& file_name, const wstring& title);
 
