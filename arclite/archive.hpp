@@ -89,18 +89,11 @@ struct FileIndexInfo {
 };
 typedef map<UInt32, FileIndexInfo> FileIndexMap;
 
-class Archive {
-private:
-  wstring password;
-  wstring get_default_name() const;
-public:
-  bool updatable() const {
-    return format_chain.size() == 1 && format_chain.back().update;
-  }
-  wstring get_temp_file_name() const;
-  void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
-  friend class ArchiveExtractor;
+// forwards
+class SetAttrProgress;
+class PrepareExtractProgress;
 
+class Archive {
   // open
 private:
   wstring archive_dir;
@@ -129,6 +122,7 @@ private:
   UInt32 num_indices;
   FileList file_list;
   FileIndex file_list_index;
+  wstring password;
   void make_index();
 public:
   UInt32 find_dir(const wstring& dir);
@@ -137,8 +131,21 @@ public:
     return file_list[file_index];
   }
 
+  // extract
+private:
+  wstring get_default_name() const;
+  void prepare_dst_dir(const wstring& path);
+  void prepare_extract(UInt32 file_index, const wstring& parent_dir, list<UInt32>& indices, const FileList& file_list, bool& ignore_errors, ErrorLog& error_log, PrepareExtractProgress& progress);
+  void set_attr(UInt32 file_index, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log, SetAttrProgress& progress);
+public:
+  bool updatable() const {
+    return format_chain.size() == 1 && format_chain.back().update;
+  }
+  void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
+
   // create & update archive
 private:
+  wstring get_temp_file_name() const;
   UInt32 scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
   void scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
   void prepare_file_index_map(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);

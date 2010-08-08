@@ -18,6 +18,9 @@ struct Error {
     string message(string(typeid(e).name()) + ": " + e.what());
     messages.push_back(wstring(message.begin(), message.end()));
   }
+  operator bool() const {
+    return code != NO_ERROR;
+  }
 };
 
 #define FAIL(code) throw Error(code, __FILE__, __LINE__)

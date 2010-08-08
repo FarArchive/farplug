@@ -142,7 +142,7 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
   try {
     HRESULT res = out_arc->UpdateItems(update_stream, new_indices.size(), deleter);
     if (FAILED(res)) {
-      if (error.code != NO_ERROR)
+      if (error)
         throw error;
       else
         FAIL(res);
@@ -151,7 +151,7 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
     CHECK_SYS(MoveFileExW(temp_arc_name.c_str(), get_archive_path().c_str(), MOVEFILE_REPLACE_EXISTING));
   }
   catch (...) {
-    DeleteFileW(temp_arc_name.c_str());
+    DeleteFileW(long_path(temp_arc_name).c_str());
     throw;
   }
 

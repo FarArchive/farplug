@@ -306,7 +306,7 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
     }
   }
   catch (...) {
-    DeleteFileW(options.arc_path.c_str());
+    DeleteFileW(long_path(options.arc_path).c_str());
     throw;
   }
 }
@@ -328,7 +328,7 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
   try {
     HRESULT res = out_arc->UpdateItems(update_stream, new_index, updater);
     if (FAILED(res)) {
-      if (error.code != NO_ERROR)
+      if (error)
         throw error;
       else
         FAIL(res);
@@ -337,7 +337,7 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
     CHECK_SYS(MoveFileExW(temp_arc_name.c_str(), get_archive_path().c_str(), MOVEFILE_REPLACE_EXISTING));
   }
   catch (...) {
-    DeleteFileW(temp_arc_name.c_str());
+    DeleteFileW(long_path(temp_arc_name).c_str());
     throw;
   }
 

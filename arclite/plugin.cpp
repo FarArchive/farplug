@@ -74,7 +74,7 @@ public:
     opi->CurDir = current_dir.c_str();
     panel_title = Far::get_msg(MSG_PLUGIN_NAME);
     if (is_open()) {
-      panel_title += L":" + format_chain.back().name + L":" + archive_file_info.cFileName;
+      panel_title += L":" + format_chain.to_string() + L":" + archive_file_info.cFileName;
       host_file = archive_file_info.cFileName;
     }
     opi->HostFile = host_file.c_str();

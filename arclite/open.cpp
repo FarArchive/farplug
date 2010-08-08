@@ -209,7 +209,7 @@ bool Archive::open_archive(IInStream* in_stream, IInArchive* archive) {
   const UInt64 max_check_start_position = max_check_size;
   HRESULT res = archive->Open(in_stream, &max_check_start_position, opener);
   if (FAILED(res)) {
-    if (error.code != NO_ERROR)
+    if (error)
       throw error;
     else
       FAIL(res);

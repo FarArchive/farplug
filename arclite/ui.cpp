@@ -293,7 +293,7 @@ bool extract_dialog(ExtractOptions& options) {
   return ExtractDialog(options).show();
 }
 
-RetryDialogResult error_retry_dialog(const wstring& file_path, const Error& e) {
+RetryDialogResult error_retry_ignore_dialog(const wstring& file_path, const Error& e, bool can_retry) {
   wostringstream st;
   st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
   st << fit_str(file_path, Far::get_optimal_msg_width()) << L'\n';
@@ -306,17 +306,18 @@ RetryDialogResult error_retry_dialog(const wstring& file_path, const Error& e) {
     st << word_wrap(*msg, Far::get_optimal_msg_width()) << L'\n';
   }
   st << extract_file_name(widen(e.file)) << L':' << e.line << L'\n';
-  st << Far::get_msg(MSG_BUTTON_RETRY) << L'\n';
+  if (can_retry)
+    st << Far::get_msg(MSG_BUTTON_RETRY) << L'\n';
   st << Far::get_msg(MSG_BUTTON_IGNORE) << L'\n';
   st << Far::get_msg(MSG_BUTTON_IGNORE_ALL) << L'\n';
   st << Far::get_msg(MSG_BUTTON_CANCEL) << L'\n';
   switch (Far::message(st.str(), 4, FMSG_WARNING)) {
   case 0:
-    return rdrRetry;
+    return can_retry ? rdrRetry : rdrIgnore;
   case 1:
-    return rdrIgnore;
+    return can_retry ? rdrIgnore : rdrIgnoreAll;
   case 2:
-    return rdrIgnoreAll;
+    return can_retry ? rdrIgnoreAll : rdrCancel;
   default:
     return rdrCancel;
   }

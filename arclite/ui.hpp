@@ -69,7 +69,7 @@ enum RetryDialogResult {
   rdrCancel,
 };
 
-RetryDialogResult error_retry_dialog(const wstring& file_path, const Error& e);
+RetryDialogResult error_retry_ignore_dialog(const wstring& file_path, const Error& e, bool can_retry);
 
 void show_error_log(const ErrorLog& error_log);
 
