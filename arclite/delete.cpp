@@ -6,14 +6,14 @@
 #include "ui.hpp"
 #include "archive.hpp"
 
-class FileUpdateStream: public IOutStream, public UnknownImpl {
+class ArchiveUpdateStream: public IOutStream, public UnknownImpl {
 private:
   HANDLE h_file;
   const wstring& file_path;
   Error& error;
 public:
-  FileUpdateStream(const wstring& file_path, Error& error);
-  ~FileUpdateStream();
+  ArchiveUpdateStream(const wstring& file_path, Error& error);
+  ~ArchiveUpdateStream();
   UNKNOWN_DECL
   STDMETHOD(Write)(const void *data, UInt32 size, UInt32 *processedSize);
   STDMETHOD(Seek)(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition);
@@ -31,24 +31,31 @@ private:
   virtual void do_update_ui() {
     const unsigned c_width = 60;
     wostringstream st;
-    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
+
     unsigned percent;
     if (total == 0)
       percent = 0;
     else
       percent = round(static_cast<double>(completed) * 100 / total);
+    if (percent > 100)
+      percent = 100;
+
     unsigned __int64 speed;
     if (time_elapsed() == 0)
       speed = 0;
     else
       speed = round(static_cast<double>(completed) / time_elapsed() * ticks_per_sec());
+
+    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
     st << Far::get_msg(MSG_PROGRESS_UPDATE) << L'\n';
     st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L" @ " << setw(9) << format_data_size(speed, get_speed_suffixes()) << L'\n';
     st << Far::get_progress_bar_str(c_width, percent, 100) << L'\n';
+    Far::message(st.str(), 0, FMSG_LEFTALIGN);
+
     Far::set_progress_state(TBPF_NORMAL);
     Far::set_progress_value(percent, 100);
+
     SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(MSG_PROGRESS_UPDATE)).c_str());
-    Far::message(st.str(), 0, FMSG_LEFTALIGN);
   }
 
 public:
@@ -132,14 +139,15 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
   new_indices.reserve(num_indices);
   set_difference(file_indices.begin(), file_indices.end(), deleted_indices.begin(), deleted_indices.end(), back_insert_iterator<vector<UInt32>>(new_indices));
 
-  ComObject<IOutArchive> out_arc;
-  CHECK_COM(in_arc->QueryInterface(IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
-
-  Error error;
-  ComObject<IArchiveUpdateCallback> deleter(new ArchiveFileDeleter(new_indices, error));
   wstring temp_arc_name = get_temp_file_name();
-  ComObject<IOutStream> update_stream(new FileUpdateStream(temp_arc_name, error));
   try {
+    ComObject<IOutArchive> out_arc;
+    CHECK_COM(in_arc->QueryInterface(IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
+
+    Error error;
+    ComObject<IArchiveUpdateCallback> deleter(new ArchiveFileDeleter(new_indices, error));
+    ComObject<IOutStream> update_stream(new ArchiveUpdateStream(temp_arc_name, error));
+
     HRESULT res = out_arc->UpdateItems(update_stream, new_indices.size(), deleter);
     if (FAILED(res)) {
       if (error)

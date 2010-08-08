@@ -78,6 +78,9 @@ struct UpdateOptions {
   wstring arc_type;
   unsigned level;
   wstring method;
+  bool solid;
+  wstring password;
+  bool encrypt_header;
   bool move_files;
   bool show_dialog;
 };

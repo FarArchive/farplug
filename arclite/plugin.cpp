@@ -190,10 +190,12 @@ public:
       else
         options.arc_path = add_trailing_slash(arc_dir) + extract_file_name(src_path);
       options.arc_type = g_options.update_arc_type;
-      options.arc_path += L"." + ArcAPI::get()->find_format(options.arc_type).extension;
+      options.arc_path += ArcAPI::get()->find_format(options.arc_type).default_extension();
     }
     options.level = g_options.update_level;
     options.method = g_options.update_method;
+    options.solid = g_options.update_solid;
+    options.encrypt_header = g_options.update_encrypt_header;
     options.move_files = move != 0;
     options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
     if (options.show_dialog) {
@@ -201,6 +203,8 @@ public:
       g_options.update_arc_type = options.arc_type;
       g_options.update_level = options.level;
       g_options.update_method = options.method;
+      g_options.update_solid = options.solid;
+      g_options.update_encrypt_header = options.encrypt_header;
       g_options.save();
     }
 

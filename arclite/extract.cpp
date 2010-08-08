@@ -200,6 +200,7 @@ public:
 class ArchiveExtractor: public IArchiveExtractCallback, public ICryptoGetTextPassword, public UnknownImpl, public ExtractProgress {
 private:
   wstring file_path;
+  FileInfo file_info;
   UInt32 src_dir_index;
   wstring dst_dir;
   const FileList& file_list;
@@ -240,7 +241,7 @@ public:
       return S_OK;
     }
 
-    FileInfo file_info = file_list[index];
+    file_info = file_list[index];
     file_path = file_info.name;
     UInt32 parent_index = file_info.parent;
     while (parent_index != src_dir_index) {

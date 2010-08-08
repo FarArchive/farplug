@@ -17,6 +17,8 @@ public:
   wstring update_arc_type;
   unsigned update_level;
   wstring update_method;
+  bool update_solid;
+  bool update_encrypt_header;
 public:
   void load();
   void save();

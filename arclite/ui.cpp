@@ -311,7 +311,7 @@ RetryDialogResult error_retry_ignore_dialog(const wstring& file_path, const Erro
   st << Far::get_msg(MSG_BUTTON_IGNORE) << L'\n';
   st << Far::get_msg(MSG_BUTTON_IGNORE_ALL) << L'\n';
   st << Far::get_msg(MSG_BUTTON_CANCEL) << L'\n';
-  switch (Far::message(st.str(), 4, FMSG_WARNING)) {
+  switch (Far::message(st.str(), can_retry ? 4 : 3, FMSG_WARNING)) {
   case 0:
     return can_retry ? rdrRetry : rdrIgnore;
   case 1:
@@ -404,17 +404,18 @@ private:
   int arc_type_ctrl_id;
   int level_ctrl_id;
   int method_ctrl_id;
+  int solid_ctrl_id;
+  int encrypt_ctrl_id;
+  int password_ctrl_id;
+  int password2_ctrl_id;
+  int encrypt_header_ctrl_id;
   int move_files_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
   wstring old_ext;
   wstring get_ext(const wstring& arc_type) {
-    wstring ext = L"." + ArcAPI::get()->find_format(arc_type).extension;
-    size_t pos = ext.find(L' ');
-    if (pos != wstring::npos)
-      ext.erase(pos);
-    return ext;
+    return ArcAPI::get()->find_format(arc_type).default_extension();
   }
   bool change_extension(const wstring& new_ext) {
     if (old_ext.size() == 0 || new_ext.size() == 0)
@@ -459,6 +460,22 @@ private:
           break;
         }
       }
+      options.solid = get_check(solid_ctrl_id);
+      if (get_check(encrypt_ctrl_id)) {
+        wstring password = get_text(password_ctrl_id);
+        wstring password2 = get_text(password2_ctrl_id);
+        if (password != password2) {
+          FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_PASSWORDS_DONT_MATCH));
+        }
+        if (password.empty()) {
+          FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_PASSWORD_IS_EMPTY));
+        }
+        options.password = password;
+        options.encrypt_header = get_check(encrypt_header_ctrl_id);
+      }
+      else {
+        options.password.clear();
+      }
       options.move_files = get_check(move_files_ctrl_id);
     }
     else if (msg == DN_INITDIALOG) {
@@ -466,6 +483,10 @@ private:
       for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
         enable(i, enabled);
       }
+      for (int i = encrypt_ctrl_id + 1; i <= encrypt_header_ctrl_id; i++) {
+        enable(i, !options.password.empty());
+      }
+      enable(encrypt_header_ctrl_id, !options.password.empty() && enabled);
     }
     else if (msg == DN_BTNCLICK && param1 >= arc_type_ctrl_id && param1 < arc_type_ctrl_id + static_cast<int>(ARRAYSIZE(c_archive_types))) {
       if (param2) {
@@ -475,7 +496,15 @@ private:
           enable(i, enabled);
         }
         change_extension(get_ext(arc_type));
+        enable(solid_ctrl_id, enabled);
       }
+    }
+    else if (msg == DN_BTNCLICK && param1 == encrypt_ctrl_id) {
+      wstring arc_type = c_archive_types[param1 - arc_type_ctrl_id].value;
+      for (int i = encrypt_ctrl_id + 1; i <= encrypt_header_ctrl_id; i++) {
+        enable(i, param2 == TRUE);
+      }
+      enable(encrypt_header_ctrl_id, param2 && arc_type == L"7z");
     }
     return default_dialog_proc(msg, param1, param2);
   }
@@ -527,7 +556,25 @@ public:
     };
     new_line();
 
-    move_files_ctrl_id = check_box(Far::get_msg(MSG_EXTRACT_DLG_MOVE_FILES), options.move_files);
+    solid_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_SOLID), options.solid);
+    new_line();
+    separator();
+    new_line();
+
+    encrypt_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT), !options.password.empty());
+    new_line();
+    label(Far::get_msg(MSG_UPDATE_DLG_PASSWORD));
+    password_ctrl_id = pwd_edit_box(options.password, 20);
+    spacer(2);
+    label(Far::get_msg(MSG_UPDATE_DLG_PASSWORD2));
+    password2_ctrl_id = pwd_edit_box(options.password, 20);
+    new_line();
+    encrypt_header_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT_HEADER), options.encrypt_header);
+    new_line();
+    separator();
+    new_line();
+
+    move_files_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_MOVE_FILES), options.move_files);
     new_line();
 
     separator();

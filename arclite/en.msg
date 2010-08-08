@@ -18,6 +18,14 @@ update.dlg.arc_path = &Archive path:
 update.dlg.arc_type = Select archiver:
 update.dlg.level = Compression level:
 update.dlg.method = Compression method:
+update.dlg.solid = S&olid archive
+update.dlg.encrypt = &Encrypt archive
+update.dlg.password = Pass&word:
+update.dlg.password2 = Repeat:
+update.dlg.encrypt_header = Encrypt &header
+update.dlg.move_files = &Delete files after archiving
+update.dlg.passwords_dont_match = Passwords don't match
+update.dlg.password_is_empty = Password is empty
 
 # Archive types
 compression.archive.7z = &7z

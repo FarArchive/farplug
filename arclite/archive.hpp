@@ -27,9 +27,10 @@ struct ArcFormat {
   unsigned lib_index;
   wstring name;
   string class_id;
-  bool update;
+  bool updatable;
   string start_signature;
-  wstring extension;
+  wstring extension_list;
+  wstring default_extension() const;
 };
 
 typedef vector<ArcLib> ArcLibs;
@@ -139,7 +140,7 @@ private:
   void set_attr(UInt32 file_index, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log, SetAttrProgress& progress);
 public:
   bool updatable() const {
-    return format_chain.size() == 1 && format_chain.back().update;
+    return format_chain.size() == 1 && format_chain.back().updatable;
   }
   void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
 

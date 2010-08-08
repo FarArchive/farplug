@@ -45,6 +45,15 @@ HRESULT ArcLib::get_bytes_prop(UInt32 index, PROPID prop_id, string& value) cons
 }
 
 
+wstring ArcFormat::default_extension() const {
+  wstring ext = L"." + extension_list;
+  size_t pos = ext.find(L' ');
+  if (pos != wstring::npos)
+    ext.erase(pos);
+  return ext;
+}
+
+
 wstring ArcFormatChain::to_string() const {
   wstring result;
   for (unsigned i = 0; i < size(); i++) {
@@ -102,9 +111,9 @@ void ArcAPI::load() {
         arc_format.lib_index = i;
         CHECK_COM(arc_lib.get_string_prop(idx, NArchive::kName, arc_format.name));
         CHECK_COM(arc_lib.get_bytes_prop(idx, NArchive::kClassID, arc_format.class_id));
-        CHECK_COM(arc_lib.get_bool_prop(idx, NArchive::kUpdate, arc_format.update));
+        CHECK_COM(arc_lib.get_bool_prop(idx, NArchive::kUpdate, arc_format.updatable));
         arc_lib.get_bytes_prop(idx, NArchive::kStartSignature, arc_format.start_signature);
-        arc_lib.get_string_prop(idx, NArchive::kExtension, arc_format.extension);
+        arc_lib.get_string_prop(idx, NArchive::kExtension, arc_format.extension_list);
         arc_formats.push_back(arc_format);
       }
     }
