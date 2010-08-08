@@ -26,6 +26,7 @@ update.dlg.encrypt_header = Encrypt &header
 update.dlg.move_files = &Delete files after archiving
 update.dlg.passwords_dont_match = Passwords don't match
 update.dlg.password_is_empty = Password is empty
+update.dlg.confirm_overwrite = Target file already exists. Do you want to overwrite it?
 
 # Archive types
 compression.archive.7z = &7z

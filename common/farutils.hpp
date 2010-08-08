@@ -60,7 +60,7 @@ void flush_screen();
 
 int viewer(const wstring& file_name, const wstring& title);
 
-int update_panel(HANDLE h_panel, bool keep_selection);
+void update_panel(HANDLE h_panel, bool keep_selection);
 
 bool get_panel_info(HANDLE h_panel, PanelInfo& panel_info);
 bool is_real_file_panel(const PanelInfo& panel_info);

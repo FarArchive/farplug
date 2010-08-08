@@ -116,8 +116,9 @@ int viewer(const wstring& file_name, const wstring& title) {
   return g_far.Viewer(file_name.c_str(), title.c_str(), 0, 0, -1, -1, VF_DISABLEHISTORY | VF_ENABLE_F6, CP_UNICODE);
 }
 
-int update_panel(HANDLE h_panel, bool keep_selection) {
-  return g_far.Control(h_panel, FCTL_UPDATEPANEL, keep_selection ? 1 : 0, 0);
+void update_panel(HANDLE h_panel, bool keep_selection) {
+  g_far.Control(h_panel, FCTL_UPDATEPANEL, keep_selection ? 1 : 0, 0);
+  g_far.Control(h_panel, FCTL_REDRAWPANEL, 0, 0);
 }
 
 bool get_panel_info(HANDLE h_panel, PanelInfo& panel_info) {

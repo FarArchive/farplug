@@ -440,7 +440,13 @@ private:
   LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
     if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
       if (new_arc) {
-        options.arc_path = unquote(strip(get_text(arc_path_ctrl_id)));
+        wstring arc_path = unquote(strip(get_text(arc_path_ctrl_id)));
+        if (GetFileAttributesW(long_path(arc_path).c_str()) != INVALID_FILE_ATTRIBUTES) {
+          if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_UPDATE_DLG_CONFIRM_OVERWRITE), 0, FMSG_MB_YESNO) != 0)
+            FAIL(E_ABORT);
+        }
+        options.arc_path = arc_path;
+
         for(unsigned i = 0; i < ARRAYSIZE(c_archive_types); i++) {
           if (get_check(arc_type_ctrl_id + i)) {
             options.arc_type = c_archive_types[i].value;
@@ -479,32 +485,33 @@ private:
       options.move_files = get_check(move_files_ctrl_id);
     }
     else if (msg == DN_INITDIALOG) {
-      bool enabled = options.arc_type == L"7z";
+      bool is_7z = options.arc_type == L"7z";
       for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
-        enable(i, enabled);
+        enable(i, is_7z);
       }
       for (int i = encrypt_ctrl_id + 1; i <= encrypt_header_ctrl_id; i++) {
         enable(i, !options.password.empty());
       }
-      enable(encrypt_header_ctrl_id, !options.password.empty() && enabled);
+      enable(encrypt_header_ctrl_id, !options.password.empty() && is_7z);
     }
     else if (msg == DN_BTNCLICK && param1 >= arc_type_ctrl_id && param1 < arc_type_ctrl_id + static_cast<int>(ARRAYSIZE(c_archive_types))) {
       if (param2) {
         wstring arc_type = c_archive_types[param1 - arc_type_ctrl_id].value;
-        bool enabled = arc_type == L"7z";
+        bool is_7z = arc_type == L"7z";
         for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
-          enable(i, enabled);
+          enable(i, is_7z);
         }
         change_extension(get_ext(arc_type));
-        enable(solid_ctrl_id, enabled);
+        enable(solid_ctrl_id, is_7z);
+        enable(encrypt_header_ctrl_id, get_check(encrypt_ctrl_id) && is_7z);
       }
     }
     else if (msg == DN_BTNCLICK && param1 == encrypt_ctrl_id) {
-      wstring arc_type = c_archive_types[param1 - arc_type_ctrl_id].value;
+      bool is_7z = get_check(arc_type_ctrl_id);
       for (int i = encrypt_ctrl_id + 1; i <= encrypt_header_ctrl_id; i++) {
         enable(i, param2 == TRUE);
       }
-      enable(encrypt_header_ctrl_id, param2 && arc_type == L"7z");
+      enable(encrypt_header_ctrl_id, param2 && is_7z);
     }
     return default_dialog_proc(msg, param1, param2);
   }
