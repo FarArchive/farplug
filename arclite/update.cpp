@@ -8,6 +8,7 @@
 
 class ArchiveUpdateProgress: public ProgressMonitor {
 private:
+  bool new_arc;
   UInt64 total;
   UInt64 completed;
   wstring file_path;
@@ -41,7 +42,7 @@ private:
     else
       speed = round(static_cast<double>(completed) / time_elapsed() * ticks_per_sec());
 
-    st << Far::get_msg(MSG_PROGRESS_UPDATE) << L'\n';
+    st << Far::get_msg(new_arc ? MSG_PROGRESS_CREATE : MSG_PROGRESS_UPDATE) << L'\n';
     st << fit_str(file_path, c_width) << L'\n';
     st << setw(7) << format_data_size(file_completed, get_size_suffixes()) << L" / " << format_data_size(file_total, get_size_suffixes()) << L'\n';
     st << Far::get_progress_bar_str(c_width, file_percent, 100) << L'\n';
@@ -59,7 +60,7 @@ private:
   }
 
 public:
-  ArchiveUpdateProgress(): ProgressMonitor(true), completed(0), total(0), file_completed(0), file_total(0) {
+  ArchiveUpdateProgress(bool new_arc): ProgressMonitor(true), new_arc(new_arc), completed(0), total(0), file_completed(0), file_total(0) {
   }
 
   void on_open_file(const wstring& file_path, unsigned __int64 size) {
@@ -221,7 +222,7 @@ private:
   Error& error;
 
 public:
-  ArchiveUpdater(const wstring& src_dir, const wstring& dst_dir, UInt32 num_indices, const FileIndexMap& file_index_map, const wstring& password, Error& error): src_dir(src_dir), dst_dir(dst_dir), num_indices(num_indices), file_index_map(file_index_map), password(password), error(error) {
+  ArchiveUpdater(const wstring& src_dir, const wstring& dst_dir, UInt32 num_indices, const FileIndexMap& file_index_map, const wstring& password, Error& error): src_dir(src_dir), dst_dir(dst_dir), num_indices(num_indices), file_index_map(file_index_map), password(password), progress(num_indices == 0), error(error) {
   }
 
   UNKNOWN_IMPL_BEGIN

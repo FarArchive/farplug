@@ -291,7 +291,7 @@ void Archive::reopen() {
 void Archive::close() {
   if (in_arc) {
     in_arc->Close();
-    in_arc->Release();
+    in_arc.Release();
   }
   file_list.clear();
   file_list_index.clear();
