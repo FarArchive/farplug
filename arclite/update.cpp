@@ -299,7 +299,10 @@ public:
   }
   STDMETHODIMP SetOperationResult(Int32 operationResult) {
     COM_ERROR_HANDLER_BEGIN
-    return S_OK;
+    if (operationResult == NArchive::NUpdate::NOperationResult::kError)
+      FAIL_MSG(Far::get_msg(MSG_ERROR_UPDATE_ERROR));
+    else
+      return S_OK;
     COM_ERROR_HANDLER_END
   }
 

@@ -86,6 +86,7 @@ progress.create = Creating archive...
 error.extract.unsupported_method = Unsupported compression method
 error.extract.data_error = Data error
 error.extract.crc_error = CRC check failed
+error.update.error = Update error
 
 # Generic buttons
 button.ok = OK
