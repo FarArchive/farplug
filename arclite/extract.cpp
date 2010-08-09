@@ -148,6 +148,7 @@ private:
   ErrorLog& error_log;
   Error& error;
   bool error_state;
+
 public:
   FileExtractStream(const wstring& file_path, const FileInfo& file_info, ExtractProgress& progress, bool& ignore_errors, ErrorLog& error_log, Error& error): h_file(INVALID_HANDLE_VALUE), file_path(file_path), file_info(file_info), progress(progress), ignore_errors(ignore_errors), error_log(error_log), error(error), error_state(false) {
     progress.on_create_file(file_path, file_info.size);
@@ -165,6 +166,7 @@ public:
     }
   }
   ~FileExtractStream() {
+    SetEndOfFile(h_file);
     if (h_file != INVALID_HANDLE_VALUE)
       CloseHandle(h_file);
     if (error_state)
@@ -193,6 +195,17 @@ public:
     }
     return S_OK;
     COM_ERROR_HANDLER_END;
+  }
+
+  void allocate() {
+    if (file_info.size) {
+      LARGE_INTEGER position;
+      position.QuadPart = file_info.size;
+      CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
+      CHECK_SYS(SetEndOfFile(h_file));
+      position.QuadPart = 0;
+      CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
+    }
   }
 };
 
@@ -289,8 +302,10 @@ public:
       }
     }
 
-    ComObject<ISequentialOutStream> file_out_stream(new FileExtractStream(file_path, file_info, *this, ignore_errors, error_log, error));
-    file_out_stream.detach(outStream);
+    FileExtractStream* file_extract_stream = new FileExtractStream(file_path, file_info, *this, ignore_errors, error_log, error);
+    ComObject<ISequentialOutStream> out_stream(file_extract_stream);
+    file_extract_stream->allocate();
+    out_stream.detach(outStream);
 
     return S_OK;
     COM_ERROR_HANDLER_END
