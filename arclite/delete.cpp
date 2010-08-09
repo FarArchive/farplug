@@ -6,11 +6,10 @@
 #include "ui.hpp"
 #include "archive.hpp"
 
-class ArchiveUpdateStream: public IOutStream, public UnknownImpl {
+class ArchiveUpdateStream: public IOutStream, public ComBase {
 private:
   HANDLE h_file;
   const wstring& file_path;
-  Error& error;
 public:
   ArchiveUpdateStream(const wstring& file_path, Error& error);
   ~ArchiveUpdateStream();
@@ -20,10 +19,9 @@ public:
   STDMETHOD(SetSize)(Int64 newSize);
 };
 
-class ArchiveFileDeleter: public IArchiveUpdateCallback, public ProgressMonitor, public UnknownImpl {
+class ArchiveFileDeleter: public IArchiveUpdateCallback, public ProgressMonitor, public ComBase {
 private:
   vector<UInt32> new_indices;
-  Error& error;
 
   UInt64 total;
   UInt64 completed;
@@ -59,7 +57,7 @@ private:
   }
 
 public:
-  ArchiveFileDeleter(const vector<UInt32>& new_indices, Error& error): new_indices(new_indices), error(error), completed(0), total(0) {
+  ArchiveFileDeleter(const vector<UInt32>& new_indices, Error& error): ComBase(error), new_indices(new_indices), completed(0), total(0) {
   }
 
   UNKNOWN_IMPL_BEGIN

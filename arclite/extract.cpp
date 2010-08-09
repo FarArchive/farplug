@@ -138,7 +138,7 @@ public:
 };
 
 
-class FileExtractStream: public ISequentialOutStream, public UnknownImpl {
+class FileExtractStream: public ISequentialOutStream, public ComBase {
 private:
   HANDLE h_file;
   const wstring& file_path;
@@ -146,11 +146,10 @@ private:
   ExtractProgress& progress;
   bool& ignore_errors;
   ErrorLog& error_log;
-  Error& error;
   bool error_state;
 
 public:
-  FileExtractStream(const wstring& file_path, const FileInfo& file_info, ExtractProgress& progress, bool& ignore_errors, ErrorLog& error_log, Error& error): h_file(INVALID_HANDLE_VALUE), file_path(file_path), file_info(file_info), progress(progress), ignore_errors(ignore_errors), error_log(error_log), error(error), error_state(false) {
+  FileExtractStream(const wstring& file_path, const FileInfo& file_info, ExtractProgress& progress, bool& ignore_errors, ErrorLog& error_log, Error& error): ComBase(error), h_file(INVALID_HANDLE_VALUE), file_path(file_path), file_info(file_info), progress(progress), ignore_errors(ignore_errors), error_log(error_log), error_state(false) {
     progress.on_create_file(file_path, file_info.size);
     while (true) {
       try {
@@ -210,7 +209,7 @@ public:
 };
 
 
-class ArchiveExtractor: public IArchiveExtractCallback, public ICryptoGetTextPassword, public UnknownImpl, public ExtractProgress {
+class ArchiveExtractor: public IArchiveExtractCallback, public ICryptoGetTextPassword, public ComBase, public ExtractProgress {
 private:
   wstring file_path;
   FileInfo file_info;
@@ -220,11 +219,10 @@ private:
   wstring& password;
   OverwriteOption& oo;
   bool& ignore_errors;
-  Error& error;
   ErrorLog& error_log;
 
 public:
-  ArchiveExtractor(UInt32 src_dir_index, const wstring& dst_dir, const FileList& file_list, wstring& password, OverwriteOption& oo, bool& ignore_errors, ErrorLog& error_log, Error& error): src_dir_index(src_dir_index), dst_dir(dst_dir), file_list(file_list), password(password), oo(oo), ignore_errors(ignore_errors), error_log(error_log), error(error) {
+  ArchiveExtractor(UInt32 src_dir_index, const wstring& dst_dir, const FileList& file_list, wstring& password, OverwriteOption& oo, bool& ignore_errors, ErrorLog& error_log, Error& error): ComBase(error), src_dir_index(src_dir_index), dst_dir(dst_dir), file_list(file_list), password(password), oo(oo), ignore_errors(ignore_errors), error_log(error_log) {
   }
 
   UNKNOWN_IMPL_BEGIN

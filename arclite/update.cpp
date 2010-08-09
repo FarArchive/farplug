@@ -85,14 +85,13 @@ public:
 };
 
 
-class ArchiveUpdateStream: public IOutStream, public UnknownImpl {
+class ArchiveUpdateStream: public IOutStream, public ComBase {
 private:
   HANDLE h_file;
   const wstring& file_path;
-  Error& error;
 
 public:
-  ArchiveUpdateStream(const wstring& file_path, Error& error): h_file(INVALID_HANDLE_VALUE), file_path(file_path), error(error) {
+  ArchiveUpdateStream(const wstring& file_path, Error& error): ComBase(error), h_file(INVALID_HANDLE_VALUE), file_path(file_path) {
     h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
@@ -147,15 +146,14 @@ public:
 };
 
 
-class FileReadStream: public IInStream, public UnknownImpl {
+class FileReadStream: public IInStream, public ComBase {
 private:
   HANDLE h_file;
   const wstring& file_path;
   ArchiveUpdateProgress& progress;
-  Error& error;
 
 public:
-  FileReadStream(const wstring& file_path, ArchiveUpdateProgress& progress, Error& error): file_path(file_path), progress(progress), error(error) {
+  FileReadStream(const wstring& file_path, ArchiveUpdateProgress& progress, Error& error): ComBase(error), file_path(file_path), progress(progress) {
     h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
@@ -211,7 +209,7 @@ public:
 };
 
 
-class ArchiveUpdater: public IArchiveUpdateCallback, public ICryptoGetTextPassword2, public UnknownImpl {
+class ArchiveUpdater: public IArchiveUpdateCallback, public ICryptoGetTextPassword2, public ComBase {
 private:
   wstring src_dir;
   wstring dst_dir;
@@ -219,10 +217,9 @@ private:
   const FileIndexMap& file_index_map;
   const wstring& password;
   ArchiveUpdateProgress progress;
-  Error& error;
 
 public:
-  ArchiveUpdater(const wstring& src_dir, const wstring& dst_dir, UInt32 num_indices, const FileIndexMap& file_index_map, const wstring& password, Error& error): src_dir(src_dir), dst_dir(dst_dir), num_indices(num_indices), file_index_map(file_index_map), password(password), progress(num_indices == 0), error(error) {
+  ArchiveUpdater(const wstring& src_dir, const wstring& dst_dir, UInt32 num_indices, const FileIndexMap& file_index_map, const wstring& password, Error& error): ComBase(error), src_dir(src_dir), dst_dir(dst_dir), num_indices(num_indices), file_index_map(file_index_map), password(password), progress(num_indices == 0) {
   }
 
   UNKNOWN_IMPL_BEGIN

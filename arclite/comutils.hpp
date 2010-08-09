@@ -26,11 +26,12 @@ inline bool s_ok(HRESULT hr) {
   } \
   return error.code;
 
-class UnknownImpl: public IUnknown {
+class ComBase: public IUnknown {
 protected:
   ULONG ref_cnt;
+  Error& error;
 public:
-  UnknownImpl(): ref_cnt(0) {
+  ComBase(Error& error): ref_cnt(0), error(error) {
   }
 };
 
@@ -46,7 +47,7 @@ public:
     if (riid == IID_##iid) { *object = static_cast<iid*>(this); AddRef(); return S_OK; }
 
 #define UNKNOWN_IMPL_END \
-    if (riid == IID_IUnknown) { *object = static_cast<IUnknown*>(static_cast<UnknownImpl*>(this)); AddRef(); return S_OK; } \
+    if (riid == IID_IUnknown) { *object = static_cast<IUnknown*>(static_cast<ComBase*>(this)); AddRef(); return S_OK; } \
     *object = NULL; return E_NOINTERFACE; \
   } \
   STDMETHOD_(ULONG, AddRef)() { return ++ref_cnt; } \

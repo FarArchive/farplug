@@ -7,13 +7,12 @@
 #include "msearch.hpp"
 #include "archive.hpp"
 
-class ArchiveOpenStream: public IInStream, public UnknownImpl {
+class ArchiveOpenStream: public IInStream, public ComBase {
 private:
   HANDLE h_file;
   wstring file_path;
-  Error& error;
 public:
-  ArchiveOpenStream(const wstring& file_path, Error& error): file_path(file_path), error(error) {
+  ArchiveOpenStream(const wstring& file_path, Error& error): ComBase(error), file_path(file_path) {
     h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
@@ -68,12 +67,11 @@ public:
 };
 
 
-class ArchiveOpener: public IArchiveOpenCallback, public IArchiveOpenVolumeCallback, public ICryptoGetTextPassword, public UnknownImpl, public ProgressMonitor {
+class ArchiveOpener: public IArchiveOpenCallback, public IArchiveOpenVolumeCallback, public ICryptoGetTextPassword, public ComBase, public ProgressMonitor {
 private:
   const wstring& archive_dir;
   FindData volume_file_info;
   wstring& password;
-  Error& error;
 
   UInt64 total_files;
   UInt64 total_bytes;
@@ -92,7 +90,7 @@ private:
   }
 
 public:
-  ArchiveOpener(const wstring& archive_dir, const FindData& archive_file_info, wstring& password, Error& error): archive_dir(archive_dir), volume_file_info(archive_file_info), password(password), error(error), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
+  ArchiveOpener(const wstring& archive_dir, const FindData& archive_file_info, wstring& password, Error& error): ComBase(error), archive_dir(archive_dir), volume_file_info(archive_file_info), password(password), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
