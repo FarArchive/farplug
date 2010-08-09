@@ -92,8 +92,8 @@ public:
   }
   STDMETHODIMP GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value) {
     COM_ERROR_HANDLER_BEGIN
-    PropVariant var;
-    var.detach(value);
+    PropVariant prop;
+    prop.detach(value);
     return S_OK;
     COM_ERROR_HANDLER_END
   }

@@ -8,7 +8,7 @@
 
 HRESULT ArcLib::get_bool_prop(UInt32 index, PROPID prop_id, bool& value) const {
   PropVariant prop;
-  HRESULT res = GetHandlerProperty2(index, prop_id, &prop);
+  HRESULT res = GetHandlerProperty2(index, prop_id, prop.var());
   if (FAILED(res))
     return res;
   if (prop.vt == VT_BOOL)
@@ -20,7 +20,7 @@ HRESULT ArcLib::get_bool_prop(UInt32 index, PROPID prop_id, bool& value) const {
 
 HRESULT ArcLib::get_string_prop(UInt32 index, PROPID prop_id, wstring& value) const {
   PropVariant prop;
-  HRESULT res = GetHandlerProperty2(index, prop_id, &prop);
+  HRESULT res = GetHandlerProperty2(index, prop_id, prop.var());
   if (FAILED(res))
     return res;
   if (prop.vt == VT_BSTR)
@@ -32,7 +32,7 @@ HRESULT ArcLib::get_string_prop(UInt32 index, PROPID prop_id, wstring& value) co
 
 HRESULT ArcLib::get_bytes_prop(UInt32 index, PROPID prop_id, string& value) const {
   PropVariant prop;
-  HRESULT res = GetHandlerProperty2(index, prop_id, &prop);
+  HRESULT res = GetHandlerProperty2(index, prop_id, prop.var());
   if (FAILED(res))
     return res;
   if (prop.vt == VT_BSTR) {
@@ -218,19 +218,19 @@ void Archive::make_index() {
   UInt32 dir_index = 0;
   FileInfo file_info;
   wstring path;
-  PropVariant var;
+  PropVariant prop;
   for (UInt32 i = 0; i < num_indices; i++) {
     progress.update(i, num_indices);
 
-    if (s_ok(in_arc->GetProperty(i, kpidPath, &var)) && var.vt == VT_BSTR)
-      path.assign(var.bstrVal);
+    if (s_ok(in_arc->GetProperty(i, kpidPath, prop.var())) && prop.vt == VT_BSTR)
+      path.assign(prop.bstrVal);
     else
       path.assign(get_default_name());
 
     // attributes
-    bool is_dir = s_ok(in_arc->GetProperty(i, kpidIsDir, &var)) && var.vt == VT_BOOL && var.boolVal;
-    if (s_ok(in_arc->GetProperty(i, kpidAttrib, &var)) && var.vt == VT_UI4)
-      file_info.attr = var.ulVal;
+    bool is_dir = s_ok(in_arc->GetProperty(i, kpidIsDir, prop.var())) && prop.vt == VT_BOOL && prop.boolVal;
+    if (s_ok(in_arc->GetProperty(i, kpidAttrib, prop.var())) && prop.vt == VT_UI4)
+      file_info.attr = prop.ulVal;
     else
       file_info.attr = 0;
     if (is_dir)
@@ -239,26 +239,26 @@ void Archive::make_index() {
       is_dir = file_info.is_dir();
 
     // size
-    if (!is_dir && s_ok(in_arc->GetProperty(i, kpidSize, &var)) && var.vt == VT_UI8)
-      file_info.size = var.uhVal.QuadPart;
+    if (!is_dir && s_ok(in_arc->GetProperty(i, kpidSize, prop.var())) && prop.vt == VT_UI8)
+      file_info.size = prop.uhVal.QuadPart;
     else
       file_info.size = 0;
-    if (!is_dir && s_ok(in_arc->GetProperty(i, kpidPackSize, &var)) && var.vt == VT_UI8)
-      file_info.psize = var.uhVal.QuadPart;
+    if (!is_dir && s_ok(in_arc->GetProperty(i, kpidPackSize, prop.var())) && prop.vt == VT_UI8)
+      file_info.psize = prop.uhVal.QuadPart;
     else
       file_info.psize = 0;
 
     // date & time
-    if (s_ok(in_arc->GetProperty(i, kpidCTime, &var)) && var.vt == VT_FILETIME)
-      file_info.ctime = var.filetime;
+    if (s_ok(in_arc->GetProperty(i, kpidCTime, prop.var())) && prop.vt == VT_FILETIME)
+      file_info.ctime = prop.filetime;
     else
       file_info.ctime = archive_file_info.ftCreationTime;
-    if (s_ok(in_arc->GetProperty(i, kpidMTime, &var)) && var.vt == VT_FILETIME)
-      file_info.mtime = var.filetime;
+    if (s_ok(in_arc->GetProperty(i, kpidMTime, prop.var())) && prop.vt == VT_FILETIME)
+      file_info.mtime = prop.filetime;
     else
       file_info.mtime = archive_file_info.ftLastWriteTime;
-    if (s_ok(in_arc->GetProperty(i, kpidATime, &var)) && var.vt == VT_FILETIME)
-      file_info.atime = var.filetime;
+    if (s_ok(in_arc->GetProperty(i, kpidATime, prop.var())) && prop.vt == VT_FILETIME)
+      file_info.atime = prop.filetime;
     else
       file_info.atime = archive_file_info.ftLastAccessTime;
 

@@ -264,26 +264,26 @@ public:
   STDMETHODIMP GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value) {
     COM_ERROR_HANDLER_BEGIN
     const FileIndexInfo& file_index_info = file_index_map.at(index);
-    PropVariant var;
+    PropVariant prop;
     switch (propID) {
     case kpidPath:
-      var = add_trailing_slash(add_trailing_slash(dst_dir) + file_index_info.rel_path) + file_index_info.find_data.cFileName; break;
+      prop = add_trailing_slash(add_trailing_slash(dst_dir) + file_index_info.rel_path) + file_index_info.find_data.cFileName; break;
     case kpidName:
-      var = file_index_info.find_data.cFileName; break;
+      prop = file_index_info.find_data.cFileName; break;
     case kpidIsDir:
-      var = file_index_info.find_data.is_dir(); break;
+      prop = file_index_info.find_data.is_dir(); break;
     case kpidSize:
-      var = file_index_info.find_data.size(); break;
+      prop = file_index_info.find_data.size(); break;
     case kpidAttrib:
-      var = static_cast<UInt32>(file_index_info.find_data.dwFileAttributes); break;
+      prop = static_cast<UInt32>(file_index_info.find_data.dwFileAttributes); break;
     case kpidCTime:
-      var = file_index_info.find_data.ftCreationTime; break;
+      prop = file_index_info.find_data.ftCreationTime; break;
     case kpidATime:
-      var = file_index_info.find_data.ftLastAccessTime; break;
+      prop = file_index_info.find_data.ftLastAccessTime; break;
     case kpidMTime:
-      var = file_index_info.find_data.ftLastWriteTime; break;
+      prop = file_index_info.find_data.ftLastWriteTime; break;
     }
-    var.detach(value);
+    prop.detach(value);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
@@ -371,22 +371,17 @@ void Archive::set_properties(IOutArchive* out_arc, const UpdateOptions& options)
   ComObject<ISetProperties> set_props;
   if (SUCCEEDED(out_arc->QueryInterface(IID_ISetProperties, reinterpret_cast<void**>(&set_props)))) {
     vector<const wchar_t*> names;
-    PropVariant var;
-    vector<PROPVARIANT> values;
+    vector<PropVariant> values;
     names.push_back(L"x");
-    var = options.level;
-    values.push_back(var);
+    values.push_back(options.level);
     if (options.arc_type == L"7z") {
       names.push_back(L"0");
-      var = options.method;
-      values.push_back(var);
+      values.push_back(options.method);
       names.push_back(L"s");
-      var = options.solid;
-      values.push_back(var);
+      values.push_back(options.solid);
       if (!options.password.empty()) {
         names.push_back(L"he");
-        var = options.encrypt_header;
-        values.push_back(var);
+        values.push_back(options.encrypt_header);
       }
     }
     CHECK_COM(set_props->SetProperties(names.data(), values.data(), names.size()));

@@ -515,7 +515,7 @@ private:
   }
 
 public:
-  UpdateDialog(bool new_arc, UpdateOptions& options): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), c_client_xs), new_arc(new_arc), options(options), old_ext(new_arc ? get_ext(options.arc_type) : L"") {
+  UpdateDialog(bool new_arc, UpdateOptions& options): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), c_client_xs), new_arc(new_arc), options(options), old_ext(get_ext(options.arc_type)) {
   }
 
   bool show() {

@@ -103,7 +103,7 @@ public:
   }
 };
 
-class PropVariant: public PROPVARIANT, private NonCopyable {
+class PropVariant: public PROPVARIANT {
 private:
   void clear() {
     if (vt != VT_EMPTY)
@@ -116,7 +116,7 @@ public:
   ~PropVariant() {
     clear();
   }
-  PROPVARIANT* operator&() {
+  PROPVARIANT* var() {
     clear();
     return this;
   }
@@ -125,6 +125,47 @@ public:
       CHECK_COM(PropVariantClear(var));
     *var = *this;
     vt = VT_EMPTY;
+  }
+
+  PropVariant(const PropVariant& var) {
+    CHECK_COM(PropVariantCopy(this, &var));
+  }
+  PropVariant(const wstring& val) {
+    vt = VT_BSTR;
+    bstrVal = SysAllocStringLen(val.data(), val.size());
+    if (bstrVal == NULL) {
+      vt = VT_ERROR;
+      FAIL(E_OUTOFMEMORY);
+    }
+  }
+  PropVariant(const wchar_t* val) {
+    vt = VT_BSTR;
+    bstrVal = SysAllocStringLen(val, wcslen(val));
+    if (bstrVal == NULL) {
+      vt = VT_ERROR;
+      FAIL(E_OUTOFMEMORY);
+    }
+  }
+  PropVariant(bool val) {
+    vt = VT_BOOL;
+    boolVal = val ? VARIANT_TRUE : VARIANT_FALSE;
+  }
+  PropVariant(UInt32 val) {
+    vt = VT_UI4;
+    ulVal = val;
+  }
+  PropVariant(UInt64 val) {
+    vt = VT_UI8;
+    uhVal.QuadPart = val;
+  }
+  PropVariant(const FILETIME &val) {
+    vt = VT_FILETIME;
+    filetime = val;
+  }
+
+  PropVariant& operator=(const PropVariant& var) {
+    clear();
+    CHECK_COM(PropVariantCopy(this, &var));
   }
   PropVariant& operator=(const wstring& val) {
     clear();

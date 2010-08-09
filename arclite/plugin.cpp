@@ -196,6 +196,9 @@ public:
       options.arc_type = g_options.update_arc_type;
       options.arc_path += ArcAPI::get()->find_format(options.arc_type).default_extension();
     }
+    else {
+      options.arc_type = format_chain.back().name;
+    }
     options.level = g_options.update_level;
     options.method = g_options.update_method;
     options.solid = g_options.update_solid;

@@ -120,24 +120,24 @@ public:
 
   STDMETHODIMP GetProperty(PROPID propID, PROPVARIANT *value) {
     COM_ERROR_HANDLER_BEGIN
-    PropVariant var;
+    PropVariant prop;
     switch (propID) {
     case kpidName:
-      var = volume_file_info.cFileName; break;
+      prop = volume_file_info.cFileName; break;
     case kpidIsDir:
-      var = volume_file_info.is_dir(); break;
+      prop = volume_file_info.is_dir(); break;
     case kpidSize:
-      var = volume_file_info.size(); break;
+      prop = volume_file_info.size(); break;
     case kpidAttrib:
-      var = static_cast<UInt32>(volume_file_info.dwFileAttributes); break;
+      prop = static_cast<UInt32>(volume_file_info.dwFileAttributes); break;
     case kpidCTime:
-      var = volume_file_info.ftCreationTime; break;
+      prop = volume_file_info.ftCreationTime; break;
     case kpidATime:
-      var = volume_file_info.ftLastAccessTime; break;
+      prop = volume_file_info.ftLastAccessTime; break;
     case kpidMTime:
-      var = volume_file_info.ftLastWriteTime; break;
+      prop = volume_file_info.ftLastWriteTime; break;
     }
-    var.detach(value);
+    prop.detach(value);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
@@ -178,10 +178,10 @@ public:
 
 bool Archive::open_sub_stream(IInArchive* in_arc, IInStream** sub_stream) {
   UInt32 main_subfile;
-  PropVariant var;
-  if (in_arc->GetArchiveProperty(kpidMainSubfile, &var) != S_OK || var.vt != VT_UI4)
+  PropVariant prop;
+  if (in_arc->GetArchiveProperty(kpidMainSubfile, prop.var()) != S_OK || prop.vt != VT_UI4)
     return false;
-  main_subfile = var.ulVal;
+  main_subfile = prop.ulVal;
 
   UInt32 num_items;
   if (in_arc->GetNumberOfItems(&num_items) != S_OK || main_subfile >= num_items)
