@@ -172,6 +172,27 @@ public:
       DeleteFileW(long_path(file_path).c_str());
   }
 
+  void allocate() {
+    if (!error_state && file_info.size) {
+      while (true) {
+        try {
+          LARGE_INTEGER position;
+          position.QuadPart = file_info.size;
+          CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
+          CHECK_SYS(SetEndOfFile(h_file));
+          position.QuadPart = 0;
+          CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
+          break;
+        }
+        catch (const Error& e) {
+          error_state = true;
+          if (retry_or_ignore_error(file_path, e, ignore_errors, error_log, progress))
+            break;
+        }
+      }
+    }
+  }
+
   UNKNOWN_IMPL_BEGIN
   UNKNOWN_IMPL_ITF(ISequentialOutStream)
   UNKNOWN_IMPL_END
@@ -194,17 +215,6 @@ public:
     }
     return S_OK;
     COM_ERROR_HANDLER_END;
-  }
-
-  void allocate() {
-    if (file_info.size) {
-      LARGE_INTEGER position;
-      position.QuadPart = file_info.size;
-      CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
-      CHECK_SYS(SetEndOfFile(h_file));
-      position.QuadPart = 0;
-      CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
-    }
   }
 };
 
