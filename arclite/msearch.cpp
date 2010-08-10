@@ -61,6 +61,8 @@ StateMatrix* create_state_matrix(const vector<string>& str_list) {
 
 vector<StrPos> msearch(unsigned char* data, size_t size, const vector<string>& str_list) {
   vector<StrPos> result;
+  if (str_list.empty())
+    return result;
   result.reserve(str_list.size());
   auto_ptr<StateMatrix> matrix(create_state_matrix(str_list));
   vector<bool> found(str_list.size(), false);
