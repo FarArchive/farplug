@@ -7,6 +7,8 @@
 #include "archive.hpp"
 
 bool retry_or_ignore_error(const wstring& path, const Error& error, bool& ignore_errors, ErrorLog& error_log, ProgressMonitor& progress) {
+  if (error.code == E_ABORT)
+    throw error;
   bool ignore = ignore_errors;
   if (!ignore) {
     ProgressSuspend ps(progress);
@@ -32,6 +34,8 @@ bool retry_or_ignore_error(const wstring& path, const Error& error, bool& ignore
 }
 
 void ignore_error(const wstring& path, const Error& error, bool& ignore_errors, ErrorLog& error_log, ProgressMonitor& progress) {
+  if (error.code == E_ABORT)
+    throw error;
   if (!ignore_errors) {
     ProgressSuspend ps(progress);
     switch (error_retry_ignore_dialog(path, error, false)) {
@@ -138,59 +142,200 @@ public:
 };
 
 
-class FileExtractStream: public ISequentialOutStream, public ComBase {
+class FileWriteCache {
 private:
+  static const size_t c_min_cache_size = 10 * 1024 * 1024;
+  static const size_t c_max_cache_size = 50 * 1024 * 1024;
+
+  struct CachedFileInfo {
+    wstring file_path;
+    unsigned __int64 file_size;
+    size_t buffer_pos;
+    size_t buffer_size;
+  };
+
+  unsigned char* buffer;
+  size_t buffer_size;
+  size_t commit_size;
+  size_t buffer_pos;
+  list<CachedFileInfo> file_list;
   HANDLE h_file;
-  const wstring& file_path;
-  const FileInfo& file_info;
-  ExtractProgress& progress;
+  CachedFileInfo file_info;
+  bool continue_file;
+  bool error_state;
   bool& ignore_errors;
   ErrorLog& error_log;
-  bool error_state;
+  ExtractProgress& progress;
 
-public:
-  FileExtractStream(const wstring& file_path, const FileInfo& file_info, ExtractProgress& progress, bool& ignore_errors, ErrorLog& error_log, Error& error): ComBase(error), h_file(INVALID_HANDLE_VALUE), file_path(file_path), file_info(file_info), progress(progress), ignore_errors(ignore_errors), error_log(error_log), error_state(false) {
-    progress.on_create_file(file_path, file_info.size);
+  size_t get_max_cache_size() const {
+    MEMORYSTATUS mem_st;
+    GlobalMemoryStatus(&mem_st);
+    size_t size = mem_st.dwAvailPhys;
+    if (size < c_min_cache_size)
+      size = c_min_cache_size;
+    if (size > c_max_cache_size)
+      size = c_max_cache_size;
+    return size;
+  }
+  // create new file
+  void create_file() {
     while (true) {
       try {
-        h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
+        h_file = CreateFileW(long_path(file_info.file_path).c_str(), FILE_WRITE_DATA, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
         CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
         break;
       }
       catch (const Error& e) {
-        error_state = true;
-        if (retry_or_ignore_error(file_path, e, ignore_errors, error_log, progress))
+        if (retry_or_ignore_error(file_info.file_path, e, ignore_errors, error_log, progress)) {
+          error_state = true;
           break;
+        }
+      }
+    }
+    progress.on_create_file(file_info.file_path, file_info.file_size);
+  }
+  // allocate file
+  void allocate_file() {
+    if (error_state) return;
+    if (file_info.file_size == 0) return;
+    while (true) {
+      try {
+        LARGE_INTEGER file_pos;
+        file_pos.QuadPart = file_info.file_size;
+        CHECK_SYS(SetFilePointerEx(h_file, file_pos, NULL, FILE_BEGIN));
+        CHECK_SYS(SetEndOfFile(h_file));
+        file_pos.QuadPart = 0;
+        CHECK_SYS(SetFilePointerEx(h_file, file_pos, NULL, FILE_BEGIN));
+        break;
+      }
+      catch (const Error& e) {
+        if (retry_or_ignore_error(file_info.file_path, e, ignore_errors, error_log, progress)) {
+          error_state = true;
+          break;
+        }
       }
     }
   }
-  ~FileExtractStream() {
-    SetEndOfFile(h_file);
-    if (h_file != INVALID_HANDLE_VALUE)
-      CloseHandle(h_file);
-    if (error_state)
-      DeleteFileW(long_path(file_path).c_str());
+  // write file using 1 MB blocks
+  void write_file() {
+    if (error_state) return;
+    try {
+      const unsigned c_block_size = 1 * 1024 * 1024;
+      size_t pos = 0;
+      while (pos < file_info.buffer_size) {
+        DWORD size;
+        if (pos + c_block_size > file_info.buffer_size)
+          size = static_cast<DWORD>(file_info.buffer_size - pos);
+        else
+          size = c_block_size;
+        DWORD size_written;
+        CHECK_SYS(WriteFile(h_file, buffer + file_info.buffer_pos + pos, size, &size_written, NULL));
+        pos += size_written;
+        progress.on_write_file(size_written);
+      }
+    }
+    catch (const Error& e) {
+      ignore_error(file_info.file_path, e, ignore_errors, error_log, progress);
+      error_state = true;
+    }
   }
-
-  void allocate() {
-    if (!error_state && file_info.size) {
-      while (true) {
+  void close_file() {
+    if (h_file != INVALID_HANDLE_VALUE) {
+      if (!error_state) {
         try {
-          LARGE_INTEGER position;
-          position.QuadPart = file_info.size;
-          CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
-          CHECK_SYS(SetEndOfFile(h_file));
-          position.QuadPart = 0;
-          CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
-          break;
+          CHECK_SYS(SetEndOfFile(h_file)); // ensure end of file is set correctly
         }
         catch (const Error& e) {
+          ignore_error(file_info.file_path, e, ignore_errors, error_log, progress);
           error_state = true;
-          if (retry_or_ignore_error(file_path, e, ignore_errors, error_log, progress))
-            break;
         }
       }
+      CloseHandle(h_file);
+      h_file = INVALID_HANDLE_VALUE;
+      if (error_state)
+        DeleteFileW(long_path(file_info.file_path).c_str());
     }
+  }
+  void write() {
+    for_each(file_list.begin(), file_list.end(), [&] (const CachedFileInfo& fi) {
+      file_info = fi;
+      if (continue_file) {
+        continue_file = false;
+      }
+      else {
+        close_file();
+        error_state = false; // reset error flag on each file
+        create_file();
+        allocate_file();
+      }
+      write_file();
+    });
+    // leave only last file record in cache
+    if (!file_list.empty()) {
+      file_info = file_list.back();
+      file_info.buffer_pos = 0;
+      file_info.buffer_size = 0;
+      file_list.assign(1, file_info);
+      continue_file = true; // last file is not written in its entirety (possibly)
+    }
+    buffer_pos = 0;
+  }
+  void store(const unsigned char* data, size_t size) {
+    assert(!file_list.empty());
+    assert(size <= buffer_size);
+    if (buffer_pos + size > buffer_size) {
+      write();
+    }
+    CachedFileInfo& file_info = file_list.back();
+    size_t new_size = buffer_pos + size;
+    if (new_size > commit_size) {
+      CHECK_SYS(VirtualAlloc(buffer + commit_size, new_size - commit_size, MEM_COMMIT, PAGE_READWRITE));
+      commit_size = new_size;
+    }
+    memcpy(buffer + buffer_pos, data, size);
+    file_info.buffer_size += size;
+    buffer_pos += size;
+  }
+public:
+  FileWriteCache(bool& ignore_errors, ErrorLog& error_log, ExtractProgress& progress): buffer_size(get_max_cache_size()), commit_size(0), buffer_pos(0), h_file(INVALID_HANDLE_VALUE), continue_file(false), error_state(false), ignore_errors(ignore_errors), error_log(error_log), progress(progress) {
+    buffer = reinterpret_cast<unsigned char*>(VirtualAlloc(NULL, buffer_size, MEM_RESERVE, PAGE_NOACCESS));
+    CHECK_SYS(buffer);
+  }
+  ~FileWriteCache() {
+    VirtualFree(buffer, buffer_size, MEM_RELEASE);
+    if (h_file != INVALID_HANDLE_VALUE) {
+      CloseHandle(h_file);
+      DeleteFileW(long_path(file_info.file_path).c_str());
+    }
+  }
+  void store_file(const wstring& file_path, unsigned __int64 file_size) {
+    CachedFileInfo file_info;
+    file_info.file_path = file_path;
+    file_info.file_size = file_size;
+    file_info.buffer_pos = buffer_pos;
+    file_info.buffer_size = 0;
+    file_list.push_back(file_info);
+  }
+  void store_data(const unsigned char* data, size_t size) {
+    unsigned full_buffer_cnt = static_cast<unsigned>(size / buffer_size);
+    for (unsigned i = 0; i < full_buffer_cnt; i++) {
+      store(data + i * buffer_size, buffer_size);
+    }
+    store(data + full_buffer_cnt * buffer_size, size % buffer_size);
+  }
+  void finalize() {
+    write();
+    close_file();
+  }
+};
+
+
+class CachedFileExtractStream: public ISequentialOutStream, public ComBase {
+private:
+  FileWriteCache& cache;
+
+public:
+  CachedFileExtractStream(FileWriteCache& cache): ComBase(error), cache(cache) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -199,27 +344,15 @@ public:
 
   STDMETHODIMP Write(const void *data, UInt32 size, UInt32 *processedSize) {
     COM_ERROR_HANDLER_BEGIN
-    if (error_state) {
-      *processedSize = size;
-    }
-    else {
-      try {
-        CHECK_SYS(WriteFile(h_file, data, size, reinterpret_cast<LPDWORD>(processedSize), NULL));
-      }
-      catch (const Error& e) {
-        error_state = true;
-        *processedSize = size;
-        ignore_error(file_path, e, ignore_errors, error_log, progress);
-      }
-      progress.on_write_file(*processedSize);
-    }
+    cache.store_data(static_cast<const unsigned char*>(data), size);
+    *processedSize = size;
     return S_OK;
     COM_ERROR_HANDLER_END;
   }
 };
 
 
-class ArchiveExtractor: public IArchiveExtractCallback, public ICryptoGetTextPassword, public ComBase, public ExtractProgress {
+class ArchiveExtractor: public IArchiveExtractCallback, public ICryptoGetTextPassword, public ComBase {
 private:
   wstring file_path;
   FileInfo file_info;
@@ -230,9 +363,11 @@ private:
   OverwriteOption& oo;
   bool& ignore_errors;
   ErrorLog& error_log;
+  FileWriteCache& cache;
+  ExtractProgress& progress;
 
 public:
-  ArchiveExtractor(UInt32 src_dir_index, const wstring& dst_dir, const FileList& file_list, wstring& password, OverwriteOption& oo, bool& ignore_errors, ErrorLog& error_log, Error& error): ComBase(error), src_dir_index(src_dir_index), dst_dir(dst_dir), file_list(file_list), password(password), oo(oo), ignore_errors(ignore_errors), error_log(error_log) {
+  ArchiveExtractor(UInt32 src_dir_index, const wstring& dst_dir, const FileList& file_list, wstring& password, OverwriteOption& oo, bool& ignore_errors, ErrorLog& error_log, Error& error, FileWriteCache& cache, ExtractProgress& progress): ComBase(error), src_dir_index(src_dir_index), dst_dir(dst_dir), file_list(file_list), password(password), oo(oo), ignore_errors(ignore_errors), error_log(error_log), cache(cache), progress(progress) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -243,14 +378,14 @@ public:
 
   STDMETHODIMP SetTotal(UInt64 total) {
     COM_ERROR_HANDLER_BEGIN
-    on_total_update(total);
+    progress.on_total_update(total);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
   STDMETHODIMP SetCompleted(const UInt64 *completeValue) {
     COM_ERROR_HANDLER_BEGIN
     if (completeValue)
-      on_completed_update(*completeValue);
+      progress.on_completed_update(*completeValue);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
@@ -279,7 +414,7 @@ public:
       bool overwrite;
       if (oo == ooAsk) {
         FindData src_file_info = convert_file_info(file_info);
-        ProgressSuspend ps(*this);
+        ProgressSuspend ps(progress);
         OverwriteAction oa = overwrite_dialog(file_path, src_file_info, dst_file_info);
         if (oa == oaYes)
           overwrite = true;
@@ -310,9 +445,8 @@ public:
       }
     }
 
-    FileExtractStream* file_extract_stream = new FileExtractStream(file_path, file_info, *this, ignore_errors, error_log, error);
-    ComObject<ISequentialOutStream> out_stream(file_extract_stream);
-    file_extract_stream->allocate();
+    cache.store_file(file_path, file_info.size);
+    ComObject<ISequentialOutStream> out_stream(new CachedFileExtractStream(cache));
     out_stream.detach(outStream);
 
     return S_OK;
@@ -336,7 +470,7 @@ public:
         return S_OK;
     }
     catch (const Error& e) {
-      ignore_error(file_path, e, ignore_errors, error_log, *this);
+      ignore_error(file_path, e, ignore_errors, error_log, progress);
     }
     COM_ERROR_HANDLER_END
   }
@@ -344,7 +478,7 @@ public:
   STDMETHODIMP CryptoGetTextPassword(BSTR *pwd) {
     COM_ERROR_HANDLER_BEGIN
     if (password.empty()) {
-      ProgressSuspend ps(*this);
+      ProgressSuspend ps(progress);
       if (!password_dialog(password))
         FAIL(E_ABORT);
     }
@@ -491,7 +625,9 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
   sort(indices.begin(), indices.end());
 
   Error error;
-  ComObject<IArchiveExtractCallback> extractor(new ArchiveExtractor(src_dir_index, options.dst_dir, file_list, password, overwrite_option, ignore_errors, error_log, error));
+  ExtractProgress progress;
+  FileWriteCache cache(ignore_errors, error_log, progress);
+  ComObject<IArchiveExtractCallback> extractor(new ArchiveExtractor(src_dir_index, options.dst_dir, file_list, password, overwrite_option, ignore_errors, error_log, error, cache, progress));
   HRESULT res = in_arc->Extract(indices.data(), indices.size(), 0, extractor);
   if (FAILED(res)) {
     if (error)
@@ -499,6 +635,7 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
     else
       FAIL(res);
   }
+  cache.finalize();
 
   SetAttrProgress set_attr_progress;
   for (unsigned i = 0; i < src_indices.size(); i++) {
