@@ -74,7 +74,7 @@ public:
   }
   STDMETHODIMP SetCompleted(const UInt64 *completeValue) {
     COM_ERROR_HANDLER_BEGIN
-    if (completeValue) this->completed = *completeValue;
+    if (completeValue) completed = *completeValue;
     update_ui();
     return S_OK;
     COM_ERROR_HANDLER_END

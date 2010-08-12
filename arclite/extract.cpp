@@ -345,7 +345,8 @@ public:
   STDMETHODIMP Write(const void *data, UInt32 size, UInt32 *processedSize) {
     COM_ERROR_HANDLER_BEGIN
     cache.store_data(static_cast<const unsigned char*>(data), size);
-    *processedSize = size;
+    if (processedSize)
+      *processedSize = size;
     return S_OK;
     COM_ERROR_HANDLER_END;
   }

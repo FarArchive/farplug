@@ -107,7 +107,10 @@ public:
 
   STDMETHODIMP Write(const void *data, UInt32 size, UInt32 *processedSize) {
     COM_ERROR_HANDLER_BEGIN
-    CHECK_SYS(WriteFile(h_file, data, size, reinterpret_cast<LPDWORD>(processedSize), NULL));
+    DWORD size_written;
+    CHECK_SYS(WriteFile(h_file, data, size, &size_written, NULL));
+    if (processedSize)
+      *processedSize = size_written;
     return S_OK;
     COM_ERROR_HANDLER_END
   }
