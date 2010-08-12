@@ -8,11 +8,8 @@ DEFINES = -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_W
 LINKFLAGS = -nologo -debug -incremental:no -map -manifest:no -dynamicbase -nxcompat -largeaddressaware -dll
 RCFLAGS = -nologo
 
-7Z_DLL = 7z\CPP\7zip\Bundles\Format7zF
-
 !if "$(CPU)" == "AMD64" || "$(PLATFORM)" == "x64"
 PLATFORM = x64
-7Z_DLL = $(7Z_DLL)\x64
 !else
 PLATFORM = x86
 LINKFLAGS = $(LINKFLAGS) -safeseh
@@ -37,6 +34,21 @@ OUTDIR = $(OUTDIR).$(PLATFORM)
 INCLUDES = -I$(COMMONDIR) -I$(OUTDIR) -I7z -Ifar
 CPPFLAGS = $(CPPFLAGS) -Fo$(OUTDIR)\ -Fd$(OUTDIR)\ $(INCLUDES) $(DEFINES)
 RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
+
+7Z_DLL = 7z\CPP\7zip\Bundles\Format7zF
+!if "$(PLATFORM)" == "x64"
+!ifdef RELEASE
+7Z_DLL = $(7Z_DLL)\AMD64
+!else
+7Z_DLL = $(7Z_DLL)\x64\Debug
+!endif
+!else
+!ifdef RELEASE
+7Z_DLL = $(7Z_DLL)\O
+!else
+7Z_DLL = $(7Z_DLL)\Debug
+!endif
+!endif
 7Z_DLL = $(7Z_DLL)\7z.dll
 
 COMMON_OBJS = $(OUTDIR)\farutils.obj $(OUTDIR)\pathutils.obj $(OUTDIR)\strutils.obj $(OUTDIR)\sysutils.obj $(OUTDIR)\numutils.obj
