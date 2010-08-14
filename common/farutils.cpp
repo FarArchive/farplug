@@ -121,6 +121,26 @@ void update_panel(HANDLE h_panel, bool keep_selection) {
   g_far.Control(h_panel, FCTL_REDRAWPANEL, 0, 0);
 }
 
+void set_view_mode(HANDLE h_panel, unsigned view_mode) {
+  g_far.Control(h_panel, FCTL_SETVIEWMODE, view_mode, 0);
+}
+
+void set_sort_mode(HANDLE h_panel, unsigned sort_mode) {
+  g_far.Control(h_panel, FCTL_SETSORTMODE, sort_mode, 0);
+}
+
+void set_reverse_sort(HANDLE h_panel, bool reverse_sort) {
+  g_far.Control(h_panel, FCTL_SETSORTORDER, reverse_sort ? 1 : 0, 0);
+}
+
+void set_numeric_sort(HANDLE h_panel, bool numeric_sort) {
+  g_far.Control(h_panel, FCTL_SETNUMERICSORT, numeric_sort ? 1 : 0, 0);
+}
+
+void set_directories_first(HANDLE h_panel, bool first) {
+  g_far.Control(h_panel, FCTL_SETDIRECTORIESFIRST, first ? 1 : 0, 0);
+}
+
 bool get_panel_info(HANDLE h_panel, PanelInfo& panel_info) {
   return g_far.Control(h_panel, FCTL_GETPANELINFO, 0, reinterpret_cast<LONG_PTR>(&panel_info)) == TRUE;
 }

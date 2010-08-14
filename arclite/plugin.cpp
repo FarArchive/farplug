@@ -79,6 +79,9 @@ public:
     }
     opi->HostFile = host_file.c_str();
     opi->PanelTitle = panel_title.c_str();
+    opi->StartPanelMode = '0' + g_options.panel_view_mode;
+    opi->StartSortMode = g_options.panel_sort_mode;
+    opi->StartSortOrder = g_options.panel_reverse_sort;
   }
 
   void set_dir(const wstring& dir) {
@@ -250,6 +253,16 @@ public:
     Far::update_panel(PANEL_ACTIVE, false);
     Far::update_panel(PANEL_PASSIVE, false);
   }
+
+  void close() {
+    PanelInfo panel_info;
+    if (Far::get_panel_info(this, panel_info)) {
+      g_options.panel_view_mode = panel_info.ViewMode;
+      g_options.panel_sort_mode = panel_info.SortMode;
+      g_options.panel_reverse_sort = (panel_info.Flags & PFLAGS_REVERSESORTORDER) != 0;
+      g_options.save();
+    }
+  }
 };
 
 int WINAPI GetMinFarVersion(void) {
@@ -292,7 +305,9 @@ HANDLE WINAPI OpenFilePluginW(const wchar_t *Name,const unsigned char *Data,int 
 
 void WINAPI ClosePluginW(HANDLE hPlugin) {
   FAR_ERROR_HANDLER_BEGIN;
-  delete reinterpret_cast<Plugin*>(hPlugin);
+  Plugin* plugin = reinterpret_cast<Plugin*>(hPlugin);
+  IGNORE_ERRORS(plugin->close());
+  delete plugin;
   FAR_ERROR_HANDLER_END(return, return, true);
 }
 

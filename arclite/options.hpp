@@ -19,6 +19,10 @@ public:
   wstring update_method;
   bool update_solid;
   bool update_encrypt_header;
+  // panel mode
+  unsigned panel_view_mode;
+  unsigned panel_sort_mode;
+  bool panel_reverse_sort;
 public:
   void load();
   void save();
