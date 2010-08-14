@@ -10,11 +10,11 @@ RCFLAGS = -nologo
 
 !if "$(CPU)" == "AMD64" || "$(PLATFORM)" == "x64"
 PLATFORM = x64
+RCFLAGS = $(RCFLAGS) -Dx64
 !else
 PLATFORM = x86
 LINKFLAGS = $(LINKFLAGS) -safeseh
 !endif
-DEFINES = $(DEFINES) -DPLATFORM=$(PLATFORM)
 
 !ifdef RELEASE
 OUTDIR = Release
