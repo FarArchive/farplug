@@ -63,16 +63,18 @@ public:
     PanelInfo panel_info;
     if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
       FAIL(E_ABORT);
+    Far::FindData panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
     if (!Far::is_real_file_panel(panel_info)) {
-      Far::post_keys(vector<DWORD>(1, KEY_CTRLPGDN));
-      auto_detect_next_time = false;
+      if ((panel_item.file_attributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
+        Far::post_keys(vector<DWORD>(1, KEY_CTRLPGDN));
+        auto_detect_next_time = false;
+      }
       FAIL(E_ABORT);
     }
-    wstring name = Far::get_current_file_name(PANEL_ACTIVE);
-    if (name == L"..")
+    if (panel_item.file_name == L"..")
       FAIL(E_ABORT);
     wstring dir = Far::get_panel_dir(PANEL_ACTIVE);
-    wstring path = add_trailing_slash(dir) + name;
+    wstring path = add_trailing_slash(dir) + panel_item.file_name;
     if (!open_file(path, false))
       FAIL(E_ABORT);
   }

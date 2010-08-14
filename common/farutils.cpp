@@ -165,7 +165,7 @@ wstring get_panel_dir(HANDLE h_panel) {
   return wstring(buf.data(), size - 1);
 }
 
-wstring get_current_file_name(HANDLE h_panel) {
+FindData get_current_panel_item(HANDLE h_panel) {
   Buffer<unsigned char> buf(0x10000);
   unsigned size = g_far.Control(h_panel, FCTL_GETCURRENTPANELITEM, buf.size(), reinterpret_cast<LONG_PTR>(buf.data()));
   if (size > buf.size()) {
@@ -174,7 +174,16 @@ wstring get_current_file_name(HANDLE h_panel) {
   }
   CHECK(size)
   const PluginPanelItem* panel_item = reinterpret_cast<const PluginPanelItem*>(buf.data());
-  return panel_item->FindData.lpwszFileName;
+  FindData find_data;
+  find_data.file_attributes = panel_item->FindData.dwFileAttributes;
+  find_data.creation_time = panel_item->FindData.ftCreationTime;
+  find_data.last_access_time = panel_item->FindData.ftLastAccessTime;
+  find_data.last_write_time = panel_item->FindData.ftLastWriteTime;
+  find_data.file_size = panel_item->FindData.nFileSize;
+  find_data.pack_size = panel_item->FindData.nPackSize;
+  find_data.file_name = panel_item->FindData.lpwszFileName;
+  find_data.alt_file_name = panel_item->FindData.lpwszAlternateFileName;
+  return find_data;
 }
 
 void error_dlg(const wstring& title, const Error& e) {

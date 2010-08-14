@@ -71,7 +71,18 @@ void set_directories_first(HANDLE h_panel, bool first);
 bool get_panel_info(HANDLE h_panel, PanelInfo& panel_info);
 bool is_real_file_panel(const PanelInfo& panel_info);
 wstring get_panel_dir(HANDLE h_panel);
-wstring get_current_file_name(HANDLE h_panel);
+
+struct FindData {
+  DWORD file_attributes;
+  FILETIME creation_time;
+  FILETIME last_access_time;
+  FILETIME last_write_time;
+  unsigned __int64 file_size;
+  unsigned __int64 pack_size;
+  wstring file_name;
+  wstring alt_file_name;
+};
+FindData get_current_panel_item(HANDLE h_panel);
 
 void error_dlg(const wstring& title, const Error& e);
 void info_dlg(const wstring& title, const wstring& msg);
