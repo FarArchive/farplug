@@ -164,3 +164,4 @@ public:
 };
 
 wstring format_file_time(const FILETIME& file_time);
+unsigned __int64 get_module_version(const wstring& file_path);

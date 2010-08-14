@@ -96,7 +96,8 @@ ArcAPI* ArcAPI::arc_api = nullptr;
 
 ArcAPI::~ArcAPI() {
   for_each(arc_libs.begin(), arc_libs.end(), [&] (const ArcLib& arc_lib) {
-    FreeLibrary(arc_lib.h_module);
+    if (arc_lib.h_module)
+      FreeLibrary(arc_lib.h_module);
   });
 }
 
@@ -108,27 +109,35 @@ ArcAPI* ArcAPI::get() {
   return arc_api;
 }
 
-void ArcAPI::load() {
-  wstring path = Far::get_plugin_module_path();
+void ArcAPI::load_libs(const wstring& path) {
   FileEnum file_enum(path);
   while (file_enum.next()) {
     ArcLib arc_lib;
-    arc_lib.h_module = LoadLibraryW((add_trailing_slash(path) + file_enum.data().cFileName).c_str());
-    if (arc_lib.h_module) {
+    arc_lib.module_path = add_trailing_slash(path) + file_enum.data().cFileName;
+    arc_lib.h_module = LoadLibraryW(arc_lib.module_path.c_str());
+    if (arc_lib.h_module == nullptr) continue;
+    try {
       arc_lib.CreateObject = reinterpret_cast<ArcLib::FCreateObject>(GetProcAddress(arc_lib.h_module, "CreateObject"));
+      CHECK_SYS(arc_lib.CreateObject);
       arc_lib.GetNumberOfMethods = reinterpret_cast<ArcLib::FGetNumberOfMethods>(GetProcAddress(arc_lib.h_module, "GetNumberOfMethods"));
       arc_lib.GetMethodProperty = reinterpret_cast<ArcLib::FGetMethodProperty>(GetProcAddress(arc_lib.h_module, "GetMethodProperty"));
       arc_lib.GetNumberOfFormats = reinterpret_cast<ArcLib::FGetNumberOfFormats>(GetProcAddress(arc_lib.h_module, "GetNumberOfFormats"));
+      CHECK_SYS(arc_lib.GetNumberOfFormats);
       arc_lib.GetHandlerProperty = reinterpret_cast<ArcLib::FGetHandlerProperty>(GetProcAddress(arc_lib.h_module, "GetHandlerProperty"));
       arc_lib.GetHandlerProperty2 = reinterpret_cast<ArcLib::FGetHandlerProperty2>(GetProcAddress(arc_lib.h_module, "GetHandlerProperty2"));
-      if (arc_lib.CreateObject && arc_lib.GetNumberOfFormats && arc_lib.GetHandlerProperty2) {
-        arc_libs.push_back(arc_lib);
-      }
-      else {
-        FreeLibrary(arc_lib.h_module);
-      }
+      CHECK_SYS(arc_lib.GetHandlerProperty2);
+      arc_lib.version = get_module_version(arc_lib.module_path);
+      arc_libs.push_back(arc_lib);
+    }
+    catch (...) {
+      FreeLibrary(arc_lib.h_module);
     }
   }
+}
+
+void ArcAPI::load() {
+  IGNORE_ERRORS(load_libs(Far::get_plugin_module_path()));
+  IGNORE_ERRORS(load_libs(Key(HKEY_LOCAL_MACHINE, L"Software\\7-Zip", KEY_QUERY_VALUE).query_str(L"Path")));
   for (unsigned i = 0; i < arc_libs.size(); i++) {
     const ArcLib& arc_lib = arc_libs[i];
     UInt32 num_formats;
@@ -136,14 +145,28 @@ void ArcAPI::load() {
       for (UInt32 idx = 0; idx < num_formats; idx++) {
         ArcFormat arc_format;
         arc_format.lib_index = i;
-        ArcType class_id;
-        CHECK_COM(arc_lib.get_bytes_prop(idx, NArchive::kClassID, class_id));
-        CHECK_COM(arc_lib.get_string_prop(idx, NArchive::kName, arc_format.name));
-        CHECK_COM(arc_lib.get_bool_prop(idx, NArchive::kUpdate, arc_format.updatable));
+        ArcType type;
+        if (arc_lib.get_bytes_prop(idx, NArchive::kClassID, type) != S_OK) continue;
+        arc_lib.get_string_prop(idx, NArchive::kName, arc_format.name);
+        if (arc_lib.get_bool_prop(idx, NArchive::kUpdate, arc_format.updatable) != S_OK)
+          arc_format.updatable = false;
         arc_lib.get_bytes_prop(idx, NArchive::kStartSignature, arc_format.start_signature);
         arc_lib.get_string_prop(idx, NArchive::kExtension, arc_format.extension_list);
-        arc_formats[class_id] = arc_format;
+        ArcFormats::const_iterator existing_format = arc_formats.find(type);
+        if (existing_format == arc_formats.end() || arc_libs[existing_format->second.lib_index].version < arc_lib.version)
+          arc_formats[type] = arc_format;
       }
+    }
+  }
+  // unload unused libraries
+  set<unsigned> used_libs;
+  for_each(arc_formats.begin(), arc_formats.end(), [&] (const pair<ArcType, ArcFormat>& arc_format) {
+    used_libs.insert(arc_format.second.lib_index);
+  });
+  for (unsigned i = 0; i < arc_libs.size(); i++) {
+    if (used_libs.count(i) == 0) {
+      FreeLibrary(arc_libs[i].h_module);
+      arc_libs[i].h_module = nullptr;
     }
   }
 }

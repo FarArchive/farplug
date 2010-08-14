@@ -4,6 +4,8 @@
 
 struct ArcLib {
   HMODULE h_module;
+  unsigned __int64 version;
+  wstring module_path;
   typedef UInt32 (WINAPI *FCreateObject)(const GUID *clsID, const GUID *interfaceID, void **outObject);
   typedef UInt32 (WINAPI *FGetNumberOfMethods)(UInt32 *numMethods);
   typedef UInt32 (WINAPI *FGetMethodProperty)(UInt32 index, PROPID propID, PROPVARIANT *value);
@@ -37,7 +39,7 @@ typedef vector<ArcLib> ArcLibs;
 typedef string ArcType;
 typedef list<ArcType> ArcTypes;
 
-class ArcFormats: public map<string /*class_id*/, ArcFormat> {
+class ArcFormats: public map<ArcType, ArcFormat> {
 public:
   ArcTypes find_by_name(const wstring& name) const;
   ArcTypes find_by_ext(const wstring& ext) const;
@@ -55,6 +57,7 @@ private:
   static ArcAPI* arc_api;
   ArcAPI() {}
   ~ArcAPI();
+  void load_libs(const wstring& path);
   void load();
   static ArcAPI* get();
 public:
