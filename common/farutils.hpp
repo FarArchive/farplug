@@ -52,6 +52,7 @@ void set_progress_state(TBPFLAG state);
 void set_progress_value(unsigned __int64 completed, unsigned __int64 total);
 
 void call_user_apc(void* param);
+void post_keys(const vector<DWORD>& keys);
 void quit();
 
 HANDLE save_screen();

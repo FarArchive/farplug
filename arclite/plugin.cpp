@@ -15,6 +15,8 @@ private:
   wstring host_file;
   wstring panel_title;
 
+  static bool auto_detect_next_time;
+
   bool open_file(const wstring& file_path, bool auto_detect) {
     max_check_size = g_options.max_check_size;
     vector<ArcFormatChain> format_chains = detect(file_path, !auto_detect);
@@ -51,14 +53,21 @@ public:
   }
 
   Plugin(const wstring& file_path) {
-    if (!open_file(file_path, true))
+    bool auto_detect = auto_detect_next_time;
+    auto_detect_next_time = true;
+    if (!open_file(file_path, auto_detect))
       FAIL(E_ABORT);
   }
 
   Plugin(int open_from, INT_PTR item) {
     PanelInfo panel_info;
-    if (!Far::get_panel_info(PANEL_ACTIVE, panel_info) || !Far::is_real_file_panel(panel_info))
+    if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
       FAIL(E_ABORT);
+    if (!Far::is_real_file_panel(panel_info)) {
+      Far::post_keys(vector<DWORD>(1, KEY_CTRLPGDN));
+      auto_detect_next_time = false;
+      FAIL(E_ABORT);
+    }
     wstring name = Far::get_current_file_name(PANEL_ACTIVE);
     if (name == L"..")
       FAIL(E_ABORT);
@@ -264,6 +273,8 @@ public:
     }
   }
 };
+
+bool Plugin::auto_detect_next_time = true;
 
 int WINAPI GetMinFarVersion(void) {
   return FARMANAGERVERSION;
