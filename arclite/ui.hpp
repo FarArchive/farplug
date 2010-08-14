@@ -75,7 +75,7 @@ void show_error_log(const ErrorLog& error_log);
 
 struct UpdateOptions {
   wstring arc_path;
-  wstring arc_type;
+  string arc_type;
   unsigned level;
   wstring method;
   bool solid;

@@ -26,7 +26,6 @@ struct ArcLib {
 struct ArcFormat {
   unsigned lib_index;
   wstring name;
-  string class_id;
   bool updatable;
   string start_signature;
   wstring extension_list;
@@ -35,13 +34,16 @@ struct ArcFormat {
 
 typedef vector<ArcLib> ArcLibs;
 
-class ArcFormats: public vector<ArcFormat> {
+typedef string ArcType;
+typedef list<ArcType> ArcTypes;
+
+class ArcFormats: public map<string /*class_id*/, ArcFormat> {
 public:
-  ArcFormats find_by_name(const wstring& name) const;
-  ArcFormats find_by_ext(const wstring& ext) const;
+  ArcTypes find_by_name(const wstring& name) const;
+  ArcTypes find_by_ext(const wstring& ext) const;
 };
 
-class ArcFormatChain: public vector<ArcFormat> {
+class ArcFormatChain: public list<ArcType> {
 public:
   wstring to_string() const;
 };
@@ -54,16 +56,16 @@ private:
   ArcAPI() {}
   ~ArcAPI();
   void load();
-public:
   static ArcAPI* get();
-  const ArcLibs& libs() const {
-    return arc_libs;
+public:
+  static const ArcLibs& libs() {
+    return get()->arc_libs;
   }
-  const ArcFormats& formats() const {
-    return arc_formats;
+  static const ArcFormats& formats() {
+    return get()->arc_formats;
   }
-  void create_in_archive(const ArcFormat& format, IInArchive** in_arc);
-  void create_out_archive(const ArcFormat& format, IOutArchive** out_arc);
+  static void create_in_archive(const ArcType& arc_type, IInArchive** in_arc);
+  static void create_out_archive(const ArcType& format, IOutArchive** out_arc);
   static void free();
 };
 
@@ -144,7 +146,7 @@ private:
   void set_attr(UInt32 file_index, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log, SetAttrProgress& progress);
 public:
   bool updatable() const {
-    return format_chain.size() == 1 && format_chain.back().updatable;
+    return format_chain.size() == 1 && ArcAPI::formats().at(format_chain.back()).updatable;
   }
   void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
 
@@ -165,3 +167,8 @@ private:
 public:
   void delete_files(const vector<UInt32>& src_indices);
 };
+
+const string c_guid_7z("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x07\x00\x00", 16);
+const string c_guid_zip("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x01\x00\x00", 16);
+const string c_guid_iso("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE7\x00\x00", 16);
+const string c_guid_udf("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE0\x00\x00", 16);

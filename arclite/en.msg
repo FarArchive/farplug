@@ -87,6 +87,7 @@ error.extract.unsupported_method = Unsupported compression method
 error.extract.data_error = Data error
 error.extract.crc_error = CRC check failed
 error.update.error = Update error
+error.no_format = Archive format not found
 
 # Generic buttons
 button.ok = OK

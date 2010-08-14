@@ -193,11 +193,15 @@ public:
         options.arc_path = add_trailing_slash(arc_dir) + panel_items[0].FindData.lpwszFileName;
       else
         options.arc_path = add_trailing_slash(arc_dir) + extract_file_name(src_path);
-      options.arc_type = g_options.update_arc_type;
-      options.arc_path += ArcAPI::get()->formats().find_by_name(options.arc_type).at(0).default_extension();
+      ArcTypes arc_types = ArcAPI::formats().find_by_name(g_options.update_arc_format_name);
+      if (arc_types.empty())
+        options.arc_type = c_guid_7z;
+      else
+        options.arc_type = arc_types.front();
+      options.arc_path += ArcAPI::formats().at(options.arc_type).default_extension();
     }
     else {
-      options.arc_type = format_chain.back().name;
+      options.arc_type = format_chain.back();
     }
     options.level = g_options.update_level;
     options.method = g_options.update_method;
@@ -206,8 +210,11 @@ public:
     options.move_files = move != 0;
     options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
     if (options.show_dialog) {
-      if (!update_dialog(new_arc, options)) FAIL(E_ABORT);
-      g_options.update_arc_type = options.arc_type;
+      if (!update_dialog(new_arc, options))
+        FAIL(E_ABORT);
+      if (ArcAPI::formats().count(options.arc_type) == 0)
+        FAIL_MSG(Far::get_msg(MSG_ERROR_NO_FORMAT));
+      g_options.update_arc_format_name = ArcAPI::formats().at(options.arc_type).name;
       g_options.update_level = options.level;
       g_options.update_method = options.method;
       g_options.update_solid = options.solid;

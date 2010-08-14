@@ -23,8 +23,10 @@ HRESULT ArcLib::get_string_prop(UInt32 index, PROPID prop_id, wstring& value) co
   HRESULT res = GetHandlerProperty2(index, prop_id, prop.var());
   if (FAILED(res))
     return res;
-  if (prop.vt == VT_BSTR)
-    value = prop.bstrVal;
+  if (prop.vt == VT_BSTR) {
+    UINT len = SysStringLen(prop.bstrVal);
+    value.assign(prop.bstrVal, len);
+  }
   else
     return E_FAIL;
   return S_OK;
@@ -54,38 +56,38 @@ wstring ArcFormat::default_extension() const {
 }
 
 
-ArcFormats ArcFormats::find_by_name(const wstring& name) const {
-  ArcFormats formats;
-  for (unsigned i = 0; i < size(); i++) {
-    if ((*this)[i].name == name)
-      formats.push_back((*this)[i]);
+ArcTypes ArcFormats::find_by_name(const wstring& name) const {
+  ArcTypes types;
+  for (const_iterator fmt = begin(); fmt != end(); fmt++) {
+    if (fmt->second.name == name)
+      types.push_back(fmt->first);
   }
-  return formats;
+  return types;
 }
 
-ArcFormats ArcFormats::find_by_ext(const wstring& ext) const {
-  ArcFormats formats;
-  for (unsigned i = 0; i < size(); i++) {
-    list<wstring> ext_list = split((*this)[i].extension_list, L' ');
+ArcTypes ArcFormats::find_by_ext(const wstring& ext) const {
+  ArcTypes types;
+  for (const_iterator fmt = begin(); fmt != end(); fmt++) {
+    list<wstring> ext_list = split(fmt->second.extension_list, L' ');
     for (list<wstring>::const_iterator ext_iter = ext_list.begin(); ext_iter != ext_list.end(); ext_iter++) {
       // ext.c_str() + 1 == remove dot
       if (_wcsicmp(ext_iter->c_str(), ext.c_str() + 1) == 0) {
-        formats.push_back((*this)[i]);
+        types.push_back(fmt->first);
         break;
       }
     }
   }
-  return formats;
+  return types;
 }
 
 
 wstring ArcFormatChain::to_string() const {
   wstring result;
-  for (unsigned i = 0; i < size(); i++) {
+  for_each(begin(), end(), [&] (const ArcType& arc_type) {
     if (!result.empty())
       result += L"->";
-    result += at(i).name;
-  }
+    result += ArcAPI::formats().at(arc_type).name;
+  });
   return result;
 }
 
@@ -134,23 +136,24 @@ void ArcAPI::load() {
       for (UInt32 idx = 0; idx < num_formats; idx++) {
         ArcFormat arc_format;
         arc_format.lib_index = i;
+        ArcType class_id;
+        CHECK_COM(arc_lib.get_bytes_prop(idx, NArchive::kClassID, class_id));
         CHECK_COM(arc_lib.get_string_prop(idx, NArchive::kName, arc_format.name));
-        CHECK_COM(arc_lib.get_bytes_prop(idx, NArchive::kClassID, arc_format.class_id));
         CHECK_COM(arc_lib.get_bool_prop(idx, NArchive::kUpdate, arc_format.updatable));
         arc_lib.get_bytes_prop(idx, NArchive::kStartSignature, arc_format.start_signature);
         arc_lib.get_string_prop(idx, NArchive::kExtension, arc_format.extension_list);
-        arc_formats.push_back(arc_format);
+        arc_formats[class_id] = arc_format;
       }
     }
   }
 }
 
-void ArcAPI::create_in_archive(const ArcFormat& format, IInArchive** in_arc) {
-  CHECK_COM(arc_libs[format.lib_index].CreateObject(reinterpret_cast<const GUID*>(format.class_id.data()), &IID_IInArchive, reinterpret_cast<void**>(in_arc)));
+void ArcAPI::create_in_archive(const ArcType& arc_type, IInArchive** in_arc) {
+  CHECK_COM(libs()[formats().at(arc_type).lib_index].CreateObject(reinterpret_cast<const GUID*>(arc_type.data()), &IID_IInArchive, reinterpret_cast<void**>(in_arc)));
 }
 
-void ArcAPI::create_out_archive(const ArcFormat& format, IOutArchive** out_arc) {
-  CHECK_COM(arc_libs[format.lib_index].CreateObject(reinterpret_cast<const GUID*>(format.class_id.data()), &IID_IOutArchive, reinterpret_cast<void**>(out_arc)));
+void ArcAPI::create_out_archive(const ArcType& arc_type, IOutArchive** out_arc) {
+  CHECK_COM(libs()[formats().at(arc_type).lib_index].CreateObject(reinterpret_cast<const GUID*>(arc_type.data()), &IID_IOutArchive, reinterpret_cast<void**>(out_arc)));
 }
 
 void ArcAPI::free() {

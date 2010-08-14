@@ -356,12 +356,12 @@ void show_error_log(const ErrorLog& error_log) {
 
 struct ArchiveType {
   unsigned name_id;
-  const wchar_t* value;
+  const string& value;
 };
 
 const ArchiveType c_archive_types[] = {
-  { MSG_COMPRESSION_ARCHIVE_7Z, L"7z" },
-  { MSG_COMPRESSION_ARCHIVE_ZIP, L"zip" },
+  { MSG_COMPRESSION_ARCHIVE_7Z, c_guid_7z },
+  { MSG_COMPRESSION_ARCHIVE_ZIP, c_guid_zip },
 };
 
 struct CompressionLevel {
@@ -412,8 +412,11 @@ private:
   int cancel_ctrl_id;
 
   wstring old_ext;
-  wstring get_ext(const wstring& arc_type) {
-    return ArcAPI::get()->formats().find_by_name(arc_type).at(0).default_extension();
+  wstring get_ext(const ArcType& arc_type) {
+    if (ArcAPI::formats().count(arc_type))
+      return ArcAPI::formats().at(arc_type).default_extension();
+    else
+      return wstring();
   }
   bool change_extension(const wstring& new_ext) {
     if (old_ext.size() == 0 || new_ext.size() == 0)
@@ -483,7 +486,7 @@ private:
       options.move_files = get_check(move_files_ctrl_id);
     }
     else if (msg == DN_INITDIALOG) {
-      bool is_7z = options.arc_type == L"7z";
+      bool is_7z = options.arc_type == c_guid_7z;
       for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
         enable(i, is_7z);
       }
@@ -494,8 +497,8 @@ private:
     }
     else if (msg == DN_BTNCLICK && param1 >= arc_type_ctrl_id && param1 < arc_type_ctrl_id + static_cast<int>(ARRAYSIZE(c_archive_types))) {
       if (param2) {
-        wstring arc_type = c_archive_types[param1 - arc_type_ctrl_id].value;
-        bool is_7z = arc_type == L"7z";
+        ArcType arc_type = c_archive_types[param1 - arc_type_ctrl_id].value;
+        bool is_7z = arc_type == c_guid_7z;
         for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
           enable(i, is_7z);
         }
@@ -515,11 +518,13 @@ private:
   }
 
 public:
-  UpdateDialog(bool new_arc, UpdateOptions& options): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), c_client_xs), new_arc(new_arc), options(options), old_ext(get_ext(options.arc_type)) {
+  UpdateDialog(bool new_arc, UpdateOptions& options): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), c_client_xs), new_arc(new_arc), options(options) {
   }
 
   bool show() {
     if (new_arc) {
+      old_ext = get_ext(options.arc_type);
+
       label(Far::get_msg(MSG_UPDATE_DLG_ARC_PATH));
       new_line();
       arc_path_ctrl_id = edit_box(options.arc_path, c_client_xs);

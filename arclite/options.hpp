@@ -14,7 +14,7 @@ public:
   unsigned max_check_size;
   bool extract_ignore_errors;
   unsigned extract_overwrite;
-  wstring update_arc_type;
+  wstring update_arc_format_name;
   unsigned update_level;
   wstring update_method;
   bool update_solid;
