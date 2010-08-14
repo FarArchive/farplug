@@ -54,6 +54,31 @@ wstring ArcFormat::default_extension() const {
 }
 
 
+ArcFormats ArcFormats::find_by_name(const wstring& name) const {
+  ArcFormats formats;
+  for (unsigned i = 0; i < size(); i++) {
+    if ((*this)[i].name == name)
+      formats.push_back((*this)[i]);
+  }
+  return formats;
+}
+
+ArcFormats ArcFormats::find_by_ext(const wstring& ext) const {
+  ArcFormats formats;
+  for (unsigned i = 0; i < size(); i++) {
+    list<wstring> ext_list = split((*this)[i].extension_list, L' ');
+    for (list<wstring>::const_iterator ext_iter = ext_list.begin(); ext_iter != ext_list.end(); ext_iter++) {
+      // ext.c_str() + 1 == remove dot
+      if (_wcsicmp(ext_iter->c_str(), ext.c_str() + 1) == 0) {
+        formats.push_back((*this)[i]);
+        break;
+      }
+    }
+  }
+  return formats;
+}
+
+
 wstring ArcFormatChain::to_string() const {
   wstring result;
   for (unsigned i = 0; i < size(); i++) {
@@ -118,14 +143,6 @@ void ArcAPI::load() {
       }
     }
   }
-}
-
-const ArcFormat& ArcAPI::find_format(const wstring& name) const {
-  for (unsigned i = 0; i < arc_formats.size(); i++) {
-    if (arc_formats[i].name == name)
-      return arc_formats[i];
-  }
-  CHECK(false);
 }
 
 void ArcAPI::create_in_archive(const ArcFormat& format, IInArchive** in_arc) {

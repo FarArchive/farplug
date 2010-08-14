@@ -395,7 +395,7 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
 
   try {
     ComObject<IOutArchive> out_arc;
-    ArcAPI::get()->create_out_archive(ArcAPI::get()->find_format(options.arc_type), &out_arc);
+    ArcAPI::get()->create_out_archive(ArcAPI::get()->formats().find_by_name(options.arc_type).at(0), &out_arc);
 
     set_properties(out_arc, options);
 

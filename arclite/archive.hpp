@@ -34,7 +34,12 @@ struct ArcFormat {
 };
 
 typedef vector<ArcLib> ArcLibs;
-typedef vector<ArcFormat> ArcFormats;
+
+class ArcFormats: public vector<ArcFormat> {
+public:
+  ArcFormats find_by_name(const wstring& name) const;
+  ArcFormats find_by_ext(const wstring& ext) const;
+};
 
 class ArcFormatChain: public vector<ArcFormat> {
 public:
@@ -57,7 +62,6 @@ public:
   const ArcFormats& formats() const {
     return arc_formats;
   }
-  const ArcFormat& find_format(const wstring& name) const;
   void create_in_archive(const ArcFormat& format, IInArchive** in_arc);
   void create_out_archive(const ArcFormat& format, IOutArchive** out_arc);
   static void free();
@@ -102,9 +106,9 @@ private:
     return add_trailing_slash(archive_dir) + archive_file_info.cFileName;
   }
   ComObject<IInArchive> in_arc;
-  bool open_sub_stream(IInArchive* in_arc, IInStream** sub_stream);
+  bool open_sub_stream(IInArchive* in_arc, IInStream** sub_stream, wstring& sub_ext);
   bool open_archive(IInStream* in_stream, IInArchive* archive);
-  void detect(IInStream* in_stream, bool all, vector<ArcFormatChain>& format_chains);
+  void detect(IInStream* in_stream, const wstring& ext, bool all, vector<ArcFormatChain>& format_chains);
 protected:
   FindData archive_file_info;
   unsigned max_check_size;

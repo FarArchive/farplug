@@ -107,6 +107,29 @@ wstring extract_file_path(const wstring& path) {
     return path.substr(0, pos);
 }
 
+wstring extract_file_ext(const wstring& path) {
+  size_t ext_pos = path.rfind(L'.');
+  if (ext_pos == wstring::npos) {
+    return wstring();
+  }
+  size_t name_pos = path.rfind(L'\\');
+  if (name_pos == wstring::npos) {
+    name_pos = 0;
+  }
+  else {
+    name_pos++;
+  }
+  if (ext_pos <= name_pos)
+    return wstring();
+  size_t path_root_len;
+  bool is_unc_path;
+  locate_path_root(path, path_root_len, is_unc_path);
+  if ((ext_pos <= path_root_len) && (path_root_len != 0))
+    return wstring();
+  else
+    return path.substr(ext_pos);
+}
+
 bool is_root_path(const wstring& path) {
   size_t path_root_len;
   bool is_unc_path;

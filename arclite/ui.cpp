@@ -413,7 +413,7 @@ private:
 
   wstring old_ext;
   wstring get_ext(const wstring& arc_type) {
-    return ArcAPI::get()->find_format(arc_type).default_extension();
+    return ArcAPI::get()->formats().find_by_name(arc_type).at(0).default_extension();
   }
   bool change_extension(const wstring& new_ext) {
     if (old_ext.size() == 0 || new_ext.size() == 0)

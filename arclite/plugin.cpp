@@ -194,7 +194,7 @@ public:
       else
         options.arc_path = add_trailing_slash(arc_dir) + extract_file_name(src_path);
       options.arc_type = g_options.update_arc_type;
-      options.arc_path += ArcAPI::get()->find_format(options.arc_type).default_extension();
+      options.arc_path += ArcAPI::get()->formats().find_by_name(options.arc_type).at(0).default_extension();
     }
     else {
       options.arc_type = format_chain.back().name;
