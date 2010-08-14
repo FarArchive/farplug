@@ -273,6 +273,21 @@ void Archive::detect(IInStream* in_stream, const wstring& ext, bool all, vector<
     }
   });
 
+  // special case: UDF must go before ISO
+  list<ArcFormatPos>::iterator iso_iter = format_pos_list.end();
+  for (list<ArcFormatPos>::iterator format_pos = format_pos_list.begin(); format_pos != format_pos_list.end(); format_pos++) {
+    if (format_pos->arc_type == c_guid_iso) {
+      iso_iter = format_pos;
+    }
+    if (format_pos->arc_type == c_guid_udf) {
+      if (iso_iter != format_pos_list.end()) {
+        format_pos_list.insert(iso_iter, *format_pos);
+        format_pos_list.erase(format_pos);
+      }
+      break;
+    }
+  }
+
   for (list<ArcFormatPos>::const_iterator format_pos = format_pos_list.begin(); format_pos != format_pos_list.end(); format_pos++) {
     ComObject<IInArchive> archive;
     ArcAPI::create_in_archive(format_pos->arc_type, &archive);
