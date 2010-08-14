@@ -387,10 +387,10 @@ wstring format_file_time(const FILETIME& file_time) {
 unsigned __int64 get_module_version(const wstring& file_path) {
   unsigned __int64 version = 0;
   DWORD dw_handle;
-  DWORD ver_size = GetFileVersionInfoSizeW(file_path.data(), &dw_handle);
+  DWORD ver_size = GetFileVersionInfoSizeW(file_path.c_str(), &dw_handle);
   if (ver_size) {
     Buffer<unsigned char> ver_block(ver_size);
-    if (GetFileVersionInfoW(file_path.data(), dw_handle, ver_size, ver_block.data())) {
+    if (GetFileVersionInfoW(file_path.c_str(), dw_handle, ver_size, ver_block.data())) {
       VS_FIXEDFILEINFO* fixed_file_info;
       UINT len;
       if (VerQueryValueW(ver_block.data(), L"\\", reinterpret_cast<LPVOID*>(&fixed_file_info), &len)) {

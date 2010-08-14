@@ -102,6 +102,7 @@ typedef map<UInt32, FileIndexInfo> FileIndexMap;
 // forwards
 class SetAttrProgress;
 class PrepareExtractProgress;
+class DeleteFilesProgress;
 
 class Archive {
   // open
@@ -160,6 +161,9 @@ private:
   void scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
   void prepare_file_index_map(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
   void set_properties(IOutArchive* out_arc, const UpdateOptions& options);
+  void delete_file(const wstring& file_path, DeleteFilesProgress& progress);
+  void delete_dir(const wstring& dir_path, DeleteFilesProgress& progress);
+  void delete_files(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number);
 public:
   void create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options);
   void update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options);
