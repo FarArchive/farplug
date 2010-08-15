@@ -576,7 +576,7 @@ void error_dlg(const Error& e) {
   msg.add(far_get_msg(MSG_PLUGIN_NAME)).add('\n');
   UnicodeString err_msg = word_wrap(e.message(), get_msg_width());
   if (err_msg.size() != 0) msg.add(err_msg).add('\n');
-  msg.add_fmt(L"%S:%u r.%u "PLUGIN_TYPE, &extract_file_name(oem_to_unicode(e.file)), e.line, g_version.revision);
+  msg.add_fmt(L"%S:%u v.%u.%u.%u.%u "PLUGIN_TYPE, &extract_file_name(oem_to_unicode(e.file)), e.line, g_version.major, g_version.minor, g_version.patch, g_version.revision);
   far_message(msg, 0, FMSG_WARNING | FMSG_MB_OK);
 }
 
@@ -585,7 +585,7 @@ void error_dlg(const std::exception& e) {
   msg.add(far_get_msg(MSG_PLUGIN_NAME)).add('\n');
   UnicodeString err_msg = word_wrap(oem_to_unicode(e.what()), get_msg_width());
   if (err_msg.size() != 0) msg.add(err_msg).add('\n');
-  msg.add_fmt(L"r.%u "PLUGIN_TYPE, g_version.revision);
+  msg.add_fmt(L"v.%u.%u.%u.%u "PLUGIN_TYPE, g_version.major, g_version.minor, g_version.patch, g_version.revision);
   far_message(msg, 0, FMSG_WARNING | FMSG_MB_OK);
 }
 
