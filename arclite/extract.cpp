@@ -344,7 +344,7 @@ public:
     CHECK_SYS(buffer);
   }
   ~FileWriteCache() {
-    VirtualFree(buffer, buffer_size, MEM_RELEASE);
+    VirtualFree(buffer, 0, MEM_RELEASE);
     if (h_file != INVALID_HANDLE_VALUE) {
       CloseHandle(h_file);
       DeleteFileW(long_path(file_info.file_path).c_str());
