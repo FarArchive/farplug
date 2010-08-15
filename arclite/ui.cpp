@@ -602,3 +602,88 @@ public:
 bool update_dialog(bool new_arc, UpdateOptions& options) {
   return UpdateDialog(new_arc, options).show();
 }
+
+class SettingsDialog: public Far::Dialog {
+private:
+  enum {
+    c_client_xs = 60
+  };
+
+  PluginSettings& settings;
+
+  int use_include_masks_ctrl_id;
+  int include_masks_ctrl_id;
+  int use_exclude_masks_ctrl_id;
+  int exclude_masks_ctrl_id;
+  int generate_masks_ctrl_id;
+  int ok_ctrl_id;
+  int cancel_ctrl_id;
+
+  LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
+    if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != cancel_ctrl_id)) {
+      settings.use_include_masks = get_check(use_include_masks_ctrl_id);
+      settings.include_masks = get_text(include_masks_ctrl_id);
+      settings.use_exclude_masks = get_check(use_exclude_masks_ctrl_id);
+      settings.exclude_masks = get_text(exclude_masks_ctrl_id);
+    }
+    else if (msg == DN_INITDIALOG) {
+      enable(include_masks_ctrl_id, settings.use_include_masks);
+      enable(exclude_masks_ctrl_id, settings.use_exclude_masks);
+    }
+    else if (msg == DN_BTNCLICK && param1 == use_include_masks_ctrl_id) {
+      enable(include_masks_ctrl_id, param2 != 0);
+    }
+    else if (msg == DN_BTNCLICK && param1 == use_exclude_masks_ctrl_id) {
+      enable(exclude_masks_ctrl_id, param2 != 0);
+    }
+    else if (msg == DN_BTNCLICK && param1 == generate_masks_ctrl_id) {
+      generate_masks();
+    }
+    return default_dialog_proc(msg, param1, param2);
+  }
+
+  void generate_masks() {
+    const ArcFormats& arc_formats = ArcAPI::formats();
+    wstring masks;
+    for_each(arc_formats.begin(), arc_formats.end(), [&] (const pair<const ArcType, ArcFormat>& arc_type_format) {
+      list<wstring> ext_list = split(arc_type_format.second.extension_list, L' ');
+      for_each(ext_list.begin(), ext_list.end(), [&] (const wstring& ext) {
+        masks += L"*." + ext + L",";
+      });
+    });
+    if (!masks.empty())
+      masks.erase(masks.size() - 1);
+    set_text(include_masks_ctrl_id, masks);
+  }
+
+public:
+  SettingsDialog(PluginSettings& settings): Far::Dialog(Far::get_msg(MSG_PLUGIN_NAME), c_client_xs), settings(settings) {
+  }
+
+  bool show() {
+    use_include_masks_ctrl_id = check_box(Far::get_msg(MSG_SETTINGS_DLG_USE_INCLUDE_MASKS), settings.use_include_masks);
+    new_line();
+    include_masks_ctrl_id = edit_box(settings.include_masks, c_client_xs);
+    new_line();
+    use_exclude_masks_ctrl_id = check_box(Far::get_msg(MSG_SETTINGS_DLG_USE_EXCLUDE_MASKS), settings.use_exclude_masks);
+    new_line();
+    exclude_masks_ctrl_id = edit_box(settings.exclude_masks, c_client_xs);
+    new_line();
+    generate_masks_ctrl_id = button(Far::get_msg(MSG_SETTINGS_DLG_GENERATE_MASKS), DIF_BTNNOCLOSE);
+    new_line();
+
+    separator();
+    new_line();
+    ok_ctrl_id = def_button(Far::get_msg(MSG_BUTTON_OK), DIF_CENTERGROUP);
+    cancel_ctrl_id = button(Far::get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
+    new_line();
+
+    int item = Far::Dialog::show();
+
+    return (item != -1) && (item != cancel_ctrl_id);
+  }
+};
+
+bool settings_dialog(PluginSettings& settings) {
+  return SettingsDialog(settings).show();
+}

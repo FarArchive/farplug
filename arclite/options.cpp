@@ -18,6 +18,10 @@ const wchar_t* c_param_update_encrypt_header = L"update_encrypt_header";
 const wchar_t* c_param_panel_view_mode = L"panel_view_mode";
 const wchar_t* c_param_panel_sort_mode = L"panel_sort_mode";
 const wchar_t* c_param_panel_reverse_sort = L"panel_reverse_sort";
+const wchar_t* c_param_use_include_masks = L"use_include_masks";
+const wchar_t* c_param_include_masks = L"include_masks";
+const wchar_t* c_param_use_exclude_masks = L"use_exclude_masks";
+const wchar_t* c_param_exclude_masks = L"exclude_masks";
 
 const unsigned c_def_max_check_size = 1 << 20;
 const bool c_def_extract_ignore_errors = false;
@@ -30,6 +34,10 @@ const bool c_def_update_encrypt_header = true;
 const unsigned c_def_panel_view_mode = 2;
 const unsigned c_def_panel_sort_mode = SM_NAME;
 const bool c_def_panel_reverse_sort = false;
+const bool c_def_use_include_masks = false;
+const wchar_t* c_def_include_masks = L"";
+const bool c_def_use_exclude_masks = false;
+const wchar_t* c_def_exclude_masks = L"";
 
 wstring get_plugin_key_name() {
   return add_trailing_slash(Far::get_root_key_name()) + c_plugin_key_name;
@@ -86,6 +94,10 @@ void Options::load() {
   panel_view_mode = get_int(c_param_panel_view_mode, c_def_panel_view_mode);
   panel_sort_mode = get_int(c_param_panel_sort_mode, c_def_panel_sort_mode);
   panel_reverse_sort = get_bool(c_param_panel_reverse_sort, c_def_panel_reverse_sort);
+  use_include_masks = get_bool(c_param_use_include_masks, c_def_use_include_masks);
+  include_masks = get_str(c_param_include_masks, c_def_include_masks);
+  use_exclude_masks = get_bool(c_param_use_exclude_masks, c_def_use_exclude_masks);
+  exclude_masks = get_str(c_param_exclude_masks, c_def_exclude_masks);
 };
 
 void Options::save() {
@@ -100,4 +112,8 @@ void Options::save() {
   set_int(c_param_panel_view_mode, panel_view_mode);
   set_int(c_param_panel_sort_mode, panel_sort_mode);
   set_bool(c_param_panel_reverse_sort, panel_reverse_sort);
+  set_bool(c_param_use_include_masks, use_include_masks);
+  set_str(c_param_include_masks, include_masks);
+  set_bool(c_param_use_exclude_masks, use_exclude_masks);
+  set_str(c_param_exclude_masks, exclude_masks);
 }

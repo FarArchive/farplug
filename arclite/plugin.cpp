@@ -18,6 +18,12 @@ private:
   static bool auto_detect_next_time;
 
   bool open_file(const wstring& file_path, bool auto_detect) {
+    if (g_options.use_include_masks && !Far::match_masks(extract_file_name(file_path), g_options.include_masks))
+      FAIL(E_ABORT);
+
+    if (g_options.use_exclude_masks && Far::match_masks(extract_file_name(file_path), g_options.exclude_masks))
+      FAIL(E_ABORT);
+
     max_check_size = g_options.max_check_size;
     vector<ArcFormatChain> format_chains = detect(file_path, !auto_detect);
 
@@ -304,10 +310,15 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info) {
 void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
   FAR_ERROR_HANDLER_BEGIN;
   static const wchar_t* plugin_menu[1];
-  Info->StructSize = sizeof(PluginInfo);
+  static const wchar_t* config_menu[1];
   plugin_menu[0] = Far::msg_ptr(MSG_PLUGIN_NAME);
+  config_menu[0] = Far::msg_ptr(MSG_PLUGIN_NAME);
+
+  Info->StructSize = sizeof(PluginInfo);
   Info->PluginMenuStrings = plugin_menu;
   Info->PluginMenuStringsNumber = ARRAYSIZE(plugin_menu);
+  Info->PluginConfigStrings = config_menu;
+  Info->PluginConfigStringsNumber = ARRAYSIZE(config_menu);
   FAR_ERROR_HANDLER_END(return, return, false);
 }
 
@@ -388,7 +399,21 @@ int WINAPI ProcessKeyW(HANDLE hPlugin,int Key,unsigned int ControlState) {
 
 int WINAPI ConfigureW(int ItemNumber) {
   FAR_ERROR_HANDLER_BEGIN;
-  return FALSE;
+  PluginSettings settings;
+  settings.use_include_masks = g_options.use_include_masks;
+  settings.include_masks = g_options.include_masks;
+  settings.use_exclude_masks = g_options.use_exclude_masks;
+  settings.exclude_masks = g_options.exclude_masks;
+  if (settings_dialog(settings)) {
+    g_options.use_include_masks = settings.use_include_masks;
+    g_options.include_masks = settings.include_masks;
+    g_options.use_exclude_masks = settings.use_exclude_masks;
+    g_options.exclude_masks = settings.exclude_masks;
+    g_options.save();
+    return TRUE;
+  }
+  else
+    return FALSE;
   FAR_ERROR_HANDLER_END(return FALSE, return FALSE, false);
 }
 

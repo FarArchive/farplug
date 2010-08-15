@@ -76,6 +76,11 @@ log.info = Operation completed with errors. Do you want to review log file?
 log.close = &Close
 log.show = Show &log
 
+# Settings dialog
+settings.dlg.use_include_masks = &Open files matching masks:
+settings.dlg.use_exclude_masks = &Exclude files matching masks:
+settings.dlg.generate_masks = &Generate masks
+
 # Progress messages
 progress.extract = Extracting files...
 progress.create_dirs = Creating directories...

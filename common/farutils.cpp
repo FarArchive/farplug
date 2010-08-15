@@ -607,4 +607,8 @@ INT_PTR adv_control(int command, void* param) {
   return g_far.AdvControl(g_far.ModuleNumber, command, param);
 }
 
+bool match_masks(const wstring& file_name, const wstring& masks) {
+  return g_fsf.ProcessName(masks.c_str(), const_cast<wchar_t*>(file_name.c_str()), 0, PN_CMPNAMELIST) != 0;
+}
+
 };

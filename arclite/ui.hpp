@@ -86,3 +86,12 @@ struct UpdateOptions {
 };
 
 bool update_dialog(bool new_arc, UpdateOptions& options);
+
+struct PluginSettings {
+  bool use_include_masks;
+  wstring include_masks;
+  bool use_exclude_masks;
+  wstring exclude_masks;
+};
+
+bool settings_dialog(PluginSettings& settings);

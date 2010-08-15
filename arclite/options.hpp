@@ -23,6 +23,11 @@ public:
   unsigned panel_view_mode;
   unsigned panel_sort_mode;
   bool panel_reverse_sort;
+  // masks
+  bool use_include_masks;
+  wstring include_masks;
+  bool use_exclude_masks;
+  wstring exclude_masks;
 public:
   void load();
   void save();
