@@ -162,7 +162,10 @@ public:
     if (!options.show_dialog)
       options.overwrite = ooOverwrite;
     if (options.show_dialog) {
-      if (!extract_dialog(options)) FAIL(E_ABORT);
+      if (!extract_dialog(options))
+        FAIL(E_ABORT);
+      if (!is_absolute_path(options.dst_dir))
+        options.dst_dir = Far::get_absolute_path(options.dst_dir);
       if (options.dst_dir != *dest_path) {
         extract_dir = options.dst_dir;
         *dest_path = extract_dir.c_str();
@@ -228,6 +231,12 @@ public:
         FAIL(E_ABORT);
       if (ArcAPI::formats().count(options.arc_type) == 0)
         FAIL_MSG(Far::get_msg(MSG_ERROR_NO_FORMAT));
+      if (!is_absolute_path(options.arc_path))
+        options.arc_path = Far::get_absolute_path(options.arc_path);
+      if (GetFileAttributesW(long_path(options.arc_path).c_str()) != INVALID_FILE_ATTRIBUTES) {
+        if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_UPDATE_DLG_CONFIRM_OVERWRITE), 0, FMSG_MB_YESNO) != 0)
+          FAIL(E_ABORT);
+      }
       g_options.update_arc_format_name = ArcAPI::formats().at(options.arc_type).name;
       g_options.update_level = options.level;
       g_options.update_method = options.method;

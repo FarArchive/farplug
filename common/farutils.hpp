@@ -188,4 +188,6 @@ public:
   void select(unsigned idx, bool value);
 };
 
+wstring get_absolute_path(const wstring& rel_path);
+
 };

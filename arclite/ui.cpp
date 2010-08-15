@@ -441,12 +441,7 @@ private:
   LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
     if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
       if (new_arc) {
-        wstring arc_path = unquote(strip(get_text(arc_path_ctrl_id)));
-        if (GetFileAttributesW(long_path(arc_path).c_str()) != INVALID_FILE_ATTRIBUTES) {
-          if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_UPDATE_DLG_CONFIRM_OVERWRITE), 0, FMSG_MB_YESNO) != 0)
-            FAIL(E_ABORT);
-        }
-        options.arc_path = arc_path;
+        options.arc_path = unquote(strip(get_text(arc_path_ctrl_id)));
 
         for(unsigned i = 0; i < ARRAYSIZE(c_archive_types); i++) {
           if (get_check(arc_type_ctrl_id + i)) {

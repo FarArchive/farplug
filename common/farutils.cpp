@@ -593,4 +593,14 @@ void Selection::select(unsigned idx, bool value) {
   g_far.Control(h_plugin, FCTL_SETSELECTION, idx, value ? TRUE : FALSE);
 }
 
+wstring get_absolute_path(const wstring& rel_path) {
+  Buffer<wchar_t> buf(MAX_PATH);
+  unsigned len = g_fsf.ConvertPath(CPM_FULL, rel_path.c_str(), buf.data(), buf.size());
+  if (len > buf.size()) {
+    buf.resize(len);
+    len = g_fsf.ConvertPath(CPM_FULL, rel_path.c_str(), buf.data(), buf.size());
+  }
+  return buf.data();
+}
+
 };
