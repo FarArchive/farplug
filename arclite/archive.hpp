@@ -133,8 +133,9 @@ private:
   UInt32 num_indices;
   FileList file_list;
   FileIndex file_list_index;
-  wstring password;
   void make_index();
+protected:
+  wstring password;
 public:
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);

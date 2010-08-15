@@ -57,7 +57,7 @@ struct ExtractOptions {
   bool move_enabled;
   bool move_files;
   bool show_dialog;
-  bool use_tmp_files;
+  wstring password;
 };
 
 bool extract_dialog(ExtractOptions& options);

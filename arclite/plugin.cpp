@@ -156,7 +156,6 @@ public:
     options.move_enabled = updatable();
     options.move_files = move != 0 && options.move_enabled;
     options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
-    options.use_tmp_files = (op_mode & (OPM_FIND | OPM_VIEW | OPM_QUICKVIEW)) != 0;
     if (op_mode & (OPM_FIND | OPM_QUICKVIEW))
       options.ignore_errors = true;
     if (!options.show_dialog)
@@ -170,6 +169,8 @@ public:
         extract_dir = options.dst_dir;
         *dest_path = extract_dir.c_str();
       }
+      if (!options.password.empty())
+        password = options.password;
       g_options.extract_ignore_errors = options.ignore_errors;
       g_options.extract_overwrite = options.overwrite;
       g_options.save();

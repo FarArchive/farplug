@@ -11,6 +11,7 @@ extract.dlg.oo_ask = &Ask
 extract.dlg.oo_overwrite = &Overwrite
 extract.dlg.oo_skip = &Skip
 extract.dlg.move_files = &Delete files after archiving
+extract.dlg.password = Pass&word:
 
 # Update dialog
 update.dlg.title = Add files to archive

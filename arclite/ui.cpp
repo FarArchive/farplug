@@ -230,6 +230,7 @@ private:
   int oo_overwrite_ctrl_id;
   int oo_skip_ctrl_id;
   int move_files_ctrl_id;
+  int password_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -242,6 +243,7 @@ private:
       else if (get_check(oo_overwrite_ctrl_id)) options.overwrite = ooOverwrite;
       else options.overwrite = ooSkip;
       options.move_files = get_check(move_files_ctrl_id);
+      options.password = get_text(password_ctrl_id);
     }
     return default_dialog_proc(msg, param1, param2);
   }
@@ -272,6 +274,10 @@ public:
     new_line();
 
     move_files_ctrl_id = check_box(Far::get_msg(MSG_EXTRACT_DLG_MOVE_FILES), options.move_files, options.move_enabled ? 0 : DIF_DISABLE);
+    new_line();
+
+    label(Far::get_msg(MSG_EXTRACT_DLG_PASSWORD));
+    password_ctrl_id = pwd_edit_box(options.password, 20);
     new_line();
 
     separator();
