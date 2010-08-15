@@ -10,6 +10,7 @@ private:
   unsigned __int64 time_freq;
   unsigned __int64 time_total;
   unsigned __int64 time_update;
+  bool confirm_esc;
   void update_time();
   void discard_time();
 protected:
@@ -18,7 +19,6 @@ public:
   ProgressMonitor(bool lazy = true);
   virtual ~ProgressMonitor();
   void update_ui(bool force = false);
-  void reset_ui();
   unsigned __int64 time_elapsed();
   unsigned __int64 ticks_per_sec();
   friend class ProgressSuspend;

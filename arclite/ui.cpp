@@ -19,6 +19,7 @@ ProgressMonitor::ProgressMonitor(bool lazy): h_scr(nullptr) {
     time_update = time_total + time_freq / c_first_delay_div;
   else
     time_update = time_total;
+  confirm_esc = (Far::adv_control(ACTL_GETCONFIRMATIONS) & FCS_INTERRUPTOPERATION) != 0;
 }
 
 ProgressMonitor::~ProgressMonitor() {
@@ -44,17 +45,15 @@ void ProgressMonitor::update_ui(bool force) {
       PeekConsoleInput(h_con, &rec, 1, &read_cnt);
       if (read_cnt == 0) break;
       ReadConsoleInput(h_con, &rec, 1, &read_cnt);
-      if ((rec.EventType == KEY_EVENT) && (rec.Event.KeyEvent.wVirtualKeyCode == VK_ESCAPE) && rec.Event.KeyEvent.bKeyDown && ((rec.Event.KeyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | LEFT_CTRL_PRESSED | RIGHT_ALT_PRESSED | RIGHT_CTRL_PRESSED | SHIFT_PRESSED)) == 0)) FAIL(E_ABORT);
+      if ((rec.EventType == KEY_EVENT) && (rec.Event.KeyEvent.wVirtualKeyCode == VK_ESCAPE) && rec.Event.KeyEvent.bKeyDown && ((rec.Event.KeyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | LEFT_CTRL_PRESSED | RIGHT_ALT_PRESSED | RIGHT_CTRL_PRESSED | SHIFT_PRESSED)) == 0)) {
+        if (!confirm_esc)
+          FAIL(E_ABORT);
+        ProgressSuspend ps(*this);
+        if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_PROGRESS_INTERRUPT), 0, FMSG_MB_YESNO) == 0)
+          FAIL(E_ABORT);
+      }
     }
     do_update_ui();
-  }
-}
-
-void ProgressMonitor::reset_ui() {
-  time_total = time_update = 0;
-  if (h_scr) {
-    Far::restore_screen(h_scr);
-    h_scr = nullptr;
   }
 }
 

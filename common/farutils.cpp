@@ -603,4 +603,8 @@ wstring get_absolute_path(const wstring& rel_path) {
   return buf.data();
 }
 
+INT_PTR adv_control(int command, void* param) {
+  return g_far.AdvControl(g_far.ModuleNumber, command, param);
+}
+
 };

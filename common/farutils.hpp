@@ -190,4 +190,6 @@ public:
 
 wstring get_absolute_path(const wstring& rel_path);
 
+INT_PTR adv_control(int command, void* param = nullptr);
+
 };
