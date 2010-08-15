@@ -85,7 +85,7 @@ wstring ArcFormatChain::to_string() const {
   wstring result;
   for_each(begin(), end(), [&] (const ArcType& arc_type) {
     if (!result.empty())
-      result += L"->";
+      result += L"\x2192";
     result += ArcAPI::formats().at(arc_type).name;
   });
   return result;
