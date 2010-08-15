@@ -135,7 +135,7 @@ public:
     if (newPosition)
       *newPosition = new_position.QuadPart;
     return S_OK;
-    COM_ERROR_HANDLER_END;
+    COM_ERROR_HANDLER_END
   }
   STDMETHODIMP SetSize(Int64 newSize) {
     COM_ERROR_HANDLER_BEGIN

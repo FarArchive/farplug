@@ -390,7 +390,7 @@ public:
     if (processedSize)
       *processedSize = size;
     return S_OK;
-    COM_ERROR_HANDLER_END;
+    COM_ERROR_HANDLER_END
   }
 };
 

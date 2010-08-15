@@ -13,7 +13,7 @@ private:
   wstring file_path;
 public:
   ArchiveOpenStream(const wstring& file_path, Error& error): ComBase(error), file_path(file_path) {
-    h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+    h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
   ~ArchiveOpenStream() {
