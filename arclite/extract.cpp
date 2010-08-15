@@ -64,80 +64,119 @@ FindData convert_file_info(const FileInfo& file_info) {
   return find_data;
 }
 
+unsigned calc_percent(unsigned __int64 completed, unsigned __int64 total) {
+  unsigned percent;
+  if (total == 0)
+    percent = 0;
+  else
+    percent = round(static_cast<double>(completed) / total * 100);
+  if (percent > 100)
+    percent = 100;
+  return percent;
+}
+
+wstring get_progress_bar_str(unsigned width, unsigned percent1, unsigned percent2) {
+  const wchar_t c_pb_black = 9608;
+  const wchar_t c_pb_gray = 9618;
+  const wchar_t c_pb_white = 9617;
+  unsigned len1 = round(static_cast<double>(percent1) / 100 * width);
+  if (len1 > width)
+    len1 = width;
+  unsigned len2 = round(static_cast<double>(percent2) / 100 * width);
+  if (len2 > width)
+    len2 = width;
+  if (len2 > len1)
+    len2 -= len1;
+  else
+    len2 = 0;
+  unsigned len3 = width - (len1 + len2);
+  wstring result;
+  result.append(len1, c_pb_black);
+  result.append(len2, c_pb_gray);
+  result.append(len3, c_pb_white);
+  return result;
+}
 
 class ExtractProgress: public ProgressMonitor {
 private:
-  unsigned __int64 completed;
-  unsigned __int64 total;
-  wstring file_path;
-  unsigned __int64 file_completed;
-  unsigned __int64 file_total;
+  unsigned __int64 extract_completed;
+  unsigned __int64 extract_total;
+  wstring extract_file_path;
+  unsigned __int64 cache_stored;
+  unsigned __int64 cache_written;
+  unsigned __int64 cache_total;
+  wstring cache_file_path;
 
   virtual void do_update_ui() {
     const unsigned c_width = 60;
     wostringstream st;
     st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
 
-    unsigned file_percent;
-    if (file_total == 0)
-      file_percent = 0;
-    else
-      file_percent = round(static_cast<double>(file_completed) / file_total * 100);
-    if (file_percent > 100)
-      file_percent = 100;
+    unsigned extract_percent = calc_percent(extract_completed, extract_total);
 
-    unsigned percent;
-    if (total == 0)
-      percent = 0;
-    else
-      percent = round(static_cast<double>(completed) / total * 100);
-    if (percent > 100)
-      percent = 100;
-
-    unsigned __int64 speed;
+    unsigned __int64 extract_speed;
     if (time_elapsed() == 0)
-      speed = 0;
+      extract_speed = 0;
     else
-      speed = round(static_cast<double>(completed) / time_elapsed() * ticks_per_sec());
+      extract_speed = round(static_cast<double>(extract_completed) / time_elapsed() * ticks_per_sec());
+
+    if (extract_total && cache_total > extract_total)
+      cache_total = extract_total;
+
+    unsigned cache_stored_percent = calc_percent(cache_stored, cache_total);
+    unsigned cache_written_percent = calc_percent(cache_written, cache_total);
 
     st << Far::get_msg(MSG_PROGRESS_EXTRACT) << L'\n';
-    st << fit_str(file_path, c_width) << L'\n';
-    st << setw(7) << format_data_size(file_completed, get_size_suffixes()) << L" / " << format_data_size(file_total, get_size_suffixes()) << L'\n';
-    st << Far::get_progress_bar_str(c_width, file_percent, 100) << L'\n';
+    st << fit_str(extract_file_path, c_width) << L'\n';
+    st << setw(7) << format_data_size(extract_completed, get_size_suffixes()) << L" / " << format_data_size(extract_total, get_size_suffixes()) << L" @ " << setw(9) << format_data_size(extract_speed, get_speed_suffixes()) << L'\n';
+    st << Far::get_progress_bar_str(c_width, extract_percent, 100) << L'\n';
     st << L"\x1\n";
 
-    st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L" @ " << setw(9) << format_data_size(speed, get_speed_suffixes()) << L'\n';
-    st << Far::get_progress_bar_str(c_width, percent, 100) << L'\n';
+    st << fit_str(cache_file_path, c_width) << L'\n';
+    st << L"(" << format_data_size(cache_stored, get_size_suffixes()) << L" - " << format_data_size(cache_written, get_size_suffixes()) << L") / " << format_data_size(cache_total, get_size_suffixes()) << L'\n';
+    st << get_progress_bar_str(c_width, cache_written_percent, cache_stored_percent) << L'\n';
 
     Far::message(st.str(), 0, FMSG_LEFTALIGN);
 
     Far::set_progress_state(TBPF_NORMAL);
-    Far::set_progress_value(percent, 100);
+    Far::set_progress_value(extract_percent, 100);
 
-    SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(MSG_PROGRESS_EXTRACT)).c_str());
+    SetConsoleTitleW((L"{" + int_to_str(extract_percent) + L"%} " + Far::get_msg(MSG_PROGRESS_EXTRACT)).c_str());
   }
 
 public:
-  ExtractProgress(): ProgressMonitor(true), completed(0), total(0), file_completed(0), file_total(0) {
+  ExtractProgress(): ProgressMonitor(true), extract_completed(0), extract_total(0), cache_stored(0), cache_written(0), cache_total(0) {
   }
 
-  void on_create_file(const wstring& file_path, unsigned __int64 size) {
-    this->file_path = file_path;
-    file_total = size;
-    file_completed = 0;
+  void update_extract_file(const wstring& file_path) {
+    extract_file_path = file_path;
     update_ui();
   }
-  void on_write_file(unsigned size_written) {
-    file_completed += size_written;
+  void set_extract_total(unsigned __int64 size) {
+    extract_total = size;
+  }
+  void update_extract_completed(unsigned __int64 size) {
+    extract_completed = size;
     update_ui();
   }
-  void on_total_update(UInt64 total) {
-    this->total = total;
+  void update_cache_file(const wstring& file_path) {
+    cache_file_path = file_path;
     update_ui();
   }
-  void on_completed_update(UInt64 completed) {
-    this->completed = completed;
+  void set_cache_total(unsigned __int64 size) {
+    cache_total = size;
+  }
+  void update_cache_stored(unsigned __int64 size) {
+    cache_stored += size;
     update_ui();
+  }
+  void update_cache_written(unsigned __int64 size) {
+    cache_written += size;
+    update_ui();
+  }
+  void reset_cache_stats() {
+    cache_stored = 0;
+    cache_written = 0;
   }
 };
 
@@ -145,7 +184,7 @@ public:
 class FileWriteCache {
 private:
   static const size_t c_min_cache_size = 10 * 1024 * 1024;
-  static const size_t c_max_cache_size = 50 * 1024 * 1024;
+  static const size_t c_max_cache_size = 100 * 1024 * 1024;
 
   struct CachedFileInfo {
     wstring file_path;
@@ -192,7 +231,7 @@ private:
         }
       }
     }
-    progress.on_create_file(file_info.file_path, file_info.file_size);
+    progress.update_cache_file(file_info.file_path);
   }
   // allocate file
   void allocate_file() {
@@ -231,7 +270,7 @@ private:
         DWORD size_written;
         CHECK_SYS(WriteFile(h_file, buffer + file_info.buffer_pos + pos, size, &size_written, NULL));
         pos += size_written;
-        progress.on_write_file(size_written);
+        progress.update_cache_written(size_written);
       }
     }
     catch (const Error& e) {
@@ -279,6 +318,7 @@ private:
       continue_file = true; // last file is not written in its entirety (possibly)
     }
     buffer_pos = 0;
+    progress.reset_cache_stats();
   }
   void store(const unsigned char* data, size_t size) {
     assert(!file_list.empty());
@@ -295,9 +335,11 @@ private:
     memcpy(buffer + buffer_pos, data, size);
     file_info.buffer_size += size;
     buffer_pos += size;
+    progress.update_cache_stored(size);
   }
 public:
   FileWriteCache(bool& ignore_errors, ErrorLog& error_log, ExtractProgress& progress): buffer_size(get_max_cache_size()), commit_size(0), buffer_pos(0), h_file(INVALID_HANDLE_VALUE), continue_file(false), error_state(false), ignore_errors(ignore_errors), error_log(error_log), progress(progress) {
+    progress.set_cache_total(buffer_size);
     buffer = reinterpret_cast<unsigned char*>(VirtualAlloc(NULL, buffer_size, MEM_RESERVE, PAGE_NOACCESS));
     CHECK_SYS(buffer);
   }
@@ -335,7 +377,7 @@ private:
   FileWriteCache& cache;
 
 public:
-  CachedFileExtractStream(FileWriteCache& cache): ComBase(error), cache(cache) {
+  CachedFileExtractStream(FileWriteCache& cache, Error& error): ComBase(error), cache(cache) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -379,14 +421,14 @@ public:
 
   STDMETHODIMP SetTotal(UInt64 total) {
     COM_ERROR_HANDLER_BEGIN
-    progress.on_total_update(total);
+    progress.set_extract_total(total);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
   STDMETHODIMP SetCompleted(const UInt64 *completeValue) {
     COM_ERROR_HANDLER_BEGIN
     if (completeValue)
-      progress.on_completed_update(*completeValue);
+      progress.update_extract_completed(*completeValue);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
@@ -446,8 +488,9 @@ public:
       }
     }
 
+    progress.update_extract_file(file_path);
     cache.store_file(file_path, file_info.size);
-    ComObject<ISequentialOutStream> out_stream(new CachedFileExtractStream(cache));
+    ComObject<ISequentialOutStream> out_stream(new CachedFileExtractStream(cache, error));
     out_stream.detach(outStream);
 
     return S_OK;
