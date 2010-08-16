@@ -81,6 +81,9 @@ settings.dlg.use_include_masks = &Open files matching masks:
 settings.dlg.use_exclude_masks = &Exclude files matching masks:
 settings.dlg.generate_masks = &Generate masks
 
+# Attributes dialog
+attr.dlg.title = Attributes
+
 # Progress messages
 progress.extract = Extracting files...
 progress.create_dirs = Creating directories...
@@ -112,3 +115,67 @@ suffix.speed.kb = КБ/s
 suffix.speed.mb = МБ/s
 suffix.speed.gb = ГБ/s
 suffix.speed.tb = ТБ/s
+
+# Property names
+kpid.Path = Путь                      
+kpid.Name = Имя                       
+kpid.Extension = Расширение                
+kpid.IsDir = Папка                     
+kpid.Size = Размер                    
+kpid.PackSize = Сжатый                    
+kpid.Attrib = Атрибуты                  
+kpid.CTime = Создан                    
+kpid.ATime = Открыт                    
+kpid.MTime = Изменен                   
+kpid.Solid = Непрерывный               
+kpid.Commented = Комментарий               
+kpid.Encrypted = Зашифрован                
+kpid.SplitBefore = Разбит До                 
+kpid.SplitAfter = Разбит После              
+kpid.DictionarySize = Словарь                   
+kpid.CRC = CRC                       
+kpid.Type = Тип                       
+kpid.IsAnti = Анти                      
+kpid.Method = Метод                     
+kpid.HostOS = Система                   
+kpid.FileSystem = Файловая Система          
+kpid.User = Пользователь              
+kpid.Group = Группа                    
+kpid.Block = Блок                      
+kpid.Comment = Комментарий               
+kpid.Position = Позиция                   
+kpid.Prefix = Префикс             
+kpid.NumSubDirs = Папок                     
+kpid.NumSubFiles = Файлов                    
+kpid.UnpackVer = Версия                    
+kpid.Volume = Том                       
+kpid.IsVolume = Многотомный               
+kpid.Offset = Смещение                  
+kpid.Links = Ссылок                    
+kpid.NumBlocks = Блоков                    
+kpid.NumVolumes = Томов                                  
+kpid.TimeType = Тип Времени      
+kpid.Bit64 = 64-bit                    
+kpid.BigEndian = Big-endian                
+kpid.Cpu = Процессор                 
+kpid.PhySize = Физический Размер         
+kpid.HeadersSize = Размер Заголовков         
+kpid.Checksum = Контр. Сумма              
+kpid.Characts = Характеристики            
+kpid.Va = Виртуальный Адрес         
+kpid.Id = ID                        
+kpid.ShortName = Короткое имя              
+kpid.CreatorApp = Программа                 
+kpid.SectorSize = Размер сектора            
+kpid.PosixAttrib = Права                     
+kpid.Link = Ссылка                                        
+kpid.TotalSize = Емкость                   
+kpid.FreeSpace = Свободно                  
+kpid.ClusterSize = Размер кластера           
+kpid.VolumeName = Метка                     
+kpid.LocalName = Локальное Имя
+kpid.Provider = Провайдер
+
+# Property values
+property.true = Да
+property.false = Нет

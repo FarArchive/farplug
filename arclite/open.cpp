@@ -167,7 +167,7 @@ public:
       if (!password_dialog(password))
         FAIL(E_ABORT);
     }
-    *pwd = str_to_bstr(password);
+    BStr(password).detach(pwd);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
@@ -177,7 +177,7 @@ public:
 bool Archive::open_sub_stream(IInArchive* in_arc, IInStream** sub_stream, wstring& sub_ext) {
   UInt32 main_subfile;
   PropVariant prop;
-  if (in_arc->GetArchiveProperty(kpidMainSubfile, prop.var()) != S_OK || prop.vt != VT_UI4)
+  if (in_arc->GetArchiveProperty(kpidMainSubfile, prop.ref()) != S_OK || prop.vt != VT_UI4)
     return false;
   main_subfile = prop.ulVal;
 
@@ -185,7 +185,7 @@ bool Archive::open_sub_stream(IInArchive* in_arc, IInStream** sub_stream, wstrin
   if (in_arc->GetNumberOfItems(&num_items) != S_OK || main_subfile >= num_items)
     return false;
 
-  if (in_arc->GetProperty(main_subfile, kpidPath, prop.var()) == S_OK && prop.vt == VT_BSTR)
+  if (in_arc->GetProperty(main_subfile, kpidPath, prop.ref()) == S_OK && prop.vt == VT_BSTR)
     sub_ext = extract_file_ext(prop.bstrVal);
 
   ComObject<IInArchiveGetStream> get_stream;

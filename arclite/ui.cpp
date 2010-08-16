@@ -687,3 +687,44 @@ public:
 bool settings_dialog(PluginSettings& settings) {
   return SettingsDialog(settings).show();
 }
+
+class AttrDialog: public Far::Dialog {
+private:
+  const AttrList& attr_list;
+
+public:
+  AttrDialog(const AttrList& attr_list): Far::Dialog(Far::get_msg(MSG_ATTR_DLG_TITLE)), attr_list(attr_list) {
+  }
+
+  void show() {
+    unsigned max_name_len = 0;
+    unsigned max_value_len = 0;
+    for_each(attr_list.begin(), attr_list.end(), [&] (const Attr& attr) {
+      if (attr.name.size() > max_name_len)
+        max_name_len = attr.name.size();
+      if (attr.value.size() > max_value_len)
+        max_value_len = attr.value.size();
+    });
+
+    unsigned max_width = Far::get_optimal_msg_width();
+    if (max_name_len > max_width / 2)
+      max_name_len = max_width / 2;
+    if (max_name_len + 1 + max_value_len > max_width)
+      max_value_len = max_width - max_name_len - 1;
+
+    set_width(max_name_len + 1 + max_value_len);
+
+    for_each(attr_list.begin(), attr_list.end(), [&] (const Attr& attr) {
+      label(attr.name, max_name_len);
+      spacer(1);
+      label(attr.value, max_value_len);
+      new_line();
+    });
+
+    Far::Dialog::show();
+  }
+};
+
+void attr_dialog(const AttrList& attr_list) {
+  AttrDialog(attr_list).show();
+}

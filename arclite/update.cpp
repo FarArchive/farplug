@@ -309,7 +309,7 @@ public:
   STDMETHODIMP CryptoGetTextPassword2(Int32 *passwordIsDefined, BSTR *pwd) {
     COM_ERROR_HANDLER_BEGIN
     *passwordIsDefined = !password.empty();
-    *pwd = str_to_bstr(password);
+    BStr(password).detach(pwd);
     return S_OK;
     COM_ERROR_HANDLER_END
   }

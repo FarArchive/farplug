@@ -72,7 +72,7 @@ bool get_panel_info(HANDLE h_panel, PanelInfo& panel_info);
 bool is_real_file_panel(const PanelInfo& panel_info);
 wstring get_panel_dir(HANDLE h_panel);
 
-struct FindData {
+struct PanelItem {
   DWORD file_attributes;
   FILETIME creation_time;
   FILETIME last_access_time;
@@ -81,8 +81,9 @@ struct FindData {
   unsigned __int64 pack_size;
   wstring file_name;
   wstring alt_file_name;
+  DWORD_PTR user_data;
 };
-FindData get_current_panel_item(HANDLE h_panel);
+PanelItem get_current_panel_item(HANDLE h_panel);
 
 void error_dlg(const wstring& title, const Error& e);
 void info_dlg(const wstring& title, const wstring& msg);
@@ -133,8 +134,11 @@ protected:
   virtual LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
     return default_dialog_proc(msg, param1, param2);
   }
+  void set_width(unsigned width) {
+    client_xs = width;
+  }
 public:
-  Dialog(const wstring& title, unsigned width, const wchar_t* help = NULL);
+  Dialog(const wstring& title, unsigned width = 60, const wchar_t* help = NULL);
   // create different controls
   void new_line();
   void spacer(unsigned size);

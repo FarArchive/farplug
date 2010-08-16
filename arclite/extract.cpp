@@ -526,7 +526,7 @@ public:
       if (!password_dialog(password))
         FAIL(E_ABORT);
     }
-    *pwd = str_to_bstr(password);
+    BStr(password).detach(pwd);
     return S_OK;
     COM_ERROR_HANDLER_END
   }

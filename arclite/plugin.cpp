@@ -70,7 +70,7 @@ public:
     PanelInfo panel_info;
     if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
       FAIL(E_ABORT);
-    Far::FindData panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
+    Far::PanelItem panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
     if (!Far::is_real_file_panel(panel_info)) {
       if ((panel_item.file_attributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
         Far::post_keys(vector<DWORD>(1, KEY_CTRLPGDN));
@@ -282,6 +282,13 @@ public:
     Far::update_panel(PANEL_PASSIVE, false);
   }
 
+  void show_attr() {
+    Far::PanelItem panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
+    if (panel_item.file_name == L"..") return;
+    AttrList attr_list = get_attr_list(panel_item.user_data);
+    attr_dialog(attr_list);
+  }
+
   void close() {
     PanelInfo panel_info;
     if (Far::get_panel_info(this, panel_info)) {
@@ -394,6 +401,10 @@ int WINAPI DeleteFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int Ite
 
 int WINAPI ProcessKeyW(HANDLE hPlugin,int Key,unsigned int ControlState) {
   FAR_ERROR_HANDLER_BEGIN;
+  if (ControlState == PKF_CONTROL && Key == 'A') {
+    reinterpret_cast<Plugin*>(hPlugin)->show_attr();
+    return TRUE;
+  }
   return FALSE;
   FAR_ERROR_HANDLER_END(return FALSE, return FALSE, false);
 }

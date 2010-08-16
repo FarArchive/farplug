@@ -95,3 +95,5 @@ struct PluginSettings {
 };
 
 bool settings_dialog(PluginSettings& settings);
+
+void attr_dialog(const AttrList& attr_list);

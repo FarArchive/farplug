@@ -48,7 +48,7 @@ public:
 
 #define UNKNOWN_IMPL_END \
     if (riid == IID_IUnknown) { *object = static_cast<IUnknown*>(static_cast<ComBase*>(this)); AddRef(); return S_OK; } \
-    *object = NULL; return E_NOINTERFACE; \
+    *object = nullptr; return E_NOINTERFACE; \
   } \
   STDMETHOD_(ULONG, AddRef)() { return ++ref_cnt; } \
   STDMETHOD_(ULONG, Release)() { if (--ref_cnt == 0) { delete this; return 0; } else return ref_cnt; }
@@ -117,7 +117,7 @@ public:
   ~PropVariant() {
     clear();
   }
-  PROPVARIANT* var() {
+  PROPVARIANT* ref() {
     clear();
     return this;
   }
@@ -134,7 +134,7 @@ public:
   PropVariant(const wstring& val) {
     vt = VT_BSTR;
     bstrVal = SysAllocStringLen(val.data(), val.size());
-    if (bstrVal == NULL) {
+    if (bstrVal == nullptr) {
       vt = VT_ERROR;
       FAIL(E_OUTOFMEMORY);
     }
@@ -142,7 +142,7 @@ public:
   PropVariant(const wchar_t* val) {
     vt = VT_BSTR;
     bstrVal = SysAllocStringLen(val, wcslen(val));
-    if (bstrVal == NULL) {
+    if (bstrVal == nullptr) {
       vt = VT_ERROR;
       FAIL(E_OUTOFMEMORY);
     }
@@ -172,7 +172,7 @@ public:
     clear();
     vt = VT_BSTR;
     bstrVal = SysAllocStringLen(val.data(), val.size());
-    if (bstrVal == NULL) {
+    if (bstrVal == nullptr) {
       vt = VT_ERROR;
       FAIL(E_OUTOFMEMORY);
     }
@@ -182,7 +182,7 @@ public:
     clear();
     vt = VT_BSTR;
     bstrVal = SysAllocStringLen(val, wcslen(val));
-    if (bstrVal == NULL) {
+    if (bstrVal == nullptr) {
       vt = VT_ERROR;
       FAIL(E_OUTOFMEMORY);
     }
@@ -222,9 +222,65 @@ public:
   }
 };
 
-inline BSTR str_to_bstr(const wstring& str) {
-  BSTR bstr = SysAllocStringLen(str.data(), str.size());
-  if (bstr == NULL)
-    FAIL(E_OUTOFMEMORY);
-  return bstr;
-}
+class BStr {
+private:
+  BSTR bstr;
+  void clear() {
+    if (bstr) {
+      SysFreeString(bstr);
+      bstr = nullptr;
+    }
+  }
+public:
+  BStr(): bstr(nullptr) {
+  }
+  ~BStr() {
+    clear();
+  }
+  operator const wchar_t*() const {
+    return bstr;
+  }
+  unsigned size() const {
+    return SysStringLen(bstr);
+  }
+  BSTR* ref() {
+    clear();
+    return &bstr;
+  }
+  void detach(BSTR* str) {
+    *str = bstr;
+    bstr = nullptr;
+  }
+
+  BStr(const BStr& str) {
+    bstr = SysAllocStringLen(str.bstr, SysStringLen(str.bstr));
+    if (bstr == nullptr)
+      FAIL(E_OUTOFMEMORY);
+  }
+  BStr(const wstring& str) {
+    bstr = SysAllocStringLen(str.data(), str.size());
+    if (bstr == nullptr)
+      FAIL(E_OUTOFMEMORY);
+  }
+  BStr(const wchar_t* str) {
+    bstr = SysAllocString(str);
+    if (bstr == nullptr)
+      FAIL(E_OUTOFMEMORY);
+  }
+
+  BStr& operator=(const BStr& str) {
+    if (!SysReAllocStringLen(&bstr, str.bstr, SysStringLen(str.bstr)))
+      FAIL(E_OUTOFMEMORY);
+    return *this;
+  }
+  BStr& operator=(const wstring& str) {
+    if (!SysReAllocStringLen(&bstr, str.data(), str.size()))
+      FAIL(E_OUTOFMEMORY);
+    return *this;
+  }
+  BStr& operator=(const wchar_t* str) {
+    if (!SysReAllocString(&bstr, str))
+      FAIL(E_OUTOFMEMORY);
+    return *this;
+  }
+};

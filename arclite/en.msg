@@ -81,6 +81,9 @@ settings.dlg.use_include_masks = &Open files matching masks:
 settings.dlg.use_exclude_masks = &Exclude files matching masks:
 settings.dlg.generate_masks = &Generate masks
 
+# Attributes dialog
+attr.dlg.title = Attributes
+
 # Progress messages
 progress.extract = Extracting files...
 progress.create_dirs = Creating directories...
@@ -112,3 +115,67 @@ suffix.speed.kb = KB/s
 suffix.speed.mb = MB/s
 suffix.speed.gb = GB/s
 suffix.speed.tb = TB/s
+
+# Property names
+kpid.Path = Path
+kpid.Name = Name
+kpid.Extension = Extension
+kpid.IsDir = Is Folder
+kpid.Size = Size
+kpid.PackSize = Packed Size
+kpid.Attrib = Attributes
+kpid.CTime = Created
+kpid.ATime = Accessed
+kpid.MTime = Modified
+kpid.Solid = Solid
+kpid.Commented = Commented
+kpid.Encrypted = Encrypted
+kpid.SplitBefore = Splited Before
+kpid.SplitAfter = Splited After
+kpid.DictionarySize = Dictionary Size
+kpid.CRC = CRC
+kpid.Type = Type
+kpid.IsAnti = Anti
+kpid.Method = Method
+kpid.HostOS = Host OS
+kpid.FileSystem = File System
+kpid.User = User
+kpid.Group = Group
+kpid.Block = Block
+kpid.Comment = Comment
+kpid.Position = Position
+kpid.Prefix = Prefix
+kpid.NumSubDirs = Folders
+kpid.NumSubFiles = Files
+kpid.UnpackVer = Version
+kpid.Volume = Volume
+kpid.IsVolume = Multivolume
+kpid.Offset = Offset
+kpid.Links = Links
+kpid.NumBlocks = Blocks
+kpid.NumVolumes = Volumes
+kpid.TimeType = Time Type
+kpid.Bit64 = 64-bit
+kpid.BigEndian = Big-endian
+kpid.Cpu = CPU
+kpid.PhySize = Physical Size
+kpid.HeadersSize = Headers Size
+kpid.Checksum = Checksum
+kpid.Characts = Characteristics
+kpid.Va = Virtual Address
+kpid.Id = ID
+kpid.ShortName = Short Name
+kpid.CreatorApp = Creator Application
+kpid.SectorSize = Sector Size
+kpid.PosixAttrib = Mode
+kpid.Link = Link
+kpid.TotalSize = Total Size
+kpid.FreeSpace = Free Space
+kpid.ClusterSize = Cluster Size
+kpid.VolumeName = Label
+kpid.LocalName = Local Name
+kpid.Provider = Provider
+
+# Property values
+property.true = Yes
+property.false = No

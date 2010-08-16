@@ -174,6 +174,10 @@ private:
   void enum_deleted_indices(UInt32 file_index, vector<UInt32>& indices);
 public:
   void delete_files(const vector<UInt32>& src_indices);
+
+  // attributes
+public:
+  AttrList get_attr_list(UInt32 item_index);
 };
 
 const string c_guid_7z("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x07\x00\x00", 16);
