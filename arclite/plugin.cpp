@@ -18,11 +18,12 @@ private:
   static bool auto_detect_next_time;
 
   bool open_file(const wstring& file_path, bool auto_detect) {
-    if (g_options.use_include_masks && !Far::match_masks(extract_file_name(file_path), g_options.include_masks))
-      FAIL(E_ABORT);
-
-    if (g_options.use_exclude_masks && Far::match_masks(extract_file_name(file_path), g_options.exclude_masks))
-      FAIL(E_ABORT);
+    if (auto_detect) {
+      if (g_options.use_include_masks && !Far::match_masks(extract_file_name(file_path), g_options.include_masks))
+        FAIL(E_ABORT);
+      if (g_options.use_exclude_masks && Far::match_masks(extract_file_name(file_path), g_options.exclude_masks))
+        FAIL(E_ABORT);
+    }
 
     max_check_size = g_options.max_check_size;
     vector<ArcFormatChain> format_chains = detect(file_path, !auto_detect);
