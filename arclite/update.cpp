@@ -56,7 +56,7 @@ private:
     Far::set_progress_state(TBPF_NORMAL);
     Far::set_progress_value(percent, 100);
 
-    SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(MSG_PROGRESS_UPDATE)).c_str());
+    SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(new_arc ? MSG_PROGRESS_CREATE : MSG_PROGRESS_UPDATE)).c_str());
   }
 
 public:
