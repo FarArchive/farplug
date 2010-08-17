@@ -170,6 +170,8 @@ public:
     if (options.show_dialog) {
       if (!extract_dialog(options))
         FAIL(E_ABORT);
+      if (options.dst_dir.empty())
+        options.dst_dir = L".";
       if (!is_absolute_path(options.dst_dir))
         options.dst_dir = Far::get_absolute_path(options.dst_dir);
       if (options.dst_dir != *dest_path) {
