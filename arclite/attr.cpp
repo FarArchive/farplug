@@ -50,7 +50,12 @@ wstring format_uint_prop(const PropVariant& prop) {
 wstring format_size_prop(const PropVariant& prop) {
   if (!prop.is_uint())
     return wstring();
-  return format_data_size(prop.get_uint(), get_size_suffixes()) + L" (" + format_uint_prop(prop) + L")";
+  wstring short_size = format_data_size(prop.get_uint(), get_size_suffixes());
+  wstring long_size = format_uint_prop(prop);
+  if (short_size == long_size)
+    return short_size;
+  else
+    return short_size + L"  " + long_size;
 }
 
 wstring format_filetime_prop(const PropVariant& prop) {

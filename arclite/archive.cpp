@@ -265,15 +265,15 @@ void Archive::make_index() {
   for (UInt32 i = 0; i < num_indices; i++) {
     progress.update(i, num_indices);
 
-    if (s_ok(in_arc->GetProperty(i, kpidPath, prop.ref())) && prop.vt == VT_BSTR)
-      path.assign(prop.bstrVal);
+    if (s_ok(in_arc->GetProperty(i, kpidPath, prop.ref())) && prop.is_str())
+      path.assign(prop.get_str());
     else
       path.assign(get_default_name());
 
     // attributes
-    bool is_dir = s_ok(in_arc->GetProperty(i, kpidIsDir, prop.ref())) && prop.vt == VT_BOOL && prop.boolVal;
-    if (s_ok(in_arc->GetProperty(i, kpidAttrib, prop.ref())) && prop.vt == VT_UI4)
-      file_info.attr = prop.ulVal;
+    bool is_dir = s_ok(in_arc->GetProperty(i, kpidIsDir, prop.ref())) && prop.is_bool() && prop.get_bool();
+    if (s_ok(in_arc->GetProperty(i, kpidAttrib, prop.ref())) && prop.is_uint())
+      file_info.attr = static_cast<DWORD>(prop.get_uint());
     else
       file_info.attr = 0;
     if (is_dir)
@@ -282,26 +282,26 @@ void Archive::make_index() {
       is_dir = file_info.is_dir();
 
     // size
-    if (!is_dir && s_ok(in_arc->GetProperty(i, kpidSize, prop.ref())) && prop.vt == VT_UI8)
-      file_info.size = prop.uhVal.QuadPart;
+    if (!is_dir && s_ok(in_arc->GetProperty(i, kpidSize, prop.ref())) && prop.is_uint())
+      file_info.size = prop.get_uint();
     else
       file_info.size = 0;
-    if (!is_dir && s_ok(in_arc->GetProperty(i, kpidPackSize, prop.ref())) && prop.vt == VT_UI8)
-      file_info.psize = prop.uhVal.QuadPart;
+    if (!is_dir && s_ok(in_arc->GetProperty(i, kpidPackSize, prop.ref())) && prop.is_uint())
+      file_info.psize = prop.get_uint();
     else
       file_info.psize = 0;
 
     // date & time
-    if (s_ok(in_arc->GetProperty(i, kpidCTime, prop.ref())) && prop.vt == VT_FILETIME)
-      file_info.ctime = prop.filetime;
+    if (s_ok(in_arc->GetProperty(i, kpidCTime, prop.ref())) && prop.is_filetime())
+      file_info.ctime = prop.get_filetime();
     else
       file_info.ctime = archive_file_info.ftCreationTime;
-    if (s_ok(in_arc->GetProperty(i, kpidMTime, prop.ref())) && prop.vt == VT_FILETIME)
-      file_info.mtime = prop.filetime;
+    if (s_ok(in_arc->GetProperty(i, kpidMTime, prop.ref())) && prop.is_filetime())
+      file_info.mtime = prop.get_filetime();
     else
       file_info.mtime = archive_file_info.ftLastWriteTime;
-    if (s_ok(in_arc->GetProperty(i, kpidATime, prop.ref())) && prop.vt == VT_FILETIME)
-      file_info.atime = prop.filetime;
+    if (s_ok(in_arc->GetProperty(i, kpidATime, prop.ref())) && prop.is_filetime())
+      file_info.atime = prop.get_filetime();
     else
       file_info.atime = archive_file_info.ftLastAccessTime;
 
