@@ -135,9 +135,38 @@ void ArcAPI::load_libs(const wstring& path) {
   }
 }
 
+void ArcAPI::find_sfx_modules(const wstring& path) {
+  FileEnum file_enum(path);
+  while (file_enum.next()) {
+    try {
+      wstring file_path = add_trailing_slash(path) + file_enum.data().cFileName;
+      if (_wcsicmp(extract_file_ext(file_path).c_str(), L".sfx") != 0)
+        continue;
+      File file(file_path, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0);
+      Buffer<char> buffer(2);
+      unsigned sz = file.read(buffer);
+      string sig(buffer.data(), sz);
+      if (sig != "MZ")
+        continue;
+      SfxModule sfx_module;
+      sfx_module.path = file_path;
+      sfx_modules.push_back(sfx_module);
+    }
+    catch (const Error&) {
+      continue;
+    }
+  }
+}
+
 void ArcAPI::load() {
   IGNORE_ERRORS(load_libs(Far::get_plugin_module_path()));
-  IGNORE_ERRORS(load_libs(Key(HKEY_LOCAL_MACHINE, L"Software\\7-Zip", KEY_QUERY_VALUE).query_str(L"Path")));
+  IGNORE_ERRORS(find_sfx_modules(Far::get_plugin_module_path()));
+  wstring _7zip_path;
+  IGNORE_ERRORS(_7zip_path = Key(HKEY_LOCAL_MACHINE, L"Software\\7-Zip", KEY_QUERY_VALUE).query_str(L"Path"));
+  if (!_7zip_path.empty()) {
+    IGNORE_ERRORS(load_libs(_7zip_path));
+    IGNORE_ERRORS(find_sfx_modules(_7zip_path));
+  }
   for (unsigned i = 0; i < arc_libs.size(); i++) {
     const ArcLib& arc_lib = arc_libs[i];
     UInt32 num_formats;

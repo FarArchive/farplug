@@ -25,9 +25,12 @@ update.dlg.encrypt = &Encrypt archive
 update.dlg.password = Pass&word:
 update.dlg.password2 = Repeat:
 update.dlg.encrypt_header = Encrypt &header
+update.dlg.create_sfx = Create self-e&xtracting archive
+update.dlg.sfx_module = Select SFX module:
 update.dlg.move_files = &Delete files after archiving
 update.dlg.passwords_dont_match = Passwords don't match
 update.dlg.password_is_empty = Password is empty
+update.dlg.wrong_sfx_module = Select SFX module
 update.dlg.confirm_overwrite = Target file already exists. Do you want to overwrite it?
 
 # Archive types

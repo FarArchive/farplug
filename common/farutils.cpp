@@ -206,7 +206,7 @@ void info_dlg(const wstring& title, const wstring& msg) {
   message(title + L'\n' + msg, 0, FMSG_MB_OK);
 }
 
-unsigned get_label_len(const wstring& str) {
+unsigned Dialog::get_label_len(const wstring& str) {
   unsigned cnt = 0;
   for (unsigned i = 0; i < str.size(); i++) {
     if (str[i] != '&') cnt++;
@@ -434,7 +434,7 @@ unsigned Dialog::combo_box(const vector<wstring>& list_items, unsigned sel_idx, 
         if (max_len < list_items[i].size())
           max_len = static_cast<unsigned>(list_items[i].size());
       }
-      x += max_len + 1;
+      x += max_len + 5;
     }
     else
       x = c_x_frame + client_xs;

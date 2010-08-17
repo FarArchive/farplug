@@ -226,10 +226,12 @@ public:
         options.arc_type = c_guid_7z;
       else
         options.arc_type = arc_types.front();
-      options.arc_path += ArcAPI::formats().at(options.arc_type).default_extension();
+      options.create_sfx = g_options.update_create_sfx;
+      options.sfx_module_idx = g_options.update_sfx_module_idx;
+      options.arc_path += options.create_sfx ? L".exe" : ArcAPI::formats().at(options.arc_type).default_extension();
     }
     else {
-      options.arc_type = format_chain.back();
+      options.arc_type = format_chain.back(); // required to set update properties
     }
     options.level = g_options.update_level;
     options.method = g_options.update_method;
@@ -242,13 +244,17 @@ public:
         FAIL(E_ABORT);
       if (ArcAPI::formats().count(options.arc_type) == 0)
         FAIL_MSG(Far::get_msg(MSG_ERROR_NO_FORMAT));
-      if (!is_absolute_path(options.arc_path))
-        options.arc_path = Far::get_absolute_path(options.arc_path);
-      if (GetFileAttributesW(long_path(options.arc_path).c_str()) != INVALID_FILE_ATTRIBUTES) {
-        if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_UPDATE_DLG_CONFIRM_OVERWRITE), 0, FMSG_MB_YESNO) != 0)
-          FAIL(E_ABORT);
+      if (new_arc) {
+        if (!is_absolute_path(options.arc_path))
+          options.arc_path = Far::get_absolute_path(options.arc_path);
+        if (GetFileAttributesW(long_path(options.arc_path).c_str()) != INVALID_FILE_ATTRIBUTES) {
+          if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_UPDATE_DLG_CONFIRM_OVERWRITE), 0, FMSG_MB_YESNO) != 0)
+            FAIL(E_ABORT);
+        }
+        g_options.update_arc_format_name = ArcAPI::formats().at(options.arc_type).name;
+        g_options.update_create_sfx = options.create_sfx;
+        g_options.update_sfx_module_idx = options.sfx_module_idx;
       }
-      g_options.update_arc_format_name = ArcAPI::formats().at(options.arc_type).name;
       g_options.update_level = options.level;
       g_options.update_method = options.method;
       g_options.update_solid = options.solid;

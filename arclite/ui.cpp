@@ -397,7 +397,7 @@ const CompressionMethod c_methods[] = {
 class UpdateDialog: public Far::Dialog {
 private:
   enum {
-    c_client_xs = 60
+    c_client_xs = 65
   };
 
   bool new_arc;
@@ -412,19 +412,29 @@ private:
   int password_ctrl_id;
   int password2_ctrl_id;
   int encrypt_header_ctrl_id;
+  int create_sfx_ctrl_id;
+  int sfx_module_ctrl_id;
   int move_files_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
   wstring old_ext;
-  wstring get_ext(const ArcType& arc_type) {
-    if (ArcAPI::formats().count(arc_type))
+  ArcType arc_type;
+  bool create_sfx;
+  wstring get_ext() {
+    assert(new_arc);
+    if (create_sfx)
+      return L".exe";
+    else if (ArcAPI::formats().count(arc_type))
       return ArcAPI::formats().at(arc_type).default_extension();
     else
       return wstring();
   }
-  bool change_extension(const wstring& new_ext) {
-    if (old_ext.size() == 0 || new_ext.size() == 0)
+  bool change_extension() {
+    assert(new_arc);
+    wstring new_ext = get_ext();
+
+    if (old_ext.empty() || new_ext.empty())
       return false;
 
     wstring arc_path = get_text(arc_path_ctrl_id);
@@ -448,7 +458,7 @@ private:
       if (new_arc) {
         options.arc_path = unquote(strip(get_text(arc_path_ctrl_id)));
 
-        for(unsigned i = 0; i < ARRAYSIZE(c_archive_types); i++) {
+        for (unsigned i = 0; i < ARRAYSIZE(c_archive_types); i++) {
           if (get_check(arc_type_ctrl_id + i)) {
             options.arc_type = c_archive_types[i].value;
             break;
@@ -483,6 +493,15 @@ private:
       else {
         options.password.clear();
       }
+      if (new_arc) {
+        options.create_sfx = get_check(create_sfx_ctrl_id);
+        if (options.create_sfx) {
+          options.sfx_module_idx = get_list_pos(sfx_module_ctrl_id);
+          if (options.sfx_module_idx >= ArcAPI::sfx().size()) {
+            FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_SFX_MODULE));
+          }
+        }
+      }
       options.move_files = get_check(move_files_ctrl_id);
     }
     else if (msg == DN_INITDIALOG) {
@@ -494,15 +513,18 @@ private:
         enable(i, !options.password.empty());
       }
       enable(encrypt_header_ctrl_id, !options.password.empty() && is_7z);
+      for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
+        enable(i, options.create_sfx);
+      }
     }
-    else if (msg == DN_BTNCLICK && param1 >= arc_type_ctrl_id && param1 < arc_type_ctrl_id + static_cast<int>(ARRAYSIZE(c_archive_types))) {
+    else if (new_arc && msg == DN_BTNCLICK && param1 >= arc_type_ctrl_id && param1 < arc_type_ctrl_id + static_cast<int>(ARRAYSIZE(c_archive_types))) {
       if (param2) {
-        ArcType arc_type = c_archive_types[param1 - arc_type_ctrl_id].value;
+        arc_type = c_archive_types[param1 - arc_type_ctrl_id].value;
         bool is_7z = arc_type == c_guid_7z;
         for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
           enable(i, is_7z);
         }
-        change_extension(get_ext(arc_type));
+        change_extension();
         enable(solid_ctrl_id, is_7z);
         enable(encrypt_header_ctrl_id, get_check(encrypt_ctrl_id) && is_7z);
       }
@@ -514,16 +536,23 @@ private:
       }
       enable(encrypt_header_ctrl_id, param2 && is_7z);
     }
+    else if (new_arc && msg == DN_BTNCLICK && param1 == create_sfx_ctrl_id) {
+      create_sfx = param2 == TRUE;
+      for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
+        enable(i, create_sfx);
+      }
+      change_extension();
+    }
     return default_dialog_proc(msg, param1, param2);
   }
 
 public:
-  UpdateDialog(bool new_arc, UpdateOptions& options): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), c_client_xs), new_arc(new_arc), options(options) {
+  UpdateDialog(bool new_arc, UpdateOptions& options): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), c_client_xs), new_arc(new_arc), options(options), arc_type(options.arc_type), create_sfx(options.create_sfx) {
   }
 
   bool show() {
     if (new_arc) {
-      old_ext = get_ext(options.arc_type);
+      old_ext = get_ext();
 
       label(Far::get_msg(MSG_UPDATE_DLG_ARC_PATH));
       new_line();
@@ -583,6 +612,22 @@ public:
     new_line();
     separator();
     new_line();
+
+    if (new_arc) {
+      create_sfx_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_CREATE_SFX), options.create_sfx);
+      new_line();
+      wstring sfx_module_label = Far::get_msg(MSG_UPDATE_DLG_SFX_MODULE);
+      label(sfx_module_label);
+      vector<wstring> sfx_module_list;
+      const SfxModules& sfx_modules = ArcAPI::sfx();
+      for_each(sfx_modules.begin(), sfx_modules.end(), [&] (const SfxModule& sfx_module) {
+        sfx_module_list.push_back(sfx_module.path);
+      });
+      sfx_module_ctrl_id = combo_box(sfx_module_list, options.sfx_module_idx, c_client_xs - get_label_len(sfx_module_label), DIF_DROPDOWNLIST);
+      new_line();
+      separator();
+      new_line();
+    }
 
     move_files_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_MOVE_FILES), options.move_files);
     new_line();

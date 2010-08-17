@@ -451,6 +451,18 @@ void Archive::delete_files(const wstring& src_dir, const PluginPanelItem* panel_
   }
 }
 
+void Archive::write_sfx_module(IOutStream* out_stream, const UpdateOptions& options) {
+  const SfxModules& sfx_modules = ArcAPI::sfx();
+  CHECK(options.sfx_module_idx < sfx_modules.size());
+  wstring sfx_module_path = sfx_modules[options.sfx_module_idx].path;
+  File sfx_module(sfx_module_path, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0);
+  unsigned __int64 sfx_module_size = sfx_module.size();
+  CHECK(sfx_module_size < 1024 * 1024);
+  Buffer<char> buffer(static_cast<size_t>(sfx_module_size));
+  CHECK(sfx_module.read(buffer) == sfx_module_size);
+  CHECK_COM(out_stream->Write(buffer.data(), buffer.size(), NULL));
+}
+
 void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options) {
   FileIndexMap file_index_map;
   UInt32 new_index = 0;
@@ -465,6 +477,10 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
     Error error;
     ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options.password, error));
     ComObject<IOutStream> update_stream(new ArchiveUpdateStream(options.arc_path, error));
+
+    if (options.create_sfx) {
+      write_sfx_module(update_stream, options);
+    }
 
     HRESULT res = out_arc->UpdateItems(update_stream, new_index, updater);
     if (FAILED(res)) {

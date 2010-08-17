@@ -50,14 +50,21 @@ public:
   wstring to_string() const;
 };
 
+struct SfxModule {
+  wstring path;
+};
+typedef vector<SfxModule> SfxModules;
+
 class ArcAPI {
 private:
   ArcLibs arc_libs;
   ArcFormats arc_formats;
+  SfxModules sfx_modules;
   static ArcAPI* arc_api;
   ArcAPI() {}
   ~ArcAPI();
   void load_libs(const wstring& path);
+  void find_sfx_modules(const wstring& path);
   void load();
   static ArcAPI* get();
 public:
@@ -66,6 +73,9 @@ public:
   }
   static const ArcFormats& formats() {
     return get()->arc_formats;
+  }
+  static const SfxModules& sfx() {
+    return get()->sfx_modules;
   }
   static void create_in_archive(const ArcType& arc_type, IInArchive** in_arc);
   static void create_out_archive(const ArcType& format, IOutArchive** out_arc);
@@ -165,6 +175,7 @@ private:
   void delete_file(const wstring& file_path, DeleteFilesProgress& progress);
   void delete_dir(const wstring& dir_path, DeleteFilesProgress& progress);
   void delete_files(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number);
+  void write_sfx_module(IOutStream* out_stream, const UpdateOptions& options);
 public:
   void create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options);
   void update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options);
