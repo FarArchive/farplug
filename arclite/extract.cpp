@@ -448,7 +448,7 @@ public:
       file_path.insert(0, 1, L'\\').insert(0, file_info.name);
       parent_index = file_info.parent;
     }
-    file_path.insert(0, 1, L'\\').insert(0, dst_dir);
+    file_path.insert(0, add_trailing_slash(dst_dir));
 
     FindData dst_file_info;
     HANDLE h_find = FindFirstFileW(long_path(file_path).c_str(), &dst_file_info);
