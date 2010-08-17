@@ -137,6 +137,7 @@ protected:
   void set_width(unsigned width) {
     client_xs = width;
   }
+  LONG_PTR send_message(int msg, int param1, LONG_PTR param2);
 public:
   Dialog(const wstring& title, unsigned width = 60, const wchar_t* help = NULL);
   // create different controls
@@ -197,5 +198,7 @@ wstring get_absolute_path(const wstring& rel_path);
 INT_PTR adv_control(int command, void* param = nullptr);
 
 bool match_masks(const wstring& file_name, const wstring& masks);
+
+unsigned char get_colors(PaletteColors color_id);
 
 };

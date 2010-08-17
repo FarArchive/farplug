@@ -258,6 +258,10 @@ LONG_PTR Dialog::default_dialog_proc(int msg, int param1, LONG_PTR param2) {
   return g_far.DefDlgProc(h_dlg, msg, param1, param2);
 }
 
+LONG_PTR Dialog::send_message(int msg, int param1, LONG_PTR param2) {
+  return g_far.SendDlgMessage(h_dlg, msg, param1, param2);
+}
+
 Dialog::Dialog(const wstring& title, unsigned width, const wchar_t* help): client_xs(width), x(c_x_frame), y(c_y_frame), help(help) {
   frame(title);
 }
@@ -610,6 +614,10 @@ INT_PTR adv_control(int command, void* param) {
 
 bool match_masks(const wstring& file_name, const wstring& masks) {
   return g_fsf.ProcessName(masks.c_str(), const_cast<wchar_t*>(file_name.c_str()), 0, PN_CMPNAMELIST) != 0;
+}
+
+unsigned char get_colors(PaletteColors color_id) {
+  return g_far.AdvControl(g_far.ModuleNumber, ACTL_GETCOLOR, reinterpret_cast<void*>(color_id));
 }
 
 };

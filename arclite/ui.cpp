@@ -692,6 +692,26 @@ class AttrDialog: public Far::Dialog {
 private:
   const AttrList& attr_list;
 
+  LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
+    if (msg == DN_INITDIALOG) {
+      FarDialogItem dlg_item;
+      for (unsigned ctrl_id = 0; send_message(DM_GETDLGITEMSHORT, ctrl_id, reinterpret_cast<LONG_PTR>(&dlg_item)); ctrl_id++) {
+        if (dlg_item.Type == DI_EDIT) {
+          EditorSetPosition esp = { 0 };
+          send_message(DM_SETEDITPOSITION, ctrl_id, reinterpret_cast<LONG_PTR>(&esp));
+        }
+      }
+    }
+    else if (msg == DN_CTLCOLORDLGITEM) {
+      FarDialogItem dlg_item;
+      if (send_message(DM_GETDLGITEMSHORT, param1, reinterpret_cast<LONG_PTR>(&dlg_item)) && dlg_item.Type == DI_EDIT) {
+        unsigned color = Far::get_colors(COL_DIALOGTEXT);
+        return param2 & 0xFF00FF00 | (color << 16) | color;
+      }
+    }
+    return default_dialog_proc(msg, param1, param2);
+  }
+
 public:
   AttrDialog(const AttrList& attr_list): Far::Dialog(Far::get_msg(MSG_ATTR_DLG_TITLE)), attr_list(attr_list) {
   }
@@ -705,6 +725,7 @@ public:
       if (attr.value.size() > max_value_len)
         max_value_len = attr.value.size();
     });
+    max_value_len += 1;
 
     unsigned max_width = Far::get_optimal_msg_width();
     if (max_name_len > max_width / 2)
@@ -717,7 +738,7 @@ public:
     for_each(attr_list.begin(), attr_list.end(), [&] (const Attr& attr) {
       label(attr.name, max_name_len);
       spacer(1);
-      label(attr.value, max_value_len);
+      edit_box(attr.value, max_value_len);
       new_line();
     });
 

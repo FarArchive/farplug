@@ -220,6 +220,107 @@ public:
     filetime = val;
     return *this;
   }
+
+  bool is_int() const {
+    return vt == VT_I1 || vt == VT_I2 || vt == VT_I4 || vt == VT_INT || vt == VT_I8;
+  }
+  bool is_uint() const {
+    return vt == VT_UI1 || vt == VT_UI2 || vt == VT_UI4 || vt == VT_UINT || vt == VT_UI8;
+  }
+  bool is_str() const {
+    return vt == VT_BSTR || vt == VT_LPWSTR;
+  }
+  bool is_bool() const {
+    return vt == VT_BOOL;
+  }
+  bool is_filetime() const {
+    return vt == VT_FILETIME;
+  }
+
+  __int64 get_int() const {
+    switch (vt) {
+    case VT_I1:
+      return cVal;
+    case VT_I2:
+      return iVal;
+    case VT_I4:
+      return lVal;
+    case VT_INT:
+      return intVal;
+    case VT_I8:
+      return hVal.QuadPart;
+    default:
+      FAIL(E_INVALIDARG);
+    }
+  }
+  unsigned __int64 get_uint() const {
+    switch (vt) {
+    case VT_UI1:
+      return bVal;
+    case VT_UI2:
+      return uiVal;
+    case VT_UI4:
+      return ulVal;
+    case VT_UINT:
+      return uintVal;
+    case VT_UI8:
+      return uhVal.QuadPart;
+    default:
+      FAIL(E_INVALIDARG);
+    }
+  }
+  unsigned get_int_size() const {
+    switch (vt) {
+    case VT_UI1:
+      return sizeof(bVal);
+    case VT_UI2:
+      return sizeof(uiVal);
+    case VT_UI4:
+      return sizeof(ulVal);
+    case VT_UINT:
+      return sizeof(uintVal);
+    case VT_UI8:
+      return sizeof(uhVal);
+    case VT_I1:
+      return sizeof(cVal);
+    case VT_I2:
+      return sizeof(iVal);
+    case VT_I4:
+      return sizeof(lVal);
+    case VT_INT:
+      return sizeof(intVal);
+    case VT_I8:
+      return sizeof(hVal);
+    default:
+      FAIL(E_INVALIDARG);
+    }
+  }
+  wstring get_str() const {
+    switch (vt) {
+    case VT_BSTR:
+      return wstring(bstrVal, SysStringLen(bstrVal));
+    case VT_LPWSTR:
+      return wstring(pwszVal);
+    default:
+      FAIL(E_INVALIDARG);
+    }
+  }
+  bool get_bool() const {
+    switch (vt) {
+    case VT_BOOL:
+      return boolVal == VARIANT_TRUE;
+    default:
+      FAIL(E_INVALIDARG);
+    }
+  }
+  FILETIME get_filetime() const {
+    switch (vt) {
+    case VT_FILETIME:
+      return filetime;
+    default:
+      FAIL(E_INVALIDARG);
+    }
+  }
 };
 
 class BStr {
