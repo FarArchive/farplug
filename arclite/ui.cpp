@@ -255,7 +255,7 @@ public:
   bool show() {
     label(Far::get_msg(MSG_EXTRACT_DLG_DST_DIR));
     new_line();
-    dst_dir_ctrl_id = edit_box(options.dst_dir, c_client_xs);
+    dst_dir_ctrl_id = history_edit_box(options.dst_dir, L"arclite.extract_dir", c_client_xs, DIF_EDITPATH);
     new_line();
     separator();
     new_line();
@@ -561,7 +561,7 @@ public:
 
       label(Far::get_msg(MSG_UPDATE_DLG_ARC_PATH));
       new_line();
-      arc_path_ctrl_id = edit_box(options.arc_path, c_client_xs);
+      arc_path_ctrl_id = history_edit_box(options.arc_path, L"arclite.arc_path", c_client_xs, DIF_EDITPATH);
       new_line();
       separator();
       new_line();

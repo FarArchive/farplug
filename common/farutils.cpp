@@ -322,23 +322,16 @@ unsigned Dialog::edit_box(const wstring& text, unsigned boxsize, DWORD flags) {
   return new_item(di);
 }
 
+unsigned Dialog::history_edit_box(const wstring& text, const wstring& history_name, unsigned boxsize, DWORD flags) {
+  unsigned idx = edit_box(text, boxsize, flags | DIF_HISTORY);
+  items[idx].history_idx = new_value(history_name);
+  return idx;
+}
+
 unsigned Dialog::mask_edit_box(const wstring& text, const wstring& mask, unsigned boxsize, DWORD flags) {
-  DialogItem di;
-  di.type = DI_FIXEDIT;
-  di.x1 = x;
-  di.y1 = y;
-  if (boxsize == AUTO_SIZE)
-    x += static_cast<unsigned>(mask.size());
-  else
-    x += boxsize;
-  if (x - c_x_frame > client_xs)
-    client_xs = x - c_x_frame;
-  di.x2 = x - 1;
-  di.y2 = y;
-  di.mask_idx = new_value(mask);
-  di.flags = DIF_MASKEDIT | flags;
-  di.text_idx = new_value(text);
-  return new_item(di);
+  unsigned idx = fix_edit_box(text, boxsize, flags | DIF_MASKEDIT);
+  items[idx].mask_idx = new_value(mask);
+  return idx;
 }
 
 unsigned Dialog::fix_edit_box(const wstring& text, unsigned boxsize, DWORD flags) {

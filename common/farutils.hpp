@@ -151,6 +151,7 @@ public:
   unsigned label(const wstring& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned edit_box(const wstring& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned mask_edit_box(const wstring& text, const wstring& mask, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
+  unsigned history_edit_box(const wstring& text, const wstring& history_name, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned fix_edit_box(const wstring& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned pwd_edit_box(const wstring& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned button(const wstring& text, DWORD flags = 0, bool def = false);
