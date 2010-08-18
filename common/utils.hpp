@@ -47,6 +47,8 @@ private:
   Type* buffer;
   size_t buf_size;
 public:
+  Buffer(): buffer(nullptr), buf_size(0) {
+  }
   Buffer(size_t size) {
     buffer = new Type[size];
     buf_size = size;

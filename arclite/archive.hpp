@@ -175,7 +175,7 @@ private:
   void delete_file(const wstring& file_path, DeleteFilesProgress& progress);
   void delete_dir(const wstring& dir_path, DeleteFilesProgress& progress);
   void delete_files(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number);
-  void write_sfx_module(IOutStream* out_stream, const UpdateOptions& options);
+  void load_sfx_module(Buffer<char>& buffer, const UpdateOptions& options);
 public:
   void create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options);
   void update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options);

@@ -89,15 +89,20 @@ class ArchiveUpdateStream: public IOutStream, public ComBase {
 private:
   HANDLE h_file;
   const wstring& file_path;
+  __int64 start_offset;
 
 public:
-  ArchiveUpdateStream(const wstring& file_path, Error& error): ComBase(error), h_file(INVALID_HANDLE_VALUE), file_path(file_path) {
+  ArchiveUpdateStream(const wstring& file_path, Error& error): ComBase(error), h_file(INVALID_HANDLE_VALUE), file_path(file_path), start_offset(0) {
     h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
   ~ArchiveUpdateStream() {
     if (h_file != INVALID_HANDLE_VALUE)
       CloseHandle(h_file);
+  }
+
+  void set_offset(__int64 offset) {
+    start_offset = offset;
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -118,9 +123,13 @@ public:
   STDMETHODIMP Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
     COM_ERROR_HANDLER_BEGIN
     DWORD move_method;
+    LARGE_INTEGER distance;
+    distance.QuadPart = offset;
     switch (seekOrigin) {
     case STREAM_SEEK_SET:
-      move_method = FILE_BEGIN; break;
+      move_method = FILE_BEGIN;
+      distance.QuadPart += start_offset;
+      break;
     case STREAM_SEEK_CUR:
       move_method = FILE_CURRENT; break;
     case STREAM_SEEK_END:
@@ -128,10 +137,11 @@ public:
     default:
       FAIL(E_INVALIDARG);
     }
-    LARGE_INTEGER distance;
-    distance.QuadPart = offset;
     LARGE_INTEGER new_position;
     CHECK_SYS(SetFilePointerEx(h_file, distance, &new_position, move_method));
+    if (new_position.QuadPart < start_offset)
+      FAIL(E_INVALIDARG);
+    new_position.QuadPart -= start_offset;
     if (newPosition)
       *newPosition = new_position.QuadPart;
     return S_OK;
@@ -140,7 +150,7 @@ public:
   STDMETHODIMP SetSize(Int64 newSize) {
     COM_ERROR_HANDLER_BEGIN
     LARGE_INTEGER position;
-    position.QuadPart = newSize;
+    position.QuadPart = newSize + start_offset;
     CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
     CHECK_SYS(SetEndOfFile(h_file));
     return S_OK;
@@ -451,16 +461,17 @@ void Archive::delete_files(const wstring& src_dir, const PluginPanelItem* panel_
   }
 }
 
-void Archive::write_sfx_module(IOutStream* out_stream, const UpdateOptions& options) {
+void Archive::load_sfx_module(Buffer<char>& buffer, const UpdateOptions& options) {
   const SfxModules& sfx_modules = ArcAPI::sfx();
   CHECK(options.sfx_module_idx < sfx_modules.size());
   wstring sfx_module_path = sfx_modules[options.sfx_module_idx].path;
+  ERROR_MESSAGE_BEGIN
   File sfx_module(sfx_module_path, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0);
   unsigned __int64 sfx_module_size = sfx_module.size();
   CHECK(sfx_module_size < 1024 * 1024);
-  Buffer<char> buffer(static_cast<size_t>(sfx_module_size));
+  buffer.resize(static_cast<size_t>(sfx_module_size));
   CHECK(sfx_module.read(buffer) == sfx_module_size);
-  CHECK_COM(out_stream->Write(buffer.data(), buffer.size(), NULL));
+  ERROR_MESSAGE_END(sfx_module_path)
 }
 
 void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options) {
@@ -476,10 +487,13 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
 
     Error error;
     ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options.password, error));
-    ComObject<IOutStream> update_stream(new ArchiveUpdateStream(options.arc_path, error));
+    ComObject<ArchiveUpdateStream> update_stream(new ArchiveUpdateStream(options.arc_path, error));
 
-    if (options.create_sfx) {
-      write_sfx_module(update_stream, options);
+    if (options.create_sfx && options.arc_type == c_guid_7z) {
+      Buffer<char> buffer;
+      load_sfx_module(buffer, options);
+      CHECK_COM(update_stream->Write(buffer.data(), buffer.size(), NULL));
+      update_stream->set_offset(buffer.size());
     }
 
     HRESULT res = out_arc->UpdateItems(update_stream, new_index, updater);

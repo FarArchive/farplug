@@ -423,7 +423,7 @@ private:
   bool create_sfx;
   wstring get_ext() {
     assert(new_arc);
-    if (create_sfx)
+    if (create_sfx && arc_type == c_guid_7z)
       return L".exe";
     else if (ArcAPI::formats().count(arc_type))
       return ArcAPI::formats().at(arc_type).default_extension();
@@ -513,8 +513,9 @@ private:
         enable(i, !options.password.empty());
       }
       enable(encrypt_header_ctrl_id, !options.password.empty() && is_7z);
+      enable(create_sfx_ctrl_id, is_7z);
       for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
-        enable(i, options.create_sfx);
+        enable(i, is_7z && options.create_sfx);
       }
     }
     else if (new_arc && msg == DN_BTNCLICK && param1 >= arc_type_ctrl_id && param1 < arc_type_ctrl_id + static_cast<int>(ARRAYSIZE(c_archive_types))) {
@@ -526,7 +527,11 @@ private:
         }
         change_extension();
         enable(solid_ctrl_id, is_7z);
-        enable(encrypt_header_ctrl_id, get_check(encrypt_ctrl_id) && is_7z);
+        enable(encrypt_header_ctrl_id, is_7z && get_check(encrypt_ctrl_id));
+        enable(create_sfx_ctrl_id, is_7z);
+        for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
+          enable(i, is_7z && get_check(create_sfx_ctrl_id));
+        }
       }
     }
     else if (msg == DN_BTNCLICK && param1 == encrypt_ctrl_id) {
