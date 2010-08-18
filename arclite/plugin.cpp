@@ -14,6 +14,7 @@ private:
   wstring extract_dir;
   wstring host_file;
   wstring panel_title;
+  vector<InfoPanelLine> info_lines;
 
   static bool auto_detect_next_time;
 
@@ -100,6 +101,22 @@ public:
     opi->StartPanelMode = '0' + g_options.panel_view_mode;
     opi->StartSortMode = g_options.panel_sort_mode;
     opi->StartSortOrder = g_options.panel_reverse_sort;
+
+    info_lines.clear();
+    info_lines.reserve(arc_attr.size() + 1);
+    InfoPanelLine ipl;
+    ipl.Text = panel_title.c_str();
+    ipl.Data = nullptr;
+    ipl.Separator = 1;
+    info_lines.push_back(ipl);
+    for_each(arc_attr.begin(), arc_attr.end(), [&] (const Attr& attr) {
+      ipl.Text = attr.name.c_str();
+      ipl.Data = attr.value.c_str();
+      ipl.Separator = 0;
+      info_lines.push_back(ipl);
+    });
+    opi->InfoLines = info_lines.data();
+    opi->InfoLinesNumber = info_lines.size();
   }
 
   void set_dir(const wstring& dir) {

@@ -241,3 +241,46 @@ AttrList Archive::get_attr_list(UInt32 item_index) {
 
   return attr_list;
 }
+
+AttrList Archive::get_attr_list() {
+  AttrList attr_list;
+  UInt32 num_props;
+  CHECK_COM(in_arc->GetNumberOfArchiveProperties(&num_props));
+  for (unsigned i = 0; i < num_props; i++) {
+    Attr attr;
+    BStr name;
+    PROPID prop_id;
+    VARTYPE vt;
+    CHECK_COM(in_arc->GetArchivePropertyInfo(i, name.ref(), &prop_id, &vt));
+    const PropInfo* prop_info = find_prop_info(prop_id);
+    if (prop_info)
+      attr.name = Far::get_msg(prop_info->name_id);
+    else if (name)
+      attr.name.assign(name, name.size());
+    else
+      attr.name = int_to_str(prop_id);
+
+    PropVariant prop;
+    CHECK_COM(in_arc->GetArchiveProperty(prop_id, prop.ref()));
+
+    if (prop_info && prop_info->prop_to_string) {
+      attr.value = prop_info->prop_to_string(prop);
+    }
+    else {
+      if (prop.is_str())
+        attr.value = format_str_prop(prop);
+      else if (prop.is_bool())
+        attr.value = Far::get_msg(prop.get_bool() ? MSG_PROPERTY_TRUE : MSG_PROPERTY_FALSE);
+      else if (prop.is_uint())
+        attr.value = format_uint_prop(prop);
+      else if (prop.is_int())
+        attr.value = format_int_prop(prop);
+      else if (prop.is_filetime())
+        attr.value = format_filetime_prop(prop);
+    }
+
+    attr_list.push_back(attr);
+  }
+
+  return attr_list;
+}

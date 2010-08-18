@@ -187,6 +187,10 @@ public:
   void delete_files(const vector<UInt32>& src_indices);
 
   // attributes
+private:
+  AttrList get_attr_list();
+protected:
+  AttrList arc_attr;
 public:
   AttrList get_attr_list(UInt32 item_index);
 };

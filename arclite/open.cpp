@@ -334,6 +334,7 @@ bool Archive::open(const wstring& file_path, const ArcFormatChain& format_chain)
     format++;
   }
   this->format_chain = format_chain;
+  arc_attr = get_attr_list();
   return true;
 }
 
