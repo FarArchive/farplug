@@ -211,12 +211,7 @@ public:
     UpdateOptions options;
     bool new_arc = !is_open();
     if (new_arc) {
-      wstring arc_dir;
-      PanelInfo panel_info;
-      if (Far::get_panel_info(PANEL_PASSIVE, panel_info) && Far::is_real_file_panel(panel_info))
-        arc_dir = Far::get_panel_dir(PANEL_PASSIVE);
-      else
-        arc_dir = src_path;
+      wstring arc_dir = src_path;
       if (items_number == 1 || is_root_path(arc_dir))
         options.arc_path = add_trailing_slash(arc_dir) + panel_items[0].FindData.lpwszFileName;
       else
