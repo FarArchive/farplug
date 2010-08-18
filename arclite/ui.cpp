@@ -514,6 +514,7 @@ private:
       for (int i = encrypt_ctrl_id + 1; i <= encrypt_header_ctrl_id; i++) {
         enable(i, !options.password.empty());
       }
+      enable(solid_ctrl_id, is_7z);
       enable(encrypt_header_ctrl_id, !options.password.empty() && is_7z);
       enable(create_sfx_ctrl_id, is_7z);
       for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {

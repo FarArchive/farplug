@@ -6,8 +6,6 @@
 #include "ui.hpp"
 #include "archive.hpp"
 
-unsigned calc_percent(unsigned __int64 completed, unsigned __int64 total);
-
 class ArchiveTester: public IArchiveExtractCallback, public ICryptoGetTextPassword, public ComBase, public ProgressMonitor {
 private:
   UInt32 src_dir_index;

@@ -6,6 +6,15 @@
 #include "ui.hpp"
 #include "archive.hpp"
 
+wstring format_time(unsigned __int64 t) {
+  unsigned __int64 s = t % 60;
+  unsigned __int64 m = (t / 60) % 60;
+  unsigned __int64 h = t / 60 / 60;
+  wostringstream st;
+  st << setfill(L'0') << setw(2) << h << L":" << setw(2) << m << L":" << setw(2) << s;
+  return st.str();
+}
+
 class ArchiveUpdateProgress: public ProgressMonitor {
 private:
   bool new_arc;
@@ -20,27 +29,23 @@ private:
     wostringstream st;
     st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
 
-    unsigned file_percent;
-    if (file_total == 0)
-      file_percent = 0;
-    else
-      file_percent = round(static_cast<double>(file_completed) / file_total * 100);
-    if (file_percent > 100)
-      file_percent = 100;
+    unsigned file_percent = calc_percent(file_completed, file_total);
+    unsigned percent = calc_percent(completed, total);
 
-    unsigned percent;
-    if (total == 0)
-      percent = 0;
-    else
-      percent = round(static_cast<double>(completed) / total * 100);
-    if (percent > 100)
-      percent = 100;
-
+    unsigned __int64 time = time_elapsed();
     unsigned __int64 speed;
-    if (time_elapsed() == 0)
+    if (time == 0)
       speed = 0;
     else
-      speed = round(static_cast<double>(completed) / time_elapsed() * ticks_per_sec());
+      speed = round(static_cast<double>(completed) / time * ticks_per_sec());
+
+    unsigned __int64 total_time;
+    if (completed)
+      total_time = static_cast<unsigned __int64>(static_cast<double>(total) / completed * time);
+    else
+      total_time = 0;
+    if (total_time < time)
+      total_time = time;
 
     st << Far::get_msg(new_arc ? MSG_PROGRESS_CREATE : MSG_PROGRESS_UPDATE) << L'\n';
     st << fit_str(file_path, c_width) << L'\n';
@@ -48,7 +53,7 @@ private:
     st << Far::get_progress_bar_str(c_width, file_percent, 100) << L'\n';
     st << L"\x1\n";
 
-    st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L" @ " << setw(9) << format_data_size(speed, get_speed_suffixes()) << L'\n';
+    st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L" [" << setw(2) << percent << L"%] @ " << setw(9) << format_data_size(speed, get_speed_suffixes()) << L" -" << format_time((total_time - time) / ticks_per_sec()) << L'\n';
     st << Far::get_progress_bar_str(c_width, percent, 100) << L'\n';
 
     Far::message(st.str(), 0, FMSG_LEFTALIGN);
