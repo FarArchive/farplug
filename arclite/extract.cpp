@@ -567,7 +567,7 @@ public:
   }
 };
 
-void Archive::prepare_extract(UInt32 file_index, const wstring& parent_dir, list<UInt32>& indices, const FileList& file_list, bool& ignore_errors, ErrorLog& error_log, PrepareExtractProgress& progress) {
+void Archive::prepare_extract(UInt32 file_index, const wstring& parent_dir, list<UInt32>& indices, bool& ignore_errors, ErrorLog& error_log, PrepareExtractProgress& progress) {
   const FileInfo& file_info = file_list[file_index];
   if (file_info.is_dir()) {
     wstring dir_path = add_trailing_slash(parent_dir) + file_info.name;
@@ -589,7 +589,7 @@ void Archive::prepare_extract(UInt32 file_index, const wstring& parent_dir, list
 
     FileIndexRange dir_list = get_dir_list(file_index);
     for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
-      prepare_extract(file_index, dir_path, indices, file_list, ignore_errors, error_log, progress);
+      prepare_extract(file_index, dir_path, indices, ignore_errors, error_log, progress);
     });
   }
   else {
@@ -660,7 +660,7 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
   PrepareExtractProgress prepare_extract_progress;
   list<UInt32> file_indices;
   for (unsigned i = 0; i < src_indices.size(); i++) {
-    prepare_extract(src_indices[i], options.dst_dir, file_indices, file_list, ignore_errors, error_log, prepare_extract_progress);
+    prepare_extract(src_indices[i], options.dst_dir, file_indices, ignore_errors, error_log, prepare_extract_progress);
   }
 
   vector<UInt32> indices;

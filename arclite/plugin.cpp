@@ -201,8 +201,10 @@ public:
       g_options.extract_overwrite = options.overwrite;
       g_options.save();
     }
-    vector<UInt32> indices;
+
     UInt32 src_dir_index = find_dir(current_dir);
+
+    vector<UInt32> indices;
     indices.reserve(items_number);
     for (int i = 0; i < items_number; i++) {
       indices.push_back(panel_items[i].UserData);
@@ -220,6 +222,17 @@ public:
     }
 
     Far::update_panel(this, false);
+  }
+
+  void test_files(struct PluginPanelItem* panel_items, int items_number, int op_mode) {
+    UInt32 src_dir_index = find_dir(current_dir);
+    vector<UInt32> indices;
+    indices.reserve(items_number);
+    for (int i = 0; i < items_number; i++) {
+      indices.push_back(panel_items[i].UserData);
+    }
+    test(src_dir_index, indices);
+    Far::info_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_TEST_OK));
   }
 
   bool put_files(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t* src_path, int op_mode) {
@@ -416,6 +429,17 @@ int WINAPI PutFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsN
 int WINAPI DeleteFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsNumber,int OpMode) {
   FAR_ERROR_HANDLER_BEGIN;
   reinterpret_cast<Plugin*>(hPlugin)->delete_files(PanelItem, ItemsNumber, OpMode);
+  return TRUE;
+  FAR_ERROR_HANDLER_END(return FALSE, return FALSE, (OpMode & OPM_SILENT) != 0);
+}
+
+int WINAPI ProcessHostFileW(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int OpMode) {
+  FAR_ERROR_HANDLER_BEGIN;
+  vector<wstring> menu_items;
+  menu_items.push_back(Far::get_msg(MSG_TEST_MENU));
+  int item = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), menu_items);
+  if (item == 0)
+    reinterpret_cast<Plugin*>(hPlugin)->test_files(PanelItem, ItemsNumber, OpMode);
   return TRUE;
   FAR_ERROR_HANDLER_END(return FALSE, return FALSE, (OpMode & OPM_SILENT) != 0);
 }
