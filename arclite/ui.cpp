@@ -415,6 +415,7 @@ private:
   int create_sfx_ctrl_id;
   int sfx_module_ctrl_id;
   int move_files_ctrl_id;
+  int open_shared_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -503,6 +504,7 @@ private:
         }
       }
       options.move_files = get_check(move_files_ctrl_id);
+      options.open_shared = get_check(open_shared_ctrl_id);
     }
     else if (msg == DN_INITDIALOG) {
       bool is_7z = options.arc_type == c_guid_7z;
@@ -606,14 +608,14 @@ public:
     new_line();
 
     encrypt_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT), !options.password.empty());
+    spacer(2);
+    encrypt_header_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT_HEADER), options.encrypt_header);
     new_line();
     label(Far::get_msg(MSG_UPDATE_DLG_PASSWORD));
     password_ctrl_id = pwd_edit_box(options.password, 20);
     spacer(2);
     label(Far::get_msg(MSG_UPDATE_DLG_PASSWORD2));
     password2_ctrl_id = pwd_edit_box(options.password, 20);
-    new_line();
-    encrypt_header_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT_HEADER), options.encrypt_header);
     new_line();
     separator();
     new_line();
@@ -635,6 +637,8 @@ public:
     }
 
     move_files_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_MOVE_FILES), options.move_files);
+    new_line();
+    open_shared_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_OPEN_SHARED), options.open_shared);
     new_line();
 
     separator();

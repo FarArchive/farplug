@@ -250,6 +250,7 @@ public:
     options.solid = g_options.update_solid;
     options.encrypt_header = g_options.update_encrypt_header;
     options.move_files = move != 0;
+    options.open_shared = (Far::adv_control(ACTL_GETSYSTEMSETTINGS) & FSS_COPYFILESOPENEDFORWRITING) != 0;
     options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
     if (options.show_dialog) {
       if (!update_dialog(new_arc, options))

@@ -28,6 +28,7 @@ update.dlg.encrypt_header = Encrypt &header
 update.dlg.create_sfx = Create self-e&xtracting archive
 update.dlg.sfx_module = Select SFX module:
 update.dlg.move_files = &Delete files after archiving
+update.dlg.open_shared = Archive files open for w&riting
 update.dlg.passwords_dont_match = Passwords don't match
 update.dlg.password_is_empty = Password is empty
 update.dlg.wrong_sfx_module = Select SFX module

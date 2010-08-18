@@ -166,8 +166,8 @@ private:
   ArchiveUpdateProgress& progress;
 
 public:
-  FileReadStream(const wstring& file_path, ArchiveUpdateProgress& progress, Error& error): ComBase(error), file_path(file_path), progress(progress) {
-    h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+  FileReadStream(const wstring& file_path, bool open_shared, ArchiveUpdateProgress& progress, Error& error): ComBase(error), file_path(file_path), progress(progress) {
+    h_file = CreateFileW(long_path(file_path).c_str(), FILE_READ_DATA, FILE_SHARE_READ | (open_shared ? FILE_SHARE_WRITE : 0), NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
   ~FileReadStream() {
@@ -229,10 +229,11 @@ private:
   UInt32 num_indices;
   const FileIndexMap& file_index_map;
   const wstring& password;
+  bool open_shared;
   ArchiveUpdateProgress progress;
 
 public:
-  ArchiveUpdater(const wstring& src_dir, const wstring& dst_dir, UInt32 num_indices, const FileIndexMap& file_index_map, const wstring& password, Error& error): ComBase(error), src_dir(src_dir), dst_dir(dst_dir), num_indices(num_indices), file_index_map(file_index_map), password(password), progress(num_indices == 0) {
+  ArchiveUpdater(const wstring& src_dir, const wstring& dst_dir, UInt32 num_indices, const FileIndexMap& file_index_map, const wstring& password, bool open_shared, Error& error): ComBase(error), src_dir(src_dir), dst_dir(dst_dir), num_indices(num_indices), file_index_map(file_index_map), password(password), open_shared(open_shared), progress(num_indices == 0) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -302,7 +303,7 @@ public:
     const FileIndexInfo& file_index_info = file_index_map.at(index);
     wstring file_path = add_trailing_slash(add_trailing_slash(src_dir) + file_index_info.rel_path) + file_index_info.find_data.cFileName;
     progress.on_open_file(file_path, file_index_info.find_data.size());
-    ComObject<ISequentialInStream> stream(new FileReadStream(file_path, progress, error));
+    ComObject<ISequentialInStream> stream(new FileReadStream(file_path, open_shared, progress, error));
     stream.detach(inStream);
     return S_OK;
     COM_ERROR_HANDLER_END
@@ -486,7 +487,7 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
     set_properties(out_arc, options);
 
     Error error;
-    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options.password, error));
+    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options.password, options.open_shared, error));
     ComObject<ArchiveUpdateStream> update_stream(new ArchiveUpdateStream(options.arc_path, error));
 
     if (options.create_sfx && options.arc_type == c_guid_7z) {
@@ -526,7 +527,7 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
     set_properties(out_arc, options);
 
     Error error;
-    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, options.password, error));
+    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, options.password, options.open_shared, error));
     ComObject<IOutStream> update_stream(new ArchiveUpdateStream(temp_arc_name, error));
 
     HRESULT res = out_arc->UpdateItems(update_stream, new_index, updater);
