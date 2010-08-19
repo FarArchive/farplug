@@ -409,9 +409,9 @@ private:
   int method_ctrl_id;
   int solid_ctrl_id;
   int encrypt_ctrl_id;
+  int encrypt_header_ctrl_id;
   int password_ctrl_id;
   int password2_ctrl_id;
-  int encrypt_header_ctrl_id;
   int create_sfx_ctrl_id;
   int sfx_module_ctrl_id;
   int move_files_ctrl_id;
@@ -511,14 +511,16 @@ private:
       for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
         enable(i, is_7z);
       }
-      for (int i = encrypt_ctrl_id + 1; i <= encrypt_header_ctrl_id; i++) {
+      for (int i = encrypt_ctrl_id + 1; i <= password2_ctrl_id; i++) {
         enable(i, !options.password.empty());
       }
       enable(solid_ctrl_id, is_7z);
       enable(encrypt_header_ctrl_id, !options.password.empty() && is_7z);
-      enable(create_sfx_ctrl_id, is_7z);
-      for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
-        enable(i, is_7z && options.create_sfx);
+      if (new_arc) {
+        enable(create_sfx_ctrl_id, is_7z);
+        for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
+          enable(i, is_7z && options.create_sfx);
+        }
       }
     }
     else if (new_arc && msg == DN_BTNCLICK && param1 >= arc_type_ctrl_id && param1 < arc_type_ctrl_id + static_cast<int>(ARRAYSIZE(c_archive_types))) {
@@ -539,7 +541,7 @@ private:
     }
     else if (msg == DN_BTNCLICK && param1 == encrypt_ctrl_id) {
       bool is_7z = get_check(arc_type_ctrl_id);
-      for (int i = encrypt_ctrl_id + 1; i <= encrypt_header_ctrl_id; i++) {
+      for (int i = encrypt_ctrl_id + 1; i <= password2_ctrl_id; i++) {
         enable(i, param2 == TRUE);
       }
       enable(encrypt_header_ctrl_id, param2 && is_7z);
