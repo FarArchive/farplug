@@ -6,19 +6,6 @@
 #include "ui.hpp"
 #include "archive.hpp"
 
-class ArchiveUpdateStream: public IOutStream, public ComBase {
-private:
-  HANDLE h_file;
-  const wstring& file_path;
-public:
-  ArchiveUpdateStream(const wstring& file_path, Error& error);
-  ~ArchiveUpdateStream();
-  UNKNOWN_DECL
-  STDMETHOD(Write)(const void *data, UInt32 size, UInt32 *processedSize);
-  STDMETHOD(Seek)(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition);
-  STDMETHOD(SetSize)(Int64 newSize);
-};
-
 class ArchiveFileDeleter: public IArchiveUpdateCallback, public ProgressMonitor, public ComBase {
 private:
   vector<UInt32> new_indices;

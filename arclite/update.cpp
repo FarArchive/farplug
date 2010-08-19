@@ -90,78 +90,65 @@ public:
 };
 
 
-class ArchiveUpdateStream: public IOutStream, public ComBase {
-private:
-  HANDLE h_file;
-  const wstring& file_path;
-  __int64 start_offset;
+ArchiveUpdateStream::ArchiveUpdateStream(const wstring& file_path, Error& error): ComBase(error), h_file(INVALID_HANDLE_VALUE), file_path(file_path), start_offset(0) {
+  h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
+  CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
+}
+ArchiveUpdateStream::~ArchiveUpdateStream() {
+  if (h_file != INVALID_HANDLE_VALUE)
+    CloseHandle(h_file);
+}
 
-public:
-  ArchiveUpdateStream(const wstring& file_path, Error& error): ComBase(error), h_file(INVALID_HANDLE_VALUE), file_path(file_path), start_offset(0) {
-    h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
-    CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
-  }
-  ~ArchiveUpdateStream() {
-    if (h_file != INVALID_HANDLE_VALUE)
-      CloseHandle(h_file);
-  }
+void ArchiveUpdateStream::set_offset(__int64 offset) {
+  start_offset = offset;
+}
 
-  void set_offset(__int64 offset) {
-    start_offset = offset;
-  }
+STDMETHODIMP ArchiveUpdateStream::Write(const void *data, UInt32 size, UInt32 *processedSize) {
+  COM_ERROR_HANDLER_BEGIN
+  DWORD size_written;
+  CHECK_SYS(WriteFile(h_file, data, size, &size_written, NULL));
+  if (processedSize)
+    *processedSize = size_written;
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
 
-  UNKNOWN_IMPL_BEGIN
-  UNKNOWN_IMPL_ITF(ISequentialOutStream)
-  UNKNOWN_IMPL_ITF(IOutStream)
-  UNKNOWN_IMPL_END
-
-  STDMETHODIMP Write(const void *data, UInt32 size, UInt32 *processedSize) {
-    COM_ERROR_HANDLER_BEGIN
-    DWORD size_written;
-    CHECK_SYS(WriteFile(h_file, data, size, &size_written, NULL));
-    if (processedSize)
-      *processedSize = size_written;
-    return S_OK;
-    COM_ERROR_HANDLER_END
+STDMETHODIMP ArchiveUpdateStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
+  COM_ERROR_HANDLER_BEGIN
+  DWORD move_method;
+  LARGE_INTEGER distance;
+  distance.QuadPart = offset;
+  switch (seekOrigin) {
+  case STREAM_SEEK_SET:
+    move_method = FILE_BEGIN;
+    distance.QuadPart += start_offset;
+    break;
+  case STREAM_SEEK_CUR:
+    move_method = FILE_CURRENT; break;
+  case STREAM_SEEK_END:
+    move_method = FILE_END; break;
+  default:
+    FAIL(E_INVALIDARG);
   }
-
-  STDMETHODIMP Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
-    COM_ERROR_HANDLER_BEGIN
-    DWORD move_method;
-    LARGE_INTEGER distance;
-    distance.QuadPart = offset;
-    switch (seekOrigin) {
-    case STREAM_SEEK_SET:
-      move_method = FILE_BEGIN;
-      distance.QuadPart += start_offset;
-      break;
-    case STREAM_SEEK_CUR:
-      move_method = FILE_CURRENT; break;
-    case STREAM_SEEK_END:
-      move_method = FILE_END; break;
-    default:
-      FAIL(E_INVALIDARG);
-    }
-    LARGE_INTEGER new_position;
-    CHECK_SYS(SetFilePointerEx(h_file, distance, &new_position, move_method));
-    if (new_position.QuadPart < start_offset)
-      FAIL(E_INVALIDARG);
-    new_position.QuadPart -= start_offset;
-    if (newPosition)
-      *newPosition = new_position.QuadPart;
-    return S_OK;
-    COM_ERROR_HANDLER_END
-  }
-  STDMETHODIMP SetSize(Int64 newSize) {
-    COM_ERROR_HANDLER_BEGIN
-    LARGE_INTEGER position;
-    position.QuadPart = newSize + start_offset;
-    CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
-    CHECK_SYS(SetEndOfFile(h_file));
-    return S_OK;
-    COM_ERROR_HANDLER_END
-  }
-};
+  LARGE_INTEGER new_position;
+  CHECK_SYS(SetFilePointerEx(h_file, distance, &new_position, move_method));
+  if (new_position.QuadPart < start_offset)
+    FAIL(E_INVALIDARG);
+  new_position.QuadPart -= start_offset;
+  if (newPosition)
+    *newPosition = new_position.QuadPart;
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
+STDMETHODIMP ArchiveUpdateStream::SetSize(Int64 newSize) {
+  COM_ERROR_HANDLER_BEGIN
+  LARGE_INTEGER position;
+  position.QuadPart = newSize + start_offset;
+  CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
+  CHECK_SYS(SetEndOfFile(h_file));
+  return S_OK;
+  COM_ERROR_HANDLER_END
+}
 
 
 class FileReadStream: public IInStream, public ComBase {

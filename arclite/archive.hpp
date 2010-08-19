@@ -197,6 +197,27 @@ public:
   AttrList get_attr_list(UInt32 item_index);
 };
 
+class ArchiveUpdateStream: public IOutStream, public ComBase {
+private:
+  HANDLE h_file;
+  const wstring& file_path;
+  __int64 start_offset;
+
+public:
+  ArchiveUpdateStream(const wstring& file_path, Error& error);
+  ~ArchiveUpdateStream();
+  void set_offset(__int64 offset);
+
+  UNKNOWN_IMPL_BEGIN
+  UNKNOWN_IMPL_ITF(ISequentialOutStream)
+  UNKNOWN_IMPL_ITF(IOutStream)
+  UNKNOWN_IMPL_END
+
+  STDMETHOD(Write)(const void *data, UInt32 size, UInt32 *processedSize);
+  STDMETHOD(Seek)(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition);
+  STDMETHOD(SetSize)(Int64 newSize);
+};
+
 const string c_guid_7z("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x07\x00\x00", 16);
 const string c_guid_zip("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x01\x00\x00", 16);
 const string c_guid_iso("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE7\x00\x00", 16);
