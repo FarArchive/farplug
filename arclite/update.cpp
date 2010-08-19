@@ -418,39 +418,47 @@ public:
   }
 };
 
-void Archive::delete_file(const wstring& file_path, DeleteFilesProgress& progress) {
+void Archive::delete_src_file(const wstring& file_path, DeleteFilesProgress& progress) {
   progress.update(file_path);
   ERROR_MESSAGE_BEGIN
-  CHECK_SYS(DeleteFileW(long_path(file_path).c_str()));
+  if (!DeleteFileW(long_path(file_path).c_str())) {
+    CHECK_SYS(GetLastError() == ERROR_ACCESS_DENIED);
+    SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL);
+    CHECK_SYS(DeleteFileW(long_path(file_path).c_str()));
+  }
   ERROR_MESSAGE_END(file_path)
 }
 
-void Archive::delete_dir(const wstring& dir_path, DeleteFilesProgress& progress) {
+void Archive::delete_src_dir(const wstring& dir_path, DeleteFilesProgress& progress) {
   {
     FileEnum file_enum(dir_path);
     while (file_enum.next()) {
       wstring path = add_trailing_slash(dir_path) + file_enum.data().cFileName;
       progress.update(path);
       if (file_enum.data().is_dir())
-        delete_dir(path, progress);
+        delete_src_dir(path, progress);
       else
-        delete_file(path, progress);
+        delete_src_file(path, progress);
     }
   }
   ERROR_MESSAGE_BEGIN
-  CHECK_SYS(RemoveDirectoryW(long_path(dir_path).c_str()));
+  if (!RemoveDirectoryW(long_path(dir_path).c_str())) {
+    CHECK_SYS(GetLastError() == ERROR_ACCESS_DENIED);
+    SetFileAttributesW(long_path(dir_path).c_str(), FILE_ATTRIBUTE_NORMAL);
+    CHECK_SYS(RemoveDirectoryW(long_path(dir_path).c_str()));
+  }
   ERROR_MESSAGE_END(dir_path)
 }
 
-void Archive::delete_files(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number) {
+void Archive::delete_src_files(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number) {
   DeleteFilesProgress delete_files_progress;
   for (unsigned i = 0; i < items_number; i++) {
     const FAR_FIND_DATA& find_data = panel_items[i].FindData;
     wstring file_path = add_trailing_slash(src_dir) + find_data.lpwszFileName;
     if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-      delete_dir(file_path, delete_files_progress);
+      delete_src_dir(file_path, delete_files_progress);
     else
-      delete_file(file_path, delete_files_progress);
+      delete_src_file(file_path, delete_files_progress);
   }
 }
 
@@ -503,7 +511,7 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
   }
 
   if (options.move_files)
-    delete_files(src_dir, panel_items, items_number);
+    delete_src_files(src_dir, panel_items, items_number);
 }
 
 void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options) {
@@ -541,5 +549,5 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
   reopen();
 
   if (options.move_files)
-    delete_files(src_dir, panel_items, items_number);
+    delete_src_files(src_dir, panel_items, items_number);
 }
