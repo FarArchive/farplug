@@ -376,9 +376,9 @@ void Archive::scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 ds
 void Archive::prepare_file_index_map(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map) {
   for (unsigned i = 0; i < items_number; i++) {
     const FAR_FIND_DATA& find_data = panel_items[i].FindData;
-    scan_file(wstring(), get_find_data(add_trailing_slash(src_dir) + find_data.lpwszFileName), dst_dir_index, new_index, file_index_map);
+    UInt32 file_index = scan_file(wstring(), get_find_data(add_trailing_slash(src_dir) + find_data.lpwszFileName), dst_dir_index, new_index, file_index_map);
     if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-      scan_dir(src_dir, find_data.lpwszFileName, dst_dir_index, new_index, file_index_map);
+      scan_dir(src_dir, find_data.lpwszFileName, file_index, new_index, file_index_map);
     }
   }
 }
