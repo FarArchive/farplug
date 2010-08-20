@@ -8,6 +8,8 @@
 #include "archive.hpp"
 #include "options.hpp"
 
+const wchar_t* c_plugin_prefix = L"arc";
+
 class Plugin: private Archive {
 private:
   wstring current_dir;
@@ -63,22 +65,33 @@ public:
   }
 
   Plugin(int open_from, INT_PTR item) {
-    PanelInfo panel_info;
-    if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
-      FAIL(E_ABORT);
-    Far::PanelItem panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
-    if (!Far::is_real_file_panel(panel_info)) {
-      if ((panel_item.file_attributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-        Far::post_keys(vector<DWORD>(1, KEY_CTRLPGDN));
-        auto_detect_next_time = false;
+    if (open_from == OPEN_PLUGINSMENU) {
+      PanelInfo panel_info;
+      if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
+        FAIL(E_ABORT);
+      Far::PanelItem panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
+      if (!Far::is_real_file_panel(panel_info)) {
+        if ((panel_item.file_attributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
+          Far::post_keys(vector<DWORD>(1, KEY_CTRLPGDN));
+          auto_detect_next_time = false;
+        }
+        FAIL(E_ABORT);
       }
-      FAIL(E_ABORT);
+      if (panel_item.file_name == L"..")
+        FAIL(E_ABORT);
+      wstring dir = Far::get_panel_dir(PANEL_ACTIVE);
+      wstring path = add_trailing_slash(dir) + panel_item.file_name;
+      if (!open_file(path, false))
+        FAIL(E_ABORT);
     }
-    if (panel_item.file_name == L"..")
-      FAIL(E_ABORT);
-    wstring dir = Far::get_panel_dir(PANEL_ACTIVE);
-    wstring path = add_trailing_slash(dir) + panel_item.file_name;
-    if (!open_file(path, false))
+    else if (open_from == OPEN_COMMANDLINE) {
+      wstring path = unquote(strip(reinterpret_cast<const wchar_t*>(item)));
+      if (!is_absolute_path(path))
+        path = Far::get_absolute_path(path);
+      if (!open_file(path, false))
+        FAIL(E_ABORT);
+    }
+    else
       FAIL(E_ABORT);
   }
 
@@ -92,6 +105,7 @@ public:
       host_file = archive_file_info.cFileName;
     }
     opi->HostFile = host_file.c_str();
+    opi->Format = c_plugin_prefix;
     opi->PanelTitle = panel_title.c_str();
     opi->StartPanelMode = '0' + g_options.panel_view_mode;
     opi->StartSortMode = g_options.panel_sort_mode;
@@ -361,6 +375,7 @@ void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
   Info->PluginMenuStringsNumber = ARRAYSIZE(plugin_menu);
   Info->PluginConfigStrings = config_menu;
   Info->PluginConfigStringsNumber = ARRAYSIZE(config_menu);
+  Info->CommandPrefix = c_plugin_prefix;
   FAR_ERROR_HANDLER_END(return, return, false);
 }
 
