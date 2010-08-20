@@ -315,7 +315,7 @@ ArchiveHandles Archive::detect(const wstring& file_path, bool all) {
   Error error;
   ComObject<IInStream> stream(new ArchiveOpenStream(get_archive_path(), error));
   detect(stream, extract_file_ext(file_path), all, archive_handles);
-  if (!all)
+  if (!all && !archive_handles.empty())
     archive_handles.erase(archive_handles.begin(), archive_handles.end() - 1);
   return archive_handles;
 }
