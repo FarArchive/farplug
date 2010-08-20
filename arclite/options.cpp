@@ -67,7 +67,7 @@ wstring Options::get_str(const wchar_t* name, const wstring& def_value) {
 
 void Options::set_int(const wchar_t* name, unsigned value, unsigned def_value) {
   Key plugin_key;
-  plugin_key.create(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE);
+  plugin_key.create(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE);
   if (value == def_value)
     IGNORE_ERRORS(plugin_key.delete_value(name))
   else
@@ -76,7 +76,7 @@ void Options::set_int(const wchar_t* name, unsigned value, unsigned def_value) {
 
 void Options::set_bool(const wchar_t* name, bool value, bool def_value) {
   Key plugin_key;
-  plugin_key.create(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE);
+  plugin_key.create(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE);
   if (value == def_value)
     IGNORE_ERRORS(plugin_key.delete_value(name))
   else
@@ -85,7 +85,7 @@ void Options::set_bool(const wchar_t* name, bool value, bool def_value) {
 
 void Options::set_str(const wchar_t* name, const wstring& value, const wstring& def_value) {
   Key plugin_key;
-  plugin_key.create(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE);
+  plugin_key.create(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE);
   if (value == def_value)
     IGNORE_ERRORS(plugin_key.delete_value(name))
   else
