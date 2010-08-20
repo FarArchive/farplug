@@ -27,31 +27,26 @@ private:
     }
 
     max_check_size = g_options.max_check_size;
-    vector<ArcFormatChain> format_chains = detect(file_path, !auto_detect);
+    ArchiveHandles archive_handles = detect(file_path, !auto_detect);
 
-    if (format_chains.size() == 0)
+    if (archive_handles.size() == 0)
       return false;
 
-    if (auto_detect) {
-      format_chains.erase(format_chains.begin(), format_chains.end() - 1);
-    }
-
     int format_idx;
-    if (format_chains.size() == 1) {
+    if (archive_handles.size() == 1) {
       format_idx = 0;
     }
     else {
       vector<wstring> format_names;
-      for (unsigned i = 0; i < format_chains.size(); i++) {
-        format_names.push_back(format_chains[i].to_string());
+      for (unsigned i = 0; i < archive_handles.size(); i++) {
+        format_names.push_back(archive_handles[i].format_chain.to_string());
       }
       format_idx = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), format_names);
       if (format_idx == -1)
         return false;
     }
 
-    if (!open(file_path, format_chains[format_idx]))
-      return false;
+    open(archive_handles[format_idx]);
 
     return true;
   }

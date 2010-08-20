@@ -242,8 +242,8 @@ AttrList Archive::get_attr_list(UInt32 item_index) {
   return attr_list;
 }
 
-AttrList Archive::get_attr_list() {
-  AttrList attr_list;
+void Archive::load_arc_attr() {
+  arc_attr.clear();
   UInt32 num_props;
   CHECK_COM(in_arc->GetNumberOfArchiveProperties(&num_props));
   for (unsigned i = 0; i < num_props; i++) {
@@ -279,8 +279,6 @@ AttrList Archive::get_attr_list() {
         attr.value = format_filetime_prop(prop);
     }
 
-    attr_list.push_back(attr);
+    arc_attr.push_back(attr);
   }
-
-  return attr_list;
 }

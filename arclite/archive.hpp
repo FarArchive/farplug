@@ -109,6 +109,13 @@ struct FileIndexInfo {
 };
 typedef map<UInt32, FileIndexInfo> FileIndexMap;
 
+struct ArchiveHandle {
+  ArcFormatChain format_chain;
+  ComObject<IInArchive> in_arc;
+};
+
+typedef vector<ArchiveHandle> ArchiveHandles;
+
 // forwards
 class SetAttrProgress;
 class PrepareExtractProgress;
@@ -124,14 +131,14 @@ private:
   ComObject<IInArchive> in_arc;
   bool open_sub_stream(IInArchive* in_arc, IInStream** sub_stream, wstring& sub_ext);
   bool open_archive(IInStream* in_stream, IInArchive* archive);
-  void detect(IInStream* in_stream, const wstring& ext, bool all, vector<ArcFormatChain>& format_chains);
+  void detect(IInStream* in_stream, const wstring& ext, bool all, ArchiveHandles& format_chains);
 protected:
   FindData archive_file_info;
   unsigned max_check_size;
   ArcFormatChain format_chain;
 public:
-  vector<ArcFormatChain> detect(const wstring& file_path, bool all);
-  bool open(const wstring& file_path, const ArcFormatChain& format_chain);
+  ArchiveHandles detect(const wstring& file_path, bool all);
+  void open(const ArchiveHandle& archive_handle);
   void close();
   void reopen();
   bool is_open() const {
@@ -190,7 +197,7 @@ public:
 
   // attributes
 private:
-  AttrList get_attr_list();
+  void load_arc_attr();
 protected:
   AttrList arc_attr;
 public:
