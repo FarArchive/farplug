@@ -170,6 +170,11 @@ public:
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
     ExtractOptions options;
     options.dst_dir = *dest_path;
+    if (items_number > 1) {
+      options.dst_dir = add_trailing_slash(options.dst_dir) + archive_file_info.cFileName;
+      wstring ext = extract_file_ext(archive_file_info.cFileName);
+      options.dst_dir.erase(options.dst_dir.size() - ext.size(), ext.size());
+    }
     options.ignore_errors = g_options.extract_ignore_errors;
     options.overwrite = static_cast<OverwriteOption>(g_options.extract_overwrite);
     options.move_enabled = updatable();
