@@ -45,7 +45,6 @@ protected:
   HANDLE h_file;
 public:
   File(const wstring& file_path, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes);
-  File(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTransaction);
   ~File();
   unsigned __int64 size();
   unsigned read(Buffer<char>& buffer);
@@ -56,10 +55,12 @@ public:
 class Key: private NonCopyable {
 private:
   HKEY h_key;
+  void close();
 public:
-  Key(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired);
-  Key(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired, HANDLE hTransaction);
+  Key();
   ~Key();
+  Key& create(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired);
+  Key& open(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired);
   bool query_bool(const wchar_t* name, bool def_value = false);
   unsigned query_int(const wchar_t* name, unsigned def_value = 0);
   wstring query_str(const wchar_t* name, const wstring& def_value = wstring());

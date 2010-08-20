@@ -135,12 +135,30 @@ void File::set_time(const FILETIME* ctime, const FILETIME* atime, const FILETIME
   CHECK_SYS(SetFileTime(h_file, ctime, atime, mtime));
 };
 
-Key::Key(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired) {
-  CHECK_ADVSYS(RegCreateKeyExW(hKey, lpSubKey, 0, NULL, REG_OPTION_NON_VOLATILE, samDesired, NULL, &h_key, NULL));
+void Key::close() {
+  if (h_key) {
+    RegCloseKey(h_key);
+    h_key = nullptr;
+  }
+}
+
+Key::Key(): h_key(nullptr) {
 }
 
 Key::~Key() {
-  RegCloseKey(h_key);
+  close();
+}
+
+Key& Key::create(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired) {
+  close();
+  CHECK_ADVSYS(RegCreateKeyExW(hKey, lpSubKey, 0, NULL, REG_OPTION_NON_VOLATILE, samDesired, NULL, &h_key, NULL));
+  return *this;
+}
+
+Key& Key::open(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired) {
+  close();
+  CHECK_ADVSYS(RegOpenKeyExW(hKey, lpSubKey, 0, samDesired, &h_key));
+  return *this;
 }
 
 bool Key::query_bool(const wchar_t* name, bool def_value) {

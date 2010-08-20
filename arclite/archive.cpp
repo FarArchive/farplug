@@ -162,7 +162,7 @@ void ArcAPI::load() {
   IGNORE_ERRORS(load_libs(Far::get_plugin_module_path()));
   IGNORE_ERRORS(find_sfx_modules(Far::get_plugin_module_path()));
   wstring _7zip_path;
-  IGNORE_ERRORS(_7zip_path = Key(HKEY_LOCAL_MACHINE, L"Software\\7-Zip", KEY_QUERY_VALUE).query_str(L"Path"));
+  IGNORE_ERRORS(_7zip_path = Key().open(HKEY_LOCAL_MACHINE, L"Software\\7-Zip", KEY_QUERY_VALUE).query_str(L"Path"));
   if (!_7zip_path.empty()) {
     IGNORE_ERRORS(load_libs(_7zip_path));
     IGNORE_ERRORS(find_sfx_modules(_7zip_path));
