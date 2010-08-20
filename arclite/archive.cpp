@@ -114,6 +114,8 @@ void ArcAPI::load_libs(const wstring& path) {
   while (file_enum.next()) {
     ArcLib arc_lib;
     arc_lib.module_path = add_trailing_slash(path) + file_enum.data().cFileName;
+    if (_wcsicmp(extract_file_ext(arc_lib.module_path).c_str(), L".dll") != 0)
+      continue;
     arc_lib.h_module = LoadLibraryW(arc_lib.module_path.c_str());
     if (arc_lib.h_module == nullptr) continue;
     try {
