@@ -795,7 +795,7 @@ public:
     for_each(attr_list.begin(), attr_list.end(), [&] (const Attr& attr) {
       label(attr.name, max_name_len);
       spacer(1);
-      edit_box(attr.value, max_value_len);
+      edit_box(attr.value, max_value_len, DIF_READONLY);
       new_line();
     });
 
