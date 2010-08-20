@@ -95,8 +95,8 @@ void call_user_apc(void* param) {
   g_far.AdvControl(g_far.ModuleNumber, ACTL_SYNCHRO, param);
 }
 
-void post_keys(const vector<DWORD>& keys) {
-  KeySequence ks = { KSFLAGS_DISABLEOUTPUT, keys.size(), keys.data() };
+void post_keys(const vector<DWORD>& keys, DWORD flags) {
+  KeySequence ks = { flags, keys.size(), keys.data() };
   g_far.AdvControl(g_far.ModuleNumber, ACTL_POSTKEYSEQUENCE, &ks);
 }
 
