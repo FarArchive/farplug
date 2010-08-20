@@ -238,9 +238,9 @@ public:
     if (new_arc) {
       wstring arc_dir = src_path;
       if (items_number == 1 || is_root_path(arc_dir))
-        options.arc_path = add_trailing_slash(arc_dir) + panel_items[0].FindData.lpwszFileName;
+        options.arc_path = panel_items[0].FindData.lpwszFileName;
       else
-        options.arc_path = add_trailing_slash(arc_dir) + extract_file_name(src_path);
+        options.arc_path = extract_file_name(src_path);
       ArcTypes arc_types = ArcAPI::formats().find_by_name(g_options.update_arc_format_name);
       if (arc_types.empty())
         options.arc_type = c_guid_7z;
