@@ -54,7 +54,7 @@ LINKFLAGS = $(LINKFLAGS) -libpath:lzo\lib -libpath:openssl\lib
 
 OBJS = $(OUTDIR)\main.obj $(OUTDIR)\content.obj $(OUTDIR)\file_panel.obj $(OUTDIR)\ntfs_file.obj $(OUTDIR)\options.obj $(OUTDIR)\utils.obj $(OUTDIR)\volume.obj $(OUTDIR)\dlgapi.obj $(OUTDIR)\defragment.obj $(OUTDIR)\mftindex.obj $(OUTDIR)\filever.obj $(OUTDIR)\compress_files.obj
 
-LIBS = lzo2_$(LIBSUFFIX).lib libeay$(LIBSUFFIX).lib advapi32.lib mpr.lib version.lib imagehlp.lib crypt32.lib
+LIBS = lzo2_$(LIBSUFFIX).lib libeay$(LIBSUFFIX).lib advapi32.lib mpr.lib version.lib imagehlp.lib crypt32.lib wintrust.lib
 
 project: depfile $(OUTDIR)\far.ini
   $(MAKE) -nologo -$(MAKEFLAGS) build_project BUILD=1

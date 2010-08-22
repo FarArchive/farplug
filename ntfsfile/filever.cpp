@@ -10,6 +10,7 @@
 #include "filever.h"
 
 extern struct PluginStartupInfo g_far;
+extern Array<unsigned char> g_colors;
 
 struct NameValue {
   UnicodeString name;
@@ -408,9 +409,40 @@ ObjectArray<NameValue> get_signature_info(const UnicodeString& file_name) {
   return sig_info;
 }
 
+LONG verify_signature(const UnicodeString& file_name) {
+  WINTRUST_FILE_INFO wintrust_file_info;
+  memset(&wintrust_file_info, 0, sizeof(wintrust_file_info));
+  wintrust_file_info.cbStruct = sizeof(WINTRUST_FILE_INFO);
+  wintrust_file_info.pcwszFilePath = file_name.data();
+  wintrust_file_info.hFile = NULL;
+  wintrust_file_info.pgKnownSubject = NULL;
+
+  WINTRUST_DATA wintrust_data;
+  memset(&wintrust_data, 0, sizeof(wintrust_data));
+  wintrust_data.cbStruct = sizeof(wintrust_data);
+  wintrust_data.pPolicyCallbackData = NULL;
+  wintrust_data.pSIPClientData = NULL;
+  wintrust_data.dwUIChoice = WTD_UI_NONE;
+  wintrust_data.fdwRevocationChecks = WTD_REVOKE_NONE;
+  wintrust_data.dwUnionChoice = WTD_CHOICE_FILE;
+  wintrust_data.pFile = &wintrust_file_info;
+  wintrust_data.dwStateAction = WTD_STATEACTION_IGNORE;
+  wintrust_data.pwszURLReference = NULL;
+  wintrust_data.dwProvFlags = WTD_SAFER_FLAG;
+  wintrust_data.dwUIContext = WTD_UICONTEXT_EXECUTE;
+
+  GUID action_id = WINTRUST_ACTION_GENERIC_VERIFY_V2;
+
+  return WinVerifyTrust(static_cast<HWND>(INVALID_HANDLE_VALUE), &action_id, &wintrust_data);
+}
+
+
 struct FileVersionDialogData {
+  UnicodeString file_name;
   int lang_cp_ctrl_id;
   unsigned var_cnt;
+  int verify_ctrl_id;
+  int verify_result_ctrl_id;
 };
 
 LONG_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
@@ -456,12 +488,46 @@ LONG_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG
 
     return TRUE;
   }
+  else if (msg == DN_BTNCLICK && param1 == dlg_data->verify_ctrl_id) {
+    dlg->set_text(dlg_data->verify_result_ctrl_id, far_get_msg(MSG_FILE_VER_VERIFY_IN_PROGRESS));
+    LONG result = verify_signature(dlg_data->file_name);
+    unsigned char result_color;
+    UnicodeString result_text;
+    if (result == ERROR_SUCCESS) {
+      result_color = g_colors[COL_DIALOGTEXT] | FOREGROUND_GREEN & ~FOREGROUND_INTENSITY & ~FOREGROUND_RED & ~FOREGROUND_BLUE;
+      result_text = far_get_msg(MSG_FILE_VER_VERIFY_OK);
+    }
+    else {
+      if (result == TRUST_E_NOSIGNATURE)
+        result = GetLastError();
+      if (result == TRUST_E_NOSIGNATURE)
+        result_text = far_get_msg(MSG_FILE_VER_VERIFY_BAD);
+      else {
+        #define RESULT_TEXT(code) if (result == code) result_text = L#code
+        RESULT_TEXT(TRUST_E_PROVIDER_UNKNOWN);
+        RESULT_TEXT(TRUST_E_NOSIGNATURE);
+        RESULT_TEXT(TRUST_E_SUBJECT_FORM_UNKNOWN);
+        RESULT_TEXT(TRUST_E_PROVIDER_UNKNOWN);
+        RESULT_TEXT(TRUST_E_EXPLICIT_DISTRUST);
+        RESULT_TEXT(TRUST_E_SUBJECT_NOT_TRUSTED);
+        RESULT_TEXT(CRYPT_E_SECURITY_SETTINGS);
+        #undef RESULT_TEXT
+        if (result_text.size() == 0)
+          result_text = UnicodeString::format(L"0x%x", result);
+      }
+      result_color = g_colors[COL_DIALOGTEXT] | FOREGROUND_RED & ~FOREGROUND_INTENSITY & ~FOREGROUND_GREEN & ~FOREGROUND_BLUE;
+    }
+    dlg->set_text(dlg_data->verify_result_ctrl_id, result_text);
+    dlg->set_color(dlg_data->verify_result_ctrl_id, result_color);
+    return TRUE;
+  }
   END_ERROR_HANDLER(;,;);
   return g_far.DefDlgProc(h_dlg, msg, param1, param2);
 }
 
-void show_file_version_dialog(const VersionInfo& version_info) {
+void show_file_version_dialog(const UnicodeString& file_name, const VersionInfo& version_info) {
   FileVersionDialogData dlg_data;
+  dlg_data.file_name = file_name;
 
   unsigned name_width = far_get_msg(MSG_FILE_VER_LANGUAGE).size();
   unsigned value_width = 0;
@@ -526,8 +592,8 @@ void show_file_version_dialog(const VersionInfo& version_info) {
     dlg.new_line();
 
     for (unsigned i = 0; i < dlg_data.var_cnt; i++) {
-      dlg.label(L"", name_width);
-      dlg.var_edit_box(L"", max_value_len, value_width, DIF_READONLY | DIF_SELECTONENTRY);
+      dlg.label(UnicodeString(), name_width);
+      dlg.var_edit_box(UnicodeString(), max_value_len, value_width, DIF_READONLY | DIF_SELECTONENTRY);
       dlg.new_line();
     }
   }
@@ -544,7 +610,13 @@ void show_file_version_dialog(const VersionInfo& version_info) {
       dlg.var_edit_box(version_info.sig[i].value, version_info.sig[i].value.size(), value_width, DIF_READONLY | DIF_SELECTONENTRY);
       dlg.new_line();
     }
+    dlg_data.verify_ctrl_id = dlg.button(far_get_msg(MSG_FILE_VER_VERIFY_SIGNATURE), DIF_BTNNOCLOSE);
+    dlg.spacer(1);
+    dlg_data.verify_result_ctrl_id = dlg.label(UnicodeString(), 30);
+    dlg.new_line();
   }
+  else
+    dlg_data.verify_ctrl_id = -1;
 
   dlg.show(file_version_dialog_proc);
 }
@@ -552,7 +624,7 @@ void show_file_version_dialog(const VersionInfo& version_info) {
 void plugin_show_file_version(const UnicodeString& file_name) {
   VersionInfo version_info = get_version_info(file_name);
   if (version_info.fixed.size() || version_info.sig.size())
-    show_file_version_dialog(version_info);
+    show_file_version_dialog(file_name, version_info);
   else
     far_message(far_get_msg(MSG_FILE_VER_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_FILE_VER_NO_INFO), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK), 1);
 }

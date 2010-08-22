@@ -6,6 +6,7 @@
 #include <winioctl.h>
 #include <shobjidl.h>
 #include <imagehlp.h>
+#include <softpub.h>
 
 #include <process.h>
 #include <string.h>

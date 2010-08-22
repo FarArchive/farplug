@@ -214,6 +214,10 @@ file_ver.signer.subject = Certificate subject
 file_ver.timestamp.issuer = Timestamp issuer
 file_ver.timestamp.subject = Timestamp subject
 file_ver.timestamp = Timestamp
+file_ver.verify_signature = Verif&y
+file_ver.verify_ok = Ok
+file_ver.verify_bad = Invalid signature
+file_ver.verify_in_progress = Wait...
 file_ver.no_info = No version information found.
 
 # Compress files
