@@ -27,7 +27,10 @@ struct VarVerInfo {
 struct VersionInfo {
   ObjectArray<NameValue> fixed;
   ObjectArray<VarVerInfo> var;
+  ObjectArray<NameValue> sig;
 };
+
+ObjectArray<NameValue> get_signature_info(const UnicodeString& file_name);
 
 VersionInfo get_version_info(const UnicodeString& file_name) {
   VersionInfo ver_info;
@@ -241,7 +244,168 @@ VersionInfo get_version_info(const UnicodeString& file_name) {
     if (dll_chars.size()) ver_info.fixed += NameValue(far_get_msg(MSG_FILE_VER_DLL_CHARS), dll_chars);
   }
 
+  ver_info.sig = get_signature_info(file_name);
+
   return ver_info;
+}
+
+
+struct CertificateInfo {
+  UnicodeString issuer;
+  UnicodeString subject;
+};
+
+CertificateInfo get_certificate_info(HCERTSTORE h_cert_store, const CMSG_SIGNER_INFO* signer_info) {
+  CertificateInfo certificate_info;
+  // Search for the signer certificate in the temporary certificate store.
+  CERT_INFO cert_info;
+  cert_info.Issuer = signer_info->Issuer;
+  cert_info.SerialNumber = signer_info->SerialNumber;
+
+  struct CertContext {
+    PCCERT_CONTEXT cert_context;
+    CertContext(): cert_context(NULL) {
+    }
+    ~CertContext() {
+      if (cert_context)
+        VERIFY(CertFreeCertificateContext(cert_context));
+    }
+  };
+  CertContext object;
+  object.cert_context = CertFindCertificateInStore(h_cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_SUBJECT_CERT, &cert_info, NULL);
+  if (object.cert_context) {
+    // Get Issuer name.
+    DWORD issuer_size = CertGetNameStringW(object.cert_context, CERT_NAME_FRIENDLY_DISPLAY_TYPE, CERT_NAME_ISSUER_FLAG, NULL, NULL, 0);
+    issuer_size = CertGetNameStringW(object.cert_context, CERT_NAME_FRIENDLY_DISPLAY_TYPE, CERT_NAME_ISSUER_FLAG, NULL, certificate_info.issuer.buf(issuer_size), issuer_size);
+    if (issuer_size) issuer_size -= 1;
+    certificate_info.issuer.set_size(issuer_size);
+    // Get Subject name.
+    DWORD subject_size = CertGetNameStringW(object.cert_context, CERT_NAME_FRIENDLY_DISPLAY_TYPE, 0, NULL, NULL, 0);
+    subject_size = CertGetNameStringW(object.cert_context, CERT_NAME_FRIENDLY_DISPLAY_TYPE, 0, NULL, certificate_info.subject.buf(subject_size), subject_size);
+    if (subject_size) subject_size -= 1;
+    certificate_info.subject.set_size(subject_size);
+  }
+  return certificate_info;
+}
+
+ObjectArray<NameValue> get_signature_info(const UnicodeString& file_name) {
+  ObjectArray<NameValue> sig_info;
+
+  struct CryptObject {
+    HCERTSTORE h_cert_store;
+    HCRYPTMSG h_crypt_msg;
+    CryptObject(): h_cert_store(NULL), h_crypt_msg(NULL) {
+    }
+    ~CryptObject() {
+      if (h_cert_store)
+        VERIFY(CertCloseStore(h_cert_store, CERT_CLOSE_STORE_FORCE_FLAG));
+      if (h_crypt_msg)
+        VERIFY(CryptMsgClose(h_crypt_msg));
+    }
+  };
+
+  CryptObject crypt_object;
+  DWORD encoding_type, content_type, format_type;
+  // Get message handle and store handle from the signed file.
+  if (!CryptQueryObject(CERT_QUERY_OBJECT_FILE, file_name.data(), CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY, 0, &encoding_type, &content_type, &format_type, &crypt_object.h_cert_store, &crypt_object.h_crypt_msg, NULL)) return sig_info;
+
+  // Get signer information size.
+  DWORD signer_info_size;
+  if (!CryptMsgGetParam(crypt_object.h_crypt_msg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &signer_info_size)) return sig_info;
+  Array<unsigned char> signer_info_buffer;
+  if (!CryptMsgGetParam(crypt_object.h_crypt_msg, CMSG_SIGNER_INFO_PARAM, 0, signer_info_buffer.buf(signer_info_size), &signer_info_size)) return sig_info;
+  signer_info_buffer.set_size(signer_info_size);
+  const CMSG_SIGNER_INFO* signer_info = reinterpret_cast<const CMSG_SIGNER_INFO*>(signer_info_buffer.data());
+
+  // Loop through authenticated attributes and find SPC_SP_OPUS_INFO_OBJID OID.
+  for (DWORD i = 0; i < signer_info->AuthAttrs.cAttr; i++) {
+    DWORD opus_info_size;
+    if (strcmp(SPC_SP_OPUS_INFO_OBJID, signer_info->AuthAttrs.rgAttr[i].pszObjId) == 0) {
+      CRYPT_ATTR_BLOB& value = signer_info->AuthAttrs.rgAttr[i].rgValue[0];
+      if (!CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, SPC_SP_OPUS_INFO_OBJID, value.pbData, value.cbData, 0, NULL, &opus_info_size)) break;
+      Array<unsigned char> opus_info_buffer;
+      if (!CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, SPC_SP_OPUS_INFO_OBJID, value.pbData, value.cbData, 0, opus_info_buffer.buf(opus_info_size), &opus_info_size)) break;
+      opus_info_buffer.set_size(opus_info_size);
+      const SPC_SP_OPUS_INFO* opus_info = reinterpret_cast<const SPC_SP_OPUS_INFO*>(opus_info_buffer.data());
+
+      if (opus_info->pwszProgramName) {
+        sig_info.add(NameValue(far_get_msg(MSG_FILE_VER_PROGRAM_NAME), opus_info->pwszProgramName));
+      }
+      if (opus_info->pPublisherInfo) {
+        switch (opus_info->pPublisherInfo->dwLinkChoice) {
+        case SPC_URL_LINK_CHOICE:
+          sig_info.add(NameValue(far_get_msg(MSG_FILE_VER_PUBLISHER_INFO), opus_info->pPublisherInfo->pwszUrl)); break;
+        case SPC_FILE_LINK_CHOICE:
+          sig_info.add(NameValue(far_get_msg(MSG_FILE_VER_PUBLISHER_INFO), opus_info->pPublisherInfo->pwszFile)); break;
+        }
+      }
+      if (opus_info->pMoreInfo) {
+        switch (opus_info->pMoreInfo->dwLinkChoice) {
+        case SPC_URL_LINK_CHOICE:
+          sig_info.add(NameValue(far_get_msg(MSG_FILE_VER_MORE_INFO), opus_info->pMoreInfo->pwszUrl)); break;
+        case SPC_FILE_LINK_CHOICE:
+          sig_info.add(NameValue(far_get_msg(MSG_FILE_VER_MORE_INFO), opus_info->pMoreInfo->pwszFile)); break;
+        }
+      }
+
+      break;
+    }
+  }
+
+  CertificateInfo signer_certificate = get_certificate_info(crypt_object.h_cert_store, signer_info);
+  if (signer_certificate.issuer.size())
+    sig_info.add(NameValue(far_get_msg(MSG_FILE_VER_SIGNER_ISSUER), signer_certificate.issuer));
+  if (signer_certificate.subject.size())
+    sig_info.add(NameValue(far_get_msg(MSG_FILE_VER_SIGNER_SUBJECT), signer_certificate.subject));
+
+  // Timestamp
+  for (DWORD i = 0; i < signer_info->UnauthAttrs.cAttr; i++) {
+    if (strcmp(signer_info->UnauthAttrs.rgAttr[i].pszObjId, szOID_RSA_counterSign) == 0) {
+      CRYPT_ATTR_BLOB& value = signer_info->UnauthAttrs.rgAttr[i].rgValue[0];
+      DWORD counter_signer_info_size;
+      if (!CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, PKCS7_SIGNER_INFO, value.pbData, value.cbData, 0, NULL, &counter_signer_info_size)) break;
+      Array<unsigned char> counter_signer_info_buffer;
+      if (!CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, PKCS7_SIGNER_INFO, value.pbData, value.cbData, 0, counter_signer_info_buffer.buf(counter_signer_info_size), &counter_signer_info_size)) break;
+      counter_signer_info_buffer.set_size(counter_signer_info_size);
+      const CMSG_SIGNER_INFO* counter_signer_info = reinterpret_cast<const CMSG_SIGNER_INFO*>(counter_signer_info_buffer.data());
+
+      for (DWORD i = 0; i < counter_signer_info->AuthAttrs.cAttr; i++) {
+        if (strcmp(counter_signer_info->AuthAttrs.rgAttr[i].pszObjId, szOID_RSA_signingTime) == 0) {
+          CRYPT_ATTR_BLOB& value = counter_signer_info->AuthAttrs.rgAttr[i].rgValue[0];
+          FILETIME ft, local_ft;
+          SYSTEMTIME st;
+          DWORD ft_size = sizeof(ft);
+          if (!CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, szOID_RSA_signingTime, value.pbData, value.cbData, 0, &ft, &ft_size)) break;
+          FileTimeToLocalFileTime(&ft, &local_ft);
+          FileTimeToSystemTime(&local_ft, &st);
+          int date_size = GetDateFormatW(LOCALE_USER_DEFAULT, DATE_SHORTDATE, &st, NULL, NULL, 0);
+          if (date_size == 0) break;
+          UnicodeString date;
+          date_size = GetDateFormatW(LOCALE_USER_DEFAULT, DATE_SHORTDATE, &st, NULL, date.buf(date_size), date_size);
+          if (date_size) date_size -= 1;
+          date.set_size(date_size);
+          int time_size = GetTimeFormatW(LOCALE_USER_DEFAULT, 0, &st, NULL, NULL, 0);
+          if (time_size == 0) break;
+          UnicodeString time;
+          time_size = GetTimeFormatW(LOCALE_USER_DEFAULT, 0, &st, NULL, time.buf(time_size), time_size);
+          if (time_size) time_size -= 1;
+          time.set_size(time_size);
+          sig_info.add(NameValue(far_get_msg(MSG_FILE_VER_TIMESTAMP), date + L' ' + time));
+          break;
+        }
+      }
+
+      CertificateInfo timestamp_certificate = get_certificate_info(crypt_object.h_cert_store, counter_signer_info);
+      if (timestamp_certificate.issuer.size())
+        sig_info.add(NameValue(far_get_msg(MSG_FILE_VER_TIMESTAMP_ISSUER), timestamp_certificate.issuer));
+      if (timestamp_certificate.subject.size())
+        sig_info.add(NameValue(far_get_msg(MSG_FILE_VER_TIMESTAMP_SUBJECT), timestamp_certificate.subject));
+
+      break;
+    }
+  }
+
+  return sig_info;
 }
 
 struct FileVersionDialogData {
@@ -313,6 +477,10 @@ void show_file_version_dialog(const VersionInfo& version_info) {
       if (value_width < version_info.var[i].strings[j].value.size()) value_width = version_info.var[i].strings[j].value.size();
     }
   }
+  for (unsigned i = 0; i < version_info.sig.size(); i++) {
+    if (name_width < version_info.sig[i].name.size()) name_width = version_info.sig[i].name.size();
+    if (value_width < version_info.sig[i].value.size()) value_width = version_info.sig[i].value.size();
+  }
 
   ObjectArray<UnicodeString> lang_items;
   for (unsigned i = 0; i < version_info.var.size(); i++) {
@@ -366,12 +534,24 @@ void show_file_version_dialog(const VersionInfo& version_info) {
   else
     dlg_data.lang_cp_ctrl_id = -1;
 
+  if (version_info.sig.size()) {
+    if (version_info.fixed.size()) {
+      dlg.separator(far_get_msg(MSG_FILE_VER_SIGNATURE));
+      dlg.new_line();
+    }
+    for (unsigned i = 0; i < version_info.sig.size(); i++) {
+      dlg.label(version_info.sig[i].name, name_width);
+      dlg.var_edit_box(version_info.sig[i].value, version_info.sig[i].value.size(), value_width, DIF_READONLY | DIF_SELECTONENTRY);
+      dlg.new_line();
+    }
+  }
+
   dlg.show(file_version_dialog_proc);
 }
 
 void plugin_show_file_version(const UnicodeString& file_name) {
   VersionInfo version_info = get_version_info(file_name);
-  if (version_info.fixed.size())
+  if (version_info.fixed.size() || version_info.sig.size())
     show_file_version_dialog(version_info);
   else
     far_message(far_get_msg(MSG_FILE_VER_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_FILE_VER_NO_INFO), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK), 1);

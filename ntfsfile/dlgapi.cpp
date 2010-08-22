@@ -382,6 +382,17 @@ unsigned FarDialog::separator() {
   return new_item(di);
 }
 
+unsigned FarDialog::separator(const UnicodeString& text) {
+  FarDialogItem di;
+  memset(&di, 0, sizeof(di));
+  di.Type = DI_TEXT;
+  di.Y1 = y;
+  di.Y2 = y;
+  di.Flags = DIF_SEPARATOR;
+  set_text(di, text);
+  return new_item(di);
+}
+
 unsigned FarDialog::label(const UnicodeString& text, unsigned boxsize, DWORD flags) {
   FarDialogItem di;
   memset(&di, 0, sizeof(di));

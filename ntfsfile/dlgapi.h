@@ -71,6 +71,7 @@ public:
     if (pos > x - c_x_frame) spacer(pos - (x - c_x_frame));
   }
   unsigned separator();
+  unsigned separator(const UnicodeString& text);
   unsigned label(const UnicodeString& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned var_edit_box(const UnicodeString& text, unsigned bufsize, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned mask_edit_box(const UnicodeString& text, const UnicodeString& mask, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);

@@ -205,6 +205,15 @@ file_ver.product_name = Product &name
 file_ver.product_version = Product version
 file_ver.private_build = Private b&uild
 file_ver.special_build = Special &build
+file_ver.signature = Signature
+file_ver.program_name = Program name
+file_ver.publisher_info = Publisher info
+file_ver.more_info = More info
+file_ver.signer.issuer = Certificate issuer
+file_ver.signer.subject = Certificate subject
+file_ver.timestamp.issuer = Timestamp issuer
+file_ver.timestamp.subject = Timestamp subject
+file_ver.timestamp = Timestamp
 file_ver.no_info = No version information found.
 
 # Compress files
