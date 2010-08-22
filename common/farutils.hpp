@@ -167,11 +167,11 @@ public:
   // display dialog
   int show();
   // utilities to set/get control values
-  wstring get_text(unsigned ctrl_id);
+  wstring get_text(unsigned ctrl_id) const;
   void set_text(unsigned ctrl_id, const wstring& text);
-  bool get_check(unsigned ctrl_id);
+  bool get_check(unsigned ctrl_id) const;
   void set_check(unsigned ctrl_id, bool check);
-  unsigned get_list_pos(unsigned ctrl_id);
+  unsigned get_list_pos(unsigned ctrl_id) const;
   void set_color(unsigned ctrl_id, unsigned char color);
   void set_focus(unsigned ctrl_id);
   void enable(unsigned ctrl_id, bool enable);

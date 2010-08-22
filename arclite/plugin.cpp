@@ -267,7 +267,7 @@ public:
         options.arc_type = arc_types.front();
       options.create_sfx = g_options.update_create_sfx;
       options.sfx_module_idx = g_options.update_sfx_module_idx;
-      options.arc_path += options.create_sfx && options.arc_type == c_guid_7z ? L".exe" : ArcAPI::formats().at(options.arc_type).default_extension();
+      options.arc_path += ArcAPI::formats().at(options.arc_type).default_extension();
     }
     else {
       options.arc_type = format_chain.back(); // required to set update properties

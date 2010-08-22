@@ -512,7 +512,7 @@ int Dialog::show() {
   return res;
 }
 
-wstring Dialog::get_text(unsigned ctrl_id) {
+wstring Dialog::get_text(unsigned ctrl_id) const {
   size_t len = g_far.SendDlgMessage(h_dlg, DM_GETTEXTLENGTH, ctrl_id, 0);
   Buffer<wchar_t> buf(len + 1);
   g_far.SendDlgMessage(h_dlg, DM_GETTEXTPTR, ctrl_id, reinterpret_cast<LONG_PTR>(buf.data()));
@@ -523,7 +523,7 @@ void Dialog::set_text(unsigned ctrl_id, const wstring& text) {
   g_far.SendDlgMessage(h_dlg, DM_SETTEXTPTR, ctrl_id, reinterpret_cast<LONG_PTR>(text.c_str()));
 }
 
-bool Dialog::get_check(unsigned ctrl_id) {
+bool Dialog::get_check(unsigned ctrl_id) const {
   return DlgItem_GetCheck(g_far, h_dlg, ctrl_id) == BSTATE_CHECKED;
 }
 
@@ -531,7 +531,7 @@ void Dialog::set_check(unsigned ctrl_id, bool check) {
   g_far.SendDlgMessage(h_dlg, DM_SETCHECK, ctrl_id, check ? BSTATE_CHECKED : BSTATE_UNCHECKED);
 }
 
-unsigned Dialog::get_list_pos(unsigned ctrl_id) {
+unsigned Dialog::get_list_pos(unsigned ctrl_id) const {
   return static_cast<unsigned>(g_far.SendDlgMessage(h_dlg, DM_LISTGETCURPOS, ctrl_id, 0));
 }
 

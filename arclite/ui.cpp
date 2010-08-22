@@ -401,10 +401,13 @@ private:
   };
 
   bool new_arc;
+  vector<ArcType> main_formats;
+  vector<ArcType> other_formats;
   UpdateOptions& options;
 
   int arc_path_ctrl_id;
-  int arc_type_ctrl_id;
+  int main_formats_ctrl_id;
+  int other_formats_ctrl_id;
   int level_ctrl_id;
   int method_ctrl_id;
   int solid_ctrl_id;
@@ -421,19 +424,16 @@ private:
 
   wstring old_ext;
   ArcType arc_type;
-  bool create_sfx;
-  wstring get_ext() {
-    assert(new_arc);
-    if (create_sfx && arc_type == c_guid_7z)
-      return L".exe";
-    else if (ArcAPI::formats().count(arc_type))
-      return ArcAPI::formats().at(arc_type).default_extension();
-    else
-      return wstring();
-  }
+
   bool change_extension() {
     assert(new_arc);
-    wstring new_ext = get_ext();
+
+    wstring new_ext;
+    bool create_sfx = get_check(create_sfx_ctrl_id);
+    if (create_sfx && arc_type == c_guid_7z)
+      new_ext = L".exe";
+    else if (ArcAPI::formats().count(arc_type))
+      new_ext = ArcAPI::formats().at(arc_type).default_extension();
 
     if (old_ext.empty() || new_ext.empty())
       return false;
@@ -454,17 +454,49 @@ private:
     return true;
   }
 
+  void set_control_state() {
+    bool is_7z = arc_type == c_guid_7z;
+    for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
+      enable(i, is_7z);
+    }
+    enable(solid_ctrl_id, is_7z);
+    bool other_format = get_check(other_formats_ctrl_id);
+    enable(encrypt_ctrl_id, !other_format);
+    bool encrypt = get_check(encrypt_ctrl_id);
+    for (int i = encrypt_ctrl_id + 1; i <= password2_ctrl_id; i++) {
+      enable(i, encrypt && !other_format);
+    }
+    enable(encrypt_header_ctrl_id, is_7z && encrypt);
+    if (new_arc) {
+      change_extension();
+      enable(create_sfx_ctrl_id, is_7z);
+      bool create_sfx = get_check(create_sfx_ctrl_id);
+      for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
+        enable(i, is_7z && create_sfx);
+      }
+      enable(other_formats_ctrl_id + 1, other_format);
+    }
+  }
+
   LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
     if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
       if (new_arc) {
         options.arc_path = unquote(strip(get_text(arc_path_ctrl_id)));
 
-        for (unsigned i = 0; i < ARRAYSIZE(c_archive_types); i++) {
-          if (get_check(arc_type_ctrl_id + i)) {
-            options.arc_type = c_archive_types[i].value;
+        ArcType arc_type;
+        for (unsigned i = 0; i < main_formats.size(); i++) {
+          if (get_check(main_formats_ctrl_id + i)) {
+            arc_type = c_archive_types[i].value;
             break;
           }
         }
+        if (!other_formats.empty() && get_check(other_formats_ctrl_id)) {
+          arc_type = other_formats[get_list_pos(other_formats_ctrl_id)];
+        }
+        if (arc_type.empty()) {
+          FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_ARC_TYPE));
+        }
+        options.arc_type = arc_type;
       }
       for (unsigned i = 0; i < ARRAYSIZE(c_levels); i++) {
         if (get_check(level_ctrl_id + i)) {
@@ -507,62 +539,40 @@ private:
       options.open_shared = get_check(open_shared_ctrl_id);
     }
     else if (msg == DN_INITDIALOG) {
-      bool is_7z = options.arc_type == c_guid_7z;
-      for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
-        enable(i, is_7z);
-      }
-      for (int i = encrypt_ctrl_id + 1; i <= password2_ctrl_id; i++) {
-        enable(i, !options.password.empty());
-      }
-      enable(solid_ctrl_id, is_7z);
-      enable(encrypt_header_ctrl_id, !options.password.empty() && is_7z);
-      if (new_arc) {
-        enable(create_sfx_ctrl_id, is_7z);
-        for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
-          enable(i, is_7z && options.create_sfx);
-        }
+      set_control_state();
+    }
+    else if (new_arc && msg == DN_BTNCLICK && !main_formats.empty() && param1 >= main_formats_ctrl_id && param1 < main_formats_ctrl_id + static_cast<int>(main_formats.size())) {
+      if (param2) {
+        arc_type = main_formats[param1 - main_formats_ctrl_id];
+        set_control_state();
       }
     }
-    else if (new_arc && msg == DN_BTNCLICK && param1 >= arc_type_ctrl_id && param1 < arc_type_ctrl_id + static_cast<int>(ARRAYSIZE(c_archive_types))) {
+    else if (new_arc && msg == DN_BTNCLICK && !other_formats.empty() && param1 == other_formats_ctrl_id) {
       if (param2) {
-        arc_type = c_archive_types[param1 - arc_type_ctrl_id].value;
-        bool is_7z = arc_type == c_guid_7z;
-        for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
-          enable(i, is_7z);
-        }
-        change_extension();
-        enable(solid_ctrl_id, is_7z);
-        enable(encrypt_header_ctrl_id, is_7z && get_check(encrypt_ctrl_id));
-        enable(create_sfx_ctrl_id, is_7z);
-        for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
-          enable(i, is_7z && get_check(create_sfx_ctrl_id));
-        }
+        arc_type = other_formats[get_list_pos(other_formats_ctrl_id + 1)];
+        set_control_state();
       }
+    }
+    else if (new_arc && msg == DN_EDITCHANGE && !other_formats.empty() && param1 == other_formats_ctrl_id + 1) {
+      arc_type = other_formats[get_list_pos(other_formats_ctrl_id + 1)];
+      set_control_state();
     }
     else if (msg == DN_BTNCLICK && param1 == encrypt_ctrl_id) {
-      bool is_7z = get_check(arc_type_ctrl_id);
-      for (int i = encrypt_ctrl_id + 1; i <= password2_ctrl_id; i++) {
-        enable(i, param2 == TRUE);
-      }
-      enable(encrypt_header_ctrl_id, param2 && is_7z);
+      set_control_state();
     }
     else if (new_arc && msg == DN_BTNCLICK && param1 == create_sfx_ctrl_id) {
-      create_sfx = param2 == TRUE;
-      for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
-        enable(i, create_sfx);
-      }
-      change_extension();
+      set_control_state();
     }
     return default_dialog_proc(msg, param1, param2);
   }
 
 public:
-  UpdateDialog(bool new_arc, UpdateOptions& options): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), c_client_xs), new_arc(new_arc), options(options), arc_type(options.arc_type), create_sfx(options.create_sfx) {
+  UpdateDialog(bool new_arc, UpdateOptions& options): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), c_client_xs), new_arc(new_arc), options(options), arc_type(options.arc_type) {
   }
 
   bool show() {
     if (new_arc) {
-      old_ext = get_ext();
+      old_ext = extract_file_ext(options.arc_path);
 
       label(Far::get_msg(MSG_UPDATE_DLG_ARC_PATH));
       new_line();
@@ -573,13 +583,44 @@ public:
 
       label(Far::get_msg(MSG_UPDATE_DLG_ARC_TYPE));
       new_line();
+
+      const ArcFormats& arc_formats = ArcAPI::formats();
       for (unsigned i = 0; i < ARRAYSIZE(c_archive_types); i++) {
-        if (i)
-          spacer(1);
-        int ctrl_id = radio_button(Far::get_msg(c_archive_types[i].name_id), options.arc_type == c_archive_types[i].value, i == 0 ? DIF_GROUP : 0);
-        if (i == 0)
-          arc_type_ctrl_id = ctrl_id;
+        ArcFormats::const_iterator arc_iter = arc_formats.find(c_archive_types[i].value);
+        if (arc_iter != arc_formats.end() && arc_iter->second.updatable) {
+          bool first = main_formats.size() == 0;
+          if (!first)
+            spacer(1);
+          int ctrl_id = radio_button(Far::get_msg(c_archive_types[i].name_id), options.arc_type == c_archive_types[i].value, first ? DIF_GROUP : 0);
+          if (first)
+            main_formats_ctrl_id = ctrl_id;
+          main_formats.push_back(c_archive_types[i].value);
+        }
       };
+
+      vector<wstring> format_names;
+      unsigned other_format_index = 0;
+      bool found = false;
+      for (ArcFormats::const_iterator arc_iter = arc_formats.begin(); arc_iter != arc_formats.end(); arc_iter++) {
+        if (arc_iter->second.updatable) {
+          vector<ArcType>::const_iterator main_type = find(main_formats.begin(), main_formats.end(), arc_iter->first);
+          if (main_type == main_formats.end()) {
+            other_formats.push_back(arc_iter->first);
+            format_names.push_back(arc_iter->second.name);
+            if (options.arc_type == arc_iter->first) {
+              other_format_index = other_formats.size() - 1;
+              found = true;
+            }
+          }
+        }
+      }
+      if (!other_formats.empty()) {
+        if (!main_formats.empty())
+          spacer(1);
+        other_formats_ctrl_id = radio_button(Far::get_msg(MSG_UPDATE_DLG_ARC_TYPE_OTHER), found);
+        combo_box(format_names, other_format_index, AUTO_SIZE, DIF_DROPDOWNLIST);
+      }
+
       new_line();
     }
 
