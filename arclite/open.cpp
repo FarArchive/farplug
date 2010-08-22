@@ -262,7 +262,7 @@ void Archive::detect(IInStream* in_stream, const wstring& ext, bool all, Archive
   for_each(types_by_ext.begin(), types_by_ext.end(), [&] (const ArcType& arc_type) {
     if (found_types.count(arc_type) == 0) {
       found_types.insert(arc_type);
-      format_pos_list.push_back(ArcFormatPos(arc_type, 0));
+      format_pos_list.push_front(ArcFormatPos(arc_type, 0));
     }
   });
 
