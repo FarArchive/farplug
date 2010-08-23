@@ -234,8 +234,6 @@ public:
       if (options.move_files)
         Archive::delete_files(indices);
     }
-
-    Far::update_panel(this, false);
   }
 
   void test_files(struct PluginPanelItem* panel_items, int items_number, int op_mode) {
