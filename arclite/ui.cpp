@@ -491,7 +491,7 @@ private:
           }
         }
         if (!other_formats.empty() && get_check(other_formats_ctrl_id)) {
-          arc_type = other_formats[get_list_pos(other_formats_ctrl_id)];
+          arc_type = other_formats[get_list_pos(other_formats_ctrl_id + 1)];
         }
         if (arc_type.empty()) {
           FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_ARC_TYPE));
