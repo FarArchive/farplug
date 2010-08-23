@@ -186,9 +186,9 @@ private:
   static const size_t c_min_cache_size = 10 * 1024 * 1024;
   static const size_t c_max_cache_size = 100 * 1024 * 1024;
 
-  struct CachedFileInfo {
+  struct CacheRecord {
     wstring file_path;
-    unsigned __int64 file_size;
+    FileInfo file_info;
     size_t buffer_pos;
     size_t buffer_size;
   };
@@ -197,9 +197,9 @@ private:
   size_t buffer_size;
   size_t commit_size;
   size_t buffer_pos;
-  list<CachedFileInfo> file_list;
+  list<CacheRecord> cache_records;
   HANDLE h_file;
-  CachedFileInfo file_info;
+  CacheRecord current_rec;
   bool continue_file;
   bool error_state;
   bool& ignore_errors;
@@ -220,27 +220,27 @@ private:
   void create_file() {
     while (true) {
       try {
-        h_file = CreateFileW(long_path(file_info.file_path).c_str(), FILE_WRITE_DATA, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
+        h_file = CreateFileW(long_path(current_rec.file_path).c_str(), FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
         CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
         break;
       }
       catch (const Error& e) {
-        if (retry_or_ignore_error(file_info.file_path, e, ignore_errors, error_log, progress)) {
+        if (retry_or_ignore_error(current_rec.file_path, e, ignore_errors, error_log, progress)) {
           error_state = true;
           break;
         }
       }
     }
-    progress.update_cache_file(file_info.file_path);
+    progress.update_cache_file(current_rec.file_path);
   }
   // allocate file
   void allocate_file() {
     if (error_state) return;
-    if (file_info.file_size == 0) return;
+    if (current_rec.file_info.size == 0) return;
     while (true) {
       try {
         LARGE_INTEGER file_pos;
-        file_pos.QuadPart = file_info.file_size;
+        file_pos.QuadPart = current_rec.file_info.size;
         CHECK_SYS(SetFilePointerEx(h_file, file_pos, NULL, FILE_BEGIN));
         CHECK_SYS(SetEndOfFile(h_file));
         file_pos.QuadPart = 0;
@@ -248,7 +248,7 @@ private:
         break;
       }
       catch (const Error& e) {
-        if (retry_or_ignore_error(file_info.file_path, e, ignore_errors, error_log, progress)) {
+        if (retry_or_ignore_error(current_rec.file_path, e, ignore_errors, error_log, progress)) {
           error_state = true;
           break;
         }
@@ -261,20 +261,20 @@ private:
     try {
       const unsigned c_block_size = 1 * 1024 * 1024;
       size_t pos = 0;
-      while (pos < file_info.buffer_size) {
+      while (pos < current_rec.buffer_size) {
         DWORD size;
-        if (pos + c_block_size > file_info.buffer_size)
-          size = static_cast<DWORD>(file_info.buffer_size - pos);
+        if (pos + c_block_size > current_rec.buffer_size)
+          size = static_cast<DWORD>(current_rec.buffer_size - pos);
         else
           size = c_block_size;
         DWORD size_written;
-        CHECK_SYS(WriteFile(h_file, buffer + file_info.buffer_pos + pos, size, &size_written, NULL));
+        CHECK_SYS(WriteFile(h_file, buffer + current_rec.buffer_pos + pos, size, &size_written, NULL));
         pos += size_written;
         progress.update_cache_written(size_written);
       }
     }
     catch (const Error& e) {
-      ignore_error(file_info.file_path, e, ignore_errors, error_log, progress);
+      ignore_error(current_rec.file_path, e, ignore_errors, error_log, progress);
       error_state = true;
     }
   }
@@ -283,57 +283,60 @@ private:
       if (!error_state) {
         try {
           CHECK_SYS(SetEndOfFile(h_file)); // ensure end of file is set correctly
+          CHECK_SYS(SetFileAttributesW(long_path(current_rec.file_path).c_str(), current_rec.file_info.attr));
+          CHECK_SYS(SetFileTime(h_file, &current_rec.file_info.ctime, &current_rec.file_info.atime, &current_rec.file_info.mtime));
         }
         catch (const Error& e) {
-          ignore_error(file_info.file_path, e, ignore_errors, error_log, progress);
+          ignore_error(current_rec.file_path, e, ignore_errors, error_log, progress);
           error_state = true;
         }
       }
       CloseHandle(h_file);
       h_file = INVALID_HANDLE_VALUE;
       if (error_state)
-        DeleteFileW(long_path(file_info.file_path).c_str());
+        DeleteFileW(long_path(current_rec.file_path).c_str());
     }
   }
   void write() {
-    for_each(file_list.begin(), file_list.end(), [&] (const CachedFileInfo& fi) {
-      file_info = fi;
+    for_each(cache_records.begin(), cache_records.end(), [&] (const CacheRecord& rec) {
       if (continue_file) {
         continue_file = false;
+        current_rec = rec;
       }
       else {
         close_file();
         error_state = false; // reset error flag on each file
+        current_rec = rec;
         create_file();
         allocate_file();
       }
       write_file();
     });
     // leave only last file record in cache
-    if (!file_list.empty()) {
-      file_info = file_list.back();
-      file_info.buffer_pos = 0;
-      file_info.buffer_size = 0;
-      file_list.assign(1, file_info);
+    if (!cache_records.empty()) {
+      current_rec = cache_records.back();
+      current_rec.buffer_pos = 0;
+      current_rec.buffer_size = 0;
+      cache_records.assign(1, current_rec);
       continue_file = true; // last file is not written in its entirety (possibly)
     }
     buffer_pos = 0;
     progress.reset_cache_stats();
   }
   void store(const unsigned char* data, size_t size) {
-    assert(!file_list.empty());
+    assert(!cache_records.empty());
     assert(size <= buffer_size);
     if (buffer_pos + size > buffer_size) {
       write();
     }
-    CachedFileInfo& file_info = file_list.back();
+    CacheRecord& rec = cache_records.back();
     size_t new_size = buffer_pos + size;
     if (new_size > commit_size) {
       CHECK_SYS(VirtualAlloc(buffer + commit_size, new_size - commit_size, MEM_COMMIT, PAGE_READWRITE));
       commit_size = new_size;
     }
     memcpy(buffer + buffer_pos, data, size);
-    file_info.buffer_size += size;
+    rec.buffer_size += size;
     buffer_pos += size;
     progress.update_cache_stored(size);
   }
@@ -347,16 +350,16 @@ public:
     VirtualFree(buffer, 0, MEM_RELEASE);
     if (h_file != INVALID_HANDLE_VALUE) {
       CloseHandle(h_file);
-      DeleteFileW(long_path(file_info.file_path).c_str());
+      DeleteFileW(long_path(current_rec.file_path).c_str());
     }
   }
-  void store_file(const wstring& file_path, unsigned __int64 file_size) {
-    CachedFileInfo file_info;
-    file_info.file_path = file_path;
-    file_info.file_size = file_size;
-    file_info.buffer_pos = buffer_pos;
-    file_info.buffer_size = 0;
-    file_list.push_back(file_info);
+  void store_file(const wstring& file_path, const FileInfo& file_info) {
+    CacheRecord rec;
+    rec.file_path = file_path;
+    rec.file_info = file_info;
+    rec.buffer_pos = buffer_pos;
+    rec.buffer_size = 0;
+    cache_records.push_back(rec);
   }
   void store_data(const unsigned char* data, size_t size) {
     unsigned full_buffer_cnt = static_cast<unsigned>(size / buffer_size);
@@ -489,7 +492,7 @@ public:
     }
 
     progress.update_extract_file(file_path);
-    cache.store_file(file_path, file_info.size);
+    cache.store_file(file_path, file_info);
     ComObject<ISequentialOutStream> out_stream(new CachedFileExtractStream(cache, error));
     out_stream.detach(outStream);
 
@@ -597,7 +600,7 @@ void Archive::prepare_extract(UInt32 file_index, const wstring& parent_dir, list
   }
 }
 
-class SetAttrProgress: public ProgressMonitor {
+class SetDirAttrProgress: public ProgressMonitor {
 private:
   const wstring* file_path;
 
@@ -616,7 +619,7 @@ private:
   }
 
 public:
-  SetAttrProgress(): ProgressMonitor(true) {
+  SetDirAttrProgress(): ProgressMonitor(true) {
   }
   void update(const wstring& file_path) {
     this->file_path = &file_path;
@@ -624,31 +627,29 @@ public:
   }
 };
 
-void Archive::set_attr(UInt32 file_index, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log, SetAttrProgress& progress) {
-  const FileInfo& file_info = file_list[file_index];
-  wstring file_path = add_trailing_slash(parent_dir) + file_info.name;
-  progress.update(file_path);
-  if (file_info.is_dir()) {
-    FileIndexRange dir_list = get_dir_list(file_index);
-    for_each (dir_list.first, dir_list.second, [&] (UInt32 file_index) {
-      if (file_list[file_index].is_dir()) {
-        set_attr(file_index, file_path, ignore_errors, error_log, progress);
+void Archive::set_dir_attr(const FileIndexRange& index_range, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log, SetDirAttrProgress& progress) {
+  for_each (index_range.first, index_range.second, [&] (UInt32 file_index) {
+    const FileInfo& file_info = file_list[file_index];
+    wstring file_path = add_trailing_slash(parent_dir) + file_info.name;
+    progress.update(file_path);
+    if (file_info.is_dir()) {
+      FileIndexRange dir_list = get_dir_list(file_index);
+      set_dir_attr(dir_list, file_path, ignore_errors, error_log, progress);
+      while (true) {
+        try {
+          CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL));
+          File file(file_path, FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS);
+          CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), file_info.attr));
+          file.set_time(&file_info.ctime, &file_info.atime, &file_info.mtime);
+          break;
+        }
+        catch (const Error& e) {
+          if (retry_or_ignore_error(file_path, e, ignore_errors, error_log, progress))
+            break;
+        }
       }
-    });
-  }
-  while (true) {
-    try {
-      CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL));
-      File file(file_path, FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS);
-      CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), file_info.attr));
-      file.set_time(&file_info.ctime, &file_info.atime, &file_info.mtime);
-      break;
     }
-    catch (const Error& e) {
-      if (retry_or_ignore_error(file_path, e, ignore_errors, error_log, progress))
-        break;
-    }
-  }
+  });
 }
 
 void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log) {
@@ -681,9 +682,7 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
   }
   cache.finalize();
 
-  SetAttrProgress set_attr_progress;
-  for (unsigned i = 0; i < src_indices.size(); i++) {
-    const FileInfo& file_info = file_list[src_indices[i]];
-    set_attr(src_indices[i], options.dst_dir, ignore_errors, error_log, set_attr_progress);
-  }
+  SetDirAttrProgress set_dir_attr_progress;
+  FileIndexRange index_range(src_indices.begin(), src_indices.end());
+  set_dir_attr(index_range, options.dst_dir, ignore_errors, error_log, set_dir_attr_progress);
 }

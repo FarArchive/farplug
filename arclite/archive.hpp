@@ -117,7 +117,7 @@ struct ArchiveHandle {
 typedef vector<ArchiveHandle> ArchiveHandles;
 
 // forwards
-class SetAttrProgress;
+class SetDirAttrProgress;
 class PrepareExtractProgress;
 class DeleteFilesProgress;
 
@@ -165,7 +165,7 @@ private:
   wstring get_default_name() const;
   void prepare_dst_dir(const wstring& path);
   void prepare_extract(UInt32 file_index, const wstring& parent_dir, list<UInt32>& indices, bool& ignore_errors, ErrorLog& error_log, PrepareExtractProgress& progress);
-  void set_attr(UInt32 file_index, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log, SetAttrProgress& progress);
+  void set_dir_attr(const FileIndexRange& index_list, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log, SetDirAttrProgress& progress);
   void prepare_test(UInt32 file_index, list<UInt32>& indices);
 public:
   bool updatable() const {
