@@ -215,9 +215,14 @@ file_ver.timestamp.issuer = Timestamp issuer
 file_ver.timestamp.subject = Timestamp subject
 file_ver.timestamp = Timestamp
 file_ver.verify_signature = Verif&y
-file_ver.verify_ok = Ok
+file_ver.verify_ok = Valid signature
 file_ver.verify_bad = Invalid signature
 file_ver.verify_in_progress = Wait...
+file_ver.props = Summary Information
+file_ver.prop.title = Title
+file_ver.prop.subject = Subject
+file_ver.prop.author = Author
+file_ver.prop.comments = Comments
 file_ver.no_info = No version information found.
 
 # Compress files

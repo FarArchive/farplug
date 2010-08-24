@@ -49,6 +49,28 @@ AnsiString unicode_to_ansi(const UnicodeString& u_str) {
   return ansi_str;
 }
 
+UnicodeString ansi_to_unicode(const AnsiString& a_str, unsigned code_page) {
+  UnicodeString u_str;
+  unsigned a_size = a_str.size();
+  if (a_size == 0)
+    return u_str;
+  int u_size = MultiByteToWideChar(code_page, 0, a_str.data(), a_size, NULL, 0);
+  u_size = MultiByteToWideChar(code_page, 0, a_str.data(), a_size, u_str.buf(u_size), u_size);
+  u_str.set_size(u_size);
+  return u_str;
+}
+
+AnsiString unicode_to_ansi(const UnicodeString& u_str, unsigned code_page) {
+  AnsiString a_str;
+  unsigned u_size = u_str.size();
+  if (u_size == 0)
+    return a_str;
+  int a_size = WideCharToMultiByte(code_page, 0, u_str.data(), u_size, NULL, 0, NULL, NULL);
+  a_size = WideCharToMultiByte(code_page, 0, u_str.data(), u_size, a_str.buf(a_size), a_size, NULL, NULL);
+  a_str.set_size(a_size);
+  return a_str;
+}
+
 // format amount of information
 UnicodeString format_inf_amount(u64 size) {
   UnicodeString str1, str2;

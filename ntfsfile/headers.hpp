@@ -8,6 +8,7 @@
 #include <imagehlp.h>
 #include <softpub.h>
 
+#include <comdef.h>
 #include <process.h>
 #include <string.h>
 #include <stdio.h>

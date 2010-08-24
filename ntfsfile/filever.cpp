@@ -29,9 +29,11 @@ struct VersionInfo {
   ObjectArray<NameValue> fixed;
   ObjectArray<VarVerInfo> var;
   ObjectArray<NameValue> sig;
+  ObjectArray<NameValue> props;
 };
 
 ObjectArray<NameValue> get_signature_info(const UnicodeString& file_name);
+ObjectArray<NameValue> get_prop_list(const UnicodeString& file_name);
 
 VersionInfo get_version_info(const UnicodeString& file_name) {
   VersionInfo ver_info;
@@ -166,7 +168,7 @@ VersionInfo get_version_info(const UnicodeString& file_name) {
     }
   }
 
-  LOADED_IMAGE* exec_image = ImageLoad(unicode_to_ansi(file_name).data(), NULL);
+  LOADED_IMAGE* exec_image = ImageLoad(unicode_to_ansi(file_name, CP_ACP).data(), NULL);
   if (exec_image) {
     CLEAN(LOADED_IMAGE*, exec_image, ImageUnload(exec_image));
     UnicodeString machine;
@@ -246,6 +248,7 @@ VersionInfo get_version_info(const UnicodeString& file_name) {
   }
 
   ver_info.sig = get_signature_info(file_name);
+  ver_info.props = get_prop_list(file_name);
 
   return ver_info;
 }
@@ -437,6 +440,44 @@ LONG verify_signature(const UnicodeString& file_name) {
 }
 
 
+ObjectArray<NameValue> get_prop_list(const UnicodeString& file_name) {
+  ObjectArray<NameValue> prop_list;
+
+  IPropertySetStoragePtr prop_set_stg;
+  if FAILED(StgOpenStorageEx(file_name.data(), STGM_READ | STGM_SHARE_DENY_WRITE, STGFMT_ANY, 0, nullptr, nullptr, IID_IPropertySetStorage, reinterpret_cast<void**>(&prop_set_stg)))
+    return prop_list;
+
+  IPropertyStoragePtr prop_stg;
+  if (FAILED(prop_set_stg->Open(FMTID_SummaryInformation, STGM_READ | STGM_SHARE_EXCLUSIVE, &prop_stg)))
+    return prop_list;
+
+  const PROPID c_prop_ids[] = { PID_CODEPAGE, PIDSI_TITLE, PIDSI_SUBJECT, PIDSI_AUTHOR, PIDSI_COMMENTS };
+  const unsigned c_prop_name_idx[] = { 0, MSG_FILE_VER_PROP_TITLE, MSG_FILE_VER_PROP_SUBJECT, MSG_FILE_VER_PROP_AUTHOR, MSG_FILE_VER_PROP_COMMENTS };
+  const unsigned c_num_props = ARRAYSIZE(c_prop_ids);
+  PROPSPEC prop_specs[c_num_props];
+  PROPVARIANT prop_vars[c_num_props];
+  for (unsigned i = 0; i < c_num_props; i++) {
+    prop_specs[i].ulKind = PRSPEC_PROPID;
+    prop_specs[i].propid = c_prop_ids[i];
+    PropVariantInit(prop_vars + i);
+  }
+  if (FAILED(prop_stg->ReadMultiple(c_num_props, prop_specs, prop_vars)))
+    return prop_list;
+  unsigned code_page = CP_ACP;
+  for (unsigned i = 0; i < c_num_props; i++) {
+    if (c_prop_ids[i] == PID_CODEPAGE && prop_vars[i].vt == VT_I2) {
+      code_page = prop_vars[i].iVal;
+    }
+    else if (prop_vars[i].vt == VT_LPSTR && *prop_vars[i].pszVal) {
+      prop_list.add(NameValue(far_get_msg(c_prop_name_idx[i]), ansi_to_unicode(prop_vars[i].pszVal, code_page)));
+    }
+    PropVariantClear(prop_vars + i);
+  }
+
+  return prop_list;
+}
+
+
 struct FileVersionDialogData {
   UnicodeString file_name;
   int lang_cp_ctrl_id;
@@ -525,28 +566,29 @@ LONG_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG
   return g_far.DefDlgProc(h_dlg, msg, param1, param2);
 }
 
+void calc_max_widths(const ObjectArray<NameValue>& name_values, unsigned& name_width, unsigned& value_width) {
+  for (unsigned i = 0; i < name_values.size(); i++) {
+    if (name_width < name_values[i].name.size())
+      name_width = name_values[i].name.size();
+    if (value_width < name_values[i].value.size())
+      value_width = name_values[i].value.size();
+  }
+}
+
 void show_file_version_dialog(const UnicodeString& file_name, const VersionInfo& version_info) {
   FileVersionDialogData dlg_data;
   dlg_data.file_name = file_name;
 
-  unsigned name_width = far_get_msg(MSG_FILE_VER_LANGUAGE).size();
+  unsigned name_width = max(far_get_msg(MSG_FILE_VER_LANGUAGE).size(), far_get_msg(MSG_FILE_VER_VERIFY_SIGNATURE).size());
   unsigned value_width = 0;
-  for (unsigned i = 0; i < version_info.fixed.size(); i++) {
-    if (name_width < version_info.fixed[i].name.size()) name_width = version_info.fixed[i].name.size();
-    if (value_width < version_info.fixed[i].value.size()) value_width = version_info.fixed[i].value.size();
-  }
+  calc_max_widths(version_info.fixed, name_width, value_width);
   dlg_data.var_cnt = 0;
   for (unsigned i = 0; i < version_info.var.size(); i++) {
     if (dlg_data.var_cnt < version_info.var[i].strings.size()) dlg_data.var_cnt = version_info.var[i].strings.size();
-    for (unsigned j = 0; j < version_info.var[i].strings.size(); j++) {
-      if (name_width < version_info.var[i].strings[j].name.size()) name_width = version_info.var[i].strings[j].name.size();
-      if (value_width < version_info.var[i].strings[j].value.size()) value_width = version_info.var[i].strings[j].value.size();
-    }
+    calc_max_widths(version_info.var[i].strings, name_width, value_width);
   }
-  for (unsigned i = 0; i < version_info.sig.size(); i++) {
-    if (name_width < version_info.sig[i].name.size()) name_width = version_info.sig[i].name.size();
-    if (value_width < version_info.sig[i].value.size()) value_width = version_info.sig[i].value.size();
-  }
+  calc_max_widths(version_info.sig, name_width, value_width);
+  calc_max_widths(version_info.props, name_width, value_width);
 
   ObjectArray<UnicodeString> lang_items;
   for (unsigned i = 0; i < version_info.var.size(); i++) {
@@ -618,12 +660,24 @@ void show_file_version_dialog(const UnicodeString& file_name, const VersionInfo&
   else
     dlg_data.verify_ctrl_id = -1;
 
+  if (version_info.props.size()) {
+    if (version_info.fixed.size() || version_info.sig.size()) {
+      dlg.separator(far_get_msg(MSG_FILE_VER_PROPS));
+      dlg.new_line();
+    }
+    for (unsigned i = 0; i < version_info.props.size(); i++) {
+      dlg.label(version_info.props[i].name, name_width);
+      dlg.var_edit_box(version_info.props[i].value, version_info.props[i].value.size(), value_width, DIF_READONLY | DIF_SELECTONENTRY);
+      dlg.new_line();
+    }
+  }
+
   dlg.show(file_version_dialog_proc);
 }
 
 void plugin_show_file_version(const UnicodeString& file_name) {
   VersionInfo version_info = get_version_info(file_name);
-  if (version_info.fixed.size() || version_info.sig.size())
+  if (version_info.fixed.size() || version_info.sig.size() || version_info.props.size())
     show_file_version_dialog(file_name, version_info);
   else
     far_message(far_get_msg(MSG_FILE_VER_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_FILE_VER_NO_INFO), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK), 1);
