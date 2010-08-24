@@ -1,7 +1,7 @@
 #ifndef _DLGAPI_H
 #define _DLGAPI_H
 
-#define CHANGE_FG(color, fg) ((fg) | (color) & ~FOREGROUND_INTENSITY & ~FOREGROUND_RED & ~FOREGROUND_GREEN & ~FOREGROUND_BLUE)
+#define CHANGE_FG(color, fg) ((((color) >> 4) == (fg)) ? (color) : ((color) & 0xF0 | (fg)))
 #define AUTO_SIZE (-1)
 
 extern const unsigned c_x_frame;

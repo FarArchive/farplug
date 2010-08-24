@@ -530,12 +530,13 @@ LONG_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG
     return TRUE;
   }
   else if (msg == DN_BTNCLICK && param1 == dlg_data->verify_ctrl_id) {
+    dlg->set_color(dlg_data->verify_result_ctrl_id, g_colors[COL_DIALOGTEXT]);
     dlg->set_text(dlg_data->verify_result_ctrl_id, far_get_msg(MSG_FILE_VER_VERIFY_IN_PROGRESS));
     LONG result = verify_signature(dlg_data->file_name);
     unsigned char result_color;
     UnicodeString result_text;
     if (result == ERROR_SUCCESS) {
-      result_color = g_colors[COL_DIALOGTEXT] | FOREGROUND_GREEN & ~FOREGROUND_INTENSITY & ~FOREGROUND_RED & ~FOREGROUND_BLUE;
+      result_color = CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_GREEN);
       result_text = far_get_msg(MSG_FILE_VER_VERIFY_OK);
     }
     else {
@@ -556,7 +557,7 @@ LONG_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG
         if (result_text.size() == 0)
           result_text = UnicodeString::format(L"0x%x", result);
       }
-      result_color = g_colors[COL_DIALOGTEXT] | FOREGROUND_RED & ~FOREGROUND_INTENSITY & ~FOREGROUND_GREEN & ~FOREGROUND_BLUE;
+      result_color = CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED);
     }
     dlg->set_text(dlg_data->verify_result_ctrl_id, result_text);
     dlg->set_color(dlg_data->verify_result_ctrl_id, result_color);
@@ -653,7 +654,7 @@ void show_file_version_dialog(const UnicodeString& file_name, const VersionInfo&
       dlg.new_line();
     }
     dlg_data.verify_ctrl_id = dlg.button(far_get_msg(MSG_FILE_VER_VERIFY_SIGNATURE), DIF_BTNNOCLOSE);
-    dlg.spacer(1);
+    dlg.pad(name_width);
     dlg_data.verify_result_ctrl_id = dlg.label(UnicodeString(), 30);
     dlg.new_line();
   }

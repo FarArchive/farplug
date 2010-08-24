@@ -211,11 +211,11 @@ LONG_PTR WINAPI result_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR para
       UnicodeString result_text;
       if (user_hash.size() != 0) {
         if (result) {
-          result_color = g_colors[COL_DIALOGTEXT] | FOREGROUND_GREEN & ~FOREGROUND_INTENSITY & ~FOREGROUND_RED & ~FOREGROUND_BLUE;
+          result_color = CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_GREEN);
           result_text = far_get_msg(MSG_CONTENT_RESULT_CORRECT);
         }
         else {
-          result_color = g_colors[COL_DIALOGTEXT] | FOREGROUND_RED & ~FOREGROUND_INTENSITY & ~FOREGROUND_GREEN & ~FOREGROUND_BLUE;
+          result_color = CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED);
           result_text = far_get_msg(MSG_CONTENT_RESULT_WRONG);
         }
         dlg->set_color(dlg_data->result_label_ctrl_id, result_color);
