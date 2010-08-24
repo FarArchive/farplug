@@ -456,7 +456,7 @@ ObjectArray<NameValue> get_prop_list(const UnicodeString& file_name) {
   ObjectArray<NameValue> prop_list;
 
   IPropertySetStoragePtr prop_set_stg;
-  if FAILED(StgOpenStorageEx(file_name.data(), STGM_READ | STGM_SHARE_DENY_WRITE, STGFMT_ANY, 0, nullptr, nullptr, IID_IPropertySetStorage, reinterpret_cast<void**>(&prop_set_stg)))
+  if FAILED(StgOpenStorageEx(file_name.data(), STGM_READ | STGM_SHARE_DENY_WRITE, STGFMT_ANY, 0, NULL, NULL, IID_IPropertySetStorage, reinterpret_cast<void**>(&prop_set_stg)))
     return prop_list;
 
   IPropertyStoragePtr prop_stg;
