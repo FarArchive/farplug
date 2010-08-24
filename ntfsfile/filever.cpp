@@ -245,6 +245,18 @@ VersionInfo get_version_info(const UnicodeString& file_name) {
     DLL_CHAR_FLAG(TERMINAL_SERVER_AWARE)
     #undef DLL_CHAR_FLAG
     if (dll_chars.size()) ver_info.fixed += NameValue(far_get_msg(MSG_FILE_VER_DLL_CHARS), dll_chars);
+
+    if (exec_image->FileHeader->FileHeader.TimeDateStamp) {
+      time_t t = exec_image->FileHeader->FileHeader.TimeDateStamp;
+      FILETIME ft = time_t_to_FILETIME(t);
+      FILETIME lft;
+      SYSTEMTIME st;
+      wchar_t date[64];
+      wchar_t time[64];
+      if (FileTimeToLocalFileTime(&ft, &lft) && FileTimeToSystemTime(&lft, &st) && GetDateFormatW(LOCALE_USER_DEFAULT, DATE_SHORTDATE, &st, NULL, date, ARRAYSIZE(date)) && GetTimeFormatW(LOCALE_USER_DEFAULT, 0, &st, NULL, time, ARRAYSIZE(time))) {
+        ver_info.fixed += NameValue(far_get_msg(MSG_FILE_VER_LINK_TIME), UnicodeString(date) + L' ' + time);
+      }
+    }
   }
 
   ver_info.sig = get_signature_info(file_name);

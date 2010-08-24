@@ -712,3 +712,11 @@ FindData get_find_data(const UnicodeString& path) {
   FindClose(h_find);
   return find_data;
 }
+
+FILETIME time_t_to_FILETIME(time_t t) {
+	FILETIME ft;
+  LONGLONG ll = Int32x32To64(t, 10000000) + 116444736000000000;
+  ft.dwLowDateTime = static_cast<DWORD>(ll);
+  ft.dwHighDateTime = ll >> 32;
+  return ft;
+}

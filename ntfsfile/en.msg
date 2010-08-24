@@ -192,6 +192,7 @@ file_ver.os_version = OS version
 file_ver.subsystem = Subsystem
 file_ver.image_chars = Characteristics
 file_ver.dll_chars = DLL characteristics
+file_ver.link_time = Link time
 file_ver.language = &Language
 file_ver.comments = &Comments
 file_ver.company_name = Co&mpany name

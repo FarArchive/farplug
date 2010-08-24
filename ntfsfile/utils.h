@@ -216,3 +216,4 @@ public:
 };
 
 FindData get_find_data(const UnicodeString& path);
+FILETIME time_t_to_FILETIME(time_t t);
