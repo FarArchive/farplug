@@ -70,6 +70,8 @@ public:
       if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
         FAIL(E_ABORT);
       Far::PanelItem panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
+      if (panel_item.file_attributes & FILE_ATTRIBUTE_DIRECTORY)
+        FAIL(E_ABORT);
       if (!Far::is_real_file_panel(panel_info)) {
         if ((panel_item.file_attributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
           Far::post_keys(vector<DWORD>(1, KEY_CTRLPGDN));
