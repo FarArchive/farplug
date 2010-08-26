@@ -91,6 +91,10 @@ void set_progress_value(unsigned __int64 completed, unsigned __int64 total) {
   g_far.AdvControl(g_far.ModuleNumber, ACTL_SETPROGRESSVALUE, &pv);
 }
 
+void progress_notify() {
+  g_far.AdvControl(g_far.ModuleNumber, ACTL_PROGRESSNOTIFY, nullptr);
+}
+
 void call_user_apc(void* param) {
   g_far.AdvControl(g_far.ModuleNumber, ACTL_SYNCHRO, param);
 }

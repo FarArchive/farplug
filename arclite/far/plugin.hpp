@@ -5,7 +5,7 @@
 /*
   plugin.hpp
 
-  Plugin API for FAR Manager 2.0 build 1641
+  Plugin API for FAR Manager 2.0 build 1661
 */
 
 /*
@@ -42,7 +42,7 @@ other possible license with no implications from the above license on them.
 
 #define FARMANAGERVERSION_MAJOR 2
 #define FARMANAGERVERSION_MINOR 0
-#define FARMANAGERVERSION_BUILD 1641
+#define FARMANAGERVERSION_BUILD 1661
 
 #ifndef RC_INVOKED
 
@@ -796,6 +796,8 @@ enum FILE_CONTROL_COMMANDS
 	FCTL_ENDSELECTION,
 	FCTL_CLEARSELECTION,
 	FCTL_SETDIRECTORIESFIRST,
+	FCTL_GETPANELFORMAT,
+	FCTL_GETPANELHOSTFILE,
 };
 
 typedef int (WINAPI *FARAPICONTROL)(
@@ -948,6 +950,7 @@ enum ADVANCED_CONTROL_COMMANDS
 	ACTL_GETFARRECT           = 32,
 	ACTL_GETCURSORPOS         = 33,
 	ACTL_SETCURSORPOS         = 34,
+	ACTL_PROGRESSNOTIFY       = 35,
 };
 
 

@@ -235,6 +235,7 @@ public:
     else {
       if (options.move_files)
         Archive::delete_files(indices);
+      Far::progress_notify();
     }
   }
 
@@ -307,6 +308,7 @@ public:
     else
       update(src_path, panel_items, items_number, remove_path_root(current_dir), options);
 
+    Far::progress_notify();
     return new_arc;
   }
 
@@ -326,8 +328,7 @@ public:
     }
     Archive::delete_files(indices);
 
-    Far::update_panel(PANEL_ACTIVE, false);
-    Far::update_panel(PANEL_PASSIVE, false);
+    Far::progress_notify();
   }
 
   void show_attr() {
