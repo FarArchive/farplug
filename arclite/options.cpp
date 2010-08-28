@@ -8,6 +8,7 @@ Options g_options;
 const wchar_t* c_plugin_key_name = L"arclite";
 
 const wchar_t* c_param_max_check_size = L"max_check_size";
+const wchar_t* c_param_smart_path = L"smart_path";
 const wchar_t* c_param_extract_ignore_errors = L"extract_ignore_errors";
 const wchar_t* c_param_extract_overwrite = L"extract_overwrite";
 const wchar_t* c_param_update_arc_format_name = L"update_arc_type";
@@ -26,6 +27,7 @@ const wchar_t* c_param_use_exclude_masks = L"use_exclude_masks";
 const wchar_t* c_param_exclude_masks = L"exclude_masks";
 
 const unsigned c_def_max_check_size = 1 << 20;
+const bool c_def_smart_path = true;
 const bool c_def_extract_ignore_errors = false;
 const unsigned c_def_extract_overwrite = 0;
 const wchar_t* c_def_update_arc_format_name = L"7z";
@@ -95,6 +97,7 @@ void Options::set_str(const wchar_t* name, const wstring& value, const wstring& 
 void Options::load() {
   plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE, true);
   max_check_size = get_int(c_param_max_check_size, c_def_max_check_size);
+  smart_path = get_bool(c_param_smart_path, c_def_smart_path);
   extract_ignore_errors = get_bool(c_param_extract_ignore_errors, c_def_extract_ignore_errors);
   extract_overwrite = get_int(c_param_extract_overwrite, c_def_extract_overwrite);
   update_arc_format_name = get_str(c_param_update_arc_format_name, c_def_update_arc_format_name);
@@ -116,6 +119,7 @@ void Options::load() {
 void Options::save() {
   plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE, true);
   set_int(c_param_max_check_size, max_check_size, c_def_max_check_size);
+  set_bool(c_param_smart_path, smart_path, c_def_smart_path);
   set_bool(c_param_extract_ignore_errors, extract_ignore_errors, c_def_extract_ignore_errors);
   set_int(c_param_extract_overwrite, extract_overwrite, c_def_extract_overwrite);
   set_str(c_param_update_arc_format_name, update_arc_format_name, c_def_update_arc_format_name);

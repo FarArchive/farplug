@@ -13,6 +13,7 @@ private:
   void set_str(const wchar_t* name, const wstring& value, const wstring& def_value);
 public:
   unsigned max_check_size;
+  bool smart_path;
   bool extract_ignore_errors;
   unsigned extract_overwrite;
   wstring update_arc_format_name;

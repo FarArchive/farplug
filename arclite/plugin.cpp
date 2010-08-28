@@ -186,10 +186,15 @@ public:
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
     ExtractOptions options;
     options.dst_dir = *dest_path;
-    if (items_number > 1 && (op_mode & OPM_TOPLEVEL)) {
+    if (g_options.smart_path && items_number > 1 && (op_mode & OPM_TOPLEVEL)) {
       options.dst_dir = add_trailing_slash(options.dst_dir) + archive_file_info.cFileName;
       wstring ext = extract_file_ext(archive_file_info.cFileName);
       options.dst_dir.erase(options.dst_dir.size() - ext.size(), ext.size());
+      if (GetFileAttributesW(long_path(options.dst_dir).c_str()) != INVALID_FILE_ATTRIBUTES) {
+        unsigned n = 0;
+        while (GetFileAttributesW(long_path(options.dst_dir + L"." + int_to_str(n)).c_str()) != INVALID_FILE_ATTRIBUTES && n < 100) n++;
+        options.dst_dir += L"." + int_to_str(n);
+      }
     }
     options.ignore_errors = g_options.extract_ignore_errors;
     options.overwrite = static_cast<OverwriteOption>(g_options.extract_overwrite);
@@ -256,11 +261,14 @@ public:
     UpdateOptions options;
     bool new_arc = !is_open();
     if (new_arc) {
-      wstring arc_dir = src_path;
-      if (items_number == 1 || is_root_path(arc_dir))
-        options.arc_path = panel_items[0].FindData.lpwszFileName;
+      wstring arc_dir;
+      PanelInfo panel_info;
+      if (g_options.smart_path && Far::get_panel_info(PANEL_PASSIVE, panel_info) && Far::is_real_file_panel(panel_info))
+        arc_dir = Far::get_panel_dir(PANEL_PASSIVE);
+      if (items_number == 1 || is_root_path(src_path))
+        options.arc_path = add_trailing_slash(arc_dir) + panel_items[0].FindData.lpwszFileName;
       else
-        options.arc_path = extract_file_name(src_path);
+        options.arc_path = add_trailing_slash(arc_dir) + extract_file_name(src_path);
       ArcTypes arc_types = ArcAPI::formats().find_by_name(g_options.update_arc_format_name);
       if (arc_types.empty())
         options.arc_type = c_guid_7z;
