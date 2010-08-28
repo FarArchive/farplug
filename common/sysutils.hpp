@@ -44,30 +44,48 @@ class File: private NonCopyable {
 protected:
   HANDLE h_file;
 public:
-  File(const wstring& file_path, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes);
-  ~File();
+  File() throw();
+  ~File() throw();
+  File(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD dlags_and_attributes);
+  void open(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD dlags_and_attributes);
+  bool open_nt(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD dlags_and_attributes) throw();
+  void close() throw();
+  HANDLE handle() const throw();
   unsigned __int64 size();
-  unsigned read(Buffer<char>& buffer);
-  void write(const void* data, unsigned size);
-  void set_time(const FILETIME* ctime, const FILETIME* atime, const FILETIME* mtime);
+  bool size_nt(unsigned __int64& file_size) throw();
+  unsigned read(void* data, unsigned size);
+  bool read_nt(void* data, unsigned size, unsigned& size_read) throw();
+  unsigned write(const void* data, unsigned size);
+  bool write_nt(const void* data, unsigned size, unsigned& size_written) throw();
+  void set_time(const FILETIME& ctime, const FILETIME& atime, const FILETIME& mtime);
+  bool set_time_nt(const FILETIME& ctime, const FILETIME& atime, const FILETIME& mtime) throw();
 };
 
 class Key: private NonCopyable {
 private:
   HKEY h_key;
-  void close();
 public:
-  Key();
-  ~Key();
-  Key& create(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired);
-  Key& open(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired);
-  bool query_bool(const wchar_t* name, bool def_value = false);
-  unsigned query_int(const wchar_t* name, unsigned def_value = 0);
-  wstring query_str(const wchar_t* name, const wstring& def_value = wstring());
+  Key() throw();
+  ~Key() throw();
+  Key(HKEY h_parent, LPCWSTR sub_key, REGSAM sam_desired, bool create);
+  Key& open(HKEY h_parent, LPCWSTR sub_key, REGSAM sam_desired, bool create);
+  bool open_nt(HKEY h_parent, LPCWSTR sub_key, REGSAM sam_desired, bool create) throw();
+  void close() throw();
+  HKEY handle() const throw();
+  bool query_bool(const wchar_t* name);
+  bool query_bool_nt(bool& value, const wchar_t* name) throw();
+  unsigned query_int(const wchar_t* name);
+  bool query_int_nt(unsigned& value, const wchar_t* name) throw();
+  wstring query_str(const wchar_t* name);
+  bool query_str_nt(wstring& value, const wchar_t* name) throw();
   void set_bool(const wchar_t* name, bool value);
+  bool set_bool_nt(const wchar_t* name, bool value) throw();
   void set_int(const wchar_t* name, unsigned value);
+  bool set_int_nt(const wchar_t* name, unsigned value) throw();
   void set_str(const wchar_t* name, const wstring& value);
+  bool set_str_nt(const wchar_t* name, const wstring& value) throw();
   void delete_value(const wchar_t* name);
+  bool delete_value_nt(const wchar_t* name) throw();
 };
 
 struct FindData: public WIN32_FIND_DATAW {
@@ -85,9 +103,10 @@ protected:
   HANDLE h_find;
   FindData find_data;
 public:
-  FileEnum(const wstring& dir_path);
-  ~FileEnum();
+  FileEnum(const wstring& dir_path) throw();
+  ~FileEnum() throw();
   bool next();
+  bool next_nt(bool& more) throw();
   const FindData& data() const {
     return find_data;
   }
@@ -165,4 +184,3 @@ public:
 };
 
 wstring format_file_time(const FILETIME& file_time);
-unsigned __int64 get_module_version(const wstring& file_path);

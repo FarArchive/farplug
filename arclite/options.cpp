@@ -48,51 +48,52 @@ wstring get_plugin_key_name() {
 }
 
 unsigned Options::get_int(const wchar_t* name, unsigned def_value) {
-  Key plugin_key;
-  plugin_key.create(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE);
-  return plugin_key.query_int(name, def_value);
+  unsigned value;
+  if (plugin_key.query_int_nt(value, name))
+    return value;
+  else
+    return def_value;
 }
 
 bool Options::get_bool(const wchar_t* name, bool def_value) {
-  Key plugin_key;
-  plugin_key.create(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE);
-  return plugin_key.query_bool(name, def_value);
+  bool value;
+  if (plugin_key.query_bool_nt(value, name))
+    return value;
+  else
+    return def_value;
 }
 
 wstring Options::get_str(const wchar_t* name, const wstring& def_value) {
-  Key plugin_key;
-  plugin_key.create(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE);
-  return plugin_key.query_str(name, def_value);
+  wstring value;
+  if (plugin_key.query_str_nt(value, name))
+    return value;
+  else
+    return def_value;
 }
 
 void Options::set_int(const wchar_t* name, unsigned value, unsigned def_value) {
-  Key plugin_key;
-  plugin_key.create(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE);
   if (value == def_value)
-    IGNORE_ERRORS(plugin_key.delete_value(name))
+    plugin_key.delete_value_nt(name);
   else
-    plugin_key.set_int(name, value);
+    plugin_key.set_int_nt(name, value);
 }
 
 void Options::set_bool(const wchar_t* name, bool value, bool def_value) {
-  Key plugin_key;
-  plugin_key.create(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE);
   if (value == def_value)
-    IGNORE_ERRORS(plugin_key.delete_value(name))
+    plugin_key.delete_value_nt(name);
   else
-    plugin_key.set_bool(name, value);
+    plugin_key.set_bool_nt(name, value);
 }
 
 void Options::set_str(const wchar_t* name, const wstring& value, const wstring& def_value) {
-  Key plugin_key;
-  plugin_key.create(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE);
   if (value == def_value)
-    IGNORE_ERRORS(plugin_key.delete_value(name))
+    plugin_key.delete_value_nt(name);
   else
-    plugin_key.set_str(name, value);
+    plugin_key.set_str_nt(name, value);
 }
 
 void Options::load() {
+  plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE, true);
   max_check_size = get_int(c_param_max_check_size, c_def_max_check_size);
   extract_ignore_errors = get_bool(c_param_extract_ignore_errors, c_def_extract_ignore_errors);
   extract_overwrite = get_int(c_param_extract_overwrite, c_def_extract_overwrite);
@@ -113,21 +114,22 @@ void Options::load() {
 };
 
 void Options::save() {
-  set_int(c_param_max_check_size, max_check_size);
-  set_bool(c_param_extract_ignore_errors, extract_ignore_errors);
-  set_int(c_param_extract_overwrite, extract_overwrite);
-  set_str(c_param_update_arc_format_name, update_arc_format_name);
-  set_int(c_param_update_level, update_level);
-  set_str(c_param_update_method, update_method);
-  set_bool(c_param_update_solid, update_solid);
-  set_bool(c_param_update_encrypt_header, update_encrypt_header);
-  set_bool(c_param_update_create_sfx, update_create_sfx);
-  set_int(c_param_update_sfx_module_idx, update_sfx_module_idx);
-  set_int(c_param_panel_view_mode, panel_view_mode);
-  set_int(c_param_panel_sort_mode, panel_sort_mode);
-  set_bool(c_param_panel_reverse_sort, panel_reverse_sort);
-  set_bool(c_param_use_include_masks, use_include_masks);
-  set_str(c_param_include_masks, include_masks);
-  set_bool(c_param_use_exclude_masks, use_exclude_masks);
-  set_str(c_param_exclude_masks, exclude_masks);
+  plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE, true);
+  set_int(c_param_max_check_size, max_check_size, c_def_max_check_size);
+  set_bool(c_param_extract_ignore_errors, extract_ignore_errors, c_def_extract_ignore_errors);
+  set_int(c_param_extract_overwrite, extract_overwrite, c_def_extract_overwrite);
+  set_str(c_param_update_arc_format_name, update_arc_format_name, c_def_update_arc_format_name);
+  set_int(c_param_update_level, update_level, c_def_update_level);
+  set_str(c_param_update_method, update_method, c_def_update_method);
+  set_bool(c_param_update_solid, update_solid, c_def_update_solid);
+  set_bool(c_param_update_encrypt_header, update_encrypt_header, c_def_update_encrypt_header);
+  set_bool(c_param_update_create_sfx, update_create_sfx, c_def_update_create_sfx);
+  set_int(c_param_update_sfx_module_idx, update_sfx_module_idx, c_def_update_sfx_module_idx);
+  set_int(c_param_panel_view_mode, panel_view_mode, c_def_panel_view_mode);
+  set_int(c_param_panel_sort_mode, panel_sort_mode, c_def_panel_sort_mode);
+  set_bool(c_param_panel_reverse_sort, panel_reverse_sort, c_def_panel_reverse_sort);
+  set_bool(c_param_use_include_masks, use_include_masks, c_def_use_include_masks);
+  set_str(c_param_include_masks, include_masks, c_def_include_masks);
+  set_bool(c_param_use_exclude_masks, use_exclude_masks, c_def_use_exclude_masks);
+  set_str(c_param_exclude_masks, exclude_masks, c_def_exclude_masks);
 }

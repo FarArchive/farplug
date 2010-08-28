@@ -15,3 +15,4 @@ public:
 };
 
 unsigned calc_percent(unsigned __int64 completed, unsigned __int64 total);
+unsigned __int64 get_module_version(const wstring& file_path);

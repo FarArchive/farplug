@@ -2,7 +2,7 @@
 #include "utils.hpp"
 #include "sysutils.hpp"
 #include "farutils.hpp"
-#include "common_types.hpp"
+#include "common.hpp"
 #include "ui.hpp"
 #include "archive.hpp"
 
@@ -471,7 +471,7 @@ void Archive::load_sfx_module(Buffer<char>& buffer, const UpdateOptions& options
   unsigned __int64 sfx_module_size = sfx_module.size();
   CHECK(sfx_module_size < 1024 * 1024);
   buffer.resize(static_cast<size_t>(sfx_module_size));
-  CHECK(sfx_module.read(buffer) == sfx_module_size);
+  CHECK(sfx_module.read(buffer.data(), buffer.size()) == sfx_module_size);
   ERROR_MESSAGE_END(sfx_module_path)
 }
 

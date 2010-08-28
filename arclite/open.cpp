@@ -2,7 +2,7 @@
 #include "utils.hpp"
 #include "sysutils.hpp"
 #include "farutils.hpp"
-#include "common_types.hpp"
+#include "common.hpp"
 #include "ui.hpp"
 #include "msearch.hpp"
 #include "archive.hpp"

@@ -2,7 +2,7 @@
 #include "utils.hpp"
 #include "sysutils.hpp"
 #include "farutils.hpp"
-#include "common_types.hpp"
+#include "common.hpp"
 #include "ui.hpp"
 #include "archive.hpp"
 
@@ -111,63 +111,63 @@ ArcAPI* ArcAPI::get() {
 
 void ArcAPI::load_libs(const wstring& path) {
   FileEnum file_enum(path);
-  while (file_enum.next()) {
+  bool more;
+  while (file_enum.next_nt(more) && more) {
     ArcLib arc_lib;
     arc_lib.module_path = add_trailing_slash(path) + file_enum.data().cFileName;
     if (_wcsicmp(extract_file_ext(arc_lib.module_path).c_str(), L".dll") != 0)
       continue;
     arc_lib.h_module = LoadLibraryW(arc_lib.module_path.c_str());
-    if (arc_lib.h_module == nullptr) continue;
-    try {
-      arc_lib.CreateObject = reinterpret_cast<ArcLib::FCreateObject>(GetProcAddress(arc_lib.h_module, "CreateObject"));
-      CHECK_SYS(arc_lib.CreateObject);
-      arc_lib.GetNumberOfMethods = reinterpret_cast<ArcLib::FGetNumberOfMethods>(GetProcAddress(arc_lib.h_module, "GetNumberOfMethods"));
-      arc_lib.GetMethodProperty = reinterpret_cast<ArcLib::FGetMethodProperty>(GetProcAddress(arc_lib.h_module, "GetMethodProperty"));
-      arc_lib.GetNumberOfFormats = reinterpret_cast<ArcLib::FGetNumberOfFormats>(GetProcAddress(arc_lib.h_module, "GetNumberOfFormats"));
-      CHECK_SYS(arc_lib.GetNumberOfFormats);
-      arc_lib.GetHandlerProperty = reinterpret_cast<ArcLib::FGetHandlerProperty>(GetProcAddress(arc_lib.h_module, "GetHandlerProperty"));
-      arc_lib.GetHandlerProperty2 = reinterpret_cast<ArcLib::FGetHandlerProperty2>(GetProcAddress(arc_lib.h_module, "GetHandlerProperty2"));
-      CHECK_SYS(arc_lib.GetHandlerProperty2);
+    if (arc_lib.h_module == nullptr)
+      continue;
+    arc_lib.CreateObject = reinterpret_cast<ArcLib::FCreateObject>(GetProcAddress(arc_lib.h_module, "CreateObject"));
+    arc_lib.GetNumberOfMethods = reinterpret_cast<ArcLib::FGetNumberOfMethods>(GetProcAddress(arc_lib.h_module, "GetNumberOfMethods"));
+    arc_lib.GetMethodProperty = reinterpret_cast<ArcLib::FGetMethodProperty>(GetProcAddress(arc_lib.h_module, "GetMethodProperty"));
+    arc_lib.GetNumberOfFormats = reinterpret_cast<ArcLib::FGetNumberOfFormats>(GetProcAddress(arc_lib.h_module, "GetNumberOfFormats"));
+    arc_lib.GetHandlerProperty = reinterpret_cast<ArcLib::FGetHandlerProperty>(GetProcAddress(arc_lib.h_module, "GetHandlerProperty"));
+    arc_lib.GetHandlerProperty2 = reinterpret_cast<ArcLib::FGetHandlerProperty2>(GetProcAddress(arc_lib.h_module, "GetHandlerProperty2"));
+    if (arc_lib.CreateObject && arc_lib.GetNumberOfFormats && arc_lib.GetHandlerProperty2) {
       arc_lib.version = get_module_version(arc_lib.module_path);
       arc_libs.push_back(arc_lib);
     }
-    catch (...) {
+    else
       FreeLibrary(arc_lib.h_module);
-    }
   }
 }
 
 void ArcAPI::find_sfx_modules(const wstring& path) {
   FileEnum file_enum(path);
-  while (file_enum.next()) {
-    try {
-      wstring file_path = add_trailing_slash(path) + file_enum.data().cFileName;
-      if (_wcsicmp(extract_file_ext(file_path).c_str(), L".sfx") != 0)
-        continue;
-      File file(file_path, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0);
-      Buffer<char> buffer(2);
-      unsigned sz = file.read(buffer);
-      string sig(buffer.data(), sz);
-      if (sig != "MZ")
-        continue;
-      SfxModule sfx_module;
-      sfx_module.path = file_path;
-      sfx_modules.push_back(sfx_module);
-    }
-    catch (const Error&) {
+  bool more;
+  while (file_enum.next_nt(more) && more) {
+    wstring file_path = add_trailing_slash(path) + file_enum.data().cFileName;
+    if (_wcsicmp(extract_file_ext(file_path).c_str(), L".sfx") != 0)
       continue;
-    }
+    File file;
+    if (!file.open_nt(file_path, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0))
+      continue;
+    Buffer<char> buffer(2);
+    unsigned sz;
+    if (!file.read_nt(buffer.data(), buffer.size(), sz))
+      continue;
+    string sig(buffer.data(), sz);
+    if (sig != "MZ")
+      continue;
+    SfxModule sfx_module;
+    sfx_module.path = file_path;
+    sfx_modules.push_back(sfx_module);
   }
 }
 
 void ArcAPI::load() {
-  IGNORE_ERRORS(load_libs(Far::get_plugin_module_path()));
-  IGNORE_ERRORS(find_sfx_modules(Far::get_plugin_module_path()));
+  load_libs(Far::get_plugin_module_path());
+  find_sfx_modules(Far::get_plugin_module_path());
   wstring _7zip_path;
-  IGNORE_ERRORS(_7zip_path = Key().open(HKEY_LOCAL_MACHINE, L"Software\\7-Zip", KEY_QUERY_VALUE).query_str(L"Path"));
+  Key _7zip_key;
+  if (_7zip_key.open_nt(HKEY_LOCAL_MACHINE, L"Software\\7-Zip", KEY_QUERY_VALUE, false))
+    _7zip_key.query_str_nt(_7zip_path, L"Path");
   if (!_7zip_path.empty()) {
-    IGNORE_ERRORS(load_libs(_7zip_path));
-    IGNORE_ERRORS(find_sfx_modules(_7zip_path));
+    load_libs(_7zip_path);
+    find_sfx_modules(_7zip_path);
   }
   for (unsigned i = 0; i < arc_libs.size(); i++) {
     const ArcLib& arc_lib = arc_libs[i];

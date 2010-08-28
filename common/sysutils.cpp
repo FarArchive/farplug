@@ -1,17 +1,17 @@
 #include "utils.hpp"
 #include "sysutils.hpp"
 
-HINSTANCE g_h_instance = NULL;
+HINSTANCE g_h_instance = nullptr;
 
 wstring get_system_message(HRESULT hr) {
   wostringstream st;
   wchar_t* sys_msg;
-  DWORD len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, NULL);
+  DWORD len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, nullptr);
   if (!len) {
     if (HRESULT_FACILITY(hr) == FACILITY_WIN32) {
       HMODULE h_winhttp = GetModuleHandle("winhttp");
       if (h_winhttp) {
-        len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, h_winhttp, HRESULT_CODE(hr), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, NULL);
+        len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, h_winhttp, HRESULT_CODE(hr), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, nullptr);
       }
     }
   }
@@ -54,7 +54,7 @@ wstring ansi_to_unicode(const string& str, unsigned code_page) {
   unsigned str_size = static_cast<unsigned>(str.size());
   if (str_size == 0)
     return wstring();
-  int size = MultiByteToWideChar(code_page, 0, str.data(), str_size, NULL, 0);
+  int size = MultiByteToWideChar(code_page, 0, str.data(), str_size, nullptr, 0);
   Buffer<wchar_t> out(size);
   size = MultiByteToWideChar(code_page, 0, str.data(), str_size, out.data(), size);
   CHECK_SYS(size);
@@ -65,9 +65,9 @@ string unicode_to_ansi(const wstring& str, unsigned code_page) {
   unsigned str_size = static_cast<unsigned>(str.size());
   if (str_size == 0)
     return string();
-  int size = WideCharToMultiByte(code_page, 0, str.data(), str_size, NULL, 0, NULL, NULL);
+  int size = WideCharToMultiByte(code_page, 0, str.data(), str_size, nullptr, 0, nullptr, nullptr);
   Buffer<char> out(size);
-  size = WideCharToMultiByte(code_page, 0, str.data(), str_size, out.data(), size, NULL, NULL);
+  size = WideCharToMultiByte(code_page, 0, str.data(), str_size, out.data(), size, nullptr, nullptr);
   CHECK_SYS(size);
   return string(out.data(), size);
 }
@@ -85,10 +85,10 @@ wstring expand_env_vars(const wstring& str) {
 
 wstring get_full_path_name(const wstring& path) {
   Buffer<wchar_t> buf(MAX_PATH);
-  DWORD size = GetFullPathNameW(path.c_str(), static_cast<DWORD>(buf.size()), buf.data(), NULL);
+  DWORD size = GetFullPathNameW(path.c_str(), static_cast<DWORD>(buf.size()), buf.data(), nullptr);
   if (size > buf.size()) {
     buf.resize(size);
-    size = GetFullPathNameW(path.c_str(), static_cast<DWORD>(buf.size()), buf.data(), NULL);
+    size = GetFullPathNameW(path.c_str(), static_cast<DWORD>(buf.size()), buf.data(), nullptr);
   }
   CHECK_SYS(size);
   return wstring(buf.data(), size);
@@ -105,34 +105,92 @@ wstring get_current_directory() {
   return wstring(buf.data(), size);
 }
 
-File::File(const wstring& file_path, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes) {
-  h_file = CreateFileW(long_path(file_path).c_str(), dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, dwFlagsAndAttributes, NULL);
-  CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
+File::File(): h_file(INVALID_HANDLE_VALUE) {
 }
 
 File::~File() {
-  CloseHandle(h_file);
+  close();
+}
+
+File::File(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD dlags_and_attributes): h_file(INVALID_HANDLE_VALUE) {
+  open(file_path, desired_access, share_mode, creation_disposition, dlags_and_attributes);
+}
+
+void File::open(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD dlags_and_attributes) {
+  CHECK_SYS(open_nt(file_path, desired_access, share_mode, creation_disposition, dlags_and_attributes));
+}
+
+bool File::open_nt(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD flags_and_attributes) {
+  close();
+  h_file = CreateFileW(long_path(file_path).c_str(), desired_access, share_mode, nullptr, creation_disposition, flags_and_attributes, nullptr);
+  return h_file != INVALID_HANDLE_VALUE;
+}
+
+void File::close() {
+  if (h_file != INVALID_HANDLE_VALUE) {
+    CloseHandle(h_file);
+    h_file = INVALID_HANDLE_VALUE;
+  }
+}
+
+HANDLE File::handle() const {
+  return h_file;
 }
 
 unsigned __int64 File::size() {
-  LARGE_INTEGER file_size;
-  CHECK_SYS(GetFileSizeEx(h_file, &file_size));
-  return file_size.QuadPart;
+  unsigned __int64 file_size;
+  CHECK_SYS(size_nt(file_size));
+  return file_size;
 }
 
-unsigned File::read(Buffer<char>& buffer) {
-  DWORD size_read;
-  CHECK_SYS(ReadFile(h_file, buffer.data(), static_cast<DWORD>(buffer.size()), &size_read, NULL));
+bool File::size_nt(unsigned __int64& file_size) {
+  LARGE_INTEGER fs;
+  if (GetFileSizeEx(h_file, &fs)) {
+    file_size = fs.QuadPart;
+    return true;
+  }
+  else
+    return false;
+}
+
+unsigned File::read(void* data, unsigned size) {
+  unsigned size_read;
+  CHECK_SYS(read_nt(data, size, size_read));
   return size_read;
 }
 
-void File::write(const void* data, unsigned size) {
-  DWORD size_written;
-  CHECK_SYS(WriteFile(h_file, data, size, &size_written, NULL));
+bool File::read_nt(void* data, unsigned size, unsigned& size_read) {
+  DWORD sz;
+  if (ReadFile(h_file, data, size, &sz, nullptr)) {
+    size_read = sz;
+    return true;
+  }
+  else
+    return false;
 }
 
-void File::set_time(const FILETIME* ctime, const FILETIME* atime, const FILETIME* mtime) {
-  CHECK_SYS(SetFileTime(h_file, ctime, atime, mtime));
+unsigned File::write(const void* data, unsigned size) {
+  unsigned size_written;
+  CHECK_SYS(write_nt(data, size, size_written));
+  return size_written;
+}
+
+bool File::write_nt(const void* data, unsigned size, unsigned& size_written) {
+  DWORD sz;
+  if (WriteFile(h_file, data, size, &sz, nullptr)) {
+    size_written = sz;
+    return true;
+  }
+  else
+    return false;
+}
+
+void File::set_time(const FILETIME& ctime, const FILETIME& atime, const FILETIME& mtime) {
+  CHECK_SYS(set_time_nt(ctime, atime, mtime));
+};
+
+bool File::set_time_nt(const FILETIME& ctime, const FILETIME& atime, const FILETIME& mtime) {
+  return SetFileTime(h_file, &ctime, &atime, &mtime) != 0;
 };
 
 void Key::close() {
@@ -149,68 +207,144 @@ Key::~Key() {
   close();
 }
 
-Key& Key::create(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired) {
+Key::Key(HKEY h_parent, LPCWSTR sub_key, REGSAM sam_desired, bool create) {
+  open(h_parent, sub_key, sam_desired, create);
+}
+
+Key& Key::open(HKEY h_parent, LPCWSTR sub_key, REGSAM sam_desired, bool create) {
   close();
-  CHECK_ADVSYS(RegCreateKeyExW(hKey, lpSubKey, 0, NULL, REG_OPTION_NON_VOLATILE, samDesired, NULL, &h_key, NULL));
+  CHECK_SYS(open_nt(h_parent, sub_key, sam_desired, create));
   return *this;
 }
 
-Key& Key::open(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired) {
+bool Key::open_nt(HKEY h_parent, LPCWSTR sub_key, REGSAM sam_desired, bool create) {
   close();
-  CHECK_ADVSYS(RegOpenKeyExW(hKey, lpSubKey, 0, samDesired, &h_key));
-  return *this;
+  LONG res;
+  if (create)
+    res = RegCreateKeyExW(h_parent, sub_key, 0, nullptr, REG_OPTION_NON_VOLATILE, sam_desired, nullptr, &h_key, nullptr);
+  else
+    res = RegOpenKeyExW(h_parent, sub_key, 0, sam_desired, &h_key);
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
+  }
+  return true;
 }
 
-bool Key::query_bool(const wchar_t* name, bool def_value) {
+bool Key::query_bool(const wchar_t* name) {
+  bool value;
+  CHECK_SYS(query_bool_nt(value, name));
+  return value;
+}
+
+bool Key::query_bool_nt(bool& value, const wchar_t* name) {
   DWORD type = REG_DWORD;
   DWORD data;
   DWORD data_size = sizeof(data);
-  LONG res = RegQueryValueExW(h_key, name, NULL, &type, reinterpret_cast<LPBYTE>(&data), &data_size);
-  if (res == ERROR_SUCCESS)
-    return data != 0;
-  return def_value;
+  LONG res = RegQueryValueExW(h_key, name, nullptr, &type, reinterpret_cast<LPBYTE>(&data), &data_size);
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
+  }
+  value = data != 0;
+  return true;
 }
 
-unsigned Key::query_int(const wchar_t* name, unsigned def_value) {
+unsigned Key::query_int(const wchar_t* name) {
+  unsigned value;
+  CHECK_SYS(query_int_nt(value, name));
+  return value;
+}
+
+bool Key::query_int_nt(unsigned& value, const wchar_t* name) {
   DWORD type = REG_DWORD;
   DWORD data;
   DWORD data_size = sizeof(data);
-  LONG res = RegQueryValueExW(h_key, name, NULL, &type, reinterpret_cast<LPBYTE>(&data), &data_size);
-  if (res == ERROR_SUCCESS)
-    return data;
-  return def_value;
+  LONG res = RegQueryValueExW(h_key, name, nullptr, &type, reinterpret_cast<LPBYTE>(&data), &data_size);
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
+  }
+  value = data;
+  return true;
 }
 
-wstring Key::query_str(const wchar_t* name, const wstring& def_value) {
+wstring Key::query_str(const wchar_t* name) {
+  wstring value;
+  CHECK_SYS(query_str_nt(value, name));
+  return value;
+}
+
+bool Key::query_str_nt(wstring& value, const wchar_t* name) {
   DWORD type = REG_SZ;
   DWORD data_size;
-  LONG res = RegQueryValueExW(h_key, name, NULL, &type, NULL, &data_size);
-  if (res == ERROR_SUCCESS) {
-    Buffer<wchar_t> buf(data_size / sizeof(wchar_t));
-    res = RegQueryValueExW(h_key, name, NULL, &type, reinterpret_cast<LPBYTE>(buf.data()), &data_size);
-    if (res == ERROR_SUCCESS) {
-      return wstring(buf.data(), buf.size() - 1);
-    }
+  LONG res = RegQueryValueExW(h_key, name, nullptr, &type, nullptr, &data_size);
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
   }
-  return def_value;
+  Buffer<wchar_t> buf(data_size / sizeof(wchar_t));
+  res = RegQueryValueExW(h_key, name, nullptr, &type, reinterpret_cast<LPBYTE>(buf.data()), &data_size);
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
+  }
+  value.assign(buf.data(), buf.size() - 1);
+  return true;
 }
 
 void Key::set_bool(const wchar_t* name, bool value) {
+  CHECK_SYS(set_bool_nt(name, value));
+}
+
+bool Key::set_bool_nt(const wchar_t* name, bool value) {
   DWORD data = value ? 1 : 0;
-  CHECK_ADVSYS(RegSetValueExW(h_key, name, 0, REG_DWORD, reinterpret_cast<LPBYTE>(&data), sizeof(data)));
+  LONG res = RegSetValueExW(h_key, name, 0, REG_DWORD, reinterpret_cast<LPBYTE>(&data), sizeof(data));
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
+  }
+  return true;
 }
 
 void Key::set_int(const wchar_t* name, unsigned value) {
+  CHECK_SYS(set_int_nt(name, value));
+}
+
+bool Key::set_int_nt(const wchar_t* name, unsigned value) {
   DWORD data = value;
-  CHECK_ADVSYS(RegSetValueExW(h_key, name, 0, REG_DWORD, reinterpret_cast<LPBYTE>(&data), sizeof(data)));
+  LONG res = RegSetValueExW(h_key, name, 0, REG_DWORD, reinterpret_cast<LPBYTE>(&data), sizeof(data));
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
+  }
+  return true;
 }
 
 void Key::set_str(const wchar_t* name, const wstring& value) {
-  CHECK_ADVSYS(RegSetValueExW(h_key, name, 0, REG_SZ, reinterpret_cast<LPBYTE>(const_cast<wchar_t*>(value.c_str())), (static_cast<DWORD>(value.size()) + 1) * sizeof(wchar_t)));
+  CHECK_SYS(set_str_nt(name, value));
+}
+
+bool Key::set_str_nt(const wchar_t* name, const wstring& value) {
+  LONG res = RegSetValueExW(h_key, name, 0, REG_SZ, reinterpret_cast<LPBYTE>(const_cast<wchar_t*>(value.c_str())), (static_cast<DWORD>(value.size()) + 1) * sizeof(wchar_t));
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
+  }
+  return true;
 }
 
 void Key::delete_value(const wchar_t* name) {
-  CHECK_ADVSYS(RegDeleteValueW(h_key, name));
+  CHECK_SYS(delete_value_nt(name));
+}
+
+bool Key::delete_value_nt(const wchar_t* name) {
+  LONG res = RegDeleteValueW(h_key, name);
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
+  }
+  return true;
 }
 
 FileEnum::FileEnum(const wstring& dir_path): dir_path(dir_path), h_find(INVALID_HANDLE_VALUE) {
@@ -222,22 +356,32 @@ FileEnum::~FileEnum() {
 }
 
 bool FileEnum::next() {
+  bool more;
+  CHECK_SYS(next_nt(more));
+  return more;
+}
+
+bool FileEnum::next_nt(bool& more) {
   while (true) {
     if (h_find == INVALID_HANDLE_VALUE) {
       h_find = FindFirstFileW(long_path(add_trailing_slash(dir_path) + L'*').c_str(), &find_data);
-      CHECK_SYS(h_find != INVALID_HANDLE_VALUE);
+      if (h_find == INVALID_HANDLE_VALUE)
+        return false;
     }
     else {
       if (!FindNextFileW(h_find, &find_data)) {
-        if (GetLastError() == ERROR_NO_MORE_FILES)
-          return false;
-        CHECK_SYS(false);
+        if (GetLastError() == ERROR_NO_MORE_FILES) {
+          more = false;
+          return true;
+        }
+        return false;
       }
     }
     if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
       if ((find_data.cFileName[0] == L'.') && ((find_data.cFileName[1] == 0) || ((find_data.cFileName[1] == L'.') && (find_data.cFileName[2] == 0))))
         continue;
     }
+    more = true;
     return true;
   }
 }
@@ -284,7 +428,7 @@ unsigned __stdcall Thread::thread_proc(void* arg) {
   return FALSE;
 }
 
-Thread::Thread(): h_thread(NULL) {
+Thread::Thread(): h_thread(nullptr) {
 }
 
 Thread::~Thread() {
@@ -296,7 +440,7 @@ Thread::~Thread() {
 
 void Thread::start() {
   unsigned th_id;
-  h_thread = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, thread_proc, this, 0, &th_id));
+  h_thread = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 0, thread_proc, this, 0, &th_id));
   CHECK_SYS(h_thread);
 }
 
@@ -311,7 +455,7 @@ bool Thread::get_result() {
 }
 
 Event::Event(bool manual_reset, bool initial_state) {
-  h_event = CreateEvent(NULL, manual_reset, initial_state, NULL);
+  h_event = CreateEvent(nullptr, manual_reset, initial_state, nullptr);
   CHECK_SYS(h_event);
 }
 
@@ -334,7 +478,7 @@ WindowClass::WindowClass(const wstring& name, WindowProc window_proc): name(name
 }
 
 WindowClass::~WindowClass() {
-  UnregisterClassW(name.c_str(), NULL);
+  UnregisterClassW(name.c_str(), nullptr);
 }
 
 LRESULT CALLBACK MessageWindow::message_window_proc(HWND h_wnd, UINT msg, WPARAM w_param, LPARAM l_param) {
@@ -348,7 +492,7 @@ LRESULT CALLBACK MessageWindow::message_window_proc(HWND h_wnd, UINT msg, WPARAM
 }
 
 MessageWindow::MessageWindow(const wstring& name): WindowClass(name, message_window_proc) {
-  h_wnd = CreateWindowW(name.c_str(), name.c_str(), 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, g_h_instance, this);
+  h_wnd = CreateWindowW(name.c_str(), name.c_str(), 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, g_h_instance, this);
   CHECK_SYS(h_wnd);
   SetWindowLongPtrW(h_wnd, 0, reinterpret_cast<LONG_PTR>(this));
 }
@@ -367,7 +511,7 @@ unsigned MessageWindow::message_loop(HANDLE h_abort) {
     }
     else if (res == WAIT_OBJECT_0 + 1) {
       MSG msg;
-      while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+      while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
         if (msg.message == WM_QUIT)
           return static_cast<unsigned>(msg.wParam);
       }
@@ -395,26 +539,9 @@ wstring format_file_time(const FILETIME& file_time) {
   SYSTEMTIME st;
   CHECK_SYS(FileTimeToSystemTime(&local_ft, &st));
   Buffer<wchar_t> buf(1024);
-  CHECK_SYS(GetDateFormatW(LOCALE_USER_DEFAULT, DATE_SHORTDATE, &st, NULL, buf.data(), static_cast<int>(buf.size())));
+  CHECK_SYS(GetDateFormatW(LOCALE_USER_DEFAULT, DATE_SHORTDATE, &st, nullptr, buf.data(), static_cast<int>(buf.size())));
   wstring date_str = buf.data();
-  CHECK_SYS(GetTimeFormatW(LOCALE_USER_DEFAULT, 0, &st, NULL, buf.data(), static_cast<int>(buf.size())));
+  CHECK_SYS(GetTimeFormatW(LOCALE_USER_DEFAULT, 0, &st, nullptr, buf.data(), static_cast<int>(buf.size())));
   wstring time_str = buf.data();
   return date_str + L' ' + time_str;
-}
-
-unsigned __int64 get_module_version(const wstring& file_path) {
-  unsigned __int64 version = 0;
-  DWORD dw_handle;
-  DWORD ver_size = GetFileVersionInfoSizeW(file_path.c_str(), &dw_handle);
-  if (ver_size) {
-    Buffer<unsigned char> ver_block(ver_size);
-    if (GetFileVersionInfoW(file_path.c_str(), dw_handle, ver_size, ver_block.data())) {
-      VS_FIXEDFILEINFO* fixed_file_info;
-      UINT len;
-      if (VerQueryValueW(ver_block.data(), L"\\", reinterpret_cast<LPVOID*>(&fixed_file_info), &len)) {
-        return (static_cast<unsigned __int64>(fixed_file_info->dwFileVersionMS) << 32) + fixed_file_info->dwFileVersionLS;
-      }
-    }
-  }
-  return version;
 }

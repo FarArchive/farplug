@@ -2,7 +2,7 @@
 #include "utils.hpp"
 #include "sysutils.hpp"
 #include "farutils.hpp"
-#include "common_types.hpp"
+#include "common.hpp"
 #include "ui.hpp"
 #include "archive.hpp"
 
@@ -62,17 +62,6 @@ FindData convert_file_info(const FileInfo& file_info) {
   find_data.nFileSizeLow = file_info.size & 0xFFFFFFFF;
   wcscpy(find_data.cFileName, file_info.name.c_str());
   return find_data;
-}
-
-unsigned calc_percent(unsigned __int64 completed, unsigned __int64 total) {
-  unsigned percent;
-  if (total == 0)
-    percent = 0;
-  else
-    percent = round(static_cast<double>(completed) / total * 100);
-  if (percent > 100)
-    percent = 100;
-  return percent;
 }
 
 wstring get_progress_bar_str(unsigned width, unsigned percent1, unsigned percent2) {
@@ -640,7 +629,7 @@ void Archive::set_dir_attr(const FileIndexRange& index_range, const wstring& par
           CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL));
           File file(file_path, FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS);
           CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), file_info.attr));
-          file.set_time(&file_info.ctime, &file_info.atime, &file_info.mtime);
+          file.set_time(file_info.ctime, file_info.atime, file_info.mtime);
           break;
         }
         catch (const Error& e) {
