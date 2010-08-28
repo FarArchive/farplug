@@ -311,12 +311,19 @@ public:
       g_options.save();
     }
 
+    ErrorLog error_log;
     if (new_arc)
-      create(src_path, panel_items, items_number, options);
+      create(src_path, panel_items, items_number, options, error_log);
     else
-      update(src_path, panel_items, items_number, remove_path_root(current_dir), options);
+      update(src_path, panel_items, items_number, remove_path_root(current_dir), options, error_log);
+    if (!error_log.empty()) {
+      if (options.show_dialog)
+        show_error_log(error_log);
+    }
+    else {
+      Far::progress_notify();
+    }
 
-    Far::progress_notify();
     return new_arc;
   }
 

@@ -347,10 +347,10 @@ void show_error_log(const ErrorLog& error_log) {
     if (error.code != E_MESSAGE) {
       wstring sys_msg = get_system_message(error.code);
       if (!sys_msg.empty())
-        line.append(word_wrap(sys_msg, Far::get_optimal_msg_width())).append(1, L'\n');
+        line.append(sys_msg).append(1, L'\n');
     }
     for (list<wstring>::const_iterator err_msg = error.messages.begin(); err_msg != error.messages.end(); err_msg++) {
-      line.append(word_wrap(*err_msg, Far::get_optimal_msg_width())).append(1, L'\n');
+      line.append(*err_msg).append(1, L'\n');
     }
     line.append(1, L'\n');
     file.write(line.data(), line.size() * sizeof(wchar_t));

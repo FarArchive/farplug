@@ -186,8 +186,8 @@ private:
   void delete_src_files(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number);
   void load_sfx_module(Buffer<char>& buffer, const UpdateOptions& options);
 public:
-  void create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options);
-  void update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options);
+  void create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options, ErrorLog& error_log);
+  void update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options, ErrorLog& error_log);
 
   // delete files in archive
 private:

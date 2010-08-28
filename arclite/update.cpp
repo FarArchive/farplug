@@ -222,10 +222,12 @@ private:
   const FileIndexMap& file_index_map;
   const wstring& password;
   bool open_shared;
+  bool& ignore_errors;
+  ErrorLog& error_log;
   ArchiveUpdateProgress progress;
 
 public:
-  ArchiveUpdater(const wstring& src_dir, const wstring& dst_dir, UInt32 num_indices, const FileIndexMap& file_index_map, const wstring& password, bool open_shared, Error& error): ComBase(error), src_dir(src_dir), dst_dir(dst_dir), num_indices(num_indices), file_index_map(file_index_map), password(password), open_shared(open_shared), progress(num_indices == 0) {
+  ArchiveUpdater(const wstring& src_dir, const wstring& dst_dir, UInt32 num_indices, const FileIndexMap& file_index_map, const wstring& password, bool open_shared, bool& ignore_errors, ErrorLog& error_log, Error& error): ComBase(error), src_dir(src_dir), dst_dir(dst_dir), num_indices(num_indices), file_index_map(file_index_map), password(password), open_shared(open_shared), progress(num_indices == 0), ignore_errors(ignore_errors), error_log(error_log) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -295,9 +297,28 @@ public:
     const FileIndexInfo& file_index_info = file_index_map.at(index);
     wstring file_path = add_trailing_slash(add_trailing_slash(src_dir) + file_index_info.rel_path) + file_index_info.find_data.cFileName;
     progress.on_open_file(file_path, file_index_info.find_data.size());
-    ComObject<ISequentialInStream> stream(new FileReadStream(file_path, open_shared, progress, error));
-    stream.detach(inStream);
-    return S_OK;
+
+    FileReadStream* file_read_stream = nullptr;
+    while (true) {
+      try {
+        file_read_stream = new FileReadStream(file_path, open_shared, progress, error);
+        break;
+      }
+      catch (const Error& e) {
+        if (retry_or_ignore_error(file_path, e, ignore_errors, error_log, progress))
+          break;
+      }
+    }
+
+    if (file_read_stream) {
+      ComObject<ISequentialInStream> stream(file_read_stream);
+      stream.detach(inStream);
+      return S_OK;
+    }
+    else {
+      *inStream = nullptr;
+      return S_FALSE;
+    }
     COM_ERROR_HANDLER_END
   }
   STDMETHODIMP SetOperationResult(Int32 operationResult) {
@@ -475,7 +496,7 @@ void Archive::load_sfx_module(Buffer<char>& buffer, const UpdateOptions& options
   ERROR_MESSAGE_END(sfx_module_path)
 }
 
-void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options) {
+void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options, ErrorLog& error_log) {
   FileIndexMap file_index_map;
   UInt32 new_index = 0;
   prepare_file_index_map(src_dir, panel_items, items_number, c_root_index, new_index, file_index_map);
@@ -487,7 +508,8 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
     set_properties(out_arc, options);
 
     Error error;
-    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options.password, options.open_shared, error));
+    bool ignore_errors = false;
+    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options.password, options.open_shared, ignore_errors, error_log, error));
     ComObject<ArchiveUpdateStream> update_stream(new ArchiveUpdateStream(options.arc_path, error));
 
     if (options.create_sfx && options.arc_type == c_guid_7z) {
@@ -510,11 +532,11 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
     throw;
   }
 
-  if (options.move_files)
+  if (options.move_files && error_log.empty())
     delete_src_files(src_dir, panel_items, items_number);
 }
 
-void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options) {
+void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options, ErrorLog& error_log) {
   FileIndexMap file_index_map;
   UInt32 new_index = num_indices; // starting index for new files
   prepare_file_index_map(src_dir, panel_items, items_number, find_dir(dst_dir), new_index, file_index_map);
@@ -527,7 +549,8 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
     set_properties(out_arc, options);
 
     Error error;
-    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, options.password, options.open_shared, error));
+    bool ignore_errors = false;
+    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, options.password, options.open_shared, ignore_errors, error_log, error));
     ComObject<IOutStream> update_stream(new ArchiveUpdateStream(temp_arc_name, error));
 
     HRESULT res = out_arc->UpdateItems(update_stream, new_index, updater);
@@ -548,6 +571,6 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
 
   reopen();
 
-  if (options.move_files)
+  if (options.move_files && error_log.empty())
     delete_src_files(src_dir, panel_items, items_number);
 }
