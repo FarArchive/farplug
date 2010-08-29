@@ -24,6 +24,7 @@ BEGIN
       VALUE "SpecialBuild", "Debug build.\0"
 #endif
       VALUE "LegalCopyright", "http://farplug.googlecode.com/\0"
+      VALUE "CompanyName", "Oleg Makovski\0"
     END
   END
   BLOCK "VarFileInfo"
