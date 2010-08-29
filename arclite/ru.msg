@@ -3,38 +3,38 @@
 plugin.name = <(NAME)>
 
 # Extract dialog
-extract.dlg.title = Extract files
-extract.dlg.dst_dir = &Extract files to:
-extract.dlg.ignore_errors = &Ignore errors
-extract.dlg.oo = When destination file exists:
-extract.dlg.oo_ask = &Ask
-extract.dlg.oo_overwrite = &Overwrite
-extract.dlg.oo_skip = &Skip
-extract.dlg.move_files = &Delete files after archiving
-extract.dlg.password = Pass&word:
+extract.dlg.title = Распаковка архива
+extract.dlg.dst_dir = &Извлечь файлы в:
+extract.dlg.ignore_errors = &Пропускать файлы с ошибками
+extract.dlg.oo = Если файл существует:
+extract.dlg.oo_ask = &Спрашивать
+extract.dlg.oo_overwrite = П&ерезаписывать
+extract.dlg.oo_skip = П&ропускать
+extract.dlg.move_files = &Удалить файлы после распаковки
+extract.dlg.password = П&ароль:
 
 # Update dialog
-update.dlg.title = Add files to archive
-update.dlg.title.create = Create archive
-update.dlg.arc_path = &Archive path:
-update.dlg.arc_type = Select archiver:
-update.dlg.arc_type.other = &0ther:
-update.dlg.level = Compression level:
-update.dlg.method = Compression method:
-update.dlg.solid = S&olid archive
-update.dlg.encrypt = &Encrypt archive
-update.dlg.password = Pass&word:
-update.dlg.password2 = Repeat:
-update.dlg.encrypt_header = Encrypt &header
-update.dlg.create_sfx = Create self-e&xtracting archive
-update.dlg.sfx_module = Select SFX module:
-update.dlg.move_files = &Delete files after archiving
-update.dlg.open_shared = Archive files open for w&riting
-update.dlg.wrong_arc_type = Select archive format
-update.dlg.passwords_dont_match = Passwords don't match
-update.dlg.password_is_empty = Password is empty
-update.dlg.wrong_sfx_module = Select SFX module
-update.dlg.confirm_overwrite = Target file already exists. Do you want to overwrite it?
+update.dlg.title = Обновление архива
+update.dlg.title.create = Создание архива
+update.dlg.arc_path = &Путь:
+update.dlg.arc_type = Формат архива:
+update.dlg.arc_type.other = П&рочие:
+update.dlg.level = Уровень сжатия:
+update.dlg.method = Метод сжатия:
+update.dlg.solid = &Непрерывный архив
+update.dlg.encrypt = За&шифрованный архив
+update.dlg.password = Паро&ль:
+update.dlg.password2 = Проверка пароля:
+update.dlg.encrypt_header = Ши&фрование оглавления архива
+update.dlg.create_sfx = &Самоизвлекающийся архив
+update.dlg.sfx_module = SF&X модуль:
+update.dlg.move_files = &Удалить файлы после архивации
+update.dlg.open_shared = Архивировать файлы, &открытые для записи
+update.dlg.wrong_arc_type = Необходимо выбрать формат архива
+update.dlg.passwords_dont_match = Введенные пароли не совпадают
+update.dlg.password_is_empty = Необходимо указать пароль
+update.dlg.wrong_sfx_module = Необходимо выбрать SFX модуль
+update.dlg.confirm_overwrite = Целевой архив уже существует. Хотите перезаписать его?
 
 # Archive types
 compression.archive.7z = &7z
@@ -54,15 +54,15 @@ compression.method.lzma2 = LZMA&2
 compression.method.ppmd = &PPMD
 
 # Delete files
-delete.dlg.confirm = Do you want to delete selected files?
+delete.dlg.confirm = Вы хотите удалить выбранные файлы?
 
 # Test archive
-test.ok = Archive test complete
-test.menu = Test archive files
+test.ok = Тест архива завершен успешно
+test.menu = Протестировать архив
 
 # Password dialog
-password.title = Enter password
-password.password = Password:
+password.title = Ввод пароля
+password.password = Пароль:
 
 # Overwrite dialog
 overwrite.dlg.title = Перезапись файла
@@ -76,40 +76,40 @@ overwrite.dlg.no = &Нет
 overwrite.dlg.no.all = Нет для в&сех
 
 # Error retry dialog
-button.retry = &Retry
-button.ignore = &Ignore
-button.ignore_all = Ignore &All
+button.retry = &Повтор
+button.ignore = &Игнорировать
+button.ignore_all = Игнорировать &все
 
 # Log dialog
-log.title = Operation log
-log.info = Operation completed with errors. Do you want to review log file?
-log.close = &Close
-log.show = Show &log
+log.title = Список ошибок
+log.info = Операция завершена с ошибками. Хотите просмотреть список?
+log.close = &Закрыть
+log.show = &Показать список
 
 # Settings dialog
-settings.dlg.use_include_masks = &Open files matching masks:
-settings.dlg.use_exclude_masks = &Exclude files matching masks:
-settings.dlg.generate_masks = &Generate masks
+settings.dlg.use_include_masks = Маски &включения:
+settings.dlg.use_exclude_masks = Маски &исключения:
+settings.dlg.generate_masks = &Сгенерировать маски
 
 # Attributes dialog
-attr.dlg.title = Attributes
+attr.dlg.title = Атрибуты
 
 # Progress messages
-progress.extract = Extracting files...
-progress.create_dirs = Creating directories...
-progress.set_attr = Setting attributes...
-progress.test = Testing archive...
-progress.update = Updating archive...
-progress.create = Creating archive...
-progress.delete_files = Deleting files...
-progress.interrupt = Do you want to interrupt current operation?
+progress.extract = Извлечение файлов...
+progress.create_dirs = Создание каталогов...
+progress.set_attr = Установка атрибутов...
+progress.test = Тестирование архива...
+progress.update = Обновление архива...
+progress.create = Создание архива...
+progress.delete_files = Удаление файлов...
+progress.interrupt = Хотите прервать текущую операцию?
 
 # Error messages
-error.extract.unsupported_method = Unsupported compression method
-error.extract.data_error = Data error
-error.extract.crc_error = CRC check failed
-error.update.error = Update error
-error.no_format = Archive format not found
+error.extract.unsupported_method = Неподдерживаемый метод сжатия
+error.extract.data_error = Ошибка в данных
+error.extract.crc_error = Ошибка при проверке контрольной суммы
+error.update.error = Ошибка обновления
+error.no_format = Формат архива не найден
 
 # Generic buttons
 button.ok = OK

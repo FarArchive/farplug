@@ -10,7 +10,7 @@ extract.dlg.oo = When destination file exists:
 extract.dlg.oo_ask = &Ask
 extract.dlg.oo_overwrite = &Overwrite
 extract.dlg.oo_skip = &Skip
-extract.dlg.move_files = &Delete files after archiving
+extract.dlg.move_files = &Delete files after extraction
 extract.dlg.password = Pass&word:
 
 # Update dialog
@@ -27,7 +27,7 @@ update.dlg.password = Pass&word:
 update.dlg.password2 = Repeat:
 update.dlg.encrypt_header = Encrypt &header
 update.dlg.create_sfx = Create self-e&xtracting archive
-update.dlg.sfx_module = Select SFX module:
+update.dlg.sfx_module = Sele&ct SFX module:
 update.dlg.move_files = &Delete files after archiving
 update.dlg.open_shared = Archive files open for w&riting
 update.dlg.wrong_arc_type = Select archive format
