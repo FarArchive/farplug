@@ -12,10 +12,13 @@ private:
   void set_bool(const wchar_t* name, bool value, bool def_value);
   void set_str(const wchar_t* name, const wstring& value, const wstring& def_value);
 public:
+  wstring plugin_prefix;
   unsigned max_check_size;
   bool smart_path;
+  // extract
   bool extract_ignore_errors;
   unsigned extract_overwrite;
+  // update
   wstring update_arc_format_name;
   unsigned update_level;
   wstring update_method;

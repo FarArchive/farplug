@@ -8,7 +8,7 @@
 #include "archive.hpp"
 #include "options.hpp"
 
-const wchar_t* c_plugin_prefix = L"arc";
+wstring g_plugin_prefix;
 
 class Plugin: private Archive {
 private:
@@ -107,7 +107,7 @@ public:
       host_file = archive_file_info.cFileName;
     }
     opi->HostFile = host_file.c_str();
-    opi->Format = c_plugin_prefix;
+    opi->Format = g_plugin_prefix.c_str();
     opi->PanelTitle = panel_title.c_str();
     opi->StartPanelMode = '0' + g_options.panel_view_mode;
     opi->StartSortMode = g_options.panel_sort_mode;
@@ -261,14 +261,10 @@ public:
     UpdateOptions options;
     bool new_arc = !is_open();
     if (new_arc) {
-      wstring arc_dir;
-      PanelInfo panel_info;
-      if (g_options.smart_path && Far::get_panel_info(PANEL_PASSIVE, panel_info) && Far::is_real_file_panel(panel_info))
-        arc_dir = Far::get_panel_dir(PANEL_PASSIVE);
       if (items_number == 1 || is_root_path(src_path))
-        options.arc_path = add_trailing_slash(arc_dir) + panel_items[0].FindData.lpwszFileName;
+        options.arc_path = panel_items[0].FindData.lpwszFileName;
       else
-        options.arc_path = add_trailing_slash(arc_dir) + extract_file_name(src_path);
+        options.arc_path = extract_file_name(src_path);
       ArcTypes arc_types = ArcAPI::formats().find_by_name(g_options.update_arc_format_name);
       if (arc_types.empty())
         options.arc_type = c_guid_7z;
@@ -377,6 +373,7 @@ int WINAPI GetMinFarVersionW(void) {
 void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info) {
   Far::init(Info);
   g_options.load();
+  g_plugin_prefix = g_options.plugin_prefix;
 }
 
 void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
@@ -391,7 +388,7 @@ void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
   Info->PluginMenuStringsNumber = ARRAYSIZE(plugin_menu);
   Info->PluginConfigStrings = config_menu;
   Info->PluginConfigStringsNumber = ARRAYSIZE(config_menu);
-  Info->CommandPrefix = c_plugin_prefix;
+  Info->CommandPrefix = g_plugin_prefix.c_str();
   FAR_ERROR_HANDLER_END(return, return, false);
 }
 
