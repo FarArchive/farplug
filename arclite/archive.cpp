@@ -147,7 +147,7 @@ void ArcAPI::find_sfx_modules(const wstring& path) {
       continue;
     Buffer<char> buffer(2);
     unsigned sz;
-    if (!file.read_nt(buffer.data(), buffer.size(), sz))
+    if (!file.read_nt(buffer.data(), static_cast<unsigned>(buffer.size()), sz))
       continue;
     string sig(buffer.data(), sz);
     if (sig != "MZ")
@@ -401,7 +401,7 @@ void Archive::make_index() {
   // create search index
   file_list_index.clear();
   file_list_index.reserve(file_list.size());
-  for (size_t i = 0; i < file_list.size(); i++) {
+  for (UInt32 i = 0; i < file_list.size(); i++) {
     file_list_index.push_back(i);
   }
   sort(file_list_index.begin(), file_list_index.end(), [&] (UInt32 left, UInt32 right) -> bool {

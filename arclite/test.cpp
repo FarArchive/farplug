@@ -140,7 +140,7 @@ void Archive::test(UInt32 src_dir_index, const vector<UInt32>& src_indices) {
 
   Error error;
   ComObject<IArchiveExtractCallback> tester(new ArchiveTester(src_dir_index, file_list, error));
-  HRESULT res = in_arc->Extract(indices.data(), indices.size(), 1, tester);
+  HRESULT res = in_arc->Extract(indices.data(), static_cast<UInt32>(indices.size()), 1, tester);
   if (FAILED(res)) {
     if (error)
       throw error;

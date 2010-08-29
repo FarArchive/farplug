@@ -91,7 +91,7 @@ public:
 
 
 ArchiveUpdateStream::ArchiveUpdateStream(const wstring& file_path, Error& error): ComBase(error), h_file(INVALID_HANDLE_VALUE), file_path(file_path), start_offset(0) {
-  h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
+  h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, 0, nullptr);
   CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
 }
 ArchiveUpdateStream::~ArchiveUpdateStream() {
@@ -106,7 +106,7 @@ void ArchiveUpdateStream::set_offset(__int64 offset) {
 STDMETHODIMP ArchiveUpdateStream::Write(const void *data, UInt32 size, UInt32 *processedSize) {
   COM_ERROR_HANDLER_BEGIN
   DWORD size_written;
-  CHECK_SYS(WriteFile(h_file, data, size, &size_written, NULL));
+  CHECK_SYS(WriteFile(h_file, data, size, &size_written, nullptr));
   if (processedSize)
     *processedSize = size_written;
   return S_OK;
@@ -144,7 +144,7 @@ STDMETHODIMP ArchiveUpdateStream::SetSize(Int64 newSize) {
   COM_ERROR_HANDLER_BEGIN
   LARGE_INTEGER position;
   position.QuadPart = newSize + start_offset;
-  CHECK_SYS(SetFilePointerEx(h_file, position, NULL, FILE_BEGIN));
+  CHECK_SYS(SetFilePointerEx(h_file, position, nullptr, FILE_BEGIN));
   CHECK_SYS(SetEndOfFile(h_file));
   return S_OK;
   COM_ERROR_HANDLER_END
@@ -159,7 +159,7 @@ private:
 
 public:
   FileReadStream(const wstring& file_path, bool open_shared, ArchiveUpdateProgress& progress, Error& error): ComBase(error), file_path(file_path), progress(progress) {
-    h_file = CreateFileW(long_path(file_path).c_str(), FILE_READ_DATA, FILE_SHARE_READ | (open_shared ? FILE_SHARE_WRITE | FILE_SHARE_DELETE : 0), NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+    h_file = CreateFileW(long_path(file_path).c_str(), FILE_READ_DATA, FILE_SHARE_READ | (open_shared ? FILE_SHARE_WRITE | FILE_SHARE_DELETE : 0), nullptr, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
   ~FileReadStream() {
@@ -175,7 +175,7 @@ public:
     COM_ERROR_HANDLER_BEGIN
     ERROR_MESSAGE_BEGIN
     DWORD bytes_read;
-    CHECK_SYS(ReadFile(h_file, data, size, &bytes_read, NULL));
+    CHECK_SYS(ReadFile(h_file, data, size, &bytes_read, nullptr));
     if (processedSize)
       *processedSize = bytes_read;
     progress.on_read_file(bytes_read);
@@ -439,7 +439,7 @@ void Archive::set_properties(IOutArchive* out_arc, const UpdateOptions& options)
         values.push_back(options.encrypt_header);
       }
     }
-    CHECK_COM(set_props->SetProperties(names.data(), values.data(), names.size()));
+    CHECK_COM(set_props->SetProperties(names.data(), values.data(), static_cast<Int32>(names.size())));
   }
 }
 
@@ -523,7 +523,7 @@ void Archive::load_sfx_module(Buffer<char>& buffer, const UpdateOptions& options
   unsigned __int64 sfx_module_size = sfx_module.size();
   CHECK(sfx_module_size < 1024 * 1024);
   buffer.resize(static_cast<size_t>(sfx_module_size));
-  CHECK(sfx_module.read(buffer.data(), buffer.size()) == sfx_module_size);
+  CHECK(sfx_module.read(buffer.data(), static_cast<unsigned>(buffer.size())) == sfx_module_size);
   ERROR_MESSAGE_END(sfx_module_path)
 }
 
@@ -547,7 +547,7 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
     if (options.create_sfx && options.arc_type == c_guid_7z) {
       Buffer<char> buffer;
       load_sfx_module(buffer, options);
-      CHECK_COM(update_stream->Write(buffer.data(), buffer.size(), NULL));
+      CHECK_COM(update_stream->Write(buffer.data(), static_cast<UInt32>(buffer.size()), nullptr));
       update_stream->set_offset(buffer.size());
     }
 

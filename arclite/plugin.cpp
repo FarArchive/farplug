@@ -127,7 +127,7 @@ public:
       info_lines.push_back(ipl);
     });
     opi->InfoLines = info_lines.data();
-    opi->InfoLinesNumber = info_lines.size();
+    opi->InfoLinesNumber = static_cast<int>(info_lines.size());
   }
 
   void set_dir(const wstring& dir) {
@@ -155,7 +155,7 @@ public:
       FAIL(E_ABORT);
     UInt32 dir_index = find_dir(current_dir);
     FileIndexRange dir_list = get_dir_list(dir_index);
-    unsigned size = dir_list.second - dir_list.first;
+    size_t size = dir_list.second - dir_list.first;
     PluginPanelItem* items = new PluginPanelItem[size];
     memset(items, 0, size * sizeof(PluginPanelItem));
     try {
@@ -179,7 +179,7 @@ public:
       throw;
     }
     *panel_items = items;
-    *items_number = size;
+    *items_number = static_cast<int>(size);
   }
 
   void get_files(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t** dest_path, int op_mode) {
@@ -228,7 +228,7 @@ public:
     vector<UInt32> indices;
     indices.reserve(items_number);
     for (int i = 0; i < items_number; i++) {
-      indices.push_back(panel_items[i].UserData);
+      indices.push_back(static_cast<UInt32>(panel_items[i].UserData));
     }
 
     ErrorLog error_log;
@@ -249,7 +249,7 @@ public:
     vector<UInt32> indices;
     indices.reserve(items_number);
     for (int i = 0; i < items_number; i++) {
-      indices.push_back(panel_items[i].UserData);
+      indices.push_back(static_cast<UInt32>(panel_items[i].UserData));
     }
     test(src_dir_index, indices);
     Far::info_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_TEST_OK));
@@ -337,7 +337,7 @@ public:
     vector<UInt32> indices;
     indices.reserve(items_number);
     for (int i = 0; i < items_number; i++) {
-      indices.push_back(panel_items[i].UserData);
+      indices.push_back(static_cast<UInt32>(panel_items[i].UserData));
     }
     Archive::delete_files(indices);
 
@@ -347,7 +347,7 @@ public:
   void show_attr() {
     Far::PanelItem panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
     if (panel_item.file_name == L"..") return;
-    AttrList attr_list = get_attr_list(panel_item.user_data);
+    AttrList attr_list = get_attr_list(static_cast<UInt32>(panel_item.user_data));
     attr_dialog(attr_list);
   }
 
@@ -402,7 +402,7 @@ HANDLE WINAPI OpenPluginW(int OpenFrom,INT_PTR Item) {
 
 HANDLE WINAPI OpenFilePluginW(const wchar_t *Name,const unsigned char *Data,int DataSize,int OpMode) {
   FAR_ERROR_HANDLER_BEGIN;
-  if (Name == NULL)
+  if (Name == nullptr)
     return new Plugin();
   else
     return new Plugin(Name);

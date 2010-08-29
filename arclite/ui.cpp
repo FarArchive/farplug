@@ -358,7 +358,7 @@ void show_error_log(const ErrorLog& error_log) {
       line.append(*err_msg).append(1, L'\n');
     }
     line.append(1, L'\n');
-    file.write(line.data(), line.size() * sizeof(wchar_t));
+    file.write(line.data(), static_cast<unsigned>(line.size()) * sizeof(wchar_t));
   }
 
   Far::viewer(temp_file.get_path(), Far::get_msg(MSG_LOG_TITLE));
@@ -615,7 +615,7 @@ public:
             other_formats.push_back(arc_iter->first);
             format_names.push_back(arc_iter->second.name);
             if (options.arc_type == arc_iter->first) {
-              other_format_index = other_formats.size() - 1;
+              other_format_index = static_cast<unsigned>(other_formats.size()) - 1;
               found = true;
             }
           }
@@ -828,9 +828,9 @@ public:
     unsigned max_value_len = 0;
     for_each(attr_list.begin(), attr_list.end(), [&] (const Attr& attr) {
       if (attr.name.size() > max_name_len)
-        max_name_len = attr.name.size();
+        max_name_len = static_cast<unsigned>(attr.name.size());
       if (attr.value.size() > max_value_len)
-        max_value_len = attr.value.size();
+        max_value_len = static_cast<unsigned>(attr.value.size());
     });
     max_value_len += 1;
 

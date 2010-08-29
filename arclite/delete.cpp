@@ -133,7 +133,7 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
     ComObject<IArchiveUpdateCallback> deleter(new ArchiveFileDeleter(new_indices, error));
     ComObject<IOutStream> update_stream(new ArchiveUpdateStream(temp_arc_name, error));
 
-    HRESULT res = out_arc->UpdateItems(update_stream, new_indices.size(), deleter);
+    HRESULT res = out_arc->UpdateItems(update_stream, static_cast<UInt32>(new_indices.size()), deleter);
     if (FAILED(res)) {
       if (error)
         throw error;

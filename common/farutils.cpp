@@ -100,7 +100,7 @@ void call_user_apc(void* param) {
 }
 
 void post_keys(const vector<DWORD>& keys, DWORD flags) {
-  KeySequence ks = { flags, keys.size(), keys.data() };
+  KeySequence ks = { flags, static_cast<int>(keys.size()), keys.data() };
   g_far.AdvControl(g_far.ModuleNumber, ACTL_POSTKEYSEQUENCE, &ks);
 }
 
@@ -160,10 +160,10 @@ bool is_real_file_panel(const PanelInfo& panel_info) {
 
 wstring get_panel_dir(HANDLE h_panel) {
   Buffer<wchar_t> buf(MAX_PATH);
-  unsigned size = g_far.Control(h_panel, FCTL_GETPANELDIR, buf.size(), reinterpret_cast<LONG_PTR>(buf.data()));
+  unsigned size = g_far.Control(h_panel, FCTL_GETPANELDIR, static_cast<int>(buf.size()), reinterpret_cast<LONG_PTR>(buf.data()));
   if (size > buf.size()) {
     buf.resize(size);
-    size = g_far.Control(h_panel, FCTL_GETPANELDIR, buf.size(), reinterpret_cast<LONG_PTR>(buf.data()));
+    size = g_far.Control(h_panel, FCTL_GETPANELDIR, static_cast<int>(buf.size()), reinterpret_cast<LONG_PTR>(buf.data()));
   }
   CHECK(size)
   return wstring(buf.data(), size - 1);
@@ -171,10 +171,10 @@ wstring get_panel_dir(HANDLE h_panel) {
 
 PanelItem get_current_panel_item(HANDLE h_panel) {
   Buffer<unsigned char> buf(0x10000);
-  unsigned size = g_far.Control(h_panel, FCTL_GETCURRENTPANELITEM, buf.size(), reinterpret_cast<LONG_PTR>(buf.data()));
+  unsigned size = g_far.Control(h_panel, FCTL_GETCURRENTPANELITEM, static_cast<int>(buf.size()), reinterpret_cast<LONG_PTR>(buf.data()));
   if (size > buf.size()) {
     buf.resize(size);
-    size = g_far.Control(h_panel, FCTL_GETCURRENTPANELITEM, buf.size(), reinterpret_cast<LONG_PTR>(buf.data()));
+    size = g_far.Control(h_panel, FCTL_GETCURRENTPANELITEM, static_cast<int>(buf.size()), reinterpret_cast<LONG_PTR>(buf.data()));
   }
   CHECK(size)
   const PluginPanelItem* panel_item = reinterpret_cast<const PluginPanelItem*>(buf.data());
@@ -597,10 +597,10 @@ void Selection::select(unsigned idx, bool value) {
 
 wstring get_absolute_path(const wstring& rel_path) {
   Buffer<wchar_t> buf(MAX_PATH);
-  unsigned len = g_fsf.ConvertPath(CPM_FULL, rel_path.c_str(), buf.data(), buf.size());
+  unsigned len = g_fsf.ConvertPath(CPM_FULL, rel_path.c_str(), buf.data(), static_cast<int>(buf.size()));
   if (len > buf.size()) {
     buf.resize(len);
-    len = g_fsf.ConvertPath(CPM_FULL, rel_path.c_str(), buf.data(), buf.size());
+    len = g_fsf.ConvertPath(CPM_FULL, rel_path.c_str(), buf.data(), static_cast<int>(buf.size()));
   }
   return buf.data();
 }
@@ -614,7 +614,7 @@ bool match_masks(const wstring& file_name, const wstring& masks) {
 }
 
 unsigned char get_colors(PaletteColors color_id) {
-  return g_far.AdvControl(g_far.ModuleNumber, ACTL_GETCOLOR, reinterpret_cast<void*>(color_id));
+  return static_cast<unsigned char>(g_far.AdvControl(g_far.ModuleNumber, ACTL_GETCOLOR, reinterpret_cast<void*>(color_id)));
 }
 
 };

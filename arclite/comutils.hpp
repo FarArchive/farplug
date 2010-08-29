@@ -133,7 +133,7 @@ public:
   }
   PropVariant(const wstring& val) {
     vt = VT_BSTR;
-    bstrVal = SysAllocStringLen(val.data(), val.size());
+    bstrVal = SysAllocStringLen(val.data(), static_cast<UINT>(val.size()));
     if (bstrVal == nullptr) {
       vt = VT_ERROR;
       FAIL(E_OUTOFMEMORY);
@@ -141,7 +141,7 @@ public:
   }
   PropVariant(const wchar_t* val) {
     vt = VT_BSTR;
-    bstrVal = SysAllocStringLen(val, wcslen(val));
+    bstrVal = SysAllocStringLen(val, static_cast<UINT>(wcslen(val)));
     if (bstrVal == nullptr) {
       vt = VT_ERROR;
       FAIL(E_OUTOFMEMORY);
@@ -171,7 +171,7 @@ public:
   PropVariant& operator=(const wstring& val) {
     clear();
     vt = VT_BSTR;
-    bstrVal = SysAllocStringLen(val.data(), val.size());
+    bstrVal = SysAllocStringLen(val.data(), static_cast<UINT>(val.size()));
     if (bstrVal == nullptr) {
       vt = VT_ERROR;
       FAIL(E_OUTOFMEMORY);
@@ -181,7 +181,7 @@ public:
   PropVariant& operator=(const wchar_t* val) {
     clear();
     vt = VT_BSTR;
-    bstrVal = SysAllocStringLen(val, wcslen(val));
+    bstrVal = SysAllocStringLen(val, static_cast<UINT>(wcslen(val)));
     if (bstrVal == nullptr) {
       vt = VT_ERROR;
       FAIL(E_OUTOFMEMORY);
@@ -359,7 +359,7 @@ public:
       FAIL(E_OUTOFMEMORY);
   }
   BStr(const wstring& str) {
-    bstr = SysAllocStringLen(str.data(), str.size());
+    bstr = SysAllocStringLen(str.data(), static_cast<UINT>(str.size()));
     if (bstr == nullptr)
       FAIL(E_OUTOFMEMORY);
   }
@@ -375,7 +375,7 @@ public:
     return *this;
   }
   BStr& operator=(const wstring& str) {
-    if (!SysReAllocStringLen(&bstr, str.data(), str.size()))
+    if (!SysReAllocStringLen(&bstr, str.data(), static_cast<UINT>(str.size())))
       FAIL(E_OUTOFMEMORY);
     return *this;
   }

@@ -209,7 +209,7 @@ private:
   void create_file() {
     while (true) {
       try {
-        h_file = CreateFileW(long_path(current_rec.file_path).c_str(), FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
+        h_file = CreateFileW(long_path(current_rec.file_path).c_str(), FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, nullptr);
         CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
         break;
       }
@@ -230,10 +230,10 @@ private:
       try {
         LARGE_INTEGER file_pos;
         file_pos.QuadPart = current_rec.file_info.size;
-        CHECK_SYS(SetFilePointerEx(h_file, file_pos, NULL, FILE_BEGIN));
+        CHECK_SYS(SetFilePointerEx(h_file, file_pos, nullptr, FILE_BEGIN));
         CHECK_SYS(SetEndOfFile(h_file));
         file_pos.QuadPart = 0;
-        CHECK_SYS(SetFilePointerEx(h_file, file_pos, NULL, FILE_BEGIN));
+        CHECK_SYS(SetFilePointerEx(h_file, file_pos, nullptr, FILE_BEGIN));
         break;
       }
       catch (const Error& e) {
@@ -257,7 +257,7 @@ private:
         else
           size = c_block_size;
         DWORD size_written;
-        CHECK_SYS(WriteFile(h_file, buffer + current_rec.buffer_pos + pos, size, &size_written, NULL));
+        CHECK_SYS(WriteFile(h_file, buffer + current_rec.buffer_pos + pos, size, &size_written, nullptr));
         pos += size_written;
         progress.update_cache_written(size_written);
       }
@@ -332,7 +332,7 @@ private:
 public:
   FileWriteCache(bool& ignore_errors, ErrorLog& error_log, ExtractProgress& progress): buffer_size(get_max_cache_size()), commit_size(0), buffer_pos(0), h_file(INVALID_HANDLE_VALUE), continue_file(false), error_state(false), ignore_errors(ignore_errors), error_log(error_log), progress(progress) {
     progress.set_cache_total(buffer_size);
-    buffer = reinterpret_cast<unsigned char*>(VirtualAlloc(NULL, buffer_size, MEM_RESERVE, PAGE_NOACCESS));
+    buffer = reinterpret_cast<unsigned char*>(VirtualAlloc(nullptr, buffer_size, MEM_RESERVE, PAGE_NOACCESS));
     CHECK_SYS(buffer);
   }
   ~FileWriteCache() {
@@ -527,7 +527,7 @@ public:
 void Archive::prepare_dst_dir(const wstring& path) {
   if (!is_root_path(path)) {
     prepare_dst_dir(extract_file_path(path));
-    CreateDirectoryW(long_path(path).c_str(), NULL);
+    CreateDirectoryW(long_path(path).c_str(), nullptr);
   }
 }
 
@@ -567,7 +567,7 @@ void Archive::prepare_extract(UInt32 file_index, const wstring& parent_dir, list
 
     while (true) {
       try {
-        BOOL res = CreateDirectoryW(long_path(dir_path).c_str(), NULL);
+        BOOL res = CreateDirectoryW(long_path(dir_path).c_str(), nullptr);
         if (!res) {
           CHECK_SYS(GetLastError() == ERROR_ALREADY_EXISTS);
         }
@@ -663,7 +663,7 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
   ExtractProgress progress;
   FileWriteCache cache(ignore_errors, error_log, progress);
   ComObject<IArchiveExtractCallback> extractor(new ArchiveExtractor(src_dir_index, options.dst_dir, file_list, password, overwrite_option, ignore_errors, error_log, error, cache, progress));
-  HRESULT res = in_arc->Extract(indices.data(), indices.size(), 0, extractor);
+  HRESULT res = in_arc->Extract(indices.data(), static_cast<UInt32>(indices.size()), 0, extractor);
   if (FAILED(res)) {
     if (error)
       throw error;

@@ -13,7 +13,7 @@ private:
   wstring file_path;
 public:
   ArchiveOpenStream(const wstring& file_path, Error& error): ComBase(error), file_path(file_path) {
-    h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+    h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
   ~ArchiveOpenStream() {
@@ -29,7 +29,7 @@ public:
     COM_ERROR_HANDLER_BEGIN
     ERROR_MESSAGE_BEGIN
     DWORD bytes_read;
-    CHECK_SYS(ReadFile(h_file, data, size, &bytes_read, NULL));
+    CHECK_SYS(ReadFile(h_file, data, size, &bytes_read, nullptr));
     if (processedSize)
       *processedSize = bytes_read;
     return S_OK;
@@ -203,7 +203,7 @@ bool Archive::open_sub_stream(IInArchive* in_arc, IInStream** sub_stream, wstrin
 }
 
 bool Archive::open_archive(IInStream* in_stream, IInArchive* archive) {
-  CHECK_COM(in_stream->Seek(0, STREAM_SEEK_SET, NULL));
+  CHECK_COM(in_stream->Seek(0, STREAM_SEEK_SET, nullptr));
 
   Error error;
   ComObject<IArchiveOpenCallback> opener(new ArchiveOpener(archive_dir, archive_file_info, password, error));
@@ -248,7 +248,7 @@ void Archive::detect(IInStream* in_stream, const wstring& ext, bool all, Archive
 
   Buffer<unsigned char> buffer(max_check_size);
   UInt32 size;
-  CHECK_COM(in_stream->Read(buffer.data(), buffer.size(), &size));
+  CHECK_COM(in_stream->Read(buffer.data(), static_cast<UInt32>(buffer.size()), &size));
 
   vector<StrPos> sig_positions = msearch(buffer.data(), size, signatures);
 
