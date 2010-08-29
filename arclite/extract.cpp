@@ -66,7 +66,7 @@ FindData convert_file_info(const FileInfo& file_info) {
 
 wstring get_progress_bar_str(unsigned width, unsigned percent1, unsigned percent2) {
   const wchar_t c_pb_black = 9608;
-  const wchar_t c_pb_gray = 9618;
+  const wchar_t c_pb_gray = 9619;
   const wchar_t c_pb_white = 9617;
   unsigned len1 = round(static_cast<double>(percent1) / 100 * width);
   if (len1 > width)
