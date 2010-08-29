@@ -159,7 +159,7 @@ private:
 
 public:
   FileReadStream(const wstring& file_path, bool open_shared, ArchiveUpdateProgress& progress, Error& error): ComBase(error), file_path(file_path), progress(progress) {
-    h_file = CreateFileW(long_path(file_path).c_str(), FILE_READ_DATA, FILE_SHARE_READ | (open_shared ? FILE_SHARE_WRITE : 0), NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+    h_file = CreateFileW(long_path(file_path).c_str(), FILE_READ_DATA, FILE_SHARE_READ | (open_shared ? FILE_SHARE_WRITE | FILE_SHARE_DELETE : 0), NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
   ~FileReadStream() {
