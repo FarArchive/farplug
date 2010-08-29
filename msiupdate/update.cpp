@@ -161,7 +161,7 @@ void save_to_cache(const string& package, const wstring& cache_dir, const wstrin
   Transaction transaction;
   {
     const wchar_t* c_param_cache_index = L"cache_index";
-    Key plugin_key(HKEY_CURRENT_USER, (add_trailing_slash(Far::get_root_key_name()) + c_plugin_key_name).c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, transaction.handle());
+    TransactedKey plugin_key(HKEY_CURRENT_USER, (add_trailing_slash(Far::get_root_key_name()) + c_plugin_key_name).c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, true, transaction.handle());
 
     list<wstring> cache_index = split(plugin_key.query_str(c_param_cache_index), L'\n');
 
@@ -170,7 +170,7 @@ void save_to_cache(const string& package, const wstring& cache_dir, const wstrin
       cache_index.erase(cache_index.begin());
     }
 
-    File package_file((add_trailing_slash(cache_dir) + package_name).c_str(), GENERIC_WRITE, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, transaction.handle());
+    TransactedFile package_file((add_trailing_slash(cache_dir) + package_name).c_str(), GENERIC_WRITE, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, transaction.handle());
     package_file.write(package.data(), static_cast<unsigned>(package.size()));
 
     cache_index.push_back(package_name);

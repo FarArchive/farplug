@@ -46,9 +46,9 @@ protected:
 public:
   File() throw();
   ~File() throw();
-  File(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD dlags_and_attributes);
-  void open(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD dlags_and_attributes);
-  bool open_nt(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD dlags_and_attributes) throw();
+  File(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD flags_and_attributes);
+  void open(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD flags_and_attributes);
+  bool open_nt(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD flags_and_attributes) throw();
   void close() throw();
   HANDLE handle() const throw();
   unsigned __int64 size();
@@ -62,7 +62,7 @@ public:
 };
 
 class Key: private NonCopyable {
-private:
+protected:
   HKEY h_key;
 public:
   Key() throw();

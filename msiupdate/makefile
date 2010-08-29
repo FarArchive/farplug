@@ -2,6 +2,7 @@
 
 COMMONDIR = ..\common
 TOOLSDIR = ..\tools
+FARSDKDIR = ..\farsdk
 
 CPPFLAGS = -nologo -Zi -W3 -Gy -GS -GR -EHsc -MP -c
 DEFINES = -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_WIN32_WINNT=0x0500
@@ -28,7 +29,7 @@ CPPFLAGS = $(CPPFLAGS) -Od -RTC1 -MTd
 LINKFLAGS = $(LINKFLAGS) -fixed:no
 !endif
 OUTDIR = $(OUTDIR).$(PLATFORM)
-INCLUDES = -Ifar -I$(OUTDIR) -I$(COMMONDIR)
+INCLUDES = -I$(FARSDKDIR) -I$(OUTDIR) -I$(COMMONDIR)
 CPPFLAGS = $(CPPFLAGS) -Fo$(OUTDIR)\ -Fd$(OUTDIR)\ $(INCLUDES) $(DEFINES)
 RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
 
@@ -99,7 +100,7 @@ $(OUTDIR)\en.hlf: project.ini en.hlf
 $(OUTDIR)\ru.hlf: project.ini ru.hlf
   $(PREPROC)
 
-$(OUTDIR)\far.ini: far\plugin.hpp
+$(OUTDIR)\far.ini: $(FARSDKDIR)\plugin.hpp
   $(TOOLSDIR)\farver $** $@
 
 $(OUTDIR):

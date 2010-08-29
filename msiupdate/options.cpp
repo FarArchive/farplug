@@ -29,42 +29,66 @@ wstring get_plugin_key_name() {
 }
 
 unsigned Options::get_int(const wchar_t* name, unsigned def_value) {
-  Key plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE);
-  return plugin_key.query_int(name, def_value);
+  Key plugin_key;
+  if (!plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE, false))
+    return def_value;
+  unsigned value;
+  if (plugin_key.query_int_nt(value, name))
+    return value;
+  else
+    return def_value;
 }
 
 bool Options::get_bool(const wchar_t* name, bool def_value) {
-  Key plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE);
-  return plugin_key.query_bool(name, def_value);
+  Key plugin_key;
+  if (!plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE, false))
+    return def_value;
+  bool value;
+  if (plugin_key.query_bool_nt(value, name))
+    return value;
+  else
+    return def_value;
 }
 
 wstring Options::get_str(const wchar_t* name, const wstring& def_value) {
-  Key plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE);
-  return plugin_key.query_str(name, def_value);
+  Key plugin_key;
+  if (!plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE, false))
+    return def_value;
+  wstring value;
+  if (plugin_key.query_str_nt(value, name))
+    return value;
+  else
+    return def_value;
 }
 
 void Options::set_int(const wchar_t* name, unsigned value, unsigned def_value) {
-  Key plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE);
+  Key plugin_key;
+  if (!plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE, true))
+    return;
   if (value == def_value)
-    IGNORE_ERRORS(plugin_key.delete_value(name))
+    plugin_key.delete_value_nt(name);
   else
-    plugin_key.set_int(name, value);
+    plugin_key.set_int_nt(name, value);
 }
 
 void Options::set_bool(const wchar_t* name, bool value, bool def_value) {
-  Key plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE);
+  Key plugin_key;
+  if (!plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE, true))
+    return;
   if (value == def_value)
-    IGNORE_ERRORS(plugin_key.delete_value(name))
+    plugin_key.delete_value_nt(name);
   else
-    plugin_key.set_bool(name, value);
+    plugin_key.set_bool_nt(name, value);
 }
 
 void Options::set_str(const wchar_t* name, const wstring& value, const wstring& def_value) {
-  Key plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE);
+  Key plugin_key;
+  if (!plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE, true))
+    return;
   if (value == def_value)
-    IGNORE_ERRORS(plugin_key.delete_value(name))
+    plugin_key.delete_value_nt(name);
   else
-    plugin_key.set_str(name, value);
+    plugin_key.set_str_nt(name, value);
 }
 
 void Options::load() {

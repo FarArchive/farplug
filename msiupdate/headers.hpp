@@ -19,3 +19,4 @@ using namespace std;
 
 #include "plugin.hpp"
 #include "farkeys.hpp"
+#include "farcolor.hpp"

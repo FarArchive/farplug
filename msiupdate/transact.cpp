@@ -8,6 +8,7 @@ typedef BOOL (APIENTRY *FCommitTransaction)(HANDLE TransactionHandle);
 typedef HANDLE (WINAPI *FCreateFileTransactedW)(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile, HANDLE hTransaction, PUSHORT pusMiniVersion, PVOID lpExtendedParameter);
 typedef BOOL (WINAPI *FDeleteFileTransactedW)(LPCWSTR lpFileName, HANDLE hTransaction);
 typedef LSTATUS (APIENTRY *FRegCreateKeyTransactedW)(HKEY hKey, LPCWSTR lpSubKey, DWORD Reserved, LPWSTR lpClass, DWORD dwOptions, REGSAM samDesired, const LPSECURITY_ATTRIBUTES lpSecurityAttributes, PHKEY phkResult, LPDWORD lpdwDisposition, HANDLE hTransaction, PVOID  pExtendedParemeter);
+typedef LSTATUS (APIENTRY *FRegOpenKeyTransactedW)(HKEY hKey, LPCWSTR lpSubKey, DWORD ulOptions, REGSAM samDesired, PHKEY phkResult, HANDLE hTransaction, PVOID  pExtendedParemeter);
 
 HMODULE h_ktmw32 = NULL;
 HMODULE h_kernel32 = NULL;
@@ -18,6 +19,7 @@ FCommitTransaction fCommitTransaction;
 FCreateFileTransactedW fCreateFileTransactedW;
 FDeleteFileTransactedW fDeleteFileTransactedW;
 FRegCreateKeyTransactedW fRegCreateKeyTransactedW;
+FRegOpenKeyTransactedW fRegOpenKeyTransactedW;
 
 #define LOAD_MODULE(name) h_##name = LoadLibraryA(#name ".dll");
 #define UNLOAD_MODULE(name) if (h_##name) { FreeLibrary(h_##name); h_##name = NULL; }
@@ -34,6 +36,7 @@ public:
     LOAD_API_ENTRY(kernel32, CreateFileTransactedW);
     LOAD_API_ENTRY(kernel32, DeleteFileTransactedW);
     LOAD_API_ENTRY(advapi32, RegCreateKeyTransactedW);
+    LOAD_API_ENTRY(advapi32, RegOpenKeyTransactedW);
   }
   ~ApiLoader() {
     UNLOAD_MODULE(ktmw32);
@@ -71,15 +74,15 @@ HANDLE Transaction::handle() const {
 #define TXFS_MINIVERSION_DEFAULT_VIEW (0xFFFE)
 #endif
 
-File::File(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTransaction) {
+TransactedFile::TransactedFile(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD flags_and_attributes, HANDLE h_transaction) {
   if (fCreateFileTransactedW) {
     USHORT mv = TXFS_MINIVERSION_DEFAULT_VIEW;
-    h_file = fCreateFileTransactedW(lpFileName, dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, dwFlagsAndAttributes, NULL, hTransaction, &mv, NULL);
+    h_file = fCreateFileTransactedW(file_path.c_str(), desired_access, share_mode, nullptr, creation_disposition, flags_and_attributes, nullptr, h_transaction, &mv, nullptr);
+    CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
   else {
-    h_file = CreateFileW(lpFileName, dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, dwFlagsAndAttributes, NULL);
+    open(file_path, desired_access, share_mode, creation_disposition, flags_and_attributes);
   }
-  CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
 }
 
 BOOL delete_file_transacted(LPCWSTR lpFileName, HANDLE hTransaction) {
@@ -91,11 +94,16 @@ BOOL delete_file_transacted(LPCWSTR lpFileName, HANDLE hTransaction) {
   }
 }
 
-Key::Key(HKEY hKey, LPCWSTR lpSubKey, REGSAM samDesired, HANDLE hTransaction) {
+TransactedKey::TransactedKey(HKEY h_parent, LPCWSTR sub_key, REGSAM sam_desired, bool create, HANDLE h_transaction) {
   if (fRegCreateKeyTransactedW) {
-    CHECK_ADVSYS(fRegCreateKeyTransactedW(hKey, lpSubKey, 0, NULL, REG_OPTION_NON_VOLATILE, samDesired, NULL, &h_key, NULL, hTransaction, NULL));
+    if (create) {
+      CHECK_ADVSYS(fRegCreateKeyTransactedW(h_parent, sub_key, 0, nullptr, REG_OPTION_NON_VOLATILE, sam_desired, nullptr, &h_key, nullptr, h_transaction, nullptr));
+    }
+    else {
+      CHECK_ADVSYS(fRegOpenKeyTransactedW(h_parent, sub_key, 0, sam_desired, &h_key, h_transaction, nullptr));
+    }
   }
   else {
-    CHECK_ADVSYS(RegCreateKeyExW(hKey, lpSubKey, 0, NULL, REG_OPTION_NON_VOLATILE, samDesired, NULL, &h_key, NULL));
+    open(h_parent, sub_key, sam_desired, create);
   }
 }
