@@ -2,7 +2,7 @@
 
 COMMONDIR = ..\common
 TOOLSDIR = ..\tools
-FARSDKDIR = ..\farsdk
+FARSDK = ..\farsdk
 
 CPPFLAGS = -nologo -Zi -W3 -Gy -GS -GR -EHsc -MP -c
 DEFINES = -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_WIN32_WINNT=0x0500
@@ -32,7 +32,7 @@ LINKFLAGS = $(LINKFLAGS) -fixed:no
 !endif
 
 OUTDIR = $(OUTDIR).$(PLATFORM)
-INCLUDES = -I$(COMMONDIR) -I$(OUTDIR) -I7z -I$(FARSDKDIR)
+INCLUDES = -I$(COMMONDIR) -I$(OUTDIR) -I7z -I$(FARSDK)
 CPPFLAGS = $(CPPFLAGS) -Fo$(OUTDIR)\ -Fd$(OUTDIR)\ $(INCLUDES) $(DEFINES)
 RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
 
@@ -52,16 +52,23 @@ RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
 !endif
 7Z_DLL = $(7Z_DLL)\7z.dll
 
+!ifdef BUILD
+!include $(OUTDIR)\far.ini
+!endif
+
 COMMON_OBJS = $(OUTDIR)\farutils.obj $(OUTDIR)\pathutils.obj $(OUTDIR)\strutils.obj $(OUTDIR)\sysutils.obj $(OUTDIR)\numutils.obj
 OBJS = $(COMMON_OBJS) $(OUTDIR)\archive.obj $(OUTDIR)\plugin.obj $(OUTDIR)\ui.obj $(OUTDIR)\extract.obj $(OUTDIR)\open.obj $(OUTDIR)\update.obj $(OUTDIR)\delete.obj $(OUTDIR)\options.obj $(OUTDIR)\msearch.obj $(OUTDIR)\attr.obj $(OUTDIR)\test.obj $(OUTDIR)\common.obj
 
 LIBS = user32.lib advapi32.lib ole32.lib oleaut32.lib version.lib
 
-project: depfile
+project: depfile $(OUTDIR)\far.ini
   $(MAKE) -nologo -$(MAKEFLAGS) build_project BUILD=1
 
-distrib: depfile
+distrib: depfile $(OUTDIR)\far.ini
   $(MAKE) -nologo -$(MAKEFLAGS) build_distrib BUILD=1
+
+installer: depfile $(OUTDIR)\far.ini
+  $(MAKE) -nologo -$(MAKEFLAGS) build_installer BUILD=1
 
 build_project: $(OUTDIR)\$(MODULE).dll $(OUTDIR)\en.lng $(OUTDIR)\ru.lng $(OUTDIR)\en.hlf $(OUTDIR)\ru.hlf $(OUTDIR)\7z.dll
 
@@ -113,6 +120,9 @@ COPY = copy /y $** $@
 $(OUTDIR)\7z.dll: $(7Z_DLL)
   $(COPY)
 
+$(OUTDIR)\far.ini: $(FARSDK)\plugin.hpp
+  $(TOOLSDIR)\farver $** $@
+
 $(OUTDIR):
   if not exist $(OUTDIR) mkdir $(OUTDIR)
 
@@ -136,9 +146,29 @@ build_distrib: $(DISTRIB).7z
 $(DISTRIB).7z: $(DISTRIB_FILES) project.ini
   7z a -mx=9 $@ $(DISTRIB_FILES)
 
+build_installer: $(DISTRIB).msi
+
+LIGHTFLAGS = -nologo -cultures:en-us -spdb -sval -b installer
+CANDLEFLAGS = -nologo -Iinstaller -dSourceDir=$(OUTDIR) -dPlatform=$(PLATFORM) -dProduct="$(NAME)" -dVersion=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) -dMinFarVersion=$(FAR_VER_MAJOR).$(FAR_VER_MINOR).$(FAR_VER_BUILD)
+!ifdef RELEASE
+LIGHTFLAGS = $(LIGHTFLAGS) -dcl:high
+!else
+LIGHTFLAGS = $(LIGHTFLAGS) -sh -cc $(OUTDIR) -reusecab -O2
+!endif
+WIXOBJ = $(OUTDIR)\installer.wixobj $(OUTDIR)\ui.wixobj $(OUTDIR)\plugin.wixobj
+
+$(DISTRIB).msi: $(DISTRIB_FILES) project.ini $(WIXOBJ) installer\ui_en-us.wxl installer\banner.jpg installer\dialog.jpg installer\exclam.ico installer\info.ico
+  light $(LIGHTFLAGS) -loc installer\ui_en-us.wxl -out $@ $(WIXOBJ)
+
+{installer}.wxs{$(OUTDIR)}.wixobj::
+  candle $(CANDLEFLAGS) -out $(OUTDIR)\ $<
+
+installer\installer.wxs installer\plugin.wxs: installer\installer.wxi installer\plugin.wxi
+
 
 clean:
   if exist $(OUTDIR) rd /s /q $(OUTDIR)
 
 
 .PHONY: project distrib build_project build_distrib depfile clean
+.SUFFIXES: .wxs
