@@ -652,6 +652,7 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
   for (unsigned i = 0; i < src_indices.size(); i++) {
     prepare_extract(src_indices[i], options.dst_dir, file_indices, ignore_errors, error_log, prepare_extract_progress);
   }
+  prepare_extract_progress.clean();
 
   vector<UInt32> indices;
   indices.reserve(file_indices.size());
@@ -670,8 +671,10 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
       FAIL(res);
   }
   cache.finalize();
+  progress.clean();
 
   SetDirAttrProgress set_dir_attr_progress;
   FileIndexRange index_range(src_indices.begin(), src_indices.end());
   set_dir_attr(index_range, options.dst_dir, ignore_errors, error_log, set_dir_attr_progress);
+  set_dir_attr_progress.clean();
 }

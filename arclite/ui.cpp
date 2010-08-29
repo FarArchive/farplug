@@ -23,11 +23,7 @@ ProgressMonitor::ProgressMonitor(bool lazy): h_scr(nullptr) {
 }
 
 ProgressMonitor::~ProgressMonitor() {
-  if (h_scr) {
-    Far::restore_screen(h_scr);
-    SetConsoleTitleW(con_title.data());
-    Far::set_progress_state(TBPF_NOPROGRESS);
-  }
+  clean();
 }
 
 void ProgressMonitor::update_ui(bool force) {
@@ -54,6 +50,15 @@ void ProgressMonitor::update_ui(bool force) {
       }
     }
     do_update_ui();
+  }
+}
+
+void ProgressMonitor::clean() {
+  if (h_scr) {
+    Far::restore_screen(h_scr);
+    SetConsoleTitleW(con_title.data());
+    Far::set_progress_state(TBPF_NOPROGRESS);
+    h_scr = nullptr;
   }
 }
 

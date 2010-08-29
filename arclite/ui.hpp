@@ -19,6 +19,7 @@ public:
   ProgressMonitor(bool lazy = true);
   virtual ~ProgressMonitor();
   void update_ui(bool force = false);
+  void clean();
   unsigned __int64 time_elapsed();
   unsigned __int64 ticks_per_sec();
   friend class ProgressSuspend;
