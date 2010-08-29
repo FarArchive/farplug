@@ -340,7 +340,35 @@ public:
 };
 
 
-UInt32 Archive::scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map) {
+class PrepareUpdateProgress: private ProgressMonitor {
+private:
+  const wstring* file_path;
+
+  virtual void do_update_ui() {
+    const unsigned c_width = 60;
+    wostringstream st;
+    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
+
+    st << Far::get_msg(MSG_PROGRESS_SCAN_DIRS) << L'\n';
+    st << left << setw(c_width) << fit_str(*file_path, c_width) << L'\n';
+
+    Far::message(st.str(), 0, FMSG_LEFTALIGN);
+
+    Far::set_progress_state(TBPF_INDETERMINATE);
+
+    SetConsoleTitleW(Far::get_msg(MSG_PROGRESS_SCAN_DIRS).c_str());
+  }
+
+public:
+  PrepareUpdateProgress(): ProgressMonitor(true) {
+  }
+  void update(const wstring& file_path) {
+    this->file_path = &file_path;
+    update_ui();
+  }
+};
+
+UInt32 Archive::scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map, PrepareUpdateProgress& progress) {
   FileInfo file_info;
   file_info.attr = src_find_data.is_dir() ? FILE_ATTRIBUTE_DIRECTORY : 0;
   file_info.parent = dst_dir_index;
@@ -371,22 +399,25 @@ UInt32 Archive::scan_file(const wstring& sub_dir, const FindData& src_find_data,
   return file_index;
 }
 
-void Archive::scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map) {
-  FileEnum file_enum(add_trailing_slash(src_dir) + sub_dir);
+void Archive::scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map, PrepareUpdateProgress& progress) {
+  wstring path = add_trailing_slash(src_dir) + sub_dir;
+  progress.update(path);
+  FileEnum file_enum(path);
   while (file_enum.next()) {
-    UInt32 file_index = scan_file(sub_dir, file_enum.data(), dst_dir_index, new_index, file_index_map);
+    UInt32 file_index = scan_file(sub_dir, file_enum.data(), dst_dir_index, new_index, file_index_map, progress);
     if (file_enum.data().is_dir()) {
-      scan_dir(src_dir, add_trailing_slash(sub_dir) + file_enum.data().cFileName, file_index, new_index, file_index_map);
+      scan_dir(src_dir, add_trailing_slash(sub_dir) + file_enum.data().cFileName, file_index, new_index, file_index_map, progress);
     }
   }
 }
 
 void Archive::prepare_file_index_map(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map) {
+  PrepareUpdateProgress progress;
   for (unsigned i = 0; i < items_number; i++) {
     const FAR_FIND_DATA& find_data = panel_items[i].FindData;
-    UInt32 file_index = scan_file(wstring(), get_find_data(add_trailing_slash(src_dir) + find_data.lpwszFileName), dst_dir_index, new_index, file_index_map);
+    UInt32 file_index = scan_file(wstring(), get_find_data(add_trailing_slash(src_dir) + find_data.lpwszFileName), dst_dir_index, new_index, file_index_map, progress);
     if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-      scan_dir(src_dir, find_data.lpwszFileName, file_index, new_index, file_index_map);
+      scan_dir(src_dir, find_data.lpwszFileName, file_index, new_index, file_index_map, progress);
     }
   }
 }

@@ -120,6 +120,7 @@ typedef vector<ArchiveHandle> ArchiveHandles;
 class SetDirAttrProgress;
 class PrepareExtractProgress;
 class DeleteFilesProgress;
+class PrepareUpdateProgress;
 
 class Archive {
   // open
@@ -177,8 +178,8 @@ public:
   // create & update archive
 private:
   wstring get_temp_file_name() const;
-  UInt32 scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
-  void scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
+  UInt32 scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map, PrepareUpdateProgress& progress);
+  void scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map, PrepareUpdateProgress& progress);
   void prepare_file_index_map(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
   void set_properties(IOutArchive* out_arc, const UpdateOptions& options);
   void delete_src_file(const wstring& file_path, DeleteFilesProgress& progress);
