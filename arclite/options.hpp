@@ -26,6 +26,7 @@ public:
   bool update_encrypt_header;
   bool update_create_sfx;
   unsigned update_sfx_module_idx;
+  bool update_ignore_errors;
   // panel mode
   unsigned panel_view_mode;
   unsigned panel_sort_mode;

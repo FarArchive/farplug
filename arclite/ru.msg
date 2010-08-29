@@ -30,6 +30,7 @@ update.dlg.create_sfx = &Самоизвлекающийся архив
 update.dlg.sfx_module = SF&X модуль:
 update.dlg.move_files = &Удалить файлы после архивации
 update.dlg.open_shared = Архивировать файлы, &открытые для записи
+update.dlg.ignore_errors = Пропус&кать файлы с ошибками
 update.dlg.wrong_arc_type = Необходимо выбрать формат архива
 update.dlg.passwords_dont_match = Введенные пароли не совпадают
 update.dlg.password_is_empty = Необходимо указать пароль

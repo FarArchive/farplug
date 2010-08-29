@@ -207,7 +207,7 @@ public:
 class ArchiveUpdateStream: public IOutStream, public ComBase {
 private:
   HANDLE h_file;
-  const wstring& file_path;
+  wstring file_path;
   __int64 start_offset;
 
 public:

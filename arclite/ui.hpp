@@ -85,6 +85,7 @@ struct UpdateOptions {
   unsigned sfx_module_idx;
   bool move_files;
   bool open_shared;
+  bool ignore_errors;
   bool show_dialog;
 };
 

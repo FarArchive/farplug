@@ -154,7 +154,7 @@ STDMETHODIMP ArchiveUpdateStream::SetSize(Int64 newSize) {
 class FileReadStream: public IInStream, public ComBase {
 private:
   HANDLE h_file;
-  const wstring& file_path;
+  wstring file_path;
   ArchiveUpdateProgress& progress;
 
 public:
@@ -497,6 +497,8 @@ void Archive::load_sfx_module(Buffer<char>& buffer, const UpdateOptions& options
 }
 
 void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options, ErrorLog& error_log) {
+  bool ignore_errors = options.ignore_errors;
+
   FileIndexMap file_index_map;
   UInt32 new_index = 0;
   prepare_file_index_map(src_dir, panel_items, items_number, c_root_index, new_index, file_index_map);
@@ -508,7 +510,6 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
     set_properties(out_arc, options);
 
     Error error;
-    bool ignore_errors = false;
     ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options.password, options.open_shared, ignore_errors, error_log, error));
     ComObject<ArchiveUpdateStream> update_stream(new ArchiveUpdateStream(options.arc_path, error));
 
@@ -537,6 +538,8 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
 }
 
 void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options, ErrorLog& error_log) {
+  bool ignore_errors = options.ignore_errors;
+
   FileIndexMap file_index_map;
   UInt32 new_index = num_indices; // starting index for new files
   prepare_file_index_map(src_dir, panel_items, items_number, find_dir(dst_dir), new_index, file_index_map);
@@ -549,7 +552,6 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
     set_properties(out_arc, options);
 
     Error error;
-    bool ignore_errors = false;
     ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, options.password, options.open_shared, ignore_errors, error_log, error));
     ComObject<IOutStream> update_stream(new ArchiveUpdateStream(temp_arc_name, error));
 

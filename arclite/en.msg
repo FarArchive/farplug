@@ -30,6 +30,7 @@ update.dlg.create_sfx = Create self-e&xtracting archive
 update.dlg.sfx_module = Sele&ct SFX module:
 update.dlg.move_files = &Delete files after archiving
 update.dlg.open_shared = Archive files open for w&riting
+update.dlg.ignore_errors = &Ignore errors
 update.dlg.wrong_arc_type = Select archive format
 update.dlg.passwords_dont_match = Passwords don't match
 update.dlg.password_is_empty = Password is empty

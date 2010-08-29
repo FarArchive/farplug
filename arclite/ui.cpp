@@ -419,6 +419,7 @@ private:
   int sfx_module_ctrl_id;
   int move_files_ctrl_id;
   int open_shared_ctrl_id;
+  int ignore_errors_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -537,6 +538,7 @@ private:
       }
       options.move_files = get_check(move_files_ctrl_id);
       options.open_shared = get_check(open_shared_ctrl_id);
+      options.ignore_errors = get_check(ignore_errors_ctrl_id);
     }
     else if (msg == DN_INITDIALOG) {
       set_control_state();
@@ -683,6 +685,8 @@ public:
     move_files_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_MOVE_FILES), options.move_files);
     new_line();
     open_shared_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_OPEN_SHARED), options.open_shared);
+    new_line();
+    ignore_errors_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_IGNORE_ERRORS), options.ignore_errors);
     new_line();
 
     separator();
