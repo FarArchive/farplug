@@ -254,7 +254,7 @@ private:
   }
 
 public:
-  ExtractDialog(ExtractOptions& options): Far::Dialog(Far::get_msg(MSG_EXTRACT_DLG_TITLE), c_client_xs), options(options) {
+  ExtractDialog(ExtractOptions& options): Far::Dialog(Far::get_msg(MSG_EXTRACT_DLG_TITLE), c_client_xs, L"Extract"), options(options) {
   }
 
   bool show() {
@@ -574,7 +574,7 @@ private:
   }
 
 public:
-  UpdateDialog(bool new_arc, UpdateOptions& options): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), c_client_xs), new_arc(new_arc), options(options), arc_type(options.arc_type) {
+  UpdateDialog(bool new_arc, UpdateOptions& options): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), c_client_xs, L"Update"), new_arc(new_arc), options(options), arc_type(options.arc_type) {
   }
 
   bool show() {
@@ -764,7 +764,7 @@ private:
   }
 
 public:
-  SettingsDialog(PluginSettings& settings): Far::Dialog(Far::get_msg(MSG_PLUGIN_NAME), c_client_xs), settings(settings) {
+  SettingsDialog(PluginSettings& settings): Far::Dialog(Far::get_msg(MSG_PLUGIN_NAME), c_client_xs, L"Config"), settings(settings) {
   }
 
   bool show() {

@@ -99,7 +99,7 @@ void Options::set_str(const wchar_t* name, const wstring& value, const wstring& 
 }
 
 void Options::load() {
-  plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE, true);
+  plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE, false);
   plugin_prefix = get_str(c_param_plugin_prefix, c_def_plugin_prefix);
   max_check_size = get_int(c_param_max_check_size, c_def_max_check_size);
   smart_path = get_bool(c_param_smart_path, c_def_smart_path);
