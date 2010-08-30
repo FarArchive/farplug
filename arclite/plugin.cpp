@@ -272,7 +272,8 @@ public:
         options.arc_type = arc_types.front();
       options.create_sfx = g_options.update_create_sfx;
       options.sfx_module_idx = g_options.update_sfx_module_idx;
-      options.arc_path += ArcAPI::formats().at(options.arc_type).default_extension();
+      if (ArcAPI::formats().count(options.arc_type))
+        options.arc_path += ArcAPI::formats().at(options.arc_type).default_extension();
     }
     else {
       options.arc_type = format_chain.back(); // required to set update properties
@@ -280,43 +281,43 @@ public:
     options.level = g_options.update_level;
     options.method = g_options.update_method;
     options.solid = g_options.update_solid;
+    if (!new_arc)
+      options.password = password;
     options.encrypt_header = g_options.update_encrypt_header;
     options.move_files = move != 0;
     options.open_shared = (Far::adv_control(ACTL_GETSYSTEMSETTINGS) & FSS_COPYFILESOPENEDFORWRITING) != 0;
     options.ignore_errors = g_options.update_ignore_errors;
-    options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
-    if (options.show_dialog) {
-      if (!update_dialog(new_arc, options))
-        FAIL(E_ABORT);
-      if (ArcAPI::formats().count(options.arc_type) == 0)
-        FAIL_MSG(Far::get_msg(MSG_ERROR_NO_FORMAT));
-      if (new_arc) {
-        if (!is_absolute_path(options.arc_path))
-          options.arc_path = Far::get_absolute_path(options.arc_path);
-        if (GetFileAttributesW(long_path(options.arc_path).c_str()) != INVALID_FILE_ATTRIBUTES) {
-          if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_UPDATE_DLG_CONFIRM_OVERWRITE), 0, FMSG_MB_YESNO) != 0)
-            FAIL(E_ABORT);
-        }
-        g_options.update_arc_format_name = ArcAPI::formats().at(options.arc_type).name;
-        g_options.update_create_sfx = options.create_sfx;
-        g_options.update_sfx_module_idx = options.sfx_module_idx;
+
+    if (!update_dialog(new_arc, options))
+      FAIL(E_ABORT);
+    if (ArcAPI::formats().count(options.arc_type) == 0)
+      FAIL_MSG(Far::get_msg(MSG_ERROR_NO_FORMAT));
+    if (new_arc) {
+      if (!is_absolute_path(options.arc_path))
+        options.arc_path = Far::get_absolute_path(options.arc_path);
+      if (GetFileAttributesW(long_path(options.arc_path).c_str()) != INVALID_FILE_ATTRIBUTES) {
+        if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_UPDATE_DLG_CONFIRM_OVERWRITE), 0, FMSG_MB_YESNO) != 0)
+          FAIL(E_ABORT);
       }
-      g_options.update_level = options.level;
-      g_options.update_method = options.method;
-      g_options.update_solid = options.solid;
-      g_options.update_encrypt_header = options.encrypt_header;
-      g_options.update_ignore_errors = options.ignore_errors;
-      g_options.save();
+      g_options.update_arc_format_name = ArcAPI::formats().at(options.arc_type).name;
+      g_options.update_create_sfx = options.create_sfx;
+      g_options.update_sfx_module_idx = options.sfx_module_idx;
     }
+    g_options.update_level = options.level;
+    g_options.update_method = options.method;
+    g_options.update_solid = options.solid;
+    g_options.update_encrypt_header = options.encrypt_header;
+    g_options.update_ignore_errors = options.ignore_errors;
+    g_options.save();
 
     ErrorLog error_log;
     if (new_arc)
       create(src_path, panel_items, items_number, options, error_log);
     else
       update(src_path, panel_items, items_number, remove_path_root(current_dir), options, error_log);
+
     if (!error_log.empty()) {
-      if (options.show_dialog)
-        show_error_log(error_log);
+      show_error_log(error_log);
     }
     else {
       Far::progress_notify();

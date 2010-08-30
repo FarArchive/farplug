@@ -87,7 +87,6 @@ struct UpdateOptions {
   bool move_files;
   bool open_shared;
   bool ignore_errors;
-  bool show_dialog;
 };
 
 bool update_dialog(bool new_arc, UpdateOptions& options);
