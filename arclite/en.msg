@@ -109,7 +109,9 @@ progress.interrupt = Do you want to interrupt current operation?
 # Error messages
 error.extract.unsupported_method = Unsupported compression method
 error.extract.data_error = Data error
+error.extract.data_error.encrypted = Wrong password or data error
 error.extract.crc_error = CRC check failed
+error.extract.crc_error.encrypted = Wrong password or CRC check failure
 error.update.error = Update error
 error.no_format = Archive format not found
 

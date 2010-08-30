@@ -109,7 +109,9 @@ progress.interrupt = Хотите прервать текущую операци
 # Error messages
 error.extract.unsupported_method = Неподдерживаемый метод сжатия
 error.extract.data_error = Ошибка в данных
+error.extract.data_error.encrypted = Неправильный пароль либо ошибка в данных
 error.extract.crc_error = Ошибка при проверке контрольной суммы
+error.extract.crc_error.encrypted = Неправильный пароль либо ошибка при проверке контрольной суммы
 error.update.error = Ошибка обновления
 error.no_format = Формат архива не найден
 
