@@ -312,9 +312,6 @@ void Archive::make_index() {
     else
       is_dir = file_info.is_dir();
 
-    // file encrypted?
-    file_info.encrypted = in_arc->GetProperty(i, kpidEncrypted, prop.ref()) == S_OK && prop.is_bool() && prop.get_bool();
-
     // size
     if (!is_dir && s_ok(in_arc->GetProperty(i, kpidSize, prop.ref())) && prop.is_uint())
       file_info.size = prop.get_uint();

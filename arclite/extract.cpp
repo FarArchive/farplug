@@ -499,9 +499,9 @@ public:
       if (resultEOperationResult == NArchive::NExtract::NOperationResult::kUnSupportedMethod)
         FAIL_MSG(Far::get_msg(MSG_ERROR_EXTRACT_UNSUPPORTED_METHOD));
       else if (resultEOperationResult == NArchive::NExtract::NOperationResult::kDataError)
-        FAIL_MSG(Far::get_msg(file_info.encrypted ? MSG_ERROR_EXTRACT_DATA_ERROR_ENCRYPTED : MSG_ERROR_EXTRACT_DATA_ERROR));
+        FAIL_MSG(Far::get_msg(password.empty() ? MSG_ERROR_EXTRACT_DATA_ERROR : MSG_ERROR_EXTRACT_DATA_ERROR_ENCRYPTED));
       else if (resultEOperationResult == NArchive::NExtract::NOperationResult::kCRCError)
-        FAIL_MSG(Far::get_msg(file_info.encrypted ? MSG_ERROR_EXTRACT_CRC_ERROR_ENCRYPTED : MSG_ERROR_EXTRACT_CRC_ERROR));
+        FAIL_MSG(Far::get_msg(password.empty() ? MSG_ERROR_EXTRACT_CRC_ERROR : MSG_ERROR_EXTRACT_CRC_ERROR_ENCRYPTED));
       else
         return S_OK;
     }
