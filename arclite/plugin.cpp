@@ -22,6 +22,8 @@ private:
 
   bool open_file(const wstring& file_path, bool auto_detect) {
     if (auto_detect) {
+      if (!g_options.handle_commands)
+        FAIL(E_ABORT);
       if (g_options.use_include_masks && !Far::match_masks(extract_file_name(file_path), g_options.include_masks))
         FAIL(E_ABORT);
       if (g_options.use_exclude_masks && Far::match_masks(extract_file_name(file_path), g_options.exclude_masks))
@@ -55,6 +57,8 @@ private:
 
 public:
   Plugin() {
+    if (!g_options.handle_create)
+      FAIL(E_ABORT);
   }
 
   Plugin(const wstring& file_path) {
@@ -489,11 +493,15 @@ int WINAPI ProcessKeyW(HANDLE hPlugin,int Key,unsigned int ControlState) {
 int WINAPI ConfigureW(int ItemNumber) {
   FAR_ERROR_HANDLER_BEGIN;
   PluginSettings settings;
+  settings.handle_create = g_options.handle_create;
+  settings.handle_commands = g_options.handle_commands;
   settings.use_include_masks = g_options.use_include_masks;
   settings.include_masks = g_options.include_masks;
   settings.use_exclude_masks = g_options.use_exclude_masks;
   settings.exclude_masks = g_options.exclude_masks;
   if (settings_dialog(settings)) {
+    g_options.handle_create = settings.handle_create;
+    g_options.handle_commands = settings.handle_commands;
     g_options.use_include_masks = settings.use_include_masks;
     g_options.include_masks = settings.include_masks;
     g_options.use_exclude_masks = settings.use_exclude_masks;

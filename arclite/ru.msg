@@ -87,6 +87,8 @@ log.close = &Закрыть
 log.show = &Показать список
 
 # Settings dialog
+settings.dlg.handle_create = Обрабатывать команду создания архива (Shift-F&1)
+settings.dlg.handle_commands = Обрабатывать прочие архивные команды (Ctrl-PgDn, Shift-F&2)
 settings.dlg.use_include_masks = Маски &включения:
 settings.dlg.use_exclude_masks = Маски &исключения:
 settings.dlg.generate_masks = &Сгенерировать маски

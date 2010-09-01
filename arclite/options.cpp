@@ -7,6 +7,8 @@ Options g_options;
 
 const wchar_t* c_plugin_key_name = L"arclite";
 
+const wchar_t* c_param_handle_create = L"handle_create";
+const wchar_t* c_param_handle_commands = L"handle_commands";
 const wchar_t* c_param_plugin_prefix = L"plugin_prefix";
 const wchar_t* c_param_max_check_size = L"max_check_size";
 const wchar_t* c_param_smart_path = L"smart_path";
@@ -28,6 +30,8 @@ const wchar_t* c_param_include_masks = L"include_masks";
 const wchar_t* c_param_use_exclude_masks = L"use_exclude_masks";
 const wchar_t* c_param_exclude_masks = L"exclude_masks";
 
+const bool c_def_handle_create = true;
+const bool c_def_handle_commands = true;
 const wchar_t* c_def_plugin_prefix = L"arc";
 const unsigned c_def_max_check_size = 1 << 20;
 const bool c_def_smart_path = true;
@@ -100,6 +104,8 @@ void Options::set_str(const wchar_t* name, const wstring& value, const wstring& 
 
 void Options::load() {
   plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE, false);
+  handle_create = get_bool(c_param_handle_create, c_def_handle_create);
+  handle_commands = get_bool(c_param_handle_commands, c_def_handle_commands);
   plugin_prefix = get_str(c_param_plugin_prefix, c_def_plugin_prefix);
   max_check_size = get_int(c_param_max_check_size, c_def_max_check_size);
   smart_path = get_bool(c_param_smart_path, c_def_smart_path);
@@ -124,6 +130,8 @@ void Options::load() {
 
 void Options::save() {
   plugin_key.open_nt(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_SET_VALUE, true);
+  set_bool(c_param_handle_create, handle_create, c_def_handle_create);
+  set_bool(c_param_handle_commands, handle_commands, c_def_handle_commands);
   set_str(c_param_plugin_prefix, plugin_prefix, c_def_plugin_prefix);
   set_int(c_param_max_check_size, max_check_size, c_def_max_check_size);
   set_bool(c_param_smart_path, smart_path, c_def_smart_path);

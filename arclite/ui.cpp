@@ -718,6 +718,8 @@ private:
 
   PluginSettings& settings;
 
+  int handle_create_ctrl_id;
+  int handle_commands_ctrl_id;
   int use_include_masks_ctrl_id;
   int include_masks_ctrl_id;
   int use_exclude_masks_ctrl_id;
@@ -728,6 +730,8 @@ private:
 
   LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
     if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != cancel_ctrl_id)) {
+      settings.handle_create = get_check(handle_create_ctrl_id);
+      settings.handle_commands = get_check(handle_commands_ctrl_id);
       settings.use_include_masks = get_check(use_include_masks_ctrl_id);
       settings.include_masks = get_text(include_masks_ctrl_id);
       settings.use_exclude_masks = get_check(use_exclude_masks_ctrl_id);
@@ -768,6 +772,13 @@ public:
   }
 
   bool show() {
+    handle_create_ctrl_id = check_box(Far::get_msg(MSG_SETTINGS_DLG_HANDLE_CREATE), settings.handle_create);
+    new_line();
+    handle_commands_ctrl_id = check_box(Far::get_msg(MSG_SETTINGS_DLG_HANDLE_COMMANDS), settings.handle_commands);
+    new_line();
+    separator();
+    new_line();
+
     use_include_masks_ctrl_id = check_box(Far::get_msg(MSG_SETTINGS_DLG_USE_INCLUDE_MASKS), settings.use_include_masks);
     new_line();
     include_masks_ctrl_id = edit_box(settings.include_masks, c_client_xs);
