@@ -478,9 +478,7 @@ private:
       change_extension();
       enable(create_sfx_ctrl_id, is_7z);
       bool create_sfx = get_check(create_sfx_ctrl_id);
-      for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
-        enable(i, is_7z && create_sfx);
-      }
+      enable(sfx_module_ctrl_id, is_7z && create_sfx);
       enable(other_formats_ctrl_id + 1, other_format);
     }
   }
@@ -678,14 +676,12 @@ public:
     if (new_arc) {
       create_sfx_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_CREATE_SFX), options.create_sfx);
       new_line();
-      wstring sfx_module_label = Far::get_msg(MSG_UPDATE_DLG_SFX_MODULE);
-      label(sfx_module_label);
       vector<wstring> sfx_module_list;
       const SfxModules& sfx_modules = ArcAPI::sfx();
       for_each(sfx_modules.begin(), sfx_modules.end(), [&] (const SfxModule& sfx_module) {
         sfx_module_list.push_back(sfx_module.path);
       });
-      sfx_module_ctrl_id = combo_box(sfx_module_list, options.sfx_module_idx, c_client_xs - get_label_len(sfx_module_label), DIF_DROPDOWNLIST);
+      sfx_module_ctrl_id = combo_box(sfx_module_list, options.sfx_module_idx, c_client_xs, DIF_DROPDOWNLIST);
       new_line();
       separator();
       new_line();
