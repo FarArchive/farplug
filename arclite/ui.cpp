@@ -462,10 +462,11 @@ private:
 
   void set_control_state() {
     bool is_7z = arc_type == c_guid_7z;
+    bool is_compressed = !get_check(level_ctrl_id + 0);
     for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
-      enable(i, is_7z);
+      enable(i, is_7z & is_compressed);
     }
-    enable(solid_ctrl_id, is_7z);
+    enable(solid_ctrl_id, is_7z & is_compressed);
     bool other_format = get_check(other_formats_ctrl_id);
     enable(encrypt_ctrl_id, !other_format);
     bool encrypt = get_check(encrypt_ctrl_id);
@@ -562,6 +563,9 @@ private:
     }
     else if (new_arc && msg == DN_EDITCHANGE && !other_formats.empty() && param1 == other_formats_ctrl_id + 1) {
       arc_type = other_formats[get_list_pos(other_formats_ctrl_id + 1)];
+      set_control_state();
+    }
+    else if (msg == DN_BTNCLICK && param1 == level_ctrl_id + 0) {
       set_control_state();
     }
     else if (msg == DN_BTNCLICK && param1 == encrypt_ctrl_id) {

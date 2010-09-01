@@ -430,10 +430,12 @@ void Archive::set_properties(IOutArchive* out_arc, const UpdateOptions& options)
     names.push_back(L"x");
     values.push_back(options.level);
     if (options.arc_type == c_guid_7z) {
-      names.push_back(L"0");
-      values.push_back(options.method);
-      names.push_back(L"s");
-      values.push_back(options.solid);
+      if (options.level != 0) {
+        names.push_back(L"0");
+        values.push_back(options.method);
+        names.push_back(L"s");
+        values.push_back(options.solid);
+      }
       if (!options.password.empty()) {
         names.push_back(L"he");
         values.push_back(options.encrypt_header);
