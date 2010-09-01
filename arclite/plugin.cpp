@@ -163,7 +163,8 @@ public:
       for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
         const FileInfo& file_info = get_file_info(file_index);
         FAR_FIND_DATA& fdata = items[idx].FindData;
-        fdata.dwFileAttributes = file_info.attr;
+        const DWORD c_valid_attributes = FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM;
+        fdata.dwFileAttributes = file_info.attr & c_valid_attributes;
         fdata.ftCreationTime = file_info.ctime;
         fdata.ftLastAccessTime = file_info.atime;
         fdata.ftLastWriteTime = file_info.mtime;
