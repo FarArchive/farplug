@@ -273,6 +273,8 @@ void Archive::make_index() {
   file_list.clear();
   file_list.reserve(num_indices);
 
+  encrypted = false;
+
   struct DirInfo {
     UInt32 index;
     UInt32 parent;
@@ -311,6 +313,9 @@ void Archive::make_index() {
       file_info.attr |= FILE_ATTRIBUTE_DIRECTORY;
     else
       is_dir = file_info.is_dir();
+
+    if (in_arc->GetProperty(i, kpidEncrypted, prop.ref()) == S_OK && prop.is_bool() && prop.get_bool())
+      encrypted = true;
 
     // size
     if (!is_dir && s_ok(in_arc->GetProperty(i, kpidSize, prop.ref())) && prop.is_uint())

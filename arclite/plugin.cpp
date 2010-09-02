@@ -286,8 +286,15 @@ public:
     options.level = g_options.update_level;
     options.method = g_options.update_method;
     options.solid = g_options.update_solid;
-    if (!new_arc)
+    if (new_arc) {
+      options.encrypt = false;
+      options.encrypt_header_defined = true;
+    }
+    else {
+      options.encrypt = encrypted;
+      options.encrypt_header_defined = false;
       options.password = password;
+    }
     options.encrypt_header = g_options.update_encrypt_header;
     options.move_files = move != 0;
     options.open_shared = (Far::adv_control(ACTL_GETSYSTEMSETTINGS) & FSS_COPYFILESOPENEDFORWRITING) != 0;

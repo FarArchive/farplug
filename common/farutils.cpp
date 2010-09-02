@@ -531,6 +531,10 @@ bool Dialog::get_check(unsigned ctrl_id) const {
   return DlgItem_GetCheck(g_far, h_dlg, ctrl_id) == BSTATE_CHECKED;
 }
 
+bool Dialog::is_check_defined(unsigned ctrl_id) const {
+  return DlgItem_GetCheck(g_far, h_dlg, ctrl_id) != BSTATE_3STATE;
+}
+
 void Dialog::set_check(unsigned ctrl_id, bool check) {
   g_far.SendDlgMessage(h_dlg, DM_SETCHECK, ctrl_id, check ? BSTATE_CHECKED : BSTATE_UNCHECKED);
 }

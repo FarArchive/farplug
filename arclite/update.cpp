@@ -436,9 +436,11 @@ void Archive::set_properties(IOutArchive* out_arc, const UpdateOptions& options)
         names.push_back(L"s");
         values.push_back(options.solid);
       }
-      if (!options.password.empty()) {
-        names.push_back(L"he");
-        values.push_back(options.encrypt_header);
+      if (options.encrypt) {
+        if (options.encrypt_header_defined) {
+          names.push_back(L"he");
+          values.push_back(options.encrypt_header);
+        }
       }
     }
     CHECK_COM(set_props->SetProperties(names.data(), values.data(), static_cast<Int32>(names.size())));

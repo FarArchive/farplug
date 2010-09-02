@@ -201,6 +201,7 @@ private:
   void load_arc_attr();
 protected:
   AttrList arc_attr;
+  bool encrypted;
 public:
   AttrList get_attr_list(UInt32 item_index);
 };

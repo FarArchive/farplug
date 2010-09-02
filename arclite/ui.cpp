@@ -516,7 +516,8 @@ private:
         }
       }
       options.solid = get_check(solid_ctrl_id);
-      if (get_check(encrypt_ctrl_id)) {
+      options.encrypt = get_check(encrypt_ctrl_id);
+      if (options.encrypt) {
         wstring password = get_text(password_ctrl_id);
         wstring password2 = get_text(password2_ctrl_id);
         if (password != password2) {
@@ -526,6 +527,7 @@ private:
           FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_PASSWORD_IS_EMPTY));
         }
         options.password = password;
+        options.encrypt_header_defined = is_check_defined(encrypt_header_ctrl_id);
         options.encrypt_header = get_check(encrypt_header_ctrl_id);
       }
       else {
@@ -660,9 +662,9 @@ public:
     separator();
     new_line();
 
-    encrypt_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT), !options.password.empty());
+    encrypt_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT), options.encrypt);
     spacer(2);
-    encrypt_header_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT_HEADER), options.encrypt_header);
+    encrypt_header_ctrl_id = check_box3(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT_HEADER), options.encrypt_header, options.encrypt_header_defined);
     new_line();
     label(Far::get_msg(MSG_UPDATE_DLG_PASSWORD));
     password_ctrl_id = pwd_edit_box(options.password, 20);

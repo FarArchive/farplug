@@ -161,7 +161,10 @@ public:
   }
   unsigned check_box(const wstring& text, int value, DWORD flags = 0);
   unsigned check_box(const wstring& text, bool value, DWORD flags = 0) {
-    return check_box(text, value ? 1 : 0, flags);
+    return check_box(text, value ? BSTATE_CHECKED : BSTATE_UNCHECKED, flags);
+  }
+  unsigned check_box3(const wstring& text, bool value, bool value_defined, DWORD flags = 0) {
+    return check_box(text, value_defined ? (value ? BSTATE_CHECKED : BSTATE_UNCHECKED) : BSTATE_3STATE, flags | DIF_3STATE);
   }
   unsigned radio_button(const wstring& text, bool value, DWORD flags = 0);
   unsigned combo_box(const vector<wstring>& items, unsigned sel_idx, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
@@ -171,6 +174,7 @@ public:
   wstring get_text(unsigned ctrl_id) const;
   void set_text(unsigned ctrl_id, const wstring& text);
   bool get_check(unsigned ctrl_id) const;
+  bool is_check_defined(unsigned ctrl_id) const;
   void set_check(unsigned ctrl_id, bool check);
   unsigned get_list_pos(unsigned ctrl_id) const;
   void set_color(unsigned ctrl_id, unsigned char color);

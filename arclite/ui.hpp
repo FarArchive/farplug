@@ -81,7 +81,9 @@ struct UpdateOptions {
   wstring method;
   bool solid;
   wstring password;
+  bool encrypt;
   bool encrypt_header;
+  bool encrypt_header_defined;
   bool create_sfx;
   unsigned sfx_module_idx;
   bool move_files;
