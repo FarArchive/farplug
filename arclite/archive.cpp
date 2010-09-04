@@ -288,6 +288,9 @@ void Archive::make_index() {
   map<UInt32, unsigned> dir_index_map;
   DirList dir_list;
 
+  bool total_size_defined = true;
+  unsigned __int64 total_size = 0;
+
   DirInfo dir_info;
   UInt32 dir_index = 0;
   FileInfo file_info;
@@ -313,10 +316,15 @@ void Archive::make_index() {
       is_dir = file_info.is_dir();
 
     // size
-    if (!is_dir && s_ok(in_arc->GetProperty(i, kpidSize, prop.ref())) && prop.is_uint())
+    if (!is_dir && s_ok(in_arc->GetProperty(i, kpidSize, prop.ref())) && prop.is_uint()) {
       file_info.size = prop.get_uint();
-    else
+      if (total_size_defined)
+        total_size += file_info.size;
+    }
+    else {
       file_info.size = 0;
+      total_size_defined = false;
+    }
     if (!is_dir && s_ok(in_arc->GetProperty(i, kpidPackSize, prop.ref())) && prop.is_uint())
       file_info.psize = prop.get_uint();
     else
@@ -407,6 +415,19 @@ void Archive::make_index() {
   sort(file_list_index.begin(), file_list_index.end(), [&] (UInt32 left, UInt32 right) -> bool {
     return file_list[left] < file_list[right];
   });
+
+  // archive properties
+  arc_attr.clear();
+  if (total_size_defined) {
+    Attr attr;
+    attr.name = Far::get_msg(MSG_PROPERTY_COMPRESSION_RATIO);
+    unsigned ratio = round(static_cast<double>(archive_file_info.size()) / total_size * 100);
+    if (ratio > 100)
+      ratio = 100;
+    attr.value = int_to_str(ratio) + L'%';
+    arc_attr.push_back(attr);
+  }
+  load_arc_attr();
 }
 
 UInt32 Archive::find_dir(const wstring& path) {

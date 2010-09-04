@@ -323,7 +323,6 @@ ArchiveHandles Archive::detect(const wstring& file_path, bool all) {
 void Archive::open(const ArchiveHandle& archive_handle) {
   in_arc = archive_handle.in_arc;
   format_chain = archive_handle.format_chain;
-  load_arc_attr();
 }
 
 void Archive::reopen() {
@@ -344,7 +343,6 @@ void Archive::reopen() {
       FAIL(E_FAIL);
     format++;
   }
-  load_arc_attr();
 }
 
 void Archive::close() {

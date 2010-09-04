@@ -197,3 +197,4 @@ kpid.Provider = Provider
 # Property values
 property.true = Yes
 property.false = No
+property.compression_ratio = Compression ratio

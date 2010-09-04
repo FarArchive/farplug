@@ -55,7 +55,7 @@ wstring format_size_prop(const PropVariant& prop) {
   if (short_size == long_size)
     return short_size;
   else
-    return short_size + L"  " + long_size;
+    return short_size + L" = " + long_size;
 }
 
 wstring format_filetime_prop(const PropVariant& prop) {
@@ -244,7 +244,6 @@ AttrList Archive::get_attr_list(UInt32 item_index) {
 }
 
 void Archive::load_arc_attr() {
-  arc_attr.clear();
   UInt32 num_props;
   CHECK_COM(in_arc->GetNumberOfArchiveProperties(&num_props));
   for (unsigned i = 0; i < num_props; i++) {
@@ -287,11 +286,14 @@ void Archive::load_arc_attr() {
 
 void Archive::load_update_props() {
   if (update_props_defined) return;
+
   encrypted = false;
   PropVariant prop;
   for (UInt32 i = 0; i < num_indices; i++) {
-    if (in_arc->GetProperty(i, kpidEncrypted, prop.ref()) == S_OK && prop.is_bool() && prop.get_bool())
+    if (in_arc->GetProperty(i, kpidEncrypted, prop.ref()) == S_OK && prop.is_bool() && prop.get_bool()) {
       encrypted = true;
+      break;
+    }
   }
 
   solid = in_arc->GetArchiveProperty(kpidSolid, prop.ref()) == S_OK && prop.is_bool() && prop.get_bool();

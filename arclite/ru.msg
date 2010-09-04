@@ -197,3 +197,4 @@ kpid.Provider = Провайдер
 # Property values
 property.true = Да
 property.false = Нет
+property.compression_ratio = Степень сжатия
