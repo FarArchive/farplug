@@ -323,7 +323,8 @@ void Archive::make_index() {
     }
     else {
       file_info.size = 0;
-      total_size_defined = false;
+      if (!is_dir)
+        total_size_defined = false;
     }
     if (!is_dir && s_ok(in_arc->GetProperty(i, kpidPackSize, prop.ref())) && prop.is_uint())
       file_info.psize = prop.get_uint();
@@ -418,8 +419,11 @@ void Archive::make_index() {
 
   // archive properties
   arc_attr.clear();
+  Attr attr;
+  attr.name = Far::get_msg(MSG_KPID_PATH);
+  attr.value = get_archive_path();
+  arc_attr.push_back(attr);
   if (total_size_defined) {
-    Attr attr;
     attr.name = Far::get_msg(MSG_PROPERTY_COMPRESSION_RATIO);
     unsigned ratio = round(static_cast<double>(archive_file_info.size()) / total_size * 100);
     if (ratio > 100)

@@ -371,9 +371,19 @@ public:
 
   void show_attr() {
     Far::PanelItem panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
-    if (panel_item.file_name == L"..") return;
-    AttrList attr_list = get_attr_list(static_cast<UInt32>(panel_item.user_data));
-    attr_dialog(attr_list);
+    if (panel_item.file_name == L"..") {
+      if (is_root_path(current_dir)) {
+        attr_dialog(arc_attr);
+      }
+      else {
+        AttrList attr_list = get_attr_list(find_dir(current_dir));
+        attr_dialog(attr_list);
+      }
+    }
+    else {
+      AttrList attr_list = get_attr_list(static_cast<UInt32>(panel_item.user_data));
+      attr_dialog(attr_list);
+    }
   }
 
   void close() {
