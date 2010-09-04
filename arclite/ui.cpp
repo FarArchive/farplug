@@ -503,19 +503,33 @@ private:
         }
         options.arc_type = arc_type;
       }
+
+      unsigned level = -1;
       for (unsigned i = 0; i < ARRAYSIZE(c_levels); i++) {
         if (get_check(level_ctrl_id + i)) {
-          options.level = c_levels[i].value;
+          level = c_levels[i].value;
           break;
         }
       }
+      if (level == -1) {
+        FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_LEVEL));
+      }
+      options.level = level;
+
+      wstring method;
       for (unsigned i = 0; i < ARRAYSIZE(c_methods); i++) {
         if (get_check(method_ctrl_id + i)) {
-          options.method = c_methods[i].value;
+          method = c_methods[i].value;
           break;
         }
       }
+      if (method.empty()) {
+        FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_METHOD));
+      }
+      options.method = method;
+
       options.solid = get_check(solid_ctrl_id);
+
       options.encrypt = get_check(encrypt_ctrl_id);
       if (options.encrypt) {
         wstring password = get_text(password_ctrl_id);
@@ -533,6 +547,7 @@ private:
       else {
         options.password.clear();
       }
+
       if (new_arc) {
         options.create_sfx = get_check(create_sfx_ctrl_id);
         if (options.create_sfx) {
@@ -542,6 +557,7 @@ private:
           }
         }
       }
+
       options.move_files = get_check(move_files_ctrl_id);
       options.open_shared = get_check(open_shared_ctrl_id);
       options.ignore_errors = get_check(ignore_errors_ctrl_id);

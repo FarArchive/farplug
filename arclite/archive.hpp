@@ -152,8 +152,6 @@ private:
   FileList file_list;
   FileIndex file_list_index;
   void make_index();
-protected:
-  wstring password;
 public:
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);
@@ -186,6 +184,14 @@ private:
   void delete_src_dir(const wstring& dir_path, DeleteFilesProgress& progress);
   void delete_src_files(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number);
   void load_sfx_module(Buffer<char>& buffer, const UpdateOptions& options);
+protected:
+  unsigned level;
+  wstring method;
+  bool solid;
+  bool encrypted;
+  wstring password;
+  bool update_props_defined;
+  void load_update_props();
 public:
   void create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options, ErrorLog& error_log);
   void update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options, ErrorLog& error_log);
@@ -201,9 +207,12 @@ private:
   void load_arc_attr();
 protected:
   AttrList arc_attr;
-  bool encrypted;
 public:
   AttrList get_attr_list(UInt32 item_index);
+
+public:
+  Archive(): update_props_defined(false) {
+  }
 };
 
 class ArchiveUpdateStream: public IOutStream, public ComBase {

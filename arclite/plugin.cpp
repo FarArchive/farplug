@@ -283,19 +283,23 @@ public:
     else {
       options.arc_type = format_chain.back(); // required to set update properties
     }
-    options.level = g_options.update_level;
-    options.method = g_options.update_method;
-    options.solid = g_options.update_solid;
     if (new_arc) {
+      options.level = g_options.update_level;
+      options.method = g_options.update_method;
+      options.solid = g_options.update_solid;
       options.encrypt = false;
       options.encrypt_header_defined = true;
+      options.encrypt_header = g_options.update_encrypt_header;
     }
     else {
+      load_update_props();
+      options.level = level;
+      options.method = method;
+      options.solid = solid;
       options.encrypt = encrypted;
       options.encrypt_header_defined = false;
       options.password = password;
     }
-    options.encrypt_header = g_options.update_encrypt_header;
     options.move_files = move != 0;
     options.open_shared = (Far::adv_control(ACTL_GETSYSTEMSETTINGS) & FSS_COPYFILESOPENEDFORWRITING) != 0;
     options.ignore_errors = g_options.update_ignore_errors;
@@ -315,10 +319,18 @@ public:
       g_options.update_create_sfx = options.create_sfx;
       g_options.update_sfx_module_idx = options.sfx_module_idx;
     }
-    g_options.update_level = options.level;
-    g_options.update_method = options.method;
-    g_options.update_solid = options.solid;
-    g_options.update_encrypt_header = options.encrypt_header;
+    if (new_arc) {
+      g_options.update_level = options.level;
+      g_options.update_method = options.method;
+      g_options.update_solid = options.solid;
+      g_options.update_encrypt_header = options.encrypt_header;
+    }
+    else {
+      level = options.level;
+      method = options.method;
+      solid = options.solid;
+      encrypted = options.encrypt;
+    }
     g_options.update_ignore_errors = options.ignore_errors;
     g_options.save();
 

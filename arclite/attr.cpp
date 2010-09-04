@@ -236,7 +236,8 @@ AttrList Archive::get_attr_list(UInt32 item_index) {
         attr.value = format_filetime_prop(prop);
     }
 
-    attr_list.push_back(attr);
+    if (!attr.value.empty())
+      attr_list.push_back(attr);
   }
 
   return attr_list;
@@ -279,6 +280,45 @@ void Archive::load_arc_attr() {
         attr.value = format_filetime_prop(prop);
     }
 
-    arc_attr.push_back(attr);
+    if (!attr.value.empty())
+      arc_attr.push_back(attr);
   }
+}
+
+void Archive::load_update_props() {
+  if (update_props_defined) return;
+  encrypted = false;
+  PropVariant prop;
+  for (UInt32 i = 0; i < num_indices; i++) {
+    if (in_arc->GetProperty(i, kpidEncrypted, prop.ref()) == S_OK && prop.is_bool() && prop.get_bool())
+      encrypted = true;
+  }
+
+  solid = in_arc->GetArchiveProperty(kpidSolid, prop.ref()) == S_OK && prop.is_bool() && prop.get_bool();
+
+  level = -1;
+  if (in_arc->GetArchiveProperty(kpidMethod, prop.ref()) == S_OK && prop.is_str()) {
+    list<wstring> m_list = split(prop.get_str(), L' ');
+    for (list<wstring>::const_iterator m_str = m_list.begin(); m_str != m_list.end(); m_str++) {
+      if (_wcsicmp(m_str->c_str(), L"Copy") == 0) {
+        level = 0;
+        method = L"LZMA";
+        break;
+      }
+      else if (_wcsicmp(m_str->c_str(), L"LZMA") == 0) {
+        method = L"LZMA";
+        break;
+      }
+      else if (_wcsicmp(m_str->c_str(), L"LZMA2") == 0) {
+        method = L"LZMA2";
+        break;
+      }
+      else if (_wcsicmp(m_str->c_str(), L"PPMD") == 0) {
+        method = L"PPMD";
+        break;
+      }
+    }
+  }
+
+  update_props_defined = true;
 }
