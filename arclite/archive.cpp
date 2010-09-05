@@ -163,8 +163,9 @@ void ArcAPI::load() {
   find_sfx_modules(Far::get_plugin_module_path());
   wstring _7zip_path;
   Key _7zip_key;
-  if (_7zip_key.open_nt(HKEY_LOCAL_MACHINE, L"Software\\7-Zip", KEY_QUERY_VALUE, false))
-    _7zip_key.query_str_nt(_7zip_path, L"Path");
+  _7zip_key.open_nt(HKEY_CURRENT_USER, L"Software\\7-Zip", KEY_QUERY_VALUE, false) && _7zip_key.query_str_nt(_7zip_path, L"Path");
+  if (_7zip_path.empty())
+    _7zip_key.open_nt(HKEY_LOCAL_MACHINE, L"Software\\7-Zip", KEY_QUERY_VALUE, false) && _7zip_key.query_str_nt(_7zip_path, L"Path");
   if (!_7zip_path.empty()) {
     load_libs(_7zip_path);
     find_sfx_modules(_7zip_path);
