@@ -108,6 +108,10 @@ progress.create = Создание архива...
 progress.delete_files = Удаление файлов...
 progress.scan_dirs = Сканирование каталогов...
 progress.interrupt = Хотите прервать текущую операцию?
+progress.pause = P = пауза
+progress.unpause = пауза (P = продолжить)
+progress.low_priority = B = низкий приоритет
+progress.normal_priority = низкий приоритет (B = нормальный)
 
 # Error messages
 error.extract.unsupported_method = Неподдерживаемый метод сжатия

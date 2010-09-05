@@ -45,6 +45,17 @@ wstring fit_str(const wstring& str, wstring::size_type size) {
   return wstring(str).replace(size / 2, str.size() - size, L"...");
 }
 
+wstring center(const wstring& str, unsigned width) {
+  if (str.size() >= width)
+    return str;
+  unsigned lpad = (width - str.size()) / 2;
+  unsigned rpad = width - str.size() - lpad;
+  wstring result(lpad, L' ');
+  result.append(str);
+  result.append(rpad, L' ');
+  return result;
+}
+
 template<class CharType> basic_string<CharType> strip(const basic_string<CharType>& str) {
   basic_string<CharType>::size_type hp = 0;
   basic_string<CharType>::size_type tp = str.size();

@@ -5,6 +5,7 @@
 bool substr_match(const wstring& str, wstring::size_type pos, wstring::const_pointer mstr);
 wstring word_wrap(const wstring& str, wstring::size_type wrap_bound);
 wstring fit_str(const wstring& str, wstring::size_type size);
+wstring center(const wstring& str, unsigned width);
 string strip(const string& str);
 wstring strip(const wstring& str);
 int str_to_int(const string& str);

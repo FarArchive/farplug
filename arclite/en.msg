@@ -108,6 +108,10 @@ progress.create = Creating archive...
 progress.delete_files = Deleting files...
 progress.scan_dirs = Scanning directories...
 progress.interrupt = Do you want to interrupt current operation?
+progress.pause = P = pause
+progress.unpause = paused (P = continue)
+progress.low_priority = B = low priority
+progress.normal_priority = low priority (B = normal)
 
 # Error messages
 error.extract.unsupported_method = Unsupported compression method

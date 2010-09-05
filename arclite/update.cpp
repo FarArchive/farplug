@@ -24,6 +24,10 @@ private:
   UInt64 file_total;
   UInt64 file_completed;
 
+  bool paused;
+  bool low_priority;
+  DWORD initial_priority;
+
   virtual void do_update_ui() {
     const unsigned c_width = 60;
     wostringstream st;
@@ -55,6 +59,13 @@ private:
 
     st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L" [" << setw(2) << percent << L"%] @ " << setw(9) << format_data_size(speed, get_speed_suffixes()) << L" -" << format_time((total_time - time) / ticks_per_sec()) << L'\n';
     st << Far::get_progress_bar_str(c_width, percent, 100) << L'\n';
+    st << L"\x1\n";
+
+    wstring cmd_str;
+    cmd_str += Far::get_msg(paused ? MSG_PROGRESS_UNPAUSE : MSG_PROGRESS_PAUSE);
+    cmd_str += L", ";
+    cmd_str += Far::get_msg(low_priority ? MSG_PROGRESS_NORMAL_PRIORITY : MSG_PROGRESS_LOW_PRIORITY);
+    st << center(cmd_str, c_width) << L'\n';
 
     Far::message(st.str(), 0, FMSG_LEFTALIGN);
 
@@ -64,8 +75,46 @@ private:
     SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(new_arc ? MSG_PROGRESS_CREATE : MSG_PROGRESS_UPDATE)).c_str());
   }
 
+  virtual void do_process_key(const KEY_EVENT_RECORD& key_event) {
+    if (is_single_key(key_event)) {
+      if (key_event.uChar.UnicodeChar == L'b') {
+        low_priority = !low_priority;
+        SetPriorityClass(GetCurrentProcess(), low_priority ? IDLE_PRIORITY_CLASS : initial_priority);
+        do_update_ui();
+      }
+      else if (key_event.uChar.UnicodeChar == L'p') {
+        paused = !paused;
+        do_update_ui();
+        if (paused) {
+          HANDLE h_con = GetStdHandle(STD_INPUT_HANDLE);
+          INPUT_RECORD rec;
+          DWORD read_cnt;
+          while (paused) {
+            ReadConsoleInputW(h_con, &rec, 1, &read_cnt);
+            if (rec.EventType == KEY_EVENT) {
+              const KEY_EVENT_RECORD& key_event = rec.Event.KeyEvent;
+              if (is_single_key(key_event)) {
+                if (key_event.wVirtualKeyCode == VK_ESCAPE) {
+                  handle_esc();
+                }
+                else if (key_event.uChar.UnicodeChar == L'p') {
+                  paused = false;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
 public:
-  ArchiveUpdateProgress(bool new_arc): ProgressMonitor(true), new_arc(new_arc), completed(0), total(0), file_completed(0), file_total(0) {
+  ArchiveUpdateProgress(bool new_arc): ProgressMonitor(true), new_arc(new_arc), completed(0), total(0), file_completed(0), file_total(0), paused(false), low_priority(false) {
+    initial_priority = GetPriorityClass(GetCurrentProcess());
+    CHECK_SYS(initial_priority);
+  }
+  ~ArchiveUpdateProgress() {
+    SetPriorityClass(GetCurrentProcess(), initial_priority);
   }
 
   void on_open_file(const wstring& file_path, unsigned __int64 size) {

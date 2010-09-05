@@ -15,6 +15,11 @@ private:
   void discard_time();
 protected:
   virtual void do_update_ui() = 0;
+  virtual void do_process_key(const KEY_EVENT_RECORD& ket_event) {
+  }
+protected:
+  bool is_single_key(const KEY_EVENT_RECORD& key_event);
+  void handle_esc();
 public:
   ProgressMonitor(bool lazy = true);
   virtual ~ProgressMonitor();

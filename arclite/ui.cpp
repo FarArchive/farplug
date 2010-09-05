@@ -38,19 +38,33 @@ void ProgressMonitor::update_ui(bool force) {
     INPUT_RECORD rec;
     DWORD read_cnt;
     while (true) {
-      PeekConsoleInput(h_con, &rec, 1, &read_cnt);
+      PeekConsoleInputW(h_con, &rec, 1, &read_cnt);
       if (read_cnt == 0) break;
-      ReadConsoleInput(h_con, &rec, 1, &read_cnt);
-      if ((rec.EventType == KEY_EVENT) && (rec.Event.KeyEvent.wVirtualKeyCode == VK_ESCAPE) && rec.Event.KeyEvent.bKeyDown && ((rec.Event.KeyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | LEFT_CTRL_PRESSED | RIGHT_ALT_PRESSED | RIGHT_CTRL_PRESSED | SHIFT_PRESSED)) == 0)) {
-        if (!confirm_esc)
-          FAIL(E_ABORT);
-        ProgressSuspend ps(*this);
-        if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_PROGRESS_INTERRUPT), 0, FMSG_MB_YESNO) == 0)
-          FAIL(E_ABORT);
+      ReadConsoleInputW(h_con, &rec, 1, &read_cnt);
+      if (rec.EventType == KEY_EVENT) {
+        const KEY_EVENT_RECORD& key_event = rec.Event.KeyEvent;
+        if (is_single_key(key_event) && key_event.wVirtualKeyCode == VK_ESCAPE) {
+          handle_esc();
+        }
+        else {
+          do_process_key(key_event);
+        }
       }
     }
     do_update_ui();
   }
+}
+
+bool ProgressMonitor::is_single_key(const KEY_EVENT_RECORD& key_event) {
+  return key_event.bKeyDown && (key_event.dwControlKeyState & (LEFT_ALT_PRESSED | LEFT_CTRL_PRESSED | RIGHT_ALT_PRESSED | RIGHT_CTRL_PRESSED | SHIFT_PRESSED)) == 0;
+}
+
+void ProgressMonitor::handle_esc() {
+  if (!confirm_esc)
+    FAIL(E_ABORT);
+  ProgressSuspend ps(*this);
+  if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_PROGRESS_INTERRUPT), 0, FMSG_MB_YESNO) == 0)
+    FAIL(E_ABORT);
 }
 
 void ProgressMonitor::clean() {
