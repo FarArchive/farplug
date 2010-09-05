@@ -48,8 +48,8 @@ wstring fit_str(const wstring& str, wstring::size_type size) {
 wstring center(const wstring& str, unsigned width) {
   if (str.size() >= width)
     return str;
-  unsigned lpad = (width - str.size()) / 2;
-  unsigned rpad = width - str.size() - lpad;
+  size_t lpad = (width - str.size()) / 2;
+  size_t rpad = width - str.size() - lpad;
   wstring result(lpad, L' ');
   result.append(str);
   result.append(rpad, L' ');
