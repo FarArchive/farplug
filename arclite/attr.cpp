@@ -201,6 +201,8 @@ const PropInfo* find_prop_info(PROPID prop_id) {
 
 AttrList Archive::get_attr_list(UInt32 item_index) {
   AttrList attr_list;
+  if (item_index >= num_indices) // fake index
+    return attr_list;
   UInt32 num_props;
   CHECK_COM(in_arc->GetNumberOfProperties(&num_props));
   for (unsigned i = 0; i < num_props; i++) {

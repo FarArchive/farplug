@@ -343,7 +343,12 @@ public:
   }
   STDMETHODIMP GetStream(UInt32 index, ISequentialInStream **inStream) {
     COM_ERROR_HANDLER_BEGIN
+    *inStream = nullptr;
     const FileIndexInfo& file_index_info = file_index_map.at(index);
+
+    if (file_index_info.find_data.is_dir())
+      return S_FALSE;
+
     wstring file_path = add_trailing_slash(add_trailing_slash(src_dir) + file_index_info.rel_path) + file_index_info.find_data.cFileName;
     progress.on_open_file(file_path, file_index_info.find_data.size());
 
@@ -364,10 +369,9 @@ public:
       stream.detach(inStream);
       return S_OK;
     }
-    else {
-      *inStream = nullptr;
+    else
       return S_FALSE;
-    }
+
     COM_ERROR_HANDLER_END
   }
   STDMETHODIMP SetOperationResult(Int32 operationResult) {

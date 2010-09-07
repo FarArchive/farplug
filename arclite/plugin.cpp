@@ -370,20 +370,21 @@ public:
   }
 
   void show_attr() {
+    AttrList attr_list;
     Far::PanelItem panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
     if (panel_item.file_name == L"..") {
       if (is_root_path(current_dir)) {
-        attr_dialog(arc_attr);
+        attr_list = arc_attr;
       }
       else {
-        AttrList attr_list = get_attr_list(find_dir(current_dir));
-        attr_dialog(attr_list);
+        attr_list = get_attr_list(find_dir(current_dir));
       }
     }
     else {
-      AttrList attr_list = get_attr_list(static_cast<UInt32>(panel_item.user_data));
-      attr_dialog(attr_list);
+      attr_list = get_attr_list(static_cast<UInt32>(panel_item.user_data));
     }
+    if (!attr_list.empty())
+      attr_dialog(attr_list);
   }
 
   void close() {
