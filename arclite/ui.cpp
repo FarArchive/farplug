@@ -408,9 +408,9 @@ struct CompressionMethod {
 };
 
 const CompressionMethod c_methods[] = {
-  { MSG_COMPRESSION_METHOD_LZMA, L"LZMA" },
-  { MSG_COMPRESSION_METHOD_LZMA2, L"LZMA2" },
-  { MSG_COMPRESSION_METHOD_PPMD, L"PPMD" },
+  { MSG_COMPRESSION_METHOD_LZMA, c_method_lzma },
+  { MSG_COMPRESSION_METHOD_LZMA2, c_method_lzma2 },
+  { MSG_COMPRESSION_METHOD_PPMD, c_method_ppmd },
 };
 
 class UpdateDialog: public Far::Dialog {

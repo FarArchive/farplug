@@ -236,7 +236,12 @@ public:
   STDMETHOD(SetSize)(Int64 newSize);
 };
 
-const string c_guid_7z("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x07\x00\x00", 16);
-const string c_guid_zip("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x01\x00\x00", 16);
-const string c_guid_iso("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE7\x00\x00", 16);
-const string c_guid_udf("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE0\x00\x00", 16);
+extern const string c_guid_7z;
+extern const string c_guid_zip;
+extern const string c_guid_iso;
+extern const string c_guid_udf;
+
+extern const wchar_t* c_method_copy;
+extern const wchar_t* c_method_lzma;
+extern const wchar_t* c_method_lzma2;
+extern const wchar_t* c_method_ppmd;
