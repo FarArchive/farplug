@@ -8,6 +8,7 @@
 
 #include <process.h>
 #include <time.h>
+#include <assert.h>
 
 #include <string>
 #include <list>
