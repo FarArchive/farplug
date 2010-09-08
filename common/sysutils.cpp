@@ -549,6 +549,6 @@ wstring format_file_time(const FILETIME& file_time) {
 wstring upcase(const wstring& str) {
   Buffer<wchar_t> up_str(str.size());
   wmemcpy(up_str.data(), str.data(), str.size());
-  CharUpperBuffW(up_str.data(), up_str.size());
+  CharUpperBuffW(up_str.data(), static_cast<DWORD>(up_str.size()));
   return wstring(up_str.data(), up_str.size());
 }
