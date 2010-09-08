@@ -301,6 +301,7 @@ void Archive::load_update_props() {
   solid = in_arc->GetArchiveProperty(kpidSolid, prop.ref()) == S_OK && prop.is_bool() && prop.get_bool();
 
   level = -1;
+  method.clear();
   if (in_arc->GetArchiveProperty(kpidMethod, prop.ref()) == S_OK && prop.is_str()) {
     list<wstring> m_list = split(prop.get_str(), L' ');
     for (list<wstring>::const_iterator m_str = m_list.begin(); m_str != m_list.end(); m_str++) {
@@ -323,6 +324,11 @@ void Archive::load_update_props() {
       }
     }
   }
+
+  if (level == -1)
+    level = 7; // maximum
+  if (method.empty())
+    method = c_method_lzma;
 
   update_props_defined = true;
 }

@@ -537,7 +537,7 @@ private:
           break;
         }
       }
-      if (method.empty() && is_7z) {
+      if (method.empty() && is_7z && level != 0) {
         FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_METHOD));
       }
       options.method = method;
