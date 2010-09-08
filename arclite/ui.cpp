@@ -502,7 +502,6 @@ private:
       if (new_arc) {
         options.arc_path = unquote(strip(get_text(arc_path_ctrl_id)));
 
-        ArcType arc_type;
         for (unsigned i = 0; i < main_formats.size(); i++) {
           if (get_check(main_formats_ctrl_id + i)) {
             arc_type = c_archive_types[i].value;
@@ -517,6 +516,7 @@ private:
         }
         options.arc_type = arc_type;
       }
+      bool is_7z = arc_type == c_guid_7z;
 
       unsigned level = -1;
       for (unsigned i = 0; i < ARRAYSIZE(c_levels); i++) {
@@ -537,7 +537,7 @@ private:
           break;
         }
       }
-      if (method.empty()) {
+      if (method.empty() && is_7z) {
         FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_METHOD));
       }
       options.method = method;
