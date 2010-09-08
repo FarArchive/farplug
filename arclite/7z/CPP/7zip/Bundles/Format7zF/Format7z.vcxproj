@@ -322,7 +322,6 @@
     <ClCompile Include="..\..\Compress\Deflate64Register.cpp" />
     <ClCompile Include="..\..\Compress\DeflateDecoder.cpp" />
     <ClCompile Include="..\..\Compress\DeflateEncoder.cpp" />
-    <ClCompile Include="..\..\Compress\DeflateNsisRegister.cpp" />
     <ClCompile Include="..\..\Compress\DeflateRegister.cpp" />
     <ClCompile Include="..\..\Compress\ImplodeDecoder.cpp" />
     <ClCompile Include="..\..\Compress\ImplodeHuffmanDecoder.cpp" />

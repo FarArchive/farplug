@@ -192,9 +192,6 @@
     <ClCompile Include="..\..\Compress\DeflateEncoder.cpp">
       <Filter>Compress\Zip Compress</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Compress\DeflateNsisRegister.cpp">
-      <Filter>Compress\Zip Compress</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Compress\DeflateRegister.cpp">
       <Filter>Compress\Zip Compress</Filter>
     </ClCompile>
