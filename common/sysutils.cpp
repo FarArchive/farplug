@@ -545,3 +545,10 @@ wstring format_file_time(const FILETIME& file_time) {
   wstring time_str = buf.data();
   return date_str + L' ' + time_str;
 }
+
+wstring upcase(const wstring& str) {
+  Buffer<wchar_t> up_str(str.size());
+  wmemcpy(up_str.data(), str.data(), str.size());
+  CharUpperBuffW(up_str.data(), up_str.size());
+  return wstring(up_str.data(), up_str.size());
+}

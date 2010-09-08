@@ -260,9 +260,9 @@ public:
     Far::info_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_TEST_OK));
   }
 
-  bool put_files(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t* src_path, int op_mode) {
+  void put_files(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t* src_path, int op_mode) {
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0)
-      return false;
+      return;
     UpdateOptions options;
     bool new_arc = !is_open();
     if (new_arc) {
@@ -347,7 +347,8 @@ public:
       Far::progress_notify();
     }
 
-    return new_arc;
+    if (new_arc)
+      Far::panel_go_to_file(PANEL_ACTIVE, options.arc_path);
   }
 
   void delete_files(const PluginPanelItem* panel_items, int items_number, int op_mode) {
@@ -488,7 +489,8 @@ int WINAPI GetFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsN
 
 int WINAPI PutFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsNumber,int Move,const wchar_t *SrcPath,int OpMode) {
   FAR_ERROR_HANDLER_BEGIN;
-  return reinterpret_cast<Plugin*>(hPlugin)->put_files(PanelItem, ItemsNumber, Move, SrcPath, OpMode) ? 1 : 2;
+  reinterpret_cast<Plugin*>(hPlugin)->put_files(PanelItem, ItemsNumber, Move, SrcPath, OpMode);
+  return 2;
   FAR_ERROR_HANDLER_END(return 0, return -1, (OpMode & OPM_FIND) != 0);
 }
 

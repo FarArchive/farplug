@@ -170,7 +170,7 @@ wstring get_panel_dir(HANDLE h_panel) {
 }
 
 PanelItem get_current_panel_item(HANDLE h_panel) {
-  Buffer<unsigned char> buf(0x10000);
+  Buffer<unsigned char> buf(0x1000);
   unsigned size = g_far.Control(h_panel, FCTL_GETCURRENTPANELITEM, static_cast<int>(buf.size()), reinterpret_cast<LONG_PTR>(buf.data()));
   if (size > buf.size()) {
     buf.resize(size);
@@ -619,6 +619,37 @@ bool match_masks(const wstring& file_name, const wstring& masks) {
 
 unsigned char get_colors(PaletteColors color_id) {
   return static_cast<unsigned char>(g_far.AdvControl(g_far.ModuleNumber, ACTL_GETCOLOR, reinterpret_cast<void*>(color_id)));
+}
+
+// set current file on panel to file_path
+bool panel_go_to_file(HANDLE h_panel, const wstring& file_path) {
+  wstring dir = extract_file_path(file_path);
+  if (!g_far.Control(h_panel, FCTL_SETPANELDIR, 0, reinterpret_cast<LONG_PTR>(dir.c_str())))
+    return false;
+  PanelInfo panel_info;
+  if (!g_far.Control(h_panel, FCTL_GETPANELINFO, 0, reinterpret_cast<LONG_PTR>(&panel_info)))
+    return false;
+  wstring file_name = upcase(extract_file_name(file_path));
+  PanelRedrawInfo panel_ri = { 0 };
+  Buffer<unsigned char> buf(0x1000);
+  int i;
+  for (i = 0; i < panel_info.ItemsNumber; i++) {
+    unsigned size = g_far.Control(h_panel, FCTL_GETPANELITEM, i, NULL);
+    if (size > buf.size())
+      buf.resize(size);
+    size = g_far.Control(h_panel, FCTL_GETPANELITEM, i, reinterpret_cast<LONG_PTR>(buf.data()));
+    assert(size);
+    const PluginPanelItem* panel_item = reinterpret_cast<const PluginPanelItem*>(buf.data());
+    if (file_name == upcase(panel_item->FindData.lpwszFileName)) {
+      panel_ri.CurrentItem = i;
+      break;
+    }
+  }
+  if (i == panel_info.ItemsNumber)
+    return false;
+  if (!g_far.Control(h_panel, FCTL_REDRAWPANEL, 0, reinterpret_cast<LONG_PTR>(&panel_ri)))
+    return false;
+  return true;
 }
 
 };
