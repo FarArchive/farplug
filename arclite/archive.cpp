@@ -16,36 +16,42 @@ const string c_guid_zip("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x0
 const string c_guid_iso("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE7\x00\x00", 16);
 const string c_guid_udf("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE0\x00\x00", 16);
 
+HRESULT ArcLib::get_prop(UInt32 index, PROPID prop_id, PROPVARIANT* prop) const {
+  if (GetHandlerProperty2) {
+    return GetHandlerProperty2(index, prop_id, prop);
+  }
+  else {
+    assert(index == 0);
+    return GetHandlerProperty(prop_id, prop);
+  }
+}
+
 HRESULT ArcLib::get_bool_prop(UInt32 index, PROPID prop_id, bool& value) const {
   PropVariant prop;
-  HRESULT res = GetHandlerProperty2(index, prop_id, prop.ref());
-  if (FAILED(res))
+  HRESULT res = get_prop(index, prop_id, prop.ref());
+  if (res != S_OK)
     return res;
-  if (prop.vt == VT_BOOL)
-    value = prop.boolVal == VARIANT_TRUE;
-  else
+  if (!prop.is_bool())
     return E_FAIL;
+  value = prop.get_bool();
   return S_OK;
 }
 
 HRESULT ArcLib::get_string_prop(UInt32 index, PROPID prop_id, wstring& value) const {
   PropVariant prop;
-  HRESULT res = GetHandlerProperty2(index, prop_id, prop.ref());
-  if (FAILED(res))
+  HRESULT res = get_prop(index, prop_id, prop.ref());
+  if (res != S_OK)
     return res;
-  if (prop.vt == VT_BSTR) {
-    UINT len = SysStringLen(prop.bstrVal);
-    value.assign(prop.bstrVal, len);
-  }
-  else
+  if (!prop.is_str())
     return E_FAIL;
+  value = prop.get_str();
   return S_OK;
 }
 
 HRESULT ArcLib::get_bytes_prop(UInt32 index, PROPID prop_id, string& value) const {
   PropVariant prop;
-  HRESULT res = GetHandlerProperty2(index, prop_id, prop.ref());
-  if (FAILED(res))
+  HRESULT res = get_prop(index, prop_id, prop.ref());
+  if (res != S_OK)
     return res;
   if (prop.vt == VT_BSTR) {
     UINT len = SysStringByteLen(prop.bstrVal);
@@ -136,7 +142,7 @@ void ArcAPI::load_libs(const wstring& path) {
     arc_lib.GetNumberOfFormats = reinterpret_cast<ArcLib::FGetNumberOfFormats>(GetProcAddress(arc_lib.h_module, "GetNumberOfFormats"));
     arc_lib.GetHandlerProperty = reinterpret_cast<ArcLib::FGetHandlerProperty>(GetProcAddress(arc_lib.h_module, "GetHandlerProperty"));
     arc_lib.GetHandlerProperty2 = reinterpret_cast<ArcLib::FGetHandlerProperty2>(GetProcAddress(arc_lib.h_module, "GetHandlerProperty2"));
-    if (arc_lib.CreateObject && arc_lib.GetNumberOfFormats && arc_lib.GetHandlerProperty2) {
+    if (arc_lib.CreateObject && ((arc_lib.GetNumberOfFormats && arc_lib.GetHandlerProperty2) || arc_lib.GetHandlerProperty)) {
       arc_lib.version = get_module_version(arc_lib.module_path);
       arc_libs.push_back(arc_lib);
     }
@@ -182,22 +188,28 @@ void ArcAPI::load() {
   }
   for (unsigned i = 0; i < arc_libs.size(); i++) {
     const ArcLib& arc_lib = arc_libs[i];
+
     UInt32 num_formats;
-    if (arc_lib.GetNumberOfFormats(&num_formats) == S_OK) {
-      for (UInt32 idx = 0; idx < num_formats; idx++) {
-        ArcFormat arc_format;
-        arc_format.lib_index = i;
-        ArcType type;
-        if (arc_lib.get_bytes_prop(idx, NArchive::kClassID, type) != S_OK) continue;
-        arc_lib.get_string_prop(idx, NArchive::kName, arc_format.name);
-        if (arc_lib.get_bool_prop(idx, NArchive::kUpdate, arc_format.updatable) != S_OK)
-          arc_format.updatable = false;
-        arc_lib.get_bytes_prop(idx, NArchive::kStartSignature, arc_format.start_signature);
-        arc_lib.get_string_prop(idx, NArchive::kExtension, arc_format.extension_list);
-        ArcFormats::const_iterator existing_format = arc_formats.find(type);
-        if (existing_format == arc_formats.end() || arc_libs[existing_format->second.lib_index].version < arc_lib.version)
-          arc_formats[type] = arc_format;
-      }
+    if (arc_lib.GetNumberOfFormats) {
+      if (arc_lib.GetNumberOfFormats(&num_formats) != S_OK)
+        num_formats = 0;
+    }
+    else
+      num_formats = 1;
+
+    for (UInt32 idx = 0; idx < num_formats; idx++) {
+      ArcFormat arc_format;
+      arc_format.lib_index = i;
+      ArcType type;
+      if (arc_lib.get_bytes_prop(idx, NArchive::kClassID, type) != S_OK) continue;
+      arc_lib.get_string_prop(idx, NArchive::kName, arc_format.name);
+      if (arc_lib.get_bool_prop(idx, NArchive::kUpdate, arc_format.updatable) != S_OK)
+        arc_format.updatable = false;
+      arc_lib.get_bytes_prop(idx, NArchive::kStartSignature, arc_format.start_signature);
+      arc_lib.get_string_prop(idx, NArchive::kExtension, arc_format.extension_list);
+      ArcFormats::const_iterator existing_format = arc_formats.find(type);
+      if (existing_format == arc_formats.end() || arc_libs[existing_format->second.lib_index].version < arc_lib.version)
+        arc_formats[type] = arc_format;
     }
   }
   // unload unused libraries

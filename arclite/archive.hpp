@@ -20,6 +20,7 @@ struct ArcLib {
   FGetHandlerProperty GetHandlerProperty;
   FGetHandlerProperty2 GetHandlerProperty2;
 
+  HRESULT get_prop(UInt32 index, PROPID prop_id, PROPVARIANT* prop) const;
   HRESULT get_bool_prop(UInt32 index, PROPID prop_id, bool& value) const;
   HRESULT get_string_prop(UInt32 index, PROPID prop_id, wstring& value) const;
   HRESULT get_bytes_prop(UInt32 index, PROPID prop_id, string& value) const;
