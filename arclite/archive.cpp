@@ -448,7 +448,7 @@ void Archive::make_index() {
   arc_attr.push_back(attr);
   if (total_size_defined) {
     attr.name = Far::get_msg(MSG_PROPERTY_COMPRESSION_RATIO);
-    unsigned ratio = round(static_cast<double>(archive_file_info.size()) / total_size * 100);
+    unsigned ratio = total_size ? round(static_cast<double>(archive_file_info.size()) / total_size * 100) : 100;
     if (ratio > 100)
       ratio = 100;
     attr.value = int_to_str(ratio) + L'%';
