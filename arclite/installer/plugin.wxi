@@ -2,7 +2,7 @@
 <?define Manufacturer = "farplug.googlecode.com" ?>
 <?define SupportUrl = "http://forum.farmanager.com/viewtopic.php?t=5637" ?>
 <?define InfoUrl = "http://farplug.googlecode.com/" ?>
-<?define UpdateUrl = "http://forum.farmanager.com/viewtopic.php?t=" ?>
+<?define UpdateUrl = "http://forum.farmanager.com/viewtopic.php?t=5720" ?>
 <?if $(var.Platform) = x86 ?>
   <?define Guid.UpgradeCode = "36535978-3D1B-490D-BEFB-B47072452CBD" ?>
   <?define Guid._7z.dll = "8015FCD5-3D05-4254-8209-512073F02D58" ?>
