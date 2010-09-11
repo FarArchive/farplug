@@ -347,8 +347,12 @@ public:
       Far::progress_notify();
     }
 
-    if (new_arc)
-      Far::panel_go_to_file(PANEL_ACTIVE, options.arc_path);
+    if (new_arc) {
+      if (upcase(Far::get_panel_dir(PANEL_ACTIVE)) == upcase(extract_file_path(options.arc_path)))
+        Far::panel_go_to_file(PANEL_ACTIVE, options.arc_path);
+      if (upcase(Far::get_panel_dir(PANEL_PASSIVE)) == upcase(extract_file_path(options.arc_path)))
+        Far::panel_go_to_file(PANEL_PASSIVE, options.arc_path);
+    }
   }
 
   void delete_files(const PluginPanelItem* panel_items, int items_number, int op_mode) {
