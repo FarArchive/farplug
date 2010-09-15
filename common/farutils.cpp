@@ -327,7 +327,7 @@ unsigned Dialog::edit_box(const wstring& text, unsigned boxsize, DWORD flags) {
     x += boxsize;
   if (x - c_x_frame > client_xs)
     client_xs = x - c_x_frame;
-  di.x2 = x - 1;
+  di.x2 = x - 1 - (flags & DIF_HISTORY ? 1 : 0);
   di.y2 = y;
   di.flags = flags;
   di.text_idx = new_value(text);
