@@ -49,7 +49,7 @@ using namespace std;
 wstring load_file(const wstring& file_name, unsigned* code_page = NULL) {
   File file(get_full_path_name(file_name), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
   Buffer<char> buffer(file.size());
-  unsigned size = file.read(buffer);
+  unsigned size = file.read(buffer.data(), buffer.size());
   if ((size >= 2) && (buffer.data()[0] == '\xFF') && (buffer.data()[1] == '\xFE')) {
     if (code_page) *code_page = CP_UTF16;
     return wstring(reinterpret_cast<wchar_t*>(buffer.data() + 2), (buffer.size() - 2) / 2);
