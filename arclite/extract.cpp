@@ -427,20 +427,22 @@ public:
 
   STDMETHODIMP GetStream(UInt32 index, ISequentialOutStream **outStream,  Int32 askExtractMode) {
     COM_ERROR_HANDLER_BEGIN
-    if (askExtractMode != NArchive::NExtract::NAskMode::kExtract) {
-      *outStream = nullptr;
-      return S_OK;
-    }
-
+    *outStream = nullptr;
     file_info = file_list[index];
+    if (file_info.is_dir())
+      return S_OK;
+
     file_path = file_info.name;
     UInt32 parent_index = file_info.parent;
-    while (parent_index != src_dir_index) {
+    while (parent_index != src_dir_index && parent_index != c_root_index) {
       const FileInfo& file_info = file_list[parent_index];
       file_path.insert(0, 1, L'\\').insert(0, file_info.name);
       parent_index = file_info.parent;
     }
     file_path.insert(0, add_trailing_slash(dst_dir));
+
+    if (askExtractMode != NArchive::NExtract::NAskMode::kExtract)
+      return S_OK;
 
     FindData dst_file_info;
     HANDLE h_find = FindFirstFileW(long_path(file_path).c_str(), &dst_file_info);
@@ -496,12 +498,18 @@ public:
   STDMETHODIMP SetOperationResult(Int32 resultEOperationResult) {
     COM_ERROR_HANDLER_BEGIN
     try {
-      if (resultEOperationResult == NArchive::NExtract::NOperationResult::kUnSupportedMethod)
+      bool encrypted = !password.empty();
+      if (resultEOperationResult == NArchive::NExtract::NOperationResult::kUnSupportedMethod) {
         FAIL_MSG(Far::get_msg(MSG_ERROR_EXTRACT_UNSUPPORTED_METHOD));
-      else if (resultEOperationResult == NArchive::NExtract::NOperationResult::kDataError)
-        FAIL_MSG(Far::get_msg(password.empty() ? MSG_ERROR_EXTRACT_DATA_ERROR : MSG_ERROR_EXTRACT_DATA_ERROR_ENCRYPTED));
-      else if (resultEOperationResult == NArchive::NExtract::NOperationResult::kCRCError)
-        FAIL_MSG(Far::get_msg(password.empty() ? MSG_ERROR_EXTRACT_CRC_ERROR : MSG_ERROR_EXTRACT_CRC_ERROR_ENCRYPTED));
+      }
+      else if (resultEOperationResult == NArchive::NExtract::NOperationResult::kDataError) {
+        password.clear();
+        FAIL_MSG(Far::get_msg(encrypted ? MSG_ERROR_EXTRACT_DATA_ERROR_ENCRYPTED : MSG_ERROR_EXTRACT_DATA_ERROR));
+      }
+      else if (resultEOperationResult == NArchive::NExtract::NOperationResult::kCRCError) {
+        password.clear();
+        FAIL_MSG(Far::get_msg(encrypted ? MSG_ERROR_EXTRACT_CRC_ERROR_ENCRYPTED : MSG_ERROR_EXTRACT_CRC_ERROR));
+      }
       else
         return S_OK;
     }
