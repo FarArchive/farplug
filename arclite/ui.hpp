@@ -86,6 +86,7 @@ struct UpdateOptions {
   wstring method;
   bool solid;
   wstring password;
+  bool show_password;
   bool encrypt;
   bool encrypt_header;
   bool encrypt_header_defined;

@@ -144,10 +144,9 @@ public:
   Dialog(const wstring& title, unsigned width = 60, const wchar_t* help = NULL);
   // create different controls
   void new_line();
+  void reset_line();
   void spacer(unsigned size);
-  void pad(unsigned pos) {
-    if (pos > x - c_x_frame) spacer(pos - (x - c_x_frame));
-  }
+  void pad(unsigned pos);
   unsigned separator();
   unsigned label(const wstring& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned edit_box(const wstring& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
@@ -180,6 +179,7 @@ public:
   void set_color(unsigned ctrl_id, unsigned char color);
   void set_focus(unsigned ctrl_id);
   void enable(unsigned ctrl_id, bool enable);
+  void set_visible(unsigned ctrl_id, bool visible);
 };
 
 class Regex: private NonCopyable {

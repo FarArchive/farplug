@@ -416,7 +416,7 @@ const CompressionMethod c_methods[] = {
 class UpdateDialog: public Far::Dialog {
 private:
   enum {
-    c_client_xs = 65
+    c_client_xs = 69
   };
 
   bool new_arc;
@@ -432,8 +432,10 @@ private:
   int solid_ctrl_id;
   int encrypt_ctrl_id;
   int encrypt_header_ctrl_id;
+  int show_password_ctrl_id;
   int password_ctrl_id;
-  int password2_ctrl_id;
+  int password_verify_ctrl_id;
+  int password_visible_ctrl_id;
   int create_sfx_ctrl_id;
   int sfx_module_ctrl_id;
   int move_files_ctrl_id;
@@ -484,10 +486,17 @@ private:
     bool other_format = get_check(other_formats_ctrl_id);
     enable(encrypt_ctrl_id, !other_format);
     bool encrypt = get_check(encrypt_ctrl_id);
-    for (int i = encrypt_ctrl_id + 1; i <= password2_ctrl_id; i++) {
+    for (int i = encrypt_ctrl_id + 1; i <= password_visible_ctrl_id; i++) {
       enable(i, encrypt && !other_format);
     }
     enable(encrypt_header_ctrl_id, is_7z && encrypt);
+    bool show_password = get_check(show_password_ctrl_id);
+    for (int i = password_ctrl_id - 1; i <= password_verify_ctrl_id; i++) {
+      set_visible(i, !show_password);
+    }
+    for (int i = password_visible_ctrl_id - 1; i <= password_visible_ctrl_id; i++) {
+      set_visible(i, show_password);
+    }
     if (new_arc) {
       change_extension();
       enable(create_sfx_ctrl_id, is_7z);
@@ -546,15 +555,20 @@ private:
 
       options.encrypt = get_check(encrypt_ctrl_id);
       if (options.encrypt) {
-        wstring password = get_text(password_ctrl_id);
-        wstring password2 = get_text(password2_ctrl_id);
-        if (password != password2) {
-          FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_PASSWORDS_DONT_MATCH));
+        options.show_password = get_check(show_password_ctrl_id);
+        if (options.show_password) {
+          options.password = get_text(password_visible_ctrl_id);
         }
-        if (password.empty()) {
+        else {
+          options.password = get_text(password_ctrl_id);
+          wstring password_verify = get_text(password_verify_ctrl_id);
+          if (options.password != password_verify) {
+            FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_PASSWORDS_DONT_MATCH));
+          }
+        }
+        if (options.password.empty()) {
           FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_PASSWORD_IS_EMPTY));
         }
-        options.password = password;
         options.encrypt_header_defined = is_check_defined(encrypt_header_ctrl_id);
         options.encrypt_header = get_check(encrypt_header_ctrl_id);
       }
@@ -603,6 +617,16 @@ private:
     }
     else if (new_arc && msg == DN_BTNCLICK && param1 == create_sfx_ctrl_id) {
       set_control_state();
+    }
+    else if (msg == DN_BTNCLICK && param1 == show_password_ctrl_id) {
+      set_control_state();
+      if (param2 == 0) {
+        set_text(password_ctrl_id, get_text(password_visible_ctrl_id));
+        set_text(password_verify_ctrl_id, get_text(password_visible_ctrl_id));
+      }
+      else {
+        set_text(password_visible_ctrl_id, get_text(password_ctrl_id));
+      }
     }
     return default_dialog_proc(msg, param1, param2);
   }
@@ -695,12 +719,17 @@ public:
     encrypt_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT), options.encrypt);
     spacer(2);
     encrypt_header_ctrl_id = check_box3(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT_HEADER), options.encrypt_header, options.encrypt_header_defined);
+    spacer(2);
+    show_password_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_SHOW_PASSWORD), options.show_password);
     new_line();
     label(Far::get_msg(MSG_UPDATE_DLG_PASSWORD));
     password_ctrl_id = pwd_edit_box(options.password, 20);
     spacer(2);
     label(Far::get_msg(MSG_UPDATE_DLG_PASSWORD2));
-    password2_ctrl_id = pwd_edit_box(options.password, 20);
+    password_verify_ctrl_id = pwd_edit_box(options.password, 20);
+    reset_line();
+    label(Far::get_msg(MSG_UPDATE_DLG_PASSWORD));
+    password_visible_ctrl_id = edit_box(options.password, 20);
     new_line();
     separator();
     new_line();

@@ -300,6 +300,7 @@ public:
       options.encrypt_header_defined = false;
       options.password = password;
     }
+    options.show_password = g_options.update_show_password;
     options.move_files = move != 0;
     options.open_shared = (Far::adv_control(ACTL_GETSYSTEMSETTINGS) & FSS_COPYFILESOPENEDFORWRITING) != 0;
     options.ignore_errors = g_options.update_ignore_errors;
@@ -331,6 +332,7 @@ public:
       solid = options.solid;
       encrypted = options.encrypt;
     }
+    g_options.update_show_password = options.show_password;
     g_options.update_ignore_errors = options.ignore_errors;
     g_options.save();
 

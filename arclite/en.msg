@@ -23,6 +23,7 @@ update.dlg.level = Compression level:
 update.dlg.method = Compression method:
 update.dlg.solid = S&olid archive
 update.dlg.encrypt = &Encrypt archive
+update.dlg.show_password = Show password
 update.dlg.password = Pass&word:
 update.dlg.password2 = Repeat:
 update.dlg.encrypt_header = Encrypt &header

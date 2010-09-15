@@ -275,10 +275,18 @@ void Dialog::new_line() {
   y++;
 }
 
+void Dialog::reset_line() {
+  x = c_x_frame;
+}
+
 void Dialog::spacer(unsigned size) {
   x += size;
   if (x - c_x_frame > client_xs)
     client_xs = x - c_x_frame;
+}
+
+void Dialog::pad(unsigned pos) {
+  if (pos > x - c_x_frame) spacer(pos - (x - c_x_frame));
 }
 
 unsigned Dialog::separator() {
@@ -559,6 +567,10 @@ void Dialog::set_focus(unsigned ctrl_id) {
 
 void Dialog::enable(unsigned ctrl_id, bool enable) {
   g_far.SendDlgMessage(h_dlg, DM_ENABLE, ctrl_id, enable ? TRUE : FALSE);
+}
+
+void Dialog::set_visible(unsigned ctrl_id, bool visible) {
+  g_far.SendDlgMessage(h_dlg, DM_SHOWITEM, ctrl_id, visible ? 1 : 0);
 }
 
 Regex::Regex(): h_regex(INVALID_HANDLE_VALUE) {

@@ -25,6 +25,7 @@ public:
   unsigned update_level;
   wstring update_method;
   bool update_solid;
+  bool update_show_password;
   bool update_encrypt_header;
   bool update_create_sfx;
   unsigned update_sfx_module_idx;
