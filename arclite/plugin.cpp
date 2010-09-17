@@ -191,16 +191,6 @@ public:
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
     ExtractOptions options;
     options.dst_dir = *dest_path;
-    if (g_options.smart_path && items_number > 1 && (op_mode & OPM_TOPLEVEL)) {
-      options.dst_dir = add_trailing_slash(options.dst_dir) + archive_file_info.cFileName;
-      wstring ext = extract_file_ext(archive_file_info.cFileName);
-      options.dst_dir.erase(options.dst_dir.size() - ext.size(), ext.size());
-      if (GetFileAttributesW(long_path(options.dst_dir).c_str()) != INVALID_FILE_ATTRIBUTES) {
-        unsigned n = 0;
-        while (GetFileAttributesW(long_path(options.dst_dir + L"." + int_to_str(n)).c_str()) != INVALID_FILE_ATTRIBUTES && n < 100) n++;
-        options.dst_dir += L"." + int_to_str(n);
-      }
-    }
     options.ignore_errors = g_options.extract_ignore_errors;
     options.overwrite = static_cast<OverwriteOption>(g_options.extract_overwrite);
     options.move_enabled = updatable();
@@ -211,6 +201,16 @@ public:
     if (!options.show_dialog)
       options.overwrite = ooOverwrite;
     if (options.show_dialog) {
+      if (g_options.smart_path && items_number > 1 && (op_mode & OPM_TOPLEVEL)) {
+        options.dst_dir = add_trailing_slash(options.dst_dir) + archive_file_info.cFileName;
+        wstring ext = extract_file_ext(archive_file_info.cFileName);
+        options.dst_dir.erase(options.dst_dir.size() - ext.size(), ext.size());
+        if (GetFileAttributesW(long_path(options.dst_dir).c_str()) != INVALID_FILE_ATTRIBUTES) {
+          unsigned n = 0;
+          while (GetFileAttributesW(long_path(options.dst_dir + L"." + int_to_str(n)).c_str()) != INVALID_FILE_ATTRIBUTES && n < 100) n++;
+          options.dst_dir += L"." + int_to_str(n);
+        }
+      }
       if (!extract_dialog(options))
         FAIL(E_ABORT);
       if (options.dst_dir.empty())
