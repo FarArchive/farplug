@@ -76,13 +76,15 @@ private:
   }
 
   virtual void do_process_key(const KEY_EVENT_RECORD& key_event) {
+    const WORD c_vk_b = 0x42;
+    const WORD c_vk_p = 0x50;
     if (is_single_key(key_event)) {
-      if (key_event.uChar.UnicodeChar == L'b') {
+      if (key_event.wVirtualKeyCode == c_vk_b) {
         low_priority = !low_priority;
         SetPriorityClass(GetCurrentProcess(), low_priority ? IDLE_PRIORITY_CLASS : initial_priority);
         do_update_ui();
       }
-      else if (key_event.uChar.UnicodeChar == L'p') {
+      else if (key_event.wVirtualKeyCode == c_vk_p) {
         paused = !paused;
         do_update_ui();
         if (paused) {
@@ -92,12 +94,12 @@ private:
           while (paused) {
             ReadConsoleInputW(h_con, &rec, 1, &read_cnt);
             if (rec.EventType == KEY_EVENT) {
-              const KEY_EVENT_RECORD& key_event = rec.Event.KeyEvent;
-              if (is_single_key(key_event)) {
-                if (key_event.wVirtualKeyCode == VK_ESCAPE) {
+              const KEY_EVENT_RECORD& ke = rec.Event.KeyEvent;
+              if (is_single_key(ke)) {
+                if (ke.wVirtualKeyCode == VK_ESCAPE) {
                   handle_esc();
                 }
-                else if (key_event.uChar.UnicodeChar == L'p') {
+                else if (ke.wVirtualKeyCode == c_vk_p) {
                   paused = false;
                 }
               }
