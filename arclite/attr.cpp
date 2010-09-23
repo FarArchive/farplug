@@ -222,7 +222,7 @@ AttrList Archive::get_attr_list(UInt32 item_index) {
     PropVariant prop;
     CHECK_COM(in_arc->GetProperty(item_index, prop_id, prop.ref()));
 
-    if (prop_info && prop_info->prop_to_string) {
+    if (prop_info != nullptr && prop_info->prop_to_string) {
       attr.value = prop_info->prop_to_string(prop);
     }
     else {
@@ -265,7 +265,7 @@ void Archive::load_arc_attr() {
     PropVariant prop;
     CHECK_COM(in_arc->GetArchiveProperty(prop_id, prop.ref()));
 
-    if (prop_info && prop_info->prop_to_string) {
+    if (prop_info != nullptr && prop_info->prop_to_string) {
       attr.value = prop_info->prop_to_string(prop);
     }
     else {

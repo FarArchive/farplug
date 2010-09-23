@@ -88,6 +88,27 @@ wstring int_to_str(int val) {
   return _itow(val, str, 10);
 }
 
+unsigned __int64 str_to_uint(const wstring& str) {
+  unsigned __int64 val = 0;
+  for (unsigned i = 0; i < str.size() && str[i] >= L'0' && str[i] <= L'9'; i++) {
+    val = val * 10 + (str[i] - L'0');
+  }
+  return val;
+}
+
+wstring uint_to_str(unsigned __int64 val) {
+  if (val == 0)
+    return L"0";
+  wchar_t str[32];
+  unsigned pos = ARRAYSIZE(str);
+  while (val) {
+    pos--;
+    str[pos] = val % 10 + L'0';
+    val /= 10;
+  }
+  return wstring(str + pos, ARRAYSIZE(str) - pos);
+}
+
 wstring widen(const string& str) {
   return wstring(str.begin(), str.end());
 }

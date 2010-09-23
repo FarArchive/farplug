@@ -193,6 +193,30 @@ bool File::set_time_nt(const FILETIME& ctime, const FILETIME& atime, const FILET
   return SetFileTime(h_file, &ctime, &atime, &mtime) != 0;
 };
 
+unsigned __int64 File::set_pos(__int64 offset, DWORD method) {
+  unsigned __int64 new_pos;
+  CHECK_SYS(set_pos_nt(offset, method, &new_pos));
+  return new_pos;
+}
+
+bool File::set_pos_nt(__int64 offset, DWORD method, unsigned __int64* new_pos) {
+  LARGE_INTEGER distance_to_move, new_file_pointer;
+  distance_to_move.QuadPart = offset;
+  if (!SetFilePointerEx(h_file, distance_to_move, &new_file_pointer, method))
+    return false;
+  if (new_pos)
+    *new_pos = new_file_pointer.QuadPart;
+  return true;
+}
+
+void File::set_end() {
+  CHECK_SYS(set_end_nt());
+}
+
+bool File::set_end_nt() {
+  return SetEndOfFile(h_file) != 0;
+}
+
 void Key::close() {
   if (h_key) {
     RegCloseKey(h_key);

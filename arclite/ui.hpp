@@ -92,6 +92,8 @@ struct UpdateOptions {
   bool encrypt_header_defined;
   bool create_sfx;
   unsigned sfx_module_idx;
+  bool enable_volumes;
+  wstring volume_size;
   bool move_files;
   bool open_shared;
   bool ignore_errors;

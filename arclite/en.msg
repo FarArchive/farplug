@@ -28,6 +28,8 @@ update.dlg.password = Pass&word:
 update.dlg.password2 = Repeat:
 update.dlg.encrypt_header = Encrypt &header
 update.dlg.create_sfx = Create self-e&xtracting archive using SFX module:
+update.dlg.enable_volumes = Split into &volumes
+update.dlg.volume_size = Volume size:
 update.dlg.move_files = &Delete files after archiving
 update.dlg.open_shared = Archive files open for w&riting
 update.dlg.ignore_errors = &Ignore errors
@@ -37,6 +39,7 @@ update.dlg.wrong_method = Select compression method
 update.dlg.passwords_dont_match = Passwords don't match
 update.dlg.password_is_empty = Password is empty
 update.dlg.wrong_sfx_module = Select SFX module
+update.dlg.wrong_volume_size = Invalid volume size
 update.dlg.confirm_overwrite = Target file already exists. Do you want to overwrite it?
 
 # Archive types

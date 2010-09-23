@@ -27,8 +27,8 @@ public:
   bool update_solid;
   bool update_show_password;
   bool update_encrypt_header;
-  bool update_create_sfx;
   unsigned update_sfx_module_idx;
+  wstring update_volume_size;
   bool update_ignore_errors;
   // panel mode
   unsigned panel_view_mode;

@@ -11,6 +11,8 @@ wstring strip(const wstring& str);
 int str_to_int(const string& str);
 int str_to_int(const wstring& str);
 wstring int_to_str(int val);
+unsigned __int64 str_to_uint(const wstring& str);
+wstring uint_to_str(unsigned __int64 val);
 wstring widen(const string& str);
 list<wstring> split(const wstring& str, wchar_t sep);
 wstring combine(const list<wstring>& lst, wchar_t sep);

@@ -20,4 +20,4 @@ void ignore_error(const wstring& path, const Error& error, bool& ignore_errors, 
 
 unsigned calc_percent(unsigned __int64 completed, unsigned __int64 total);
 unsigned __int64 get_module_version(const wstring& file_path);
-
+unsigned __int64 parse_size_string(const wstring& str);

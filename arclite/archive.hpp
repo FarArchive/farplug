@@ -216,26 +216,7 @@ public:
   }
 };
 
-class ArchiveUpdateStream: public IOutStream, public ComBase {
-private:
-  HANDLE h_file;
-  wstring file_path;
-  __int64 start_offset;
-
-public:
-  ArchiveUpdateStream(const wstring& file_path, Error& error);
-  ~ArchiveUpdateStream();
-  void set_offset(__int64 offset);
-
-  UNKNOWN_IMPL_BEGIN
-  UNKNOWN_IMPL_ITF(ISequentialOutStream)
-  UNKNOWN_IMPL_ITF(IOutStream)
-  UNKNOWN_IMPL_END
-
-  STDMETHOD(Write)(const void *data, UInt32 size, UInt32 *processedSize);
-  STDMETHOD(Seek)(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition);
-  STDMETHOD(SetSize)(Int64 newSize);
-};
+IOutStream* get_simple_update_stream(const wstring& arc_path, Error& error);
 
 extern const string c_guid_7z;
 extern const string c_guid_zip;
@@ -246,3 +227,8 @@ extern const wchar_t* c_method_copy;
 extern const wchar_t* c_method_lzma;
 extern const wchar_t* c_method_lzma2;
 extern const wchar_t* c_method_ppmd;
+
+extern const unsigned __int64 c_min_volume_size;
+
+extern const wchar_t* c_sfx_ext;
+extern const wchar_t* c_volume_ext;

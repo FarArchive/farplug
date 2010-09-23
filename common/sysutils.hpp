@@ -59,6 +59,10 @@ public:
   bool write_nt(const void* data, unsigned size, unsigned& size_written) throw();
   void set_time(const FILETIME& ctime, const FILETIME& atime, const FILETIME& mtime);
   bool set_time_nt(const FILETIME& ctime, const FILETIME& atime, const FILETIME& mtime) throw();
+  unsigned __int64 set_pos(__int64 offset, DWORD method = FILE_BEGIN);
+  bool set_pos_nt(__int64 offset, DWORD method = FILE_BEGIN, unsigned __int64* new_pos = nullptr);
+  void set_end();
+  bool set_end_nt();
 };
 
 class Key: private NonCopyable {

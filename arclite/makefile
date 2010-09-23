@@ -4,7 +4,7 @@ COMMONDIR = ..\common
 TOOLSDIR = ..\tools
 FARSDK = ..\farsdk
 
-CPPFLAGS = -nologo -Zi -W3 -Gy -GS -GR -EHsc -MP -c
+CPPFLAGS = -nologo -Zi -W3 -Gy -GR -EHsc -MP -c
 DEFINES = -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_WIN32_WINNT=0x0500
 LINKFLAGS = -nologo -debug -incremental:no -map -manifest:no -dynamicbase -nxcompat -largeaddressaware -dll
 RCFLAGS = -nologo

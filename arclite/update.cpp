@@ -139,80 +139,317 @@ public:
 };
 
 
-ArchiveUpdateStream::ArchiveUpdateStream(const wstring& file_path, Error& error): ComBase(error), h_file(INVALID_HANDLE_VALUE), file_path(file_path), start_offset(0) {
-  h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, 0, nullptr);
-  CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
-}
-ArchiveUpdateStream::~ArchiveUpdateStream() {
-  if (h_file != INVALID_HANDLE_VALUE)
-    CloseHandle(h_file);
-}
-
-void ArchiveUpdateStream::set_offset(__int64 offset) {
-  start_offset = offset;
-}
-
-STDMETHODIMP ArchiveUpdateStream::Write(const void *data, UInt32 size, UInt32 *processedSize) {
-  COM_ERROR_HANDLER_BEGIN
-  DWORD size_written;
-  CHECK_SYS(WriteFile(h_file, data, size, &size_written, nullptr));
-  if (processedSize)
-    *processedSize = size_written;
-  return S_OK;
-  COM_ERROR_HANDLER_END
-}
-
-STDMETHODIMP ArchiveUpdateStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
-  COM_ERROR_HANDLER_BEGIN
-  DWORD move_method;
-  LARGE_INTEGER distance;
-  distance.QuadPart = offset;
-  switch (seekOrigin) {
+DWORD translate_seek_method(UInt32 seek_origin) {
+  DWORD method;
+  switch (seek_origin) {
   case STREAM_SEEK_SET:
-    move_method = FILE_BEGIN;
-    distance.QuadPart += start_offset;
-    break;
+    method = FILE_BEGIN; break;
   case STREAM_SEEK_CUR:
-    move_method = FILE_CURRENT; break;
+    method = FILE_CURRENT; break;
   case STREAM_SEEK_END:
-    move_method = FILE_END; break;
+    method = FILE_END; break;
   default:
     FAIL(E_INVALIDARG);
   }
-  LARGE_INTEGER new_position;
-  CHECK_SYS(SetFilePointerEx(h_file, distance, &new_position, move_method));
-  if (new_position.QuadPart < start_offset)
-    FAIL(E_INVALIDARG);
-  new_position.QuadPart -= start_offset;
-  if (newPosition)
-    *newPosition = new_position.QuadPart;
-  return S_OK;
-  COM_ERROR_HANDLER_END
-}
-STDMETHODIMP ArchiveUpdateStream::SetSize(Int64 newSize) {
-  COM_ERROR_HANDLER_BEGIN
-  LARGE_INTEGER position;
-  position.QuadPart = newSize + start_offset;
-  CHECK_SYS(SetFilePointerEx(h_file, position, nullptr, FILE_BEGIN));
-  CHECK_SYS(SetEndOfFile(h_file));
-  return S_OK;
-  COM_ERROR_HANDLER_END
+  return method;
 }
 
+class UpdateStream: public IOutStream {
+public:
+  virtual void clean_files() throw() = 0;
+};
 
-class FileReadStream: public IInStream, public ComBase {
+
+class SimpleUpdateStream: public UpdateStream, public ComBase, private File {
 private:
-  HANDLE h_file;
+  wstring file_path;
+
+public:
+  SimpleUpdateStream(const wstring& file_path, Error& error): ComBase(error), file_path(file_path) {
+    open(file_path, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
+  }
+  ~SimpleUpdateStream() {
+  }
+
+  UNKNOWN_IMPL_BEGIN
+  UNKNOWN_IMPL_ITF(ISequentialOutStream)
+  UNKNOWN_IMPL_ITF(IOutStream)
+  UNKNOWN_IMPL_END
+
+  STDMETHODIMP Write(const void *data, UInt32 size, UInt32 *processedSize) {
+    COM_ERROR_HANDLER_BEGIN
+    unsigned size_written = write(data, size);
+    if (processedSize)
+      *processedSize = size_written;
+    return S_OK;
+    COM_ERROR_HANDLER_END
+  }
+
+  STDMETHODIMP Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
+    COM_ERROR_HANDLER_BEGIN
+    unsigned __int64 new_position = set_pos(offset, translate_seek_method(seekOrigin));
+    if (newPosition)
+      *newPosition = new_position;
+    return S_OK;
+    COM_ERROR_HANDLER_END
+  }
+  STDMETHODIMP SetSize(Int64 newSize) {
+    COM_ERROR_HANDLER_BEGIN
+    set_pos(newSize, FILE_BEGIN);
+    set_end();
+    return S_OK;
+    COM_ERROR_HANDLER_END
+  }
+
+  virtual void clean_files() throw() {
+    close();
+    DeleteFileW(long_path(file_path).c_str());
+  }
+};
+
+IOutStream* get_simple_update_stream(const wstring& arc_path, Error& error) {
+  return new SimpleUpdateStream(arc_path, error);
+}
+
+
+class SfxUpdateStream: public UpdateStream, public ComBase, private File {
+private:
+  wstring file_path;
+  unsigned __int64 start_offset;
+
+  void write_sfx_header(unsigned sfx_module_idx) {
+    const SfxModules& sfx_modules = ArcAPI::sfx();
+    CHECK(sfx_module_idx < sfx_modules.size());
+    wstring sfx_module_path = sfx_modules[sfx_module_idx].path;
+    File sfx_module(sfx_module_path, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0);
+    unsigned __int64 sfx_module_size = sfx_module.size();
+    CHECK(sfx_module_size < 1024 * 1024);
+    Buffer<char> buffer(static_cast<size_t>(sfx_module_size));
+    CHECK(sfx_module.read(buffer.data(), static_cast<unsigned>(buffer.size())) == sfx_module_size);
+    CHECK(write(buffer.data(), static_cast<unsigned>(buffer.size())) == buffer.size());
+    start_offset = buffer.size();
+  }
+
+public:
+  SfxUpdateStream(const wstring& file_path, unsigned sfx_module_idx, Error& error): ComBase(error), file_path(file_path), start_offset(0) {
+    open(file_path, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
+    write_sfx_header(sfx_module_idx);
+  }
+
+  UNKNOWN_IMPL_BEGIN
+  UNKNOWN_IMPL_ITF(ISequentialOutStream)
+  UNKNOWN_IMPL_ITF(IOutStream)
+  UNKNOWN_IMPL_END
+
+  STDMETHODIMP Write(const void *data, UInt32 size, UInt32 *processedSize) {
+    COM_ERROR_HANDLER_BEGIN
+    DWORD size_written;
+    CHECK_SYS(WriteFile(h_file, data, size, &size_written, nullptr));
+    if (processedSize)
+      *processedSize = size_written;
+    return S_OK;
+    COM_ERROR_HANDLER_END
+  }
+
+  STDMETHODIMP Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
+    COM_ERROR_HANDLER_BEGIN
+    __int64 real_offset = offset;
+    if (seekOrigin == STREAM_SEEK_SET)
+      real_offset += start_offset;
+    unsigned __int64 new_position = set_pos(real_offset, translate_seek_method(seekOrigin));
+    if (new_position < start_offset)
+      FAIL(E_INVALIDARG);
+    new_position -= start_offset;
+    if (newPosition)
+      *newPosition = new_position;
+    return S_OK;
+    COM_ERROR_HANDLER_END
+  }
+  STDMETHODIMP SetSize(Int64 newSize) {
+    COM_ERROR_HANDLER_BEGIN
+    set_pos(newSize + start_offset);
+    set_end();
+    return S_OK;
+    COM_ERROR_HANDLER_END
+  }
+
+  virtual void clean_files() throw() {
+    close();
+    DeleteFileW(long_path(file_path).c_str());
+  }
+};
+
+
+class MultiVolumeUpdateStream: public UpdateStream, public ComBase {
+private:
+  wstring file_path;
+  unsigned __int64 volume_size;
+
+  unsigned __int64 stream_pos;
+  unsigned __int64 seek_stream_pos;
+  unsigned __int64 stream_size;
+  File volume;
+
+  wstring get_volume_path(unsigned __int64 volume_idx) {
+    wstring volume_ext = uint_to_str(volume_idx + 1);
+    if (volume_ext.size() < 3)
+      volume_ext.insert(0, 3 - volume_ext.size(), L'0');
+    volume_ext.insert(0, 1, L'.');
+
+    size_t pos = file_path.find_last_of(L'.');
+    if (pos != wstring::npos && pos != 0) {
+      wstring ext = file_path.substr(pos);
+      if (_wcsicmp(ext.c_str(), c_volume_ext) == 0)
+        return file_path.substr(0, pos) + volume_ext;
+    }
+    return file_path + volume_ext;
+  }
+
+  unsigned __int64 get_last_volume_idx() {
+    return stream_size ? (stream_size - 1) / volume_size : 0;
+  }
+
+public:
+  MultiVolumeUpdateStream(const wstring& file_path, unsigned __int64 volume_size, Error& error): ComBase(error), file_path(file_path), volume_size(volume_size), stream_pos(0), seek_stream_pos(0), stream_size(0) {
+    volume.open(get_volume_path(0), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
+  }
+
+  UNKNOWN_IMPL_BEGIN
+  UNKNOWN_IMPL_ITF(ISequentialOutStream)
+  UNKNOWN_IMPL_ITF(IOutStream)
+  UNKNOWN_IMPL_END
+
+  STDMETHODIMP Write(const void *data, UInt32 size, UInt32 *processedSize) {
+    COM_ERROR_HANDLER_BEGIN
+    if (seek_stream_pos != stream_pos) {
+      unsigned __int64 volume_idx = seek_stream_pos / volume_size;
+      unsigned __int64 last_volume_idx = get_last_volume_idx();
+      while (last_volume_idx + 1 < volume_idx) {
+        last_volume_idx += 1;
+        volume.open(get_volume_path(last_volume_idx), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
+        volume.set_pos(volume_size);
+        volume.set_end();
+      }
+      if (last_volume_idx < volume_idx) {
+        last_volume_idx += 1;
+        assert(last_volume_idx == volume_idx);
+        volume.open(get_volume_path(last_volume_idx), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
+      }
+      else {
+        volume.open(get_volume_path(volume_idx), GENERIC_WRITE, FILE_SHARE_READ, OPEN_EXISTING, 0);
+      }
+      volume.set_pos(seek_stream_pos - volume_idx * volume_size);
+      stream_pos = seek_stream_pos;
+    }
+
+    unsigned data_off = 0;
+    do {
+      unsigned __int64 volume_idx = stream_pos / volume_size;
+
+      if (data_off != 0) { // advance to next volume
+        if (volume_idx > get_last_volume_idx()) {
+          volume.open(get_volume_path(volume_idx), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
+        }
+        else {
+          volume.open(get_volume_path(volume_idx), GENERIC_WRITE, FILE_SHARE_READ, OPEN_EXISTING, 0);
+        }
+      }
+
+      unsigned __int64 volume_upper_bound = (volume_idx + 1) * volume_size;
+      unsigned write_size;
+      if (stream_pos + (size - data_off) > volume_upper_bound)
+        write_size = static_cast<unsigned>(volume_upper_bound - stream_pos);
+      else
+        write_size = size - data_off;
+      CHECK(volume.write(reinterpret_cast<const unsigned char*>(data) + data_off, write_size) == write_size);
+      data_off += write_size;
+      stream_pos += write_size;
+      seek_stream_pos = stream_pos;
+      if (stream_size < stream_pos)
+        stream_size = stream_pos;
+    }
+    while (data_off < size);
+    if (processedSize)
+      *processedSize = size;
+    return S_OK;
+    COM_ERROR_HANDLER_END
+  }
+
+  STDMETHODIMP Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
+    COM_ERROR_HANDLER_BEGIN
+    switch (seekOrigin) {
+    case STREAM_SEEK_SET:
+      seek_stream_pos = offset;
+      break;
+    case STREAM_SEEK_CUR:
+      seek_stream_pos += offset;
+      break;
+    case STREAM_SEEK_END:
+      if (offset > 0 && static_cast<unsigned>(offset) > stream_size)
+        FAIL(E_INVALIDARG);
+      seek_stream_pos = stream_size - offset;
+      break;
+    default:
+      FAIL(E_INVALIDARG);
+    }
+    if (newPosition)
+      *newPosition = seek_stream_pos;
+    return S_OK;
+    COM_ERROR_HANDLER_END
+  }
+
+  STDMETHODIMP SetSize(Int64 newSize) {
+    COM_ERROR_HANDLER_BEGIN
+    if (stream_size == newSize)
+      return S_OK;
+
+    unsigned __int64 last_volume_idx = get_last_volume_idx();
+    unsigned __int64 volume_idx = static_cast<unsigned>(newSize / volume_size);
+    while (last_volume_idx + 1 < volume_idx) {
+      last_volume_idx += 1;
+      volume.open(get_volume_path(last_volume_idx), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
+      volume.set_pos(volume_size);
+      volume.set_end();
+    }
+    if (last_volume_idx < volume_idx) {
+      last_volume_idx += 1;
+      assert(last_volume_idx == volume_idx);
+      volume.open(get_volume_path(last_volume_idx), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
+    }
+    else {
+      volume.open(get_volume_path(volume_idx), GENERIC_WRITE, FILE_SHARE_READ, OPEN_EXISTING, 0);
+    }
+    volume.set_pos(newSize - volume_idx * volume_size);
+    volume.set_end();
+
+    for (unsigned __int64 extra_idx = volume_idx + 1; extra_idx <= last_volume_idx; extra_idx++) {
+      CHECK_SYS(DeleteFileW(long_path(get_volume_path(extra_idx)).c_str()));
+    }
+
+    stream_size = newSize;
+
+    return S_OK;
+    COM_ERROR_HANDLER_END
+  }
+
+  virtual void clean_files() throw() {
+    volume.close();
+    unsigned __int64 last_volume_idx = get_last_volume_idx();
+    for (unsigned __int64 volume_idx = 0; volume_idx <= last_volume_idx; volume_idx++) {
+      DeleteFileW(long_path(get_volume_path(volume_idx)).c_str());
+    }
+  }
+};
+
+
+class FileReadStream: public IInStream, public ComBase, private File {
+private:
   wstring file_path;
   ArchiveUpdateProgress& progress;
 
 public:
   FileReadStream(const wstring& file_path, bool open_shared, ArchiveUpdateProgress& progress, Error& error): ComBase(error), file_path(file_path), progress(progress) {
-    h_file = CreateFileW(long_path(file_path).c_str(), FILE_READ_DATA, FILE_SHARE_READ | (open_shared ? FILE_SHARE_WRITE | FILE_SHARE_DELETE : 0), nullptr, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
-    CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
-  }
-  ~FileReadStream() {
-    CloseHandle(h_file);
+    open(file_path, FILE_READ_DATA, FILE_SHARE_READ | (open_shared ? FILE_SHARE_WRITE | FILE_SHARE_DELETE : 0), OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -222,42 +459,20 @@ public:
 
   STDMETHODIMP Read(void *data, UInt32 size, UInt32 *processedSize) {
     COM_ERROR_HANDLER_BEGIN
-    ERROR_MESSAGE_BEGIN
-    DWORD bytes_read;
-    CHECK_SYS(ReadFile(h_file, data, size, &bytes_read, nullptr));
+    unsigned bytes_read = read(data, size);
     if (processedSize)
       *processedSize = bytes_read;
     progress.on_read_file(bytes_read);
     return S_OK;
-    ERROR_MESSAGE_END(file_path)
     COM_ERROR_HANDLER_END
   }
 
   STDMETHODIMP Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
     COM_ERROR_HANDLER_BEGIN
-    ERROR_MESSAGE_BEGIN
-    DWORD move_method;
-    switch (seekOrigin) {
-    case STREAM_SEEK_SET:
-      move_method = FILE_BEGIN;
-      break;
-    case STREAM_SEEK_CUR:
-      move_method = FILE_CURRENT;
-      break;
-    case STREAM_SEEK_END:
-      move_method = FILE_END;
-      break;
-    default:
-      return E_INVALIDARG;
-    }
-    LARGE_INTEGER distance;
-    distance.QuadPart = offset;
-    LARGE_INTEGER new_position;
-    CHECK_SYS(SetFilePointerEx(h_file, distance, &new_position, move_method));
+    unsigned __int64 new_position = set_pos(offset, translate_seek_method(seekOrigin));
     if (newPosition)
-      *newPosition = new_position.QuadPart;
+      *newPosition = new_position;
     return S_OK;
-    ERROR_MESSAGE_END(file_path)
     COM_ERROR_HANDLER_END
   }
 };
@@ -571,19 +786,6 @@ void Archive::delete_src_files(const wstring& src_dir, const PluginPanelItem* pa
   }
 }
 
-void Archive::load_sfx_module(Buffer<char>& buffer, const UpdateOptions& options) {
-  const SfxModules& sfx_modules = ArcAPI::sfx();
-  CHECK(options.sfx_module_idx < sfx_modules.size());
-  wstring sfx_module_path = sfx_modules[options.sfx_module_idx].path;
-  ERROR_MESSAGE_BEGIN
-  File sfx_module(sfx_module_path, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0);
-  unsigned __int64 sfx_module_size = sfx_module.size();
-  CHECK(sfx_module_size < 1024 * 1024);
-  buffer.resize(static_cast<size_t>(sfx_module_size));
-  CHECK(sfx_module.read(buffer.data(), static_cast<unsigned>(buffer.size())) == sfx_module_size);
-  ERROR_MESSAGE_END(sfx_module_path)
-}
-
 void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options, ErrorLog& error_log) {
   bool ignore_errors = options.ignore_errors;
 
@@ -591,23 +793,23 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
   UInt32 new_index = 0;
   prepare_file_index_map(src_dir, panel_items, items_number, c_root_index, new_index, file_index_map);
 
+  ComObject<IOutArchive> out_arc;
+  ArcAPI::create_out_archive(options.arc_type, &out_arc);
+
+  set_properties(out_arc, options);
+
+  Error error;
+  ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options.password, options.open_shared, ignore_errors, error_log, error));
+  UpdateStream* stream_impl;
+  if (options.enable_volumes)
+    stream_impl = new MultiVolumeUpdateStream(options.arc_path, parse_size_string(options.volume_size), error);
+  else if (options.create_sfx && options.arc_type == c_guid_7z)
+    stream_impl = new SfxUpdateStream(options.arc_path, options.sfx_module_idx, error);
+  else
+    stream_impl = new SimpleUpdateStream(options.arc_path, error);
+  ComObject<IOutStream> update_stream(stream_impl);
+
   try {
-    ComObject<IOutArchive> out_arc;
-    ArcAPI::create_out_archive(options.arc_type, &out_arc);
-
-    set_properties(out_arc, options);
-
-    Error error;
-    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options.password, options.open_shared, ignore_errors, error_log, error));
-    ComObject<ArchiveUpdateStream> update_stream(new ArchiveUpdateStream(options.arc_path, error));
-
-    if (options.create_sfx && options.arc_type == c_guid_7z) {
-      Buffer<char> buffer;
-      load_sfx_module(buffer, options);
-      CHECK_COM(update_stream->Write(buffer.data(), static_cast<UInt32>(buffer.size()), nullptr));
-      update_stream->set_offset(buffer.size());
-    }
-
     HRESULT res = out_arc->UpdateItems(update_stream, new_index, updater);
     if (FAILED(res)) {
       if (error)
@@ -617,7 +819,7 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
     }
   }
   catch (...) {
-    DeleteFileW(long_path(options.arc_path).c_str());
+    stream_impl->clean_files();
     throw;
   }
 
@@ -641,7 +843,7 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
 
     Error error;
     ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, options.password, options.open_shared, ignore_errors, error_log, error));
-    ComObject<IOutStream> update_stream(new ArchiveUpdateStream(temp_arc_name, error));
+    ComObject<IOutStream> update_stream(new SimpleUpdateStream(temp_arc_name, error));
 
     HRESULT res = out_arc->UpdateItems(update_stream, new_index, updater);
     if (FAILED(res)) {

@@ -275,23 +275,20 @@ public:
         options.arc_type = c_guid_7z;
       else
         options.arc_type = arc_types.front();
-      options.create_sfx = g_options.update_create_sfx;
       options.sfx_module_idx = g_options.update_sfx_module_idx;
       if (ArcAPI::formats().count(options.arc_type))
         options.arc_path += ArcAPI::formats().at(options.arc_type).default_extension();
-    }
-    else {
-      options.arc_type = format_chain.back(); // required to set update properties
-    }
-    if (new_arc) {
+
       options.level = g_options.update_level;
       options.method = g_options.update_method;
       options.solid = g_options.update_solid;
       options.encrypt = false;
       options.encrypt_header_defined = true;
       options.encrypt_header = g_options.update_encrypt_header;
+      options.volume_size = g_options.update_volume_size;
     }
     else {
+      options.arc_type = format_chain.back(); // required to set update properties
       load_update_props();
       options.level = level;
       options.method = method;
@@ -300,6 +297,8 @@ public:
       options.encrypt_header_defined = false;
       options.password = password;
     }
+    options.create_sfx = false;
+    options.enable_volumes = false;
     options.show_password = g_options.update_show_password;
     options.move_files = move != 0;
     options.open_shared = (Far::adv_control(ACTL_GETSYSTEMSETTINGS) & FSS_COPYFILESOPENEDFORWRITING) != 0;
@@ -317,10 +316,8 @@ public:
           FAIL(E_ABORT);
       }
       g_options.update_arc_format_name = ArcAPI::formats().at(options.arc_type).name;
-      g_options.update_create_sfx = options.create_sfx;
       g_options.update_sfx_module_idx = options.sfx_module_idx;
-    }
-    if (new_arc) {
+      g_options.update_volume_size = options.volume_size;
       g_options.update_level = options.level;
       g_options.update_method = options.method;
       g_options.update_solid = options.solid;

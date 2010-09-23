@@ -16,6 +16,11 @@ const string c_guid_zip("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x0
 const string c_guid_iso("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE7\x00\x00", 16);
 const string c_guid_udf("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE0\x00\x00", 16);
 
+const unsigned __int64 c_min_volume_size = 16 * 1024;
+
+const wchar_t* c_sfx_ext = L".exe";
+const wchar_t* c_volume_ext = L".001";
+
 HRESULT ArcLib::get_prop(UInt32 index, PROPID prop_id, PROPVARIANT* prop) const {
   if (GetHandlerProperty2) {
     return GetHandlerProperty2(index, prop_id, prop);

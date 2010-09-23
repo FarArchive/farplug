@@ -29,3 +29,23 @@ unsigned __int64 get_module_version(const wstring& file_path) {
   }
   return version;
 }
+
+unsigned __int64 parse_size_string(const wstring& str) {
+  unsigned __int64 size = 0;
+  unsigned i = 0;
+  while (i < str.size() && str[i] >= L'0' && str[i] <= L'9') {
+    size = size * 10 + (str[i] - L'0');
+    i++;
+  }
+  while (i < str.size() && str[i] == L' ') i++;
+  if (i < str.size()) {
+    wchar_t mod_ch = str[i];
+    unsigned __int64 mod_mul;
+    if (mod_ch == L'K' || mod_ch == L'k') mod_mul = 1024;
+    else if (mod_ch == L'M' || mod_ch == L'm') mod_mul = 1024 * 1024;
+    else if (mod_ch == L'G' || mod_ch == L'g') mod_mul = 1024 * 1024 * 1024;
+    else mod_mul = 1;
+    size *= mod_mul;
+  }
+  return size;
+}

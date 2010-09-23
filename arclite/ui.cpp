@@ -441,6 +441,8 @@ private:
   int move_files_ctrl_id;
   int open_shared_ctrl_id;
   int ignore_errors_ctrl_id;
+  int enable_volumes_ctrl_id;
+  int volume_size_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -452,10 +454,13 @@ private:
 
     wstring new_ext;
     bool create_sfx = get_check(create_sfx_ctrl_id);
-    if (create_sfx && arc_type == c_guid_7z)
-      new_ext = L".exe";
-    else if (ArcAPI::formats().count(arc_type))
+    bool enable_volumes = get_check(enable_volumes_ctrl_id);
+    if (ArcAPI::formats().count(arc_type))
       new_ext = ArcAPI::formats().at(arc_type).default_extension();
+    if (create_sfx && arc_type == c_guid_7z)
+      new_ext += c_sfx_ext;
+    else if (enable_volumes)
+      new_ext += c_volume_ext;
 
     if (old_ext.empty() || new_ext.empty())
       return false;
@@ -463,9 +468,14 @@ private:
     wstring arc_path = get_text(arc_path_ctrl_id);
     wstring file_name = extract_file_name(strip(unquote(strip(arc_path))));
     size_t pos = file_name.find_last_of(L'.');
-    if (pos == wstring::npos)
+    if (pos == wstring::npos || pos == 0)
       return false;
     wstring ext = file_name.substr(pos);
+    if (_wcsicmp(ext.c_str(), c_sfx_ext) == 0 || _wcsicmp(ext.c_str(), c_volume_ext) == 0) {
+      pos = file_name.find_last_of(L'.', pos - 1);
+      if (pos != wstring::npos && pos != 0)
+        ext = file_name.substr(pos);
+    }
     if (_wcsicmp(old_ext.c_str(), ext.c_str()) != 0)
       return false;
     pos = arc_path.find_last_of(ext) - (ext.size() - 1);
@@ -499,9 +509,18 @@ private:
     }
     if (new_arc) {
       change_extension();
-      enable(create_sfx_ctrl_id, is_7z);
       bool create_sfx = get_check(create_sfx_ctrl_id);
-      enable(sfx_module_ctrl_id, is_7z && create_sfx);
+      bool enable_volumes = get_check(enable_volumes_ctrl_id);
+      if (create_sfx && enable_volumes)
+        enable_volumes = false;
+      enable(create_sfx_ctrl_id, is_7z && !enable_volumes);
+      for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
+        enable(i, is_7z && create_sfx && !enable_volumes);
+      }
+      enable(enable_volumes_ctrl_id, !is_7z || !create_sfx);
+      for (int i = enable_volumes_ctrl_id + 1; i <= volume_size_ctrl_id; i++) {
+        enable(i, enable_volumes && (!is_7z || !create_sfx));
+      }
       enable(other_formats_ctrl_id + 1, other_format);
     }
   }
@@ -584,6 +603,14 @@ private:
             FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_SFX_MODULE));
           }
         }
+
+        options.enable_volumes = get_check(enable_volumes_ctrl_id);
+        if (options.enable_volumes) {
+          options.volume_size = get_text(volume_size_ctrl_id);
+          if (parse_size_string(options.volume_size) < c_min_volume_size) {
+            FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_VOLUME_SIZE));
+          }
+        }
       }
 
       options.move_files = get_check(move_files_ctrl_id);
@@ -616,6 +643,9 @@ private:
       set_control_state();
     }
     else if (new_arc && msg == DN_BTNCLICK && param1 == create_sfx_ctrl_id) {
+      set_control_state();
+    }
+    else if (new_arc && msg == DN_BTNCLICK && param1 == enable_volumes_ctrl_id) {
       set_control_state();
     }
     else if (msg == DN_BTNCLICK && param1 == show_password_ctrl_id) {
@@ -743,6 +773,14 @@ public:
         sfx_module_list.push_back(sfx_module.path);
       });
       sfx_module_ctrl_id = combo_box(sfx_module_list, options.sfx_module_idx, c_client_xs, DIF_DROPDOWNLIST);
+      new_line();
+      separator();
+      new_line();
+
+      enable_volumes_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_ENABLE_VOLUMES), options.enable_volumes);
+      spacer(2);
+      label(Far::get_msg(MSG_UPDATE_DLG_VOLUME_SIZE));
+      volume_size_ctrl_id = history_edit_box(options.volume_size, L"arclite.volume_size", 20);
       new_line();
       separator();
       new_line();
