@@ -2,6 +2,21 @@
 
 #include "comutils.hpp"
 
+extern const string c_guid_7z;
+extern const string c_guid_zip;
+extern const string c_guid_iso;
+extern const string c_guid_udf;
+
+extern const wchar_t* c_method_copy;
+extern const wchar_t* c_method_lzma;
+extern const wchar_t* c_method_lzma2;
+extern const wchar_t* c_method_ppmd;
+
+extern const unsigned __int64 c_min_volume_size;
+
+extern const wchar_t* c_sfx_ext;
+extern const wchar_t* c_volume_ext;
+
 struct ArcLib {
   HMODULE h_module;
   unsigned __int64 version;
@@ -44,11 +59,6 @@ class ArcFormats: public map<ArcType, ArcFormat> {
 public:
   ArcTypes find_by_name(const wstring& name) const;
   ArcTypes find_by_ext(const wstring& ext) const;
-};
-
-class ArcFormatChain: public list<ArcType> {
-public:
-  wstring to_string() const;
 };
 
 struct SfxModule {
@@ -110,8 +120,20 @@ struct FileIndexInfo {
 };
 typedef map<UInt32, FileIndexInfo> FileIndexMap;
 
+struct ArcEntry {
+  ArcType type;
+  size_t sig_pos;
+  ArcEntry(const ArcType& type, size_t sig_pos): type(type), sig_pos(sig_pos) {
+  }
+};
+
+class ArcChain: public list<ArcEntry> {
+public:
+  wstring to_string() const;
+};
+
 struct ArchiveHandle {
-  ArcFormatChain format_chain;
+  ArcChain arc_chain;
   ComObject<IInArchive> in_arc;
 };
 
@@ -133,11 +155,11 @@ private:
   ComObject<IInArchive> in_arc;
   bool open_sub_stream(IInArchive* in_arc, IInStream** sub_stream, wstring& sub_ext);
   bool open_archive(IInStream* in_stream, IInArchive* archive);
-  void detect(IInStream* in_stream, const wstring& ext, bool all, ArchiveHandles& format_chains);
+  void detect(IInStream* in_stream, const wstring& ext, bool all, ArchiveHandles& archive_handles);
 protected:
   FindData archive_file_info;
   unsigned max_check_size;
-  ArcFormatChain format_chain;
+  ArcChain arc_chain;
 public:
   ArchiveHandles detect(const wstring& file_path, bool all);
   void open(const ArchiveHandle& archive_handle);
@@ -145,6 +167,12 @@ public:
   void reopen();
   bool is_open() const {
     return in_arc;
+  }
+  bool updatable() const {
+    return arc_chain.size() == 1 && ArcAPI::formats().at(arc_chain.back().type).updatable;
+  }
+  bool is_pure_7z() const {
+    return arc_chain.size() == 1 && arc_chain.back().type == c_guid_7z && arc_chain.back().sig_pos == 0;
   }
 
   // archive contents
@@ -168,9 +196,6 @@ private:
   void set_dir_attr(const FileIndexRange& index_list, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log, SetDirAttrProgress& progress);
   void prepare_test(UInt32 file_index, list<UInt32>& indices);
 public:
-  bool updatable() const {
-    return format_chain.size() == 1 && ArcAPI::formats().at(format_chain.back()).updatable;
-  }
   void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
   void test(UInt32 src_dir_index, const vector<UInt32>& src_indices);
 
@@ -217,18 +242,3 @@ public:
 };
 
 IOutStream* get_simple_update_stream(const wstring& arc_path, Error& error);
-
-extern const string c_guid_7z;
-extern const string c_guid_zip;
-extern const string c_guid_iso;
-extern const string c_guid_udf;
-
-extern const wchar_t* c_method_copy;
-extern const wchar_t* c_method_lzma;
-extern const wchar_t* c_method_lzma2;
-extern const wchar_t* c_method_ppmd;
-
-extern const unsigned __int64 c_min_volume_size;
-
-extern const wchar_t* c_sfx_ext;
-extern const wchar_t* c_volume_ext;

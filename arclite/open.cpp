@@ -218,20 +218,13 @@ bool Archive::open_archive(IInStream* in_stream, IInArchive* archive) {
   return res == S_OK;
 }
 
-struct ArcFormatPos {
-  ArcType arc_type;
-  size_t sig_pos;
-  ArcFormatPos(const ArcType& arc_type, size_t sig_pos): arc_type(arc_type), sig_pos(sig_pos) {
-  }
-};
-
 void Archive::detect(IInStream* in_stream, const wstring& ext, bool all, ArchiveHandles& archive_handles) {
-  ArcFormatChain parent_format_chain;
+  ArcChain parent_chain;
   if (!archive_handles.empty())
-    parent_format_chain = archive_handles.back().format_chain;
+    parent_chain = archive_handles.back().arc_chain;
 
   const ArcFormats& arc_formats = ArcAPI::formats();
-  list<ArcFormatPos> format_pos_list;
+  list<ArcEntry> arc_entries;
   set<ArcType> found_types;
 
   // 1. find formats by signature
@@ -254,7 +247,7 @@ void Archive::detect(IInStream* in_stream, const wstring& ext, bool all, Archive
 
   for_each(sig_positions.begin(), sig_positions.end(), [&] (const StrPos& sig_pos) {
     found_types.insert(sig_types[sig_pos.idx]);
-    format_pos_list.push_back(ArcFormatPos(sig_types[sig_pos.idx], sig_pos.pos));
+    arc_entries.push_back(ArcEntry(sig_types[sig_pos.idx], sig_pos.pos));
   });
 
   // 2. find formats by file extension
@@ -262,39 +255,39 @@ void Archive::detect(IInStream* in_stream, const wstring& ext, bool all, Archive
   for_each(types_by_ext.begin(), types_by_ext.end(), [&] (const ArcType& arc_type) {
     if (found_types.count(arc_type) == 0) {
       found_types.insert(arc_type);
-      format_pos_list.push_front(ArcFormatPos(arc_type, 0));
+      arc_entries.push_front(ArcEntry(arc_type, 0));
     }
   });
 
   // 3. all other formats
   for_each(arc_formats.begin(), arc_formats.end(), [&] (const pair<ArcType, ArcFormat>& arc_format) {
     if (found_types.count(arc_format.first) == 0) {
-      format_pos_list.push_back(ArcFormatPos(arc_format.first, 0));
+      arc_entries.push_back(ArcEntry(arc_format.first, 0));
     }
   });
 
   // special case: UDF must go before ISO
-  list<ArcFormatPos>::iterator iso_iter = format_pos_list.end();
-  for (list<ArcFormatPos>::iterator format_pos = format_pos_list.begin(); format_pos != format_pos_list.end(); format_pos++) {
-    if (format_pos->arc_type == c_guid_iso) {
-      iso_iter = format_pos;
+  list<ArcEntry>::iterator iso_iter = arc_entries.end();
+  for (list<ArcEntry>::iterator arc_entry = arc_entries.begin(); arc_entry != arc_entries.end(); arc_entry++) {
+    if (arc_entry->type == c_guid_iso) {
+      iso_iter = arc_entry;
     }
-    if (format_pos->arc_type == c_guid_udf) {
-      if (iso_iter != format_pos_list.end()) {
-        format_pos_list.insert(iso_iter, *format_pos);
-        format_pos_list.erase(format_pos);
+    if (arc_entry->type == c_guid_udf) {
+      if (iso_iter != arc_entries.end()) {
+        arc_entries.insert(iso_iter, *arc_entry);
+        arc_entries.erase(arc_entry);
       }
       break;
     }
   }
 
-  for (list<ArcFormatPos>::const_iterator format_pos = format_pos_list.begin(); format_pos != format_pos_list.end(); format_pos++) {
+  for (list<ArcEntry>::const_iterator arc_entry = arc_entries.begin(); arc_entry != arc_entries.end(); arc_entry++) {
     ComObject<IInArchive> archive;
-    ArcAPI::create_in_archive(format_pos->arc_type, &archive);
+    ArcAPI::create_in_archive(arc_entry->type, &archive);
     if (open_archive(in_stream, archive)) {
       ArchiveHandle new_archive_handle;
-      new_archive_handle.format_chain.assign(parent_format_chain.begin(), parent_format_chain.end());
-      new_archive_handle.format_chain.push_back(format_pos->arc_type);
+      new_archive_handle.arc_chain.assign(parent_chain.begin(), parent_chain.end());
+      new_archive_handle.arc_chain.push_back(*arc_entry);
       new_archive_handle.in_arc = archive;
       archive_handles.push_back(new_archive_handle);
 
@@ -322,26 +315,26 @@ ArchiveHandles Archive::detect(const wstring& file_path, bool all) {
 
 void Archive::open(const ArchiveHandle& archive_handle) {
   in_arc = archive_handle.in_arc;
-  format_chain = archive_handle.format_chain;
+  arc_chain = archive_handle.arc_chain;
 }
 
 void Archive::reopen() {
   assert(!in_arc);
   Error error;
   ComObject<IInStream> stream(new ArchiveOpenStream(get_archive_path(), error));
-  ArcFormatChain::const_iterator format = format_chain.begin();
-  ArcAPI::create_in_archive(*format, &in_arc);
+  ArcChain::const_iterator arc_entry = arc_chain.begin();
+  ArcAPI::create_in_archive(arc_entry->type, &in_arc);
   if (!open_archive(stream, in_arc))
     FAIL(E_FAIL);
-  format++;
-  while (format != format_chain.end()) {
+  arc_entry++;
+  while (arc_entry != arc_chain.end()) {
     ComObject<IInStream> sub_stream;
     wstring sub_ext;
     CHECK(open_sub_stream(in_arc, &sub_stream, sub_ext));
-    ArcAPI::create_in_archive(*format, &in_arc);
+    ArcAPI::create_in_archive(arc_entry->type, &in_arc);
     if (!open_archive(sub_stream, in_arc))
       FAIL(E_FAIL);
-    format++;
+    arc_entry++;
   }
 }
 

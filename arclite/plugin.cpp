@@ -43,7 +43,7 @@ private:
     else {
       vector<wstring> format_names;
       for (unsigned i = 0; i < archive_handles.size(); i++) {
-        format_names.push_back(archive_handles[i].format_chain.to_string());
+        format_names.push_back(archive_handles[i].arc_chain.to_string());
       }
       format_idx = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), format_names);
       if (format_idx == -1)
@@ -107,7 +107,7 @@ public:
     opi->CurDir = current_dir.c_str();
     panel_title = Far::get_msg(MSG_PLUGIN_NAME);
     if (is_open()) {
-      panel_title += L":" + format_chain.to_string() + L":" + archive_file_info.cFileName;
+      panel_title += L":" + arc_chain.to_string() + L":" + archive_file_info.cFileName;
       host_file = archive_file_info.cFileName;
     }
     opi->HostFile = host_file.c_str();
@@ -288,7 +288,7 @@ public:
       options.volume_size = g_options.update_volume_size;
     }
     else {
-      options.arc_type = format_chain.back(); // required to set update properties
+      options.arc_type = arc_chain.back().type; // required to set update properties
       load_update_props();
       options.level = level;
       options.method = method;

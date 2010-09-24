@@ -1,5 +1,41 @@
 #pragma once
 
+enum OverwriteOption {
+  ooAsk = 0,
+  ooOverwrite = 1,
+  ooSkip = 2,
+};
+
+struct ExtractOptions {
+  wstring dst_dir;
+  bool ignore_errors;
+  OverwriteOption overwrite;
+  bool move_enabled;
+  bool move_files;
+  bool show_dialog;
+  wstring password;
+};
+
+struct UpdateOptions {
+  wstring arc_path;
+  string arc_type;
+  unsigned level;
+  wstring method;
+  bool solid;
+  wstring password;
+  bool show_password;
+  bool encrypt;
+  bool encrypt_header;
+  bool encrypt_header_defined;
+  bool create_sfx;
+  unsigned sfx_module_idx;
+  bool enable_volumes;
+  wstring volume_size;
+  bool move_files;
+  bool open_shared;
+  bool ignore_errors;
+};
+
 struct Attr {
   wstring name;
   wstring value;

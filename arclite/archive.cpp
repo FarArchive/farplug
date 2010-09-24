@@ -102,12 +102,12 @@ ArcTypes ArcFormats::find_by_ext(const wstring& ext) const {
 }
 
 
-wstring ArcFormatChain::to_string() const {
+wstring ArcChain::to_string() const {
   wstring result;
-  for_each(begin(), end(), [&] (const ArcType& arc_type) {
+  for_each(begin(), end(), [&] (const ArcEntry& arc) {
     if (!result.empty())
       result += L"\x2192";
-    result += ArcAPI::formats().at(arc_type).name;
+    result += ArcAPI::formats().at(arc.type).name;
   });
   return result;
 }
