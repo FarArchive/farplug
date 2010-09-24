@@ -10,7 +10,7 @@ extract.dlg.oo = When destination file exists:
 extract.dlg.oo_ask = &Ask
 extract.dlg.oo_overwrite = &Overwrite
 extract.dlg.oo_skip = &Skip
-extract.dlg.move_files = &Delete files after extraction
+extract.dlg.move_files = &Delete files from archive after extraction
 extract.dlg.password = Pass&word:
 
 # Update dialog

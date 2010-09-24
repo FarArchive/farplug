@@ -10,7 +10,7 @@ extract.dlg.oo = Если файл существует:
 extract.dlg.oo_ask = &Спрашивать
 extract.dlg.oo_overwrite = П&ерезаписывать
 extract.dlg.oo_skip = П&ропускать
-extract.dlg.move_files = &Удалить файлы после распаковки
+extract.dlg.move_files = &Удалить файлы из архива после распаковки
 extract.dlg.password = П&ароль:
 
 # Update dialog
