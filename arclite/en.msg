@@ -126,6 +126,7 @@ error.extract.crc_error = CRC check failed
 error.extract.crc_error.encrypted = Wrong password or CRC check failure
 error.update.error = Update error
 error.no_format = Archive format not found
+error.not_updatable = Archive modification not supported
 
 # Generic buttons
 button.ok = OK

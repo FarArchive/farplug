@@ -265,6 +265,9 @@ public:
       return;
     UpdateOptions options;
     bool new_arc = !is_open();
+    if (!new_arc && !updatable()) {
+      FAIL_MSG(Far::get_msg(MSG_ERROR_NOT_UPDATABLE));
+    }
     if (new_arc) {
       if (items_number == 1 || is_root_path(src_path))
         options.arc_path = panel_items[0].FindData.lpwszFileName;
