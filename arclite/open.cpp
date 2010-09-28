@@ -77,6 +77,7 @@ private:
   UInt64 total_bytes;
   UInt64 completed_files;
   UInt64 completed_bytes;
+
   virtual void do_update_ui() {
     wostringstream st;
     st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
@@ -86,7 +87,19 @@ private:
     st << L"\x01\n";
     st << format_data_size(completed_bytes, get_size_suffixes()) << L" / " << format_data_size(total_bytes, get_size_suffixes()) << L'\n';
     st << Far::get_progress_bar_str(60, completed_bytes, total_bytes) << L'\n';
+
     Far::message(st.str(), 0, FMSG_LEFTALIGN);
+
+    unsigned percent;
+    if (total_files)
+      percent = calc_percent(completed_files, total_files);
+    else
+      percent = calc_percent(completed_bytes, total_bytes);
+
+    Far::set_progress_state(TBPF_NORMAL);
+    Far::set_progress_value(percent, 100);
+
+    SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(MSG_PROGRESS_OPEN)).c_str());
   }
 
 public:

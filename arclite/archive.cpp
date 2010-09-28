@@ -284,6 +284,13 @@ void Archive::make_index() {
       st << completed << L" / " << total << L'\n';
       st << Far::get_progress_bar_str(60, completed, total) << L'\n';
       Far::message(st.str(), 0, FMSG_LEFTALIGN);
+
+      unsigned percent = calc_percent(completed, total);
+
+      Far::set_progress_state(TBPF_NORMAL);
+      Far::set_progress_value(percent, 100);
+
+      SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(MSG_PROGRESS_OPEN)).c_str());
     }
   public:
     Progress(): completed(0), total(0) {
