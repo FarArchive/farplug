@@ -3,15 +3,19 @@
 
 HINSTANCE g_h_instance = nullptr;
 
-wstring get_system_message(HRESULT hr) {
+wstring get_system_message(HRESULT hr, DWORD lang_id) {
   wostringstream st;
   wchar_t* sys_msg;
-  DWORD len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, nullptr);
+  DWORD len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, hr, lang_id, reinterpret_cast<LPWSTR>(&sys_msg), 0, nullptr);
+  if (!len && lang_id && GetLastError() == ERROR_RESOURCE_LANG_NOT_FOUND)
+    len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, hr, 0, reinterpret_cast<LPWSTR>(&sys_msg), 0, nullptr);
   if (!len) {
     if (HRESULT_FACILITY(hr) == FACILITY_WIN32) {
       HMODULE h_winhttp = GetModuleHandle("winhttp");
       if (h_winhttp) {
-        len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, h_winhttp, HRESULT_CODE(hr), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&sys_msg), 0, nullptr);
+        len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, h_winhttp, HRESULT_CODE(hr), lang_id, reinterpret_cast<LPWSTR>(&sys_msg), 0, nullptr);
+        if (!len && lang_id && GetLastError() == ERROR_RESOURCE_LANG_NOT_FOUND)
+          len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, h_winhttp, HRESULT_CODE(hr), 0, reinterpret_cast<LPWSTR>(&sys_msg), 0, nullptr);
       }
     }
   }

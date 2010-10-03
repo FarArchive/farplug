@@ -320,7 +320,7 @@ RetryDialogResult error_retry_ignore_dialog(const wstring& file_path, const Erro
   st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
   st << fit_str(file_path, Far::get_optimal_msg_width()) << L'\n';
   if (e.code != E_MESSAGE) {
-    wstring sys_msg = get_system_message(e.code);
+    wstring sys_msg = get_system_message(e.code, Far::get_lang_id());
     if (!sys_msg.empty())
       st << word_wrap(sys_msg, Far::get_optimal_msg_width()) << L'\n';
   }
@@ -364,7 +364,7 @@ void show_error_log(const ErrorLog& error_log) {
     const Error& error = iter->second;
     line.assign(file_path).append(1, L'\n');
     if (error.code != E_MESSAGE) {
-      wstring sys_msg = get_system_message(error.code);
+      wstring sys_msg = get_system_message(error.code, Far::get_lang_id());
       if (!sys_msg.empty())
         line.append(sys_msg).append(1, L'\n');
     }

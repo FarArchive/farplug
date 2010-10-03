@@ -8,7 +8,7 @@
 
 extern HINSTANCE g_h_instance;
 
-wstring get_system_message(HRESULT hr);
+wstring get_system_message(HRESULT hr, DWORD lang_id = 0);
 wstring get_console_title();
 bool wait_for_single_object(HANDLE handle, DWORD timeout);
 wstring ansi_to_unicode(const string& str, unsigned code_page);

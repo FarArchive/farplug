@@ -205,5 +205,6 @@ INT_PTR adv_control(int command, void* param = nullptr);
 bool match_masks(const wstring& file_name, const wstring& masks);
 unsigned char get_colors(PaletteColors color_id);
 bool panel_go_to_file(HANDLE h_panel, const wstring& file_path);
+DWORD get_lang_id();
 
 };

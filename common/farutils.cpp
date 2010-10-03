@@ -195,7 +195,7 @@ void error_dlg(const wstring& title, const Error& e) {
   wostringstream st;
   st << title << L'\n';
   if (e.code != E_MESSAGE) {
-    wstring sys_msg = get_system_message(e.code);
+    wstring sys_msg = get_system_message(e.code, get_lang_id());
     if (!sys_msg.empty())
       st << word_wrap(sys_msg, get_optimal_msg_width()) << L'\n';
   }
@@ -662,6 +662,25 @@ bool panel_go_to_file(HANDLE h_panel, const wstring& file_path) {
   if (!g_far.Control(h_panel, FCTL_REDRAWPANEL, 0, reinterpret_cast<LONG_PTR>(&panel_ri)))
     return false;
   return true;
+}
+
+DWORD get_lang_id() {
+  DWORD lang_id = 0;
+  wstring lang_key_path = add_trailing_slash(extract_file_path(g_far.RootKey)) + L"Language";
+  Key lang_key;
+  if (!lang_key.open_nt(HKEY_CURRENT_USER, lang_key_path.c_str(), KEY_QUERY_VALUE, false))
+    return lang_id;
+  wstring lang_name;
+  if (!lang_key.query_str_nt(lang_name, L"Main"))
+    return lang_id;
+  if (lang_name == L"English") lang_id = MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT);
+  else if (lang_name == L"Russian") lang_id = MAKELANGID(LANG_RUSSIAN, SUBLANG_DEFAULT);
+  else if (lang_name == L"Czech") lang_id = MAKELANGID(LANG_CZECH, SUBLANG_DEFAULT);
+  else if (lang_name == L"German") lang_id = MAKELANGID(LANG_GERMAN, SUBLANG_DEFAULT);
+  else if (lang_name == L"Hungarian") lang_id = MAKELANGID(LANG_HUNGARIAN, SUBLANG_DEFAULT);
+  else if (lang_name == L"Polish") lang_id = MAKELANGID(LANG_POLISH, SUBLANG_DEFAULT);
+  else if (lang_name == L"Spanish") lang_id = MAKELANGID(LANG_SPANISH, SUBLANG_DEFAULT);
+  return lang_id;
 }
 
 };
