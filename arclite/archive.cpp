@@ -314,7 +314,7 @@ void Archive::make_index() {
     wstring name;
     bool operator<(const DirInfo& dir_info) const {
       if (parent == dir_info.parent)
-        return name < dir_info.name;
+        return lstrcmpiW(name.c_str(), dir_info.name.c_str()) < 0;
       else
         return parent < dir_info.parent;
     }
