@@ -117,6 +117,7 @@ progress.pause = P = pause
 progress.unpause = paused (P = continue)
 progress.low_priority = B = low priority
 progress.normal_priority = low priority (B = normal)
+progress.paused = Paused
 
 # Error messages
 error.extract.unsupported_method = Unsupported compression method

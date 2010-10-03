@@ -117,6 +117,7 @@ progress.pause = P = пауза
 progress.unpause = пауза (P = продолжить)
 progress.low_priority = B = низкий приоритет
 progress.normal_priority = низкий приоритет (B = нормальный)
+progress.paused = Пауза
 
 # Error messages
 error.extract.unsupported_method = Неподдерживаемый метод сжатия
