@@ -48,7 +48,7 @@ void locate_path_root(const wstring& path, size_t& path_root_len, bool& is_unc_p
       is_unc_path = true;
     }
   }
-  if ((prefix_len == 0) && !substr_match(path, 1, L":")) {
+  if ((prefix_len == 0) && !substr_match(path, 1, L":\\")) {
     path_root_len = 0;
   }
   else {
@@ -148,7 +148,22 @@ bool is_absolute_path(const wstring& path) {
   size_t path_root_len;
   bool is_unc_path;
   locate_path_root(path, path_root_len, is_unc_path);
-  return path_root_len != 0;
+  if (path_root_len == 0)
+    return false;
+  wstring::size_type p1 = path_root_len;
+  while (p1 != path.size()) {
+    p1 += 1;
+    wstring::size_type p2 = path.find(L'\\', p1);
+    if (p2 == wstring::npos)
+      p2 = path.size();
+    wstring::size_type sz = p2 - p1;
+    if (sz == 1 && path[p1] == L'.')
+      return false;
+    if (sz == 2 && path[p1] == L'.' && path[p1 + 1] == L'.')
+      return false;
+    p1 = p2;
+  }
+  return true;
 }
 
 wstring remove_path_root(const wstring& path) {
