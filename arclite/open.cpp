@@ -11,8 +11,9 @@ class ArchiveOpenStream: public IInStream, public ComBase {
 private:
   HANDLE h_file;
   wstring file_path;
+  Error error;
 public:
-  ArchiveOpenStream(const wstring& file_path, Error& error): ComBase(error), file_path(file_path) {
+  ArchiveOpenStream(const wstring& file_path): ComBase(error), file_path(file_path) {
     h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
@@ -165,7 +166,7 @@ public:
     }
     if (volume_file_info.is_dir())
       return S_FALSE;
-    ComObject<IInStream> file_stream(new ArchiveOpenStream(file_path, error));
+    ComObject<IInStream> file_stream(new ArchiveOpenStream(file_path));
     file_stream.detach(inStream);
     update_ui();
     return S_OK;
@@ -318,8 +319,7 @@ ArchiveHandles Archive::detect(const wstring& file_path, bool all) {
   archive_file_info = get_find_data(file_path);
   archive_dir = extract_file_path(file_path);
   ArchiveHandles archive_handles;
-  Error error;
-  ComObject<IInStream> stream(new ArchiveOpenStream(get_archive_path(), error));
+  ComObject<IInStream> stream(new ArchiveOpenStream(get_archive_path()));
   detect(stream, extract_file_ext(file_path), all, archive_handles);
   if (!all && !archive_handles.empty())
     archive_handles.erase(archive_handles.begin(), archive_handles.end() - 1);
@@ -334,7 +334,7 @@ void Archive::open(const ArchiveHandle& archive_handle) {
 void Archive::reopen() {
   assert(!in_arc);
   Error error;
-  ComObject<IInStream> stream(new ArchiveOpenStream(get_archive_path(), error));
+  ComObject<IInStream> stream(new ArchiveOpenStream(get_archive_path()));
   ArcChain::const_iterator arc_entry = arc_chain.begin();
   ArcAPI::create_in_archive(arc_entry->type, &in_arc);
   if (!open_archive(stream, in_arc))
