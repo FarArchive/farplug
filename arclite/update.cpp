@@ -195,7 +195,7 @@ public:
     return S_OK;
     COM_ERROR_HANDLER_END
   }
-  STDMETHODIMP SetSize(Int64 newSize) {
+  STDMETHODIMP SetSize(UInt64 newSize) {
     COM_ERROR_HANDLER_BEGIN
     set_pos(newSize, FILE_BEGIN);
     set_end();
@@ -267,7 +267,7 @@ public:
     return S_OK;
     COM_ERROR_HANDLER_END
   }
-  STDMETHODIMP SetSize(Int64 newSize) {
+  STDMETHODIMP SetSize(UInt64 newSize) {
     COM_ERROR_HANDLER_BEGIN
     set_pos(newSize + start_offset);
     set_end();
@@ -400,7 +400,7 @@ public:
     COM_ERROR_HANDLER_END
   }
 
-  STDMETHODIMP SetSize(Int64 newSize) {
+  STDMETHODIMP SetSize(UInt64 newSize) {
     COM_ERROR_HANDLER_BEGIN
     if (stream_size == newSize)
       return S_OK;
