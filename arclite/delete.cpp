@@ -44,7 +44,7 @@ private:
   }
 
 public:
-  ArchiveFileDeleter(const vector<UInt32>& new_indices, Error& error): ComBase(error), new_indices(new_indices), completed(0), total(0) {
+  ArchiveFileDeleter(const vector<UInt32>& new_indices): new_indices(new_indices), completed(0), total(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -129,17 +129,10 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
     ComObject<IOutArchive> out_arc;
     CHECK_COM(in_arc->QueryInterface(IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
 
-    Error error;
-    ComObject<IArchiveUpdateCallback> deleter(new ArchiveFileDeleter(new_indices, error));
-    ComObject<IOutStream> update_stream(get_simple_update_stream(temp_arc_name, error));
+    ComObject<IArchiveUpdateCallback> deleter(new ArchiveFileDeleter(new_indices));
+    ComObject<IOutStream> update_stream(get_simple_update_stream(temp_arc_name));
 
-    HRESULT res = out_arc->UpdateItems(update_stream, static_cast<UInt32>(new_indices.size()), deleter);
-    if (FAILED(res)) {
-      if (error)
-        throw error;
-      else
-        FAIL(res);
-    }
+    COM_ERROR_CHECK(out_arc->UpdateItems(update_stream, static_cast<UInt32>(new_indices.size()), deleter));
     close();
     update_stream.Release();
     CHECK_SYS(MoveFileExW(long_path(temp_arc_name).c_str(), long_path(get_archive_path()).c_str(), MOVEFILE_REPLACE_EXISTING));

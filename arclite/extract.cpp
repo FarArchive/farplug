@@ -369,7 +369,7 @@ private:
   FileWriteCache& cache;
 
 public:
-  CachedFileExtractStream(FileWriteCache& cache, Error& error): ComBase(error), cache(cache) {
+  CachedFileExtractStream(FileWriteCache& cache): cache(cache) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -402,7 +402,7 @@ private:
   ExtractProgress& progress;
 
 public:
-  ArchiveExtractor(UInt32 src_dir_index, const wstring& dst_dir, const FileList& file_list, wstring& password, OverwriteOption& oo, bool& ignore_errors, ErrorLog& error_log, Error& error, FileWriteCache& cache, ExtractProgress& progress): ComBase(error), src_dir_index(src_dir_index), dst_dir(dst_dir), file_list(file_list), password(password), oo(oo), ignore_errors(ignore_errors), error_log(error_log), cache(cache), progress(progress) {
+  ArchiveExtractor(UInt32 src_dir_index, const wstring& dst_dir, const FileList& file_list, wstring& password, OverwriteOption& oo, bool& ignore_errors, ErrorLog& error_log, FileWriteCache& cache, ExtractProgress& progress): src_dir_index(src_dir_index), dst_dir(dst_dir), file_list(file_list), password(password), oo(oo), ignore_errors(ignore_errors), error_log(error_log), cache(cache), progress(progress) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -484,7 +484,7 @@ public:
 
     progress.update_extract_file(file_path);
     cache.store_file(file_path, file_info);
-    ComObject<ISequentialOutStream> out_stream(new CachedFileExtractStream(cache, error));
+    ComObject<ISequentialOutStream> out_stream(new CachedFileExtractStream(cache));
     out_stream.detach(outStream);
 
     return S_OK;
@@ -667,17 +667,10 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
   copy(file_indices.begin(), file_indices.end(), back_insert_iterator<vector<UInt32>>(indices));
   sort(indices.begin(), indices.end());
 
-  Error error;
   ExtractProgress progress;
   FileWriteCache cache(ignore_errors, error_log, progress);
-  ComObject<IArchiveExtractCallback> extractor(new ArchiveExtractor(src_dir_index, options.dst_dir, file_list, password, overwrite_option, ignore_errors, error_log, error, cache, progress));
-  HRESULT res = in_arc->Extract(indices.data(), static_cast<UInt32>(indices.size()), 0, extractor);
-  if (FAILED(res)) {
-    if (error)
-      throw error;
-    else
-      FAIL(res);
-  }
+  ComObject<IArchiveExtractCallback> extractor(new ArchiveExtractor(src_dir_index, options.dst_dir, file_list, password, overwrite_option, ignore_errors, error_log, cache, progress));
+  COM_ERROR_CHECK(in_arc->Extract(indices.data(), static_cast<UInt32>(indices.size()), 0, extractor));
   cache.finalize();
   progress.clean();
 

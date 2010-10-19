@@ -2,6 +2,8 @@
 
 #include "error.hpp"
 
+extern Error g_com_error;
+
 inline bool s_ok(HRESULT hr) {
   if (FAILED(hr))
     FAIL(hr);
@@ -15,24 +17,34 @@ inline bool s_ok(HRESULT hr) {
 #define COM_ERROR_HANDLER_END \
     } \
     catch (const Error& e) { \
-      error = e; \
+      g_com_error = e; \
     } \
     catch (const std::exception& e) { \
-      error = e; \
+      g_com_error = e; \
     } \
   } \
   catch (...) { \
-    error.code = E_FAIL; \
+    g_com_error.code = E_FAIL; \
   } \
-  return error.code;
+  return g_com_error.code;
+
+#define COM_ERROR_CHECK(code) { \
+  g_com_error = Error(); \
+  HRESULT __res = (code); \
+  if (FAILED(__res)) { \
+    if (g_com_error) \
+      throw g_com_error; \
+    else \
+      FAIL(__res); \
+  } \
+}
 
 class ComBase: public IUnknown {
 protected:
   ULONG ref_cnt;
-  Error& error;
 public:
-  ComBase(Error& error): ref_cnt(0), error(error) {
-  }
+  ComBase(): ref_cnt(0) {}
+  virtual ~ComBase() {}
 };
 
 #define UNKNOWN_DECL \

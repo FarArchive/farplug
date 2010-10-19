@@ -11,9 +11,8 @@ class ArchiveOpenStream: public IInStream, public ComBase {
 private:
   HANDLE h_file;
   wstring file_path;
-  Error error;
 public:
-  ArchiveOpenStream(const wstring& file_path): ComBase(error), file_path(file_path) {
+  ArchiveOpenStream(const wstring& file_path): file_path(file_path) {
     h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
     CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
   }
@@ -104,7 +103,7 @@ private:
   }
 
 public:
-  ArchiveOpener(const wstring& archive_dir, const FindData& archive_file_info, wstring& password, Error& error): ComBase(error), archive_dir(archive_dir), volume_file_info(archive_file_info), password(password), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
+  ArchiveOpener(const wstring& archive_dir, const FindData& archive_file_info, wstring& password): archive_dir(archive_dir), volume_file_info(archive_file_info), password(password), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -218,17 +217,10 @@ bool Archive::open_sub_stream(IInArchive* in_arc, IInStream** sub_stream, wstrin
 
 bool Archive::open_archive(IInStream* in_stream, IInArchive* archive) {
   CHECK_COM(in_stream->Seek(0, STREAM_SEEK_SET, nullptr));
-
-  Error error;
-  ComObject<IArchiveOpenCallback> opener(new ArchiveOpener(archive_dir, archive_file_info, password, error));
+  ComObject<IArchiveOpenCallback> opener(new ArchiveOpener(archive_dir, archive_file_info, password));
   const UInt64 max_check_start_position = max_check_size;
   HRESULT res = archive->Open(in_stream, &max_check_start_position, opener);
-  if (FAILED(res)) {
-    if (error)
-      throw error;
-    else
-      FAIL(res);
-  }
+  COM_ERROR_CHECK(res);
   return res == S_OK;
 }
 
@@ -333,7 +325,6 @@ void Archive::open(const ArchiveHandle& archive_handle) {
 
 void Archive::reopen() {
   assert(!in_arc);
-  Error error;
   ComObject<IInStream> stream(new ArchiveOpenStream(get_archive_path()));
   ArcChain::const_iterator arc_entry = arc_chain.begin();
   ArcAPI::create_in_archive(arc_entry->type, &in_arc);

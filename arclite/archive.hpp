@@ -241,4 +241,4 @@ public:
   }
 };
 
-IOutStream* get_simple_update_stream(const wstring& arc_path, Error& error);
+IOutStream* get_simple_update_stream(const wstring& arc_path);

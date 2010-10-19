@@ -2,6 +2,8 @@
 #include "error.hpp"
 #include "common.hpp"
 
+Error g_com_error;
+
 unsigned calc_percent(unsigned __int64 completed, unsigned __int64 total) {
   unsigned percent;
   if (total == 0)

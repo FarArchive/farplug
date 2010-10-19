@@ -167,7 +167,7 @@ private:
   wstring file_path;
 
 public:
-  SimpleUpdateStream(const wstring& file_path, Error& error): ComBase(error), file_path(file_path) {
+  SimpleUpdateStream(const wstring& file_path): file_path(file_path) {
     open(file_path, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
   }
   ~SimpleUpdateStream() {
@@ -209,8 +209,8 @@ public:
   }
 };
 
-IOutStream* get_simple_update_stream(const wstring& arc_path, Error& error) {
-  return new SimpleUpdateStream(arc_path, error);
+IOutStream* get_simple_update_stream(const wstring& arc_path) {
+  return new SimpleUpdateStream(arc_path);
 }
 
 
@@ -233,7 +233,7 @@ private:
   }
 
 public:
-  SfxUpdateStream(const wstring& file_path, unsigned sfx_module_idx, Error& error): ComBase(error), file_path(file_path), start_offset(0) {
+  SfxUpdateStream(const wstring& file_path, unsigned sfx_module_idx): file_path(file_path), start_offset(0) {
     open(file_path, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
     write_sfx_header(sfx_module_idx);
   }
@@ -312,7 +312,7 @@ private:
   }
 
 public:
-  MultiVolumeUpdateStream(const wstring& file_path, unsigned __int64 volume_size, Error& error): ComBase(error), file_path(file_path), volume_size(volume_size), stream_pos(0), seek_stream_pos(0), stream_size(0) {
+  MultiVolumeUpdateStream(const wstring& file_path, unsigned __int64 volume_size): file_path(file_path), volume_size(volume_size), stream_pos(0), seek_stream_pos(0), stream_size(0) {
     volume.open(get_volume_path(0), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
   }
 
@@ -450,7 +450,7 @@ private:
   ArchiveUpdateProgress& progress;
 
 public:
-  FileReadStream(const wstring& file_path, bool open_shared, ArchiveUpdateProgress& progress, Error& error): ComBase(error), file_path(file_path), progress(progress) {
+  FileReadStream(const wstring& file_path, bool open_shared, ArchiveUpdateProgress& progress): file_path(file_path), progress(progress) {
     open(file_path, FILE_READ_DATA, FILE_SHARE_READ | (open_shared ? FILE_SHARE_WRITE | FILE_SHARE_DELETE : 0), OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
   }
 
@@ -493,7 +493,7 @@ private:
   ArchiveUpdateProgress progress;
 
 public:
-  ArchiveUpdater(const wstring& src_dir, const wstring& dst_dir, UInt32 num_indices, const FileIndexMap& file_index_map, const wstring& password, bool open_shared, bool& ignore_errors, ErrorLog& error_log, Error& error): ComBase(error), src_dir(src_dir), dst_dir(dst_dir), num_indices(num_indices), file_index_map(file_index_map), password(password), open_shared(open_shared), progress(num_indices == 0), ignore_errors(ignore_errors), error_log(error_log) {
+  ArchiveUpdater(const wstring& src_dir, const wstring& dst_dir, UInt32 num_indices, const FileIndexMap& file_index_map, const wstring& password, bool open_shared, bool& ignore_errors, ErrorLog& error_log): src_dir(src_dir), dst_dir(dst_dir), num_indices(num_indices), file_index_map(file_index_map), password(password), open_shared(open_shared), progress(num_indices == 0), ignore_errors(ignore_errors), error_log(error_log) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -572,7 +572,7 @@ public:
     FileReadStream* file_read_stream = nullptr;
     while (true) {
       try {
-        file_read_stream = new FileReadStream(file_path, open_shared, progress, error);
+        file_read_stream = new FileReadStream(file_path, open_shared, progress);
         break;
       }
       catch (const Error& e) {
@@ -800,25 +800,18 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
 
   set_properties(out_arc, options);
 
-  Error error;
-  ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options.password, options.open_shared, ignore_errors, error_log, error));
+  ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options.password, options.open_shared, ignore_errors, error_log));
   UpdateStream* stream_impl;
   if (options.enable_volumes)
-    stream_impl = new MultiVolumeUpdateStream(options.arc_path, parse_size_string(options.volume_size), error);
+    stream_impl = new MultiVolumeUpdateStream(options.arc_path, parse_size_string(options.volume_size));
   else if (options.create_sfx && options.arc_type == c_guid_7z)
-    stream_impl = new SfxUpdateStream(options.arc_path, options.sfx_module_idx, error);
+    stream_impl = new SfxUpdateStream(options.arc_path, options.sfx_module_idx);
   else
-    stream_impl = new SimpleUpdateStream(options.arc_path, error);
+    stream_impl = new SimpleUpdateStream(options.arc_path);
   ComObject<IOutStream> update_stream(stream_impl);
 
   try {
-    HRESULT res = out_arc->UpdateItems(update_stream, new_index, updater);
-    if (FAILED(res)) {
-      if (error)
-        throw error;
-      else
-        FAIL(res);
-    }
+    COM_ERROR_CHECK(out_arc->UpdateItems(update_stream, new_index, updater));
   }
   catch (...) {
     stream_impl->clean_files();
@@ -843,17 +836,10 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
 
     set_properties(out_arc, options);
 
-    Error error;
-    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, options.password, options.open_shared, ignore_errors, error_log, error));
-    ComObject<IOutStream> update_stream(new SimpleUpdateStream(temp_arc_name, error));
+    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, options.password, options.open_shared, ignore_errors, error_log));
+    ComObject<IOutStream> update_stream(new SimpleUpdateStream(temp_arc_name));
 
-    HRESULT res = out_arc->UpdateItems(update_stream, new_index, updater);
-    if (FAILED(res)) {
-      if (error)
-        throw error;
-      else
-        FAIL(res);
-    }
+    COM_ERROR_CHECK(out_arc->UpdateItems(update_stream, new_index, updater));
     close();
     update_stream.Release();
     CHECK_SYS(MoveFileExW(long_path(temp_arc_name).c_str(), long_path(get_archive_path()).c_str(), MOVEFILE_REPLACE_EXISTING));

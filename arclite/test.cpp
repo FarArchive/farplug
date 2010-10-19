@@ -42,7 +42,7 @@ private:
   }
 
 public:
-  ArchiveTester(UInt32 src_dir_index, const FileList& file_list, Error& error): ComBase(error), ProgressMonitor(true), src_dir_index(src_dir_index), file_list(file_list), completed(0), total(0) {
+  ArchiveTester(UInt32 src_dir_index, const FileList& file_list): ProgressMonitor(true), src_dir_index(src_dir_index), file_list(file_list), completed(0), total(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -138,13 +138,6 @@ void Archive::test(UInt32 src_dir_index, const vector<UInt32>& src_indices) {
   copy(file_indices.begin(), file_indices.end(), back_insert_iterator<vector<UInt32>>(indices));
   sort(indices.begin(), indices.end());
 
-  Error error;
-  ComObject<IArchiveExtractCallback> tester(new ArchiveTester(src_dir_index, file_list, error));
-  HRESULT res = in_arc->Extract(indices.data(), static_cast<UInt32>(indices.size()), 1, tester);
-  if (FAILED(res)) {
-    if (error)
-      throw error;
-    else
-      FAIL(res);
-  }
+  ComObject<IArchiveExtractCallback> tester(new ArchiveTester(src_dir_index, file_list));
+  COM_ERROR_CHECK(in_arc->Extract(indices.data(), static_cast<UInt32>(indices.size()), 1, tester));
 }
