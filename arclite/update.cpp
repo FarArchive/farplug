@@ -856,7 +856,7 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
     }
     close();
     update_stream.Release();
-    CHECK_SYS(MoveFileExW(temp_arc_name.c_str(), get_archive_path().c_str(), MOVEFILE_REPLACE_EXISTING));
+    CHECK_SYS(MoveFileExW(long_path(temp_arc_name).c_str(), long_path(get_archive_path()).c_str(), MOVEFILE_REPLACE_EXISTING));
   }
   catch (...) {
     DeleteFileW(long_path(temp_arc_name).c_str());

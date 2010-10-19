@@ -142,7 +142,7 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
     }
     close();
     update_stream.Release();
-    CHECK_SYS(MoveFileExW(temp_arc_name.c_str(), get_archive_path().c_str(), MOVEFILE_REPLACE_EXISTING));
+    CHECK_SYS(MoveFileExW(long_path(temp_arc_name).c_str(), long_path(get_archive_path()).c_str(), MOVEFILE_REPLACE_EXISTING));
   }
   catch (...) {
     DeleteFileW(long_path(temp_arc_name).c_str());
