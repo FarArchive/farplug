@@ -290,6 +290,7 @@ private:
   unsigned __int64 stream_pos;
   unsigned __int64 seek_stream_pos;
   unsigned __int64 stream_size;
+  bool next_volume;
   File volume;
 
   wstring get_volume_path(unsigned __int64 volume_idx) {
@@ -312,7 +313,7 @@ private:
   }
 
 public:
-  MultiVolumeUpdateStream(const wstring& file_path, unsigned __int64 volume_size): file_path(file_path), volume_size(volume_size), stream_pos(0), seek_stream_pos(0), stream_size(0) {
+  MultiVolumeUpdateStream(const wstring& file_path, unsigned __int64 volume_size): file_path(file_path), volume_size(volume_size), stream_pos(0), seek_stream_pos(0), stream_size(0), next_volume(false) {
     volume.open(get_volume_path(0), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
   }
 
@@ -342,13 +343,14 @@ public:
       }
       volume.set_pos(seek_stream_pos - volume_idx * volume_size);
       stream_pos = seek_stream_pos;
+      next_volume = false;
     }
 
     unsigned data_off = 0;
     do {
       unsigned __int64 volume_idx = stream_pos / volume_size;
 
-      if (data_off != 0) { // advance to next volume
+      if (next_volume) { // advance to next volume
         if (volume_idx > get_last_volume_idx()) {
           volume.open(get_volume_path(volume_idx), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
         }
@@ -359,8 +361,10 @@ public:
 
       unsigned __int64 volume_upper_bound = (volume_idx + 1) * volume_size;
       unsigned write_size;
-      if (stream_pos + (size - data_off) > volume_upper_bound)
+      if (stream_pos + (size - data_off) >= volume_upper_bound) {
         write_size = static_cast<unsigned>(volume_upper_bound - stream_pos);
+        next_volume = true;
+      }
       else
         write_size = size - data_off;
       CHECK(volume.write(reinterpret_cast<const unsigned char*>(data) + data_off, write_size) == write_size);
