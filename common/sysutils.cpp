@@ -221,6 +221,16 @@ bool File::set_end_nt() {
   return SetEndOfFile(h_file) != 0;
 }
 
+BY_HANDLE_FILE_INFORMATION File::get_info() {
+  BY_HANDLE_FILE_INFORMATION info;
+  CHECK_SYS(get_info_nt(info));
+  return info;
+}
+
+bool File::get_info_nt(BY_HANDLE_FILE_INFORMATION& info) {
+  return GetFileInformationByHandle(h_file, &info) != 0;
+}
+
 void Key::close() {
   if (h_key) {
     RegCloseKey(h_key);
@@ -416,10 +426,18 @@ bool FileEnum::next_nt(bool& more) {
 
 FindData get_find_data(const wstring& path) {
   FindData find_data;
-  HANDLE h_find = FindFirstFileW(long_path(path).c_str(), &find_data);
-  CHECK_SYS(h_find != INVALID_HANDLE_VALUE);
-  FindClose(h_find);
+  CHECK_SYS(get_find_data_nt(path, find_data));
   return find_data;
+}
+
+bool get_find_data_nt(const wstring& path, FindData& find_data) {
+  HANDLE h_find = FindFirstFileW(long_path(path).c_str(), &find_data);
+  if (h_find != INVALID_HANDLE_VALUE) {
+    FindClose(h_find);
+    return true;
+  }
+  else
+    return false;
 }
 
 TempFile::TempFile() {

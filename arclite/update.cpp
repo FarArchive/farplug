@@ -461,20 +461,24 @@ public:
 
   STDMETHODIMP Read(void *data, UInt32 size, UInt32 *processedSize) {
     COM_ERROR_HANDLER_BEGIN
+    ERROR_MESSAGE_BEGIN
     unsigned bytes_read = read(data, size);
     if (processedSize)
       *processedSize = bytes_read;
     progress.on_read_file(bytes_read);
     return S_OK;
+    ERROR_MESSAGE_END(file_path)
     COM_ERROR_HANDLER_END
   }
 
   STDMETHODIMP Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
     COM_ERROR_HANDLER_BEGIN
+    ERROR_MESSAGE_BEGIN
     unsigned __int64 new_position = set_pos(offset, translate_seek_method(seekOrigin));
     if (newPosition)
       *newPosition = new_position;
     return S_OK;
+    ERROR_MESSAGE_END(file_path)
     COM_ERROR_HANDLER_END
   }
 };
@@ -639,13 +643,13 @@ public:
 };
 
 UInt32 Archive::scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map, PrepareUpdateProgress& progress) {
-  FileInfo file_info;
+  ArcFileInfo file_info;
   file_info.attr = src_find_data.is_dir() ? FILE_ATTRIBUTE_DIRECTORY : 0;
   file_info.parent = dst_dir_index;
   file_info.name = src_find_data.cFileName;
   FileIndexRange fi_range = equal_range(file_list_index.begin(), file_list_index.end(), -1, [&] (UInt32 left, UInt32 right) -> bool {
-    const FileInfo& fi_left = left == -1 ? file_info : file_list[left];
-    const FileInfo& fi_right = right == -1 ? file_info : file_list[right];
+    const ArcFileInfo& fi_left = left == -1 ? file_info : file_list[left];
+    const ArcFileInfo& fi_right = right == -1 ? file_info : file_list[right];
     return fi_left < fi_right;
   });
   UInt32 file_index;
@@ -842,7 +846,7 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
     COM_ERROR_CHECK(out_arc->UpdateItems(update_stream, new_index, updater));
     close();
     update_stream.Release();
-    CHECK_SYS(MoveFileExW(long_path(temp_arc_name).c_str(), long_path(get_archive_path()).c_str(), MOVEFILE_REPLACE_EXISTING));
+    CHECK_SYS(MoveFileExW(long_path(temp_arc_name).c_str(), long_path(arc_path).c_str(), MOVEFILE_REPLACE_EXISTING));
   }
   catch (...) {
     DeleteFileW(long_path(temp_arc_name).c_str());

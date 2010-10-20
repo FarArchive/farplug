@@ -94,20 +94,25 @@ public:
 };
 
 struct FileInfo {
-  UInt32 parent;
   wstring name;
   DWORD attr;
   unsigned __int64 size;
-  unsigned __int64 psize;
   FILETIME ctime;
   FILETIME mtime;
   FILETIME atime;
   bool is_dir() const {
     return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
   }
-  bool operator<(const FileInfo& file_info) const;
+  FindData convert() const;
+  void convert(const FindData& file_info);
 };
-typedef vector<FileInfo> FileList;
+
+struct ArcFileInfo: public FileInfo {
+  UInt32 parent;
+  unsigned __int64 psize;
+  bool operator<(const ArcFileInfo& file_info) const;
+};
+typedef vector<ArcFileInfo> FileList;
 
 const UInt32 c_root_index = -1;
 
@@ -132,13 +137,6 @@ public:
   wstring to_string() const;
 };
 
-struct ArchiveHandle {
-  ArcChain arc_chain;
-  ComObject<IInArchive> in_arc;
-};
-
-typedef vector<ArchiveHandle> ArchiveHandles;
-
 // forwards
 class SetDirAttrProgress;
 class PrepareExtractProgress;
@@ -148,21 +146,16 @@ class PrepareUpdateProgress;
 class Archive {
   // open
 private:
-  wstring archive_dir;
-  wstring get_archive_path() const {
-    return add_trailing_slash(archive_dir) + archive_file_info.cFileName;
-  }
   ComObject<IInArchive> in_arc;
-  bool open_sub_stream(IInArchive* in_arc, IInStream** sub_stream, wstring& sub_ext);
-  bool open_archive(IInStream* in_stream, IInArchive* archive);
-  void detect(IInStream* in_stream, const wstring& ext, bool all, ArchiveHandles& archive_handles);
-protected:
-  FindData archive_file_info;
-  unsigned max_check_size;
-  ArcChain arc_chain;
+  bool open_sub_stream(IInStream** sub_stream, FileInfo& sub_arc_info);
+  bool open(IInStream* in_stream);
+  static void detect(const wstring& file_path, bool all, vector<Archive>& archives);
 public:
-  ArchiveHandles detect(const wstring& file_path, bool all);
-  void open(const ArchiveHandle& archive_handle);
+  static unsigned max_check_size;
+  wstring arc_path;
+  FileInfo arc_info;
+  ArcChain arc_chain;
+  static vector<Archive> detect(const wstring& file_path, bool all);
   void close();
   void reopen();
   bool is_open() const {
@@ -184,7 +177,7 @@ private:
 public:
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);
-  const FileInfo& get_file_info(UInt32 file_index) const {
+  const ArcFileInfo& get_file_info(UInt32 file_index) const {
     return file_list[file_index];
   }
 
@@ -210,7 +203,7 @@ private:
   void delete_src_dir(const wstring& dir_path, DeleteFilesProgress& progress);
   void delete_src_files(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number);
   void load_sfx_module(Buffer<char>& buffer, const UpdateOptions& options);
-protected:
+public:
   unsigned level;
   wstring method;
   bool solid;
@@ -231,13 +224,14 @@ public:
   // attributes
 private:
   void load_arc_attr();
-protected:
-  AttrList arc_attr;
 public:
+  AttrList arc_attr;
   AttrList get_attr_list(UInt32 item_index);
 
 public:
-  Archive(): update_props_defined(false) {
+  Archive() {
+  }
+  Archive(const wstring& arc_path, const FileInfo& arc_info): arc_path(arc_path), arc_info(arc_info), update_props_defined(false) {
   }
 };
 

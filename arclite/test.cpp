@@ -70,11 +70,11 @@ public:
 
   STDMETHODIMP GetStream(UInt32 index, ISequentialOutStream **outStream,  Int32 askExtractMode) {
     COM_ERROR_HANDLER_BEGIN
-    const FileInfo& file_info = file_list[index];
+    const ArcFileInfo& file_info = file_list[index];
     file_path = file_info.name;
     UInt32 parent_index = file_info.parent;
     while (parent_index != src_dir_index) {
-      const FileInfo& file_info = file_list[parent_index];
+      const ArcFileInfo& file_info = file_list[parent_index];
       file_path.insert(0, 1, L'\\').insert(0, file_info.name);
       parent_index = file_info.parent;
     }
@@ -115,7 +115,7 @@ public:
 };
 
 void Archive::prepare_test(UInt32 file_index, list<UInt32>& indices) {
-  const FileInfo& file_info = file_list[file_index];
+  const ArcFileInfo& file_info = file_list[file_index];
   if (file_info.is_dir()) {
     FileIndexRange dir_list = get_dir_list(file_index);
     for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {

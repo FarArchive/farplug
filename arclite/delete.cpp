@@ -97,7 +97,7 @@ public:
 
 
 void Archive::enum_deleted_indices(UInt32 file_index, vector<UInt32>& indices) {
-  const FileInfo& file_info = file_list[file_index];
+  const ArcFileInfo& file_info = file_list[file_index];
   indices.push_back(file_index);
   if (file_info.is_dir()) {
     FileIndexRange dir_list = get_dir_list(file_index);
@@ -135,7 +135,7 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
     COM_ERROR_CHECK(out_arc->UpdateItems(update_stream, static_cast<UInt32>(new_indices.size()), deleter));
     close();
     update_stream.Release();
-    CHECK_SYS(MoveFileExW(long_path(temp_arc_name).c_str(), long_path(get_archive_path()).c_str(), MOVEFILE_REPLACE_EXISTING));
+    CHECK_SYS(MoveFileExW(long_path(temp_arc_name).c_str(), long_path(arc_path).c_str(), MOVEFILE_REPLACE_EXISTING));
   }
   catch (...) {
     DeleteFileW(long_path(temp_arc_name).c_str());

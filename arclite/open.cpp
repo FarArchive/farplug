@@ -7,17 +7,13 @@
 #include "msearch.hpp"
 #include "archive.hpp"
 
-class ArchiveOpenStream: public IInStream, public ComBase {
+class ArchiveOpenStream: public IInStream, private ComBase, private File {
 private:
-  HANDLE h_file;
   wstring file_path;
+
 public:
   ArchiveOpenStream(const wstring& file_path): file_path(file_path) {
-    h_file = CreateFileW(long_path(file_path).c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
-    CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
-  }
-  ~ArchiveOpenStream() {
-    CloseHandle(h_file);
+    open(file_path, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -28,8 +24,7 @@ public:
   STDMETHODIMP Read(void *data, UInt32 size, UInt32 *processedSize) {
     COM_ERROR_HANDLER_BEGIN
     ERROR_MESSAGE_BEGIN
-    DWORD bytes_read;
-    CHECK_SYS(ReadFile(h_file, data, size, &bytes_read, nullptr));
+    unsigned bytes_read = read(data, size);
     if (processedSize)
       *processedSize = bytes_read;
     return S_OK;
@@ -40,37 +35,41 @@ public:
   STDMETHODIMP Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
     COM_ERROR_HANDLER_BEGIN
     ERROR_MESSAGE_BEGIN
-    DWORD move_method;
-    switch (seekOrigin) {
-    case STREAM_SEEK_SET:
-      move_method = FILE_BEGIN;
-      break;
-    case STREAM_SEEK_CUR:
-      move_method = FILE_CURRENT;
-      break;
-    case STREAM_SEEK_END:
-      move_method = FILE_END;
-      break;
-    default:
-      return E_INVALIDARG;
-    }
-    LARGE_INTEGER distance;
-    distance.QuadPart = offset;
-    LARGE_INTEGER new_position;
-    CHECK_SYS(SetFilePointerEx(h_file, distance, &new_position, move_method));
+    unsigned __int64 new_position = set_pos(offset, translate_seek_method(seekOrigin));
     if (newPosition)
-      *newPosition = new_position.QuadPart;
+      *newPosition = new_position;
     return S_OK;
     ERROR_MESSAGE_END(file_path)
     COM_ERROR_HANDLER_END
+  }
+
+  FileInfo get_info() {
+    FileInfo file_info;
+    file_info.name = extract_file_name(file_path);
+    BY_HANDLE_FILE_INFORMATION fi;
+    if (get_info_nt(fi)) {
+      file_info.attr = fi.dwFileAttributes;
+      file_info.ctime = fi.ftCreationTime;
+      file_info.atime = fi.ftLastAccessTime;
+      file_info.mtime = fi.ftLastWriteTime;
+      file_info.size = (static_cast<unsigned __int64>(fi.nFileSizeHigh) << 32) | fi.nFileSizeLow;
+    }
+    else {
+      file_info.attr = 0;
+      memset(&file_info.ctime, 0, sizeof(FILETIME));
+      memset(&file_info.atime, 0, sizeof(FILETIME));
+      memset(&file_info.mtime, 0, sizeof(FILETIME));
+      file_info.size = 0;
+    }
+    return file_info;
   }
 };
 
 
 class ArchiveOpener: public IArchiveOpenCallback, public IArchiveOpenVolumeCallback, public ICryptoGetTextPassword, public ComBase, public ProgressMonitor {
 private:
-  const wstring& archive_dir;
-  FindData volume_file_info;
+  wstring archive_dir;
+  FileInfo volume_file_info;
   wstring& password;
 
   UInt64 total_files;
@@ -81,7 +80,7 @@ private:
   virtual void do_update_ui() {
     wostringstream st;
     st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-    st << volume_file_info.cFileName << L'\n';
+    st << volume_file_info.name << L'\n';
     st << completed_files << L" / " << total_files << L'\n';
     st << Far::get_progress_bar_str(60, completed_files, total_files) << L'\n';
     st << L"\x01\n";
@@ -103,7 +102,7 @@ private:
   }
 
 public:
-  ArchiveOpener(const wstring& archive_dir, const FindData& archive_file_info, wstring& password): archive_dir(archive_dir), volume_file_info(archive_file_info), password(password), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
+  ArchiveOpener(const wstring& archive_dir, const FileInfo& file_info, wstring& password): archive_dir(archive_dir), volume_file_info(file_info), password(password), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -134,19 +133,19 @@ public:
     PropVariant prop;
     switch (propID) {
     case kpidName:
-      prop = volume_file_info.cFileName; break;
+      prop = volume_file_info.name; break;
     case kpidIsDir:
       prop = volume_file_info.is_dir(); break;
     case kpidSize:
-      prop = volume_file_info.size(); break;
+      prop = volume_file_info.size; break;
     case kpidAttrib:
-      prop = static_cast<UInt32>(volume_file_info.dwFileAttributes); break;
+      prop = static_cast<UInt32>(volume_file_info.attr); break;
     case kpidCTime:
-      prop = volume_file_info.ftCreationTime; break;
+      prop = volume_file_info.ctime; break;
     case kpidATime:
-      prop = volume_file_info.ftLastAccessTime; break;
+      prop = volume_file_info.atime; break;
     case kpidMTime:
-      prop = volume_file_info.ftLastWriteTime; break;
+      prop = volume_file_info.mtime; break;
     }
     prop.detach(value);
     return S_OK;
@@ -157,14 +156,12 @@ public:
     COM_ERROR_HANDLER_BEGIN
     wstring file_path = add_trailing_slash(archive_dir) + name;
     ERROR_MESSAGE_BEGIN
-    try {
-      volume_file_info = get_find_data(file_path);
-    }
-    catch (Error&) {
+    FindData find_data;
+    if (!get_find_data_nt(file_path, find_data))
       return S_FALSE;
-    }
-    if (volume_file_info.is_dir())
+    if (find_data.is_dir())
       return S_FALSE;
+    volume_file_info.convert(find_data);
     ComObject<IInStream> file_stream(new ArchiveOpenStream(file_path));
     file_stream.detach(inStream);
     update_ui();
@@ -187,7 +184,7 @@ public:
 };
 
 
-bool Archive::open_sub_stream(IInArchive* in_arc, IInStream** sub_stream, wstring& sub_ext) {
+bool Archive::open_sub_stream(IInStream** sub_stream, FileInfo& sub_arc_info) {
   UInt32 main_subfile;
   PropVariant prop;
   if (in_arc->GetArchiveProperty(kpidMainSubfile, prop.ref()) != S_OK || prop.vt != VT_UI4)
@@ -197,9 +194,6 @@ bool Archive::open_sub_stream(IInArchive* in_arc, IInStream** sub_stream, wstrin
   UInt32 num_items;
   if (in_arc->GetNumberOfItems(&num_items) != S_OK || main_subfile >= num_items)
     return false;
-
-  if (in_arc->GetProperty(main_subfile, kpidPath, prop.ref()) == S_OK && prop.vt == VT_BSTR)
-    sub_ext = extract_file_ext(prop.bstrVal);
 
   ComObject<IInArchiveGetStream> get_stream;
   if (in_arc->QueryInterface(IID_IInArchiveGetStream, reinterpret_cast<void**>(&get_stream)) != S_OK || !get_stream)
@@ -212,22 +206,61 @@ bool Archive::open_sub_stream(IInArchive* in_arc, IInStream** sub_stream, wstrin
   if (sub_seq_stream->QueryInterface(IID_IInStream, reinterpret_cast<void**>(sub_stream)) != S_OK || !sub_stream)
     return false;
 
+  if (in_arc->GetProperty(main_subfile, kpidPath, prop.ref()) == S_OK && prop.vt == VT_BSTR)
+    sub_arc_info.name = extract_file_name(prop.bstrVal);
+
+  if (in_arc->GetProperty(main_subfile, kpidAttrib, prop.ref()) == S_OK && prop.is_uint())
+    sub_arc_info.attr = static_cast<DWORD>(prop.get_uint());
+  else
+    sub_arc_info.attr = 0;
+
+  if (in_arc->GetProperty(main_subfile, kpidSize, prop.ref()) == S_OK && prop.is_uint())
+    sub_arc_info.size = prop.get_uint();
+  else
+    sub_arc_info.size = 0;
+
+  if (in_arc->GetProperty(main_subfile, kpidCTime, prop.ref()) == S_OK && prop.is_filetime())
+    sub_arc_info.ctime = prop.get_filetime();
+  else
+    sub_arc_info.ctime = arc_info.ctime;
+  if (in_arc->GetProperty(main_subfile, kpidMTime, prop.ref()) == S_OK && prop.is_filetime())
+    sub_arc_info.mtime = prop.get_filetime();
+  else
+    sub_arc_info.mtime = arc_info.mtime;
+  if (in_arc->GetProperty(main_subfile, kpidATime, prop.ref()) == S_OK && prop.is_filetime())
+    sub_arc_info.atime = prop.get_filetime();
+  else
+    sub_arc_info.atime = arc_info.atime;
+
   return true;
 }
 
-bool Archive::open_archive(IInStream* in_stream, IInArchive* archive) {
+bool Archive::open(IInStream* in_stream) {
   CHECK_COM(in_stream->Seek(0, STREAM_SEEK_SET, nullptr));
-  ComObject<IArchiveOpenCallback> opener(new ArchiveOpener(archive_dir, archive_file_info, password));
+  ComObject<IArchiveOpenCallback> opener(new ArchiveOpener(extract_file_path(arc_path), arc_info, password));
   const UInt64 max_check_start_position = max_check_size;
-  HRESULT res = archive->Open(in_stream, &max_check_start_position, opener);
+  HRESULT res = in_arc->Open(in_stream, &max_check_start_position, opener);
   COM_ERROR_CHECK(res);
   return res == S_OK;
 }
 
-void Archive::detect(IInStream* in_stream, const wstring& ext, bool all, ArchiveHandles& archive_handles) {
-  ArcChain parent_chain;
-  if (!archive_handles.empty())
-    parent_chain = archive_handles.back().arc_chain;
+void Archive::detect(const wstring& arc_path, bool all, vector<Archive>& archives) {
+  unsigned parent_idx = -1;
+  if (!archives.empty())
+    parent_idx = archives.size() - 1;
+
+  ComObject<IInStream> stream;
+  FileInfo arc_info;
+  memset(&arc_info, 0, sizeof(arc_info));
+  if (parent_idx == -1) {
+    ArchiveOpenStream* stream_impl = new ArchiveOpenStream(arc_path);
+    stream = stream_impl;
+    arc_info = stream_impl->get_info();
+  }
+  else {
+    if (!archives[parent_idx].open_sub_stream(&stream, arc_info))
+      return;
+  }
 
   const ArcFormats& arc_formats = ArcAPI::formats();
   list<ArcEntry> arc_entries;
@@ -247,7 +280,7 @@ void Archive::detect(IInStream* in_stream, const wstring& ext, bool all, Archive
 
   Buffer<unsigned char> buffer(max_check_size);
   UInt32 size;
-  CHECK_COM(in_stream->Read(buffer.data(), static_cast<UInt32>(buffer.size()), &size));
+  CHECK_COM(stream->Read(buffer.data(), static_cast<UInt32>(buffer.size()), &size));
 
   vector<StrPos> sig_positions = msearch(buffer.data(), size, signatures);
 
@@ -257,7 +290,7 @@ void Archive::detect(IInStream* in_stream, const wstring& ext, bool all, Archive
   });
 
   // 2. find formats by file extension
-  ArcTypes types_by_ext = arc_formats.find_by_ext(ext);
+  ArcTypes types_by_ext = arc_formats.find_by_ext(extract_file_ext(arc_info.name));
   for_each(types_by_ext.begin(), types_by_ext.end(), [&] (const ArcType& arc_type) {
     if (found_types.count(arc_type) == 0) {
       found_types.insert(arc_type);
@@ -288,55 +321,42 @@ void Archive::detect(IInStream* in_stream, const wstring& ext, bool all, Archive
   }
 
   for (list<ArcEntry>::const_iterator arc_entry = arc_entries.begin(); arc_entry != arc_entries.end(); arc_entry++) {
-    ComObject<IInArchive> archive;
-    ArcAPI::create_in_archive(arc_entry->type, &archive);
-    if (open_archive(in_stream, archive)) {
-      ArchiveHandle new_archive_handle;
-      new_archive_handle.arc_chain.assign(parent_chain.begin(), parent_chain.end());
-      new_archive_handle.arc_chain.push_back(*arc_entry);
-      new_archive_handle.in_arc = archive;
-      archive_handles.push_back(new_archive_handle);
-
-      ComObject<IInStream> sub_stream;
-      wstring sub_ext;
-      if (open_sub_stream(archive, &sub_stream, sub_ext))
-        detect(sub_stream, sub_ext, all, archive_handles);
-
+    Archive archive(arc_path, arc_info);
+    ArcAPI::create_in_archive(arc_entry->type, &archive.in_arc);
+    if (archive.open(stream)) {
+      if (parent_idx != -1)
+        archive.arc_chain.assign(archives[parent_idx].arc_chain.begin(), archives[parent_idx].arc_chain.end());
+      archive.arc_chain.push_back(*arc_entry);
+      archives.push_back(archive);
+      detect(arc_path, all, archives);
       if (!all) break;
     }
   }
 }
 
-ArchiveHandles Archive::detect(const wstring& file_path, bool all) {
-  archive_file_info = get_find_data(file_path);
-  archive_dir = extract_file_path(file_path);
-  ArchiveHandles archive_handles;
-  ComObject<IInStream> stream(new ArchiveOpenStream(get_archive_path()));
-  detect(stream, extract_file_ext(file_path), all, archive_handles);
-  if (!all && !archive_handles.empty())
-    archive_handles.erase(archive_handles.begin(), archive_handles.end() - 1);
-  return archive_handles;
-}
-
-void Archive::open(const ArchiveHandle& archive_handle) {
-  in_arc = archive_handle.in_arc;
-  arc_chain = archive_handle.arc_chain;
+vector<Archive> Archive::detect(const wstring& file_path, bool all) {
+  vector<Archive> archives;
+  detect(file_path, all, archives);
+  if (!all && !archives.empty())
+    archives.erase(archives.begin(), archives.end() - 1);
+  return archives;
 }
 
 void Archive::reopen() {
   assert(!in_arc);
-  ComObject<IInStream> stream(new ArchiveOpenStream(get_archive_path()));
+  ArchiveOpenStream* stream_impl = new ArchiveOpenStream(arc_path);
+  ComObject<IInStream> stream(stream_impl);
+  arc_info = stream_impl->get_info();
   ArcChain::const_iterator arc_entry = arc_chain.begin();
   ArcAPI::create_in_archive(arc_entry->type, &in_arc);
-  if (!open_archive(stream, in_arc))
+  if (!open(stream))
     FAIL(E_FAIL);
   arc_entry++;
   while (arc_entry != arc_chain.end()) {
     ComObject<IInStream> sub_stream;
-    wstring sub_ext;
-    CHECK(open_sub_stream(in_arc, &sub_stream, sub_ext));
+    CHECK(open_sub_stream(&sub_stream, arc_info));
     ArcAPI::create_in_archive(arc_entry->type, &in_arc);
-    if (!open_archive(sub_stream, in_arc))
+    if (!open(sub_stream))
       FAIL(E_FAIL);
     arc_entry++;
   }

@@ -21,6 +21,8 @@ const unsigned __int64 c_min_volume_size = 16 * 1024;
 const wchar_t* c_sfx_ext = L".exe";
 const wchar_t* c_volume_ext = L".001";
 
+unsigned Archive::max_check_size;
+
 HRESULT ArcLib::get_prop(UInt32 index, PROPID prop_id, PROPVARIANT* prop) const {
   if (GetHandlerProperty2) {
     return GetHandlerProperty2(index, prop_id, prop);
@@ -247,7 +249,7 @@ void ArcAPI::free() {
 
 
 wstring Archive::get_default_name() const {
-  wstring name = archive_file_info.cFileName;
+  wstring name = arc_info.name;
   size_t pos = name.find_last_of(L'.');
   if (pos == wstring::npos)
     return name;
@@ -260,10 +262,34 @@ wstring Archive::get_temp_file_name() const {
   CHECK_COM(CoCreateGuid(&guid));
   wchar_t guid_str[50];
   CHECK(StringFromGUID2(guid, guid_str, ARRAYSIZE(guid_str)));
-  return add_trailing_slash(archive_dir) + guid_str + L".tmp";
+  return add_trailing_slash(extract_file_path(arc_path)) + guid_str + L".tmp";
 }
 
-bool FileInfo::operator<(const FileInfo& file_info) const {
+
+FindData FileInfo::convert() const {
+  FindData find_data;
+  memset(&find_data, 0, sizeof(find_data));
+  find_data.dwFileAttributes = attr;
+  find_data.ftCreationTime = ctime;
+  find_data.ftLastAccessTime = atime;
+  find_data.ftLastWriteTime = mtime;
+  find_data.nFileSizeHigh = size >> 32;
+  find_data.nFileSizeLow = size & 0xFFFFFFFF;
+  wcscpy(find_data.cFileName, name.c_str());
+  return find_data;
+}
+
+void FileInfo::convert(const FindData& find_data) {
+  attr = find_data.dwFileAttributes;
+  ctime = find_data.ftCreationTime;
+  atime = find_data.ftLastAccessTime;
+  mtime = find_data.ftLastWriteTime;
+  size = find_data.size();
+  name = find_data.cFileName;
+}
+
+
+bool ArcFileInfo::operator<(const ArcFileInfo& file_info) const {
   if (parent == file_info.parent)
     if (is_dir() == file_info.is_dir())
       return lstrcmpiW(name.c_str(), file_info.name.c_str()) < 0;
@@ -272,6 +298,7 @@ bool FileInfo::operator<(const FileInfo& file_info) const {
   else
     return parent < file_info.parent;
 }
+
 
 void Archive::make_index() {
   class Progress: public ProgressMonitor {
@@ -328,7 +355,7 @@ void Archive::make_index() {
 
   DirInfo dir_info;
   UInt32 dir_index = 0;
-  FileInfo file_info;
+  ArcFileInfo file_info;
   wstring path;
   PropVariant prop;
   for (UInt32 i = 0; i < num_indices; i++) {
@@ -370,15 +397,15 @@ void Archive::make_index() {
     if (s_ok(in_arc->GetProperty(i, kpidCTime, prop.ref())) && prop.is_filetime())
       file_info.ctime = prop.get_filetime();
     else
-      file_info.ctime = archive_file_info.ftCreationTime;
+      file_info.ctime = arc_info.ctime;
     if (s_ok(in_arc->GetProperty(i, kpidMTime, prop.ref())) && prop.is_filetime())
       file_info.mtime = prop.get_filetime();
     else
-      file_info.mtime = archive_file_info.ftLastWriteTime;
+      file_info.mtime = arc_info.mtime;
     if (s_ok(in_arc->GetProperty(i, kpidATime, prop.ref())) && prop.is_filetime())
       file_info.atime = prop.get_filetime();
     else
-      file_info.atime = archive_file_info.ftLastAccessTime;
+      file_info.atime = arc_info.atime;
 
     // file name
     size_t name_end_pos = path.size();
@@ -428,16 +455,16 @@ void Archive::make_index() {
       file_info.name = dir_info.name;
       file_info.attr = FILE_ATTRIBUTE_DIRECTORY;
       file_info.size = file_info.psize = 0;
-      file_info.ctime = archive_file_info.ftCreationTime;
-      file_info.mtime = archive_file_info.ftLastWriteTime;
-      file_info.atime = archive_file_info.ftLastAccessTime;
+      file_info.ctime = arc_info.ctime;
+      file_info.mtime = arc_info.mtime;
+      file_info.atime = arc_info.atime;
       dir_index++;
       file_list.push_back(file_info);
     }
   });
 
   // fix parent references
-  for_each(file_list.begin(), file_list.end(), [&] (FileInfo& file_info) {
+  for_each(file_list.begin(), file_list.end(), [&] (ArcFileInfo& file_info) {
     if (file_info.parent != c_root_index)
       file_info.parent = dir_index_map[file_info.parent];
   });
@@ -456,11 +483,11 @@ void Archive::make_index() {
   arc_attr.clear();
   Attr attr;
   attr.name = Far::get_msg(MSG_KPID_PATH);
-  attr.value = get_archive_path();
+  attr.value = arc_path;
   arc_attr.push_back(attr);
   if (total_size_defined) {
     attr.name = Far::get_msg(MSG_PROPERTY_COMPRESSION_RATIO);
-    unsigned ratio = total_size ? round(static_cast<double>(archive_file_info.size()) / total_size * 100) : 100;
+    unsigned ratio = total_size ? round(static_cast<double>(arc_info.size) / total_size * 100) : 100;
     if (ratio > 100)
       ratio = 100;
     attr.value = int_to_str(ratio) + L'%';
@@ -473,7 +500,7 @@ UInt32 Archive::find_dir(const wstring& path) {
   if (file_list.empty())
     make_index();
 
-  FileInfo dir_info;
+  ArcFileInfo dir_info;
   dir_info.attr = FILE_ATTRIBUTE_DIRECTORY;
   dir_info.parent = c_root_index;
   size_t begin_pos = 0;
@@ -483,8 +510,8 @@ UInt32 Archive::find_dir(const wstring& path) {
     if (end_pos != begin_pos) {
       dir_info.name.assign(path.data() + begin_pos, end_pos - begin_pos);
       FileIndexRange fi_range = equal_range(file_list_index.begin(), file_list_index.end(), -1, [&] (UInt32 left, UInt32 right) -> bool {
-        const FileInfo& fi_left = left == -1 ? dir_info : file_list[left];
-        const FileInfo& fi_right = right == -1 ? dir_info : file_list[right];
+        const ArcFileInfo& fi_left = left == -1 ? dir_info : file_list[left];
+        const ArcFileInfo& fi_right = right == -1 ? dir_info : file_list[right];
         return fi_left < fi_right;
       });
       if (fi_range.first == fi_range.second)
@@ -500,11 +527,11 @@ FileIndexRange Archive::get_dir_list(UInt32 dir_index) {
   if (file_list.empty())
     make_index();
 
-  FileInfo file_info;
+  ArcFileInfo file_info;
   file_info.parent = dir_index;
   FileIndexRange index_range = equal_range(file_list_index.begin(), file_list_index.end(), -1, [&] (UInt32 left, UInt32 right) -> bool {
-    const FileInfo& fi_left = left == -1 ? file_info : file_list[left];
-    const FileInfo& fi_right = right == -1 ? file_info : file_list[right];
+    const ArcFileInfo& fi_left = left == -1 ? file_info : file_list[left];
+    const ArcFileInfo& fi_right = right == -1 ? file_info : file_list[right];
     return fi_left.parent < fi_right.parent;
   });
 

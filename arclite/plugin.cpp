@@ -10,8 +10,10 @@
 
 wstring g_plugin_prefix;
 
-class Plugin: private Archive {
+class Plugin {
 private:
+  Archive archive;
+
   wstring current_dir;
   wstring extract_dir;
   wstring host_file;
@@ -30,27 +32,27 @@ private:
         FAIL(E_ABORT);
     }
 
-    max_check_size = g_options.max_check_size;
-    ArchiveHandles archive_handles = detect(file_path, !auto_detect);
+    Archive::max_check_size = g_options.max_check_size;
+    vector<Archive> archives = Archive::detect(file_path, !auto_detect);
 
-    if (archive_handles.size() == 0)
+    if (archives.size() == 0)
       return false;
 
     int format_idx;
-    if (archive_handles.size() == 1) {
+    if (archives.size() == 1) {
       format_idx = 0;
     }
     else {
       vector<wstring> format_names;
-      for (unsigned i = 0; i < archive_handles.size(); i++) {
-        format_names.push_back(archive_handles[i].arc_chain.to_string());
+      for (unsigned i = 0; i < archives.size(); i++) {
+        format_names.push_back(archives[i].arc_chain.to_string());
       }
       format_idx = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), format_names);
       if (format_idx == -1)
         return false;
     }
 
-    open(archive_handles[format_idx]);
+    archive = archives[format_idx];
 
     return true;
   }
@@ -106,9 +108,9 @@ public:
     opi->Flags = OPIF_USEFILTER | OPIF_USESORTGROUPS | OPIF_USEHIGHLIGHTING | OPIF_ADDDOTS;
     opi->CurDir = current_dir.c_str();
     panel_title = Far::get_msg(MSG_PLUGIN_NAME);
-    if (is_open()) {
-      panel_title += L":" + arc_chain.to_string() + L":" + archive_file_info.cFileName;
-      host_file = archive_file_info.cFileName;
+    if (archive.is_open()) {
+      panel_title += L":" + archive.arc_chain.to_string() + L":" + extract_file_name(archive.arc_path);
+      host_file = extract_file_name(archive.arc_path);
     }
     opi->HostFile = host_file.c_str();
     opi->Format = g_plugin_prefix.c_str();
@@ -118,13 +120,13 @@ public:
     opi->StartSortOrder = g_options.panel_reverse_sort;
 
     info_lines.clear();
-    info_lines.reserve(arc_attr.size() + 1);
+    info_lines.reserve(archive.arc_attr.size() + 1);
     InfoPanelLine ipl;
     ipl.Text = panel_title.c_str();
     ipl.Data = nullptr;
     ipl.Separator = 1;
     info_lines.push_back(ipl);
-    for_each(arc_attr.begin(), arc_attr.end(), [&] (const Attr& attr) {
+    for_each(archive.arc_attr.begin(), archive.arc_attr.end(), [&] (const Attr& attr) {
       ipl.Text = attr.name.c_str();
       ipl.Data = attr.value.c_str();
       ipl.Separator = 0;
@@ -135,7 +137,7 @@ public:
   }
 
   void set_dir(const wstring& dir) {
-    if (!is_open())
+    if (!archive.is_open())
       FAIL(E_ABORT);
     wstring new_dir;
     if (dir == L"\\")
@@ -150,22 +152,22 @@ public:
     if (new_dir == L"\\")
       new_dir.clear();
 
-    find_dir(new_dir);
+    archive.find_dir(new_dir);
     current_dir = new_dir;
   }
 
   void list(PluginPanelItem** panel_items, int* items_number) {
-    if (!is_open())
+    if (!archive.is_open())
       FAIL(E_ABORT);
-    UInt32 dir_index = find_dir(current_dir);
-    FileIndexRange dir_list = get_dir_list(dir_index);
+    UInt32 dir_index = archive.find_dir(current_dir);
+    FileIndexRange dir_list = archive.get_dir_list(dir_index);
     size_t size = dir_list.second - dir_list.first;
     PluginPanelItem* items = new PluginPanelItem[size];
     memset(items, 0, size * sizeof(PluginPanelItem));
     try {
       unsigned idx = 0;
       for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
-        const FileInfo& file_info = get_file_info(file_index);
+        const ArcFileInfo& file_info = archive.get_file_info(file_index);
         FAR_FIND_DATA& fdata = items[idx].FindData;
         const DWORD c_valid_attributes = FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM;
         fdata.dwFileAttributes = file_info.attr & c_valid_attributes;
@@ -193,7 +195,7 @@ public:
     options.dst_dir = *dest_path;
     options.ignore_errors = g_options.extract_ignore_errors;
     options.overwrite = static_cast<OverwriteOption>(g_options.extract_overwrite);
-    options.move_enabled = updatable();
+    options.move_enabled = archive.updatable();
     options.move_files = move != 0 && options.move_enabled;
     options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
     if (op_mode & (OPM_FIND | OPM_QUICKVIEW))
@@ -202,8 +204,8 @@ public:
       options.overwrite = ooOverwrite;
     if (options.show_dialog) {
       if (g_options.smart_path && items_number > 1 && (op_mode & OPM_TOPLEVEL)) {
-        options.dst_dir = add_trailing_slash(options.dst_dir) + archive_file_info.cFileName;
-        wstring ext = extract_file_ext(archive_file_info.cFileName);
+        options.dst_dir = add_trailing_slash(options.dst_dir) + archive.arc_info.name;
+        wstring ext = extract_file_ext(archive.arc_info.name);
         options.dst_dir.erase(options.dst_dir.size() - ext.size(), ext.size());
         if (GetFileAttributesW(long_path(options.dst_dir).c_str()) != INVALID_FILE_ATTRIBUTES) {
           unsigned n = 0;
@@ -222,13 +224,13 @@ public:
         *dest_path = extract_dir.c_str();
       }
       if (!options.password.empty())
-        password = options.password;
+        archive.password = options.password;
       g_options.extract_ignore_errors = options.ignore_errors;
       g_options.extract_overwrite = options.overwrite;
       g_options.save();
     }
 
-    UInt32 src_dir_index = find_dir(current_dir);
+    UInt32 src_dir_index = archive.find_dir(current_dir);
 
     vector<UInt32> indices;
     indices.reserve(items_number);
@@ -237,26 +239,26 @@ public:
     }
 
     ErrorLog error_log;
-    extract(src_dir_index, indices, options, error_log);
+    archive.extract(src_dir_index, indices, options, error_log);
     if (!error_log.empty()) {
       if (options.show_dialog)
         show_error_log(error_log);
     }
     else {
       if (options.move_files)
-        Archive::delete_files(indices);
+        archive.delete_files(indices);
       Far::progress_notify();
     }
   }
 
   void test_files(struct PluginPanelItem* panel_items, int items_number, int op_mode) {
-    UInt32 src_dir_index = find_dir(current_dir);
+    UInt32 src_dir_index = archive.find_dir(current_dir);
     vector<UInt32> indices;
     indices.reserve(items_number);
     for (int i = 0; i < items_number; i++) {
       indices.push_back(static_cast<UInt32>(panel_items[i].UserData));
     }
-    test(src_dir_index, indices);
+    archive.test(src_dir_index, indices);
     Far::info_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_TEST_OK));
   }
 
@@ -264,8 +266,8 @@ public:
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0)
       return;
     UpdateOptions options;
-    bool new_arc = !is_open();
-    if (!new_arc && !updatable()) {
+    bool new_arc = !archive.is_open();
+    if (!new_arc && !archive.updatable()) {
       FAIL_MSG(Far::get_msg(MSG_ERROR_NOT_UPDATABLE));
     }
     if (new_arc) {
@@ -291,14 +293,14 @@ public:
       options.volume_size = g_options.update_volume_size;
     }
     else {
-      options.arc_type = arc_chain.back().type; // required to set update properties
-      load_update_props();
-      options.level = level;
-      options.method = method;
-      options.solid = solid;
-      options.encrypt = encrypted;
+      options.arc_type = archive.arc_chain.back().type; // required to set update properties
+      archive.load_update_props();
+      options.level = archive.level;
+      options.method = archive.method;
+      options.solid = archive.solid;
+      options.encrypt = archive.encrypted;
       options.encrypt_header_defined = false;
-      options.password = password;
+      options.password = archive.password;
     }
     options.create_sfx = false;
     options.enable_volumes = false;
@@ -327,10 +329,10 @@ public:
       g_options.update_encrypt_header = options.encrypt_header;
     }
     else {
-      level = options.level;
-      method = options.method;
-      solid = options.solid;
-      encrypted = options.encrypt;
+      archive.level = options.level;
+      archive.method = options.method;
+      archive.solid = options.solid;
+      archive.encrypted = options.encrypt;
     }
     g_options.update_show_password = options.show_password;
     g_options.update_ignore_errors = options.ignore_errors;
@@ -338,9 +340,9 @@ public:
 
     ErrorLog error_log;
     if (new_arc)
-      create(src_path, panel_items, items_number, options, error_log);
+      archive.create(src_path, panel_items, items_number, options, error_log);
     else
-      update(src_path, panel_items, items_number, remove_path_root(current_dir), options, error_log);
+      archive.update(src_path, panel_items, items_number, remove_path_root(current_dir), options, error_log);
 
     if (!error_log.empty()) {
       show_error_log(error_log);
@@ -371,7 +373,7 @@ public:
     for (int i = 0; i < items_number; i++) {
       indices.push_back(static_cast<UInt32>(panel_items[i].UserData));
     }
-    Archive::delete_files(indices);
+    archive.delete_files(indices);
 
     Far::progress_notify();
   }
@@ -381,14 +383,14 @@ public:
     Far::PanelItem panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
     if (panel_item.file_name == L"..") {
       if (is_root_path(current_dir)) {
-        attr_list = arc_attr;
+        attr_list = archive.arc_attr;
       }
       else {
-        attr_list = get_attr_list(find_dir(current_dir));
+        attr_list = archive.get_attr_list(archive.find_dir(current_dir));
       }
     }
     else {
-      attr_list = get_attr_list(static_cast<UInt32>(panel_item.user_data));
+      attr_list = archive.get_attr_list(static_cast<UInt32>(panel_item.user_data));
     }
     if (!attr_list.empty())
       attr_dialog(attr_list);

@@ -51,19 +51,6 @@ void ignore_error(const wstring& path, const Error& error, bool& ignore_errors, 
   error_log.add(path, error);
 }
 
-FindData convert_file_info(const FileInfo& file_info) {
-  FindData find_data;
-  memset(&find_data, 0, sizeof(find_data));
-  find_data.dwFileAttributes = file_info.attr;
-  find_data.ftCreationTime = file_info.ctime;
-  find_data.ftLastAccessTime = file_info.atime;
-  find_data.ftLastWriteTime = file_info.mtime;
-  find_data.nFileSizeHigh = file_info.size >> 32;
-  find_data.nFileSizeLow = file_info.size & 0xFFFFFFFF;
-  wcscpy(find_data.cFileName, file_info.name.c_str());
-  return find_data;
-}
-
 wstring get_progress_bar_str(unsigned width, unsigned percent1, unsigned percent2) {
   const wchar_t c_pb_black = 9608;
   const wchar_t c_pb_gray = 9619;
@@ -177,7 +164,7 @@ private:
 
   struct CacheRecord {
     wstring file_path;
-    FileInfo file_info;
+    ArcFileInfo file_info;
     size_t buffer_pos;
     size_t buffer_size;
   };
@@ -342,7 +329,7 @@ public:
       DeleteFileW(long_path(current_rec.file_path).c_str());
     }
   }
-  void store_file(const wstring& file_path, const FileInfo& file_info) {
+  void store_file(const wstring& file_path, const ArcFileInfo& file_info) {
     CacheRecord rec;
     rec.file_path = file_path;
     rec.file_info = file_info;
@@ -390,7 +377,7 @@ public:
 class ArchiveExtractor: public IArchiveExtractCallback, public ICryptoGetTextPassword, public ComBase {
 private:
   wstring file_path;
-  FileInfo file_info;
+  ArcFileInfo file_info;
   UInt32 src_dir_index;
   wstring dst_dir;
   const FileList& file_list;
@@ -435,7 +422,7 @@ public:
     file_path = file_info.name;
     UInt32 parent_index = file_info.parent;
     while (parent_index != src_dir_index && parent_index != c_root_index) {
-      const FileInfo& file_info = file_list[parent_index];
+      const ArcFileInfo& file_info = file_list[parent_index];
       file_path.insert(0, 1, L'\\').insert(0, file_info.name);
       parent_index = file_info.parent;
     }
@@ -450,7 +437,7 @@ public:
       FindClose(h_find);
       bool overwrite;
       if (oo == ooAsk) {
-        FindData src_file_info = convert_file_info(file_info);
+        FindData src_file_info = file_info.convert();
         ProgressSuspend ps(progress);
         OverwriteAction oa = overwrite_dialog(file_path, src_file_info, dst_file_info);
         if (oa == oaYes)
@@ -568,7 +555,7 @@ public:
 };
 
 void Archive::prepare_extract(UInt32 file_index, const wstring& parent_dir, list<UInt32>& indices, bool& ignore_errors, ErrorLog& error_log, PrepareExtractProgress& progress) {
-  const FileInfo& file_info = file_list[file_index];
+  const ArcFileInfo& file_info = file_list[file_index];
   if (file_info.is_dir()) {
     wstring dir_path = add_trailing_slash(parent_dir) + file_info.name;
     progress.update(dir_path);
@@ -626,7 +613,7 @@ public:
 
 void Archive::set_dir_attr(const FileIndexRange& index_range, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log, SetDirAttrProgress& progress) {
   for_each (index_range.first, index_range.second, [&] (UInt32 file_index) {
-    const FileInfo& file_info = file_list[file_index];
+    const ArcFileInfo& file_info = file_list[file_index];
     wstring file_path = add_trailing_slash(parent_dir) + file_info.name;
     progress.update(file_path);
     if (file_info.is_dir()) {

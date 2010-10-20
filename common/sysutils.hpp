@@ -63,6 +63,8 @@ public:
   bool set_pos_nt(__int64 offset, DWORD method = FILE_BEGIN, unsigned __int64* new_pos = nullptr);
   void set_end();
   bool set_end_nt();
+  BY_HANDLE_FILE_INFORMATION get_info();
+  bool get_info_nt(BY_HANDLE_FILE_INFORMATION& info) throw();
 };
 
 class Key: private NonCopyable {
@@ -117,6 +119,7 @@ public:
 };
 
 FindData get_find_data(const wstring& path);
+bool get_find_data_nt(const wstring& path, FindData& find_data);
 
 class TempFile: private NonCopyable {
 private:
