@@ -2,6 +2,12 @@
 
 #include "error.hpp"
 
+enum TriState {
+  triTrue,
+  triFalse,
+  triUndef,
+};
+
 bool substr_match(const wstring& str, wstring::size_type pos, wstring::const_pointer mstr);
 wstring word_wrap(const wstring& str, wstring::size_type wrap_bound);
 wstring fit_str(const wstring& str, wstring::size_type size);

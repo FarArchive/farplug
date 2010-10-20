@@ -547,6 +547,15 @@ void Dialog::set_check(unsigned ctrl_id, bool check) {
   g_far.SendDlgMessage(h_dlg, DM_SETCHECK, ctrl_id, check ? BSTATE_CHECKED : BSTATE_UNCHECKED);
 }
 
+TriState Dialog::get_check3(unsigned ctrl_id) const {
+  unsigned value = DlgItem_GetCheck(g_far, h_dlg, ctrl_id);
+  return value == BSTATE_3STATE ? triUndef : value == BSTATE_CHECKED ? triTrue : triFalse;
+}
+
+void Dialog::set_check3(unsigned ctrl_id, TriState check) {
+  g_far.SendDlgMessage(h_dlg, DM_SETCHECK, ctrl_id, check == triUndef ? BSTATE_3STATE : check == triTrue ? BSTATE_CHECKED : BSTATE_UNCHECKED);
+}
+
 unsigned Dialog::get_list_pos(unsigned ctrl_id) const {
   return static_cast<unsigned>(g_far.SendDlgMessage(h_dlg, DM_LISTGETCURPOS, ctrl_id, 0));
 }

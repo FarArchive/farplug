@@ -16,10 +16,10 @@ public:
   bool handle_commands;
   wstring plugin_prefix;
   unsigned max_check_size;
-  bool smart_path;
   // extract
   bool extract_ignore_errors;
   unsigned extract_overwrite;
+  unsigned extract_separate_dir;
   // update
   wstring update_arc_format_name;
   unsigned update_level;

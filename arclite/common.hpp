@@ -14,6 +14,7 @@ struct ExtractOptions {
   bool move_files;
   bool show_dialog;
   wstring password;
+  TriState separate_dir;
 };
 
 struct UpdateOptions {

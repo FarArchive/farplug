@@ -41,6 +41,10 @@ ask user, automatic overwrite or skip file.
 	#Password# - specify password for encrypted files.
 If left blank password will be requested automatically when required.
 
+	#Extract archive into separate directory# - create a subdirectory inside target directory
+and extract archive into it. If option value is undefined then subdirectory is created only when
+unpacking entire archive and archive's root directory contains more than one element.
+
 @Update
 $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #Create and update archive#
@@ -110,5 +114,3 @@ information from 7z.dll.
 	#plugin_prefix# - Plugin command line prefix (string). Default prefix is #arc#.
 
 	#max_check_size# - Maximum number of bytes to load when detecting archive format (DWORD). Default is 1 Mb.
-
-	#smart_path# - When set to 0 disables smart path substitution in ~Extract archive dialog~@Extract@ (DWORD).

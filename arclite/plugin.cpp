@@ -193,19 +193,27 @@ public:
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
     ExtractOptions options;
     options.dst_dir = *dest_path;
-    options.ignore_errors = g_options.extract_ignore_errors;
-    options.overwrite = static_cast<OverwriteOption>(g_options.extract_overwrite);
     options.move_enabled = archive.updatable();
     options.move_files = move != 0 && options.move_enabled;
     options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
     if (op_mode & (OPM_FIND | OPM_QUICKVIEW))
       options.ignore_errors = true;
-    if (!options.show_dialog)
-      options.overwrite = ooOverwrite;
+    else
+      options.ignore_errors = g_options.extract_ignore_errors;
     if (options.show_dialog) {
-      if (g_options.smart_path && items_number > 1 && (op_mode & OPM_TOPLEVEL)) {
-        options.dst_dir = add_trailing_slash(options.dst_dir) + archive.arc_info.name;
-        wstring ext = extract_file_ext(archive.arc_info.name);
+      options.overwrite = static_cast<OverwriteOption>(g_options.extract_overwrite);
+      options.separate_dir = static_cast<TriState>(g_options.extract_separate_dir);
+    }
+    else {
+      options.overwrite = ooOverwrite;
+      options.separate_dir = triFalse;
+    }
+    if (options.show_dialog) {
+      if (!extract_dialog(options))
+        FAIL(E_ABORT);
+      if (options.separate_dir == triTrue || (options.separate_dir == triUndef && items_number > 1 && (op_mode & OPM_TOPLEVEL))) {
+        options.dst_dir = add_trailing_slash(options.dst_dir) + extract_file_name(archive.arc_path);
+        wstring ext = extract_file_ext(options.dst_dir);
         options.dst_dir.erase(options.dst_dir.size() - ext.size(), ext.size());
         if (GetFileAttributesW(long_path(options.dst_dir).c_str()) != INVALID_FILE_ATTRIBUTES) {
           unsigned n = 0;
@@ -213,8 +221,6 @@ public:
           options.dst_dir += L"." + int_to_str(n);
         }
       }
-      if (!extract_dialog(options))
-        FAIL(E_ABORT);
       if (options.dst_dir.empty())
         options.dst_dir = L".";
       if (!is_absolute_path(options.dst_dir))
@@ -227,6 +233,7 @@ public:
         archive.password = options.password;
       g_options.extract_ignore_errors = options.ignore_errors;
       g_options.extract_overwrite = options.overwrite;
+      g_options.extract_separate_dir = options.separate_dir;
       g_options.save();
     }
 
