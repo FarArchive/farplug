@@ -177,8 +177,8 @@ private:
   UInt32 num_indices;
   FileList file_list;
   FileIndex file_list_index;
-  void make_index();
 public:
+  void make_index();
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);
   const ArcFileInfo& get_file_info(UInt32 file_index) const {

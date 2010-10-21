@@ -85,6 +85,8 @@ struct PanelItem {
   DWORD_PTR user_data;
 };
 PanelItem get_current_panel_item(HANDLE h_panel);
+PanelItem get_panel_item(HANDLE h_panel, unsigned index);
+PanelItem get_selected_panel_item(HANDLE h_panel, unsigned index);
 
 void error_dlg(const wstring& title, const Error& e);
 void info_dlg(const wstring& title, const wstring& msg);

@@ -104,6 +104,11 @@ settings.dlg.generate_masks = &Сгенерировать маски
 # Attributes dialog
 attr.dlg.title = Атрибуты
 
+# Plugin menu
+menu.open = &Открыть
+menu.detect = Открыть (&все форматы)
+menu.extract = &Распаковать
+
 # Progress messages
 progress.open = Чтение архива...
 progress.extract = Извлечение файлов...

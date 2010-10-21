@@ -104,6 +104,11 @@ settings.dlg.generate_masks = &Generate masks
 # Attributes dialog
 attr.dlg.title = Attributes
 
+# Plugin menu
+menu.open = &Open
+menu.detect = &Detect
+menu.extract = &Extract
+
 # Progress messages
 progress.open = Reading archive...
 progress.extract = Extracting files...

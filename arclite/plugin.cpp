@@ -20,23 +20,16 @@ private:
   wstring panel_title;
   vector<InfoPanelLine> info_lines;
 
-  static bool auto_detect_next_time;
+public:
+  Plugin() {
+  }
 
-  bool open_file(const wstring& file_path, bool auto_detect) {
-    if (auto_detect) {
-      if (!g_options.handle_commands)
-        FAIL(E_ABORT);
-      if (g_options.use_include_masks && !Far::match_masks(extract_file_name(file_path), g_options.include_masks))
-        FAIL(E_ABORT);
-      if (g_options.use_exclude_masks && Far::match_masks(extract_file_name(file_path), g_options.exclude_masks))
-        FAIL(E_ABORT);
-    }
-
+  Plugin(const wstring& file_path, bool auto_detect) {
     Archive::max_check_size = g_options.max_check_size;
     vector<Archive> archives = Archive::detect(file_path, !auto_detect);
 
     if (archives.size() == 0)
-      return false;
+      FAIL(E_ABORT);
 
     int format_idx;
     if (archives.size() == 1) {
@@ -49,58 +42,10 @@ private:
       }
       format_idx = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), format_names);
       if (format_idx == -1)
-        return false;
+        FAIL(E_ABORT);
     }
 
     archive = archives[format_idx];
-
-    return true;
-  }
-
-public:
-  Plugin() {
-    if (!g_options.handle_create)
-      FAIL(E_ABORT);
-  }
-
-  Plugin(const wstring& file_path) {
-    bool auto_detect = auto_detect_next_time;
-    auto_detect_next_time = true;
-    if (!open_file(file_path, auto_detect))
-      FAIL(E_ABORT);
-  }
-
-  Plugin(int open_from, INT_PTR item) {
-    if (open_from == OPEN_PLUGINSMENU) {
-      PanelInfo panel_info;
-      if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
-        FAIL(E_ABORT);
-      Far::PanelItem panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
-      if (panel_item.file_attributes & FILE_ATTRIBUTE_DIRECTORY)
-        FAIL(E_ABORT);
-      if (!Far::is_real_file_panel(panel_info)) {
-        if ((panel_item.file_attributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-          Far::post_keys(vector<DWORD>(1, KEY_CTRLPGDN));
-          auto_detect_next_time = false;
-        }
-        FAIL(E_ABORT);
-      }
-      if (panel_item.file_name == L"..")
-        FAIL(E_ABORT);
-      wstring dir = Far::get_panel_dir(PANEL_ACTIVE);
-      wstring path = add_trailing_slash(dir) + panel_item.file_name;
-      if (!open_file(path, false))
-        FAIL(E_ABORT);
-    }
-    else if (open_from == OPEN_COMMANDLINE) {
-      wstring path = unquote(strip(reinterpret_cast<const wchar_t*>(item)));
-      if (!is_absolute_path(path))
-        path = Far::get_absolute_path(path);
-      if (!open_file(path, false))
-        FAIL(E_ABORT);
-    }
-    else
-      FAIL(E_ABORT);
   }
 
   void info(OpenPluginInfo* opi) {
@@ -189,6 +134,18 @@ public:
     *items_number = static_cast<int>(size);
   }
 
+  static wstring get_separate_dir_path(const wstring& dst_dir, const wstring& arc_path) {
+    wstring final_dir = add_trailing_slash(dst_dir) + extract_file_name(arc_path);
+    wstring ext = extract_file_ext(final_dir);
+    final_dir.erase(final_dir.size() - ext.size(), ext.size());
+    if (GetFileAttributesW(long_path(final_dir).c_str()) != INVALID_FILE_ATTRIBUTES) {
+      unsigned n = 0;
+      while (GetFileAttributesW(long_path(final_dir + L"." + int_to_str(n)).c_str()) != INVALID_FILE_ATTRIBUTES && n < 100) n++;
+      final_dir += L"." + int_to_str(n);
+    }
+    return final_dir;
+  }
+
   void get_files(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t** dest_path, int op_mode) {
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
     ExtractOptions options;
@@ -213,14 +170,7 @@ public:
       if (!extract_dialog(options))
         FAIL(E_ABORT);
       if (options.separate_dir == triTrue || (options.separate_dir == triUndef && items_number > 1 && (op_mode & OPM_TOPLEVEL))) {
-        options.dst_dir = add_trailing_slash(options.dst_dir) + extract_file_name(archive.arc_path);
-        wstring ext = extract_file_ext(options.dst_dir);
-        options.dst_dir.erase(options.dst_dir.size() - ext.size(), ext.size());
-        if (GetFileAttributesW(long_path(options.dst_dir).c_str()) != INVALID_FILE_ATTRIBUTES) {
-          unsigned n = 0;
-          while (GetFileAttributesW(long_path(options.dst_dir + L"." + int_to_str(n)).c_str()) != INVALID_FILE_ATTRIBUTES && n < 100) n++;
-          options.dst_dir += L"." + int_to_str(n);
-        }
+        options.dst_dir = get_separate_dir_path(options.dst_dir, archive.arc_path);
       }
       if (options.dst_dir.empty())
         options.dst_dir = L".";
@@ -260,6 +210,73 @@ public:
       }
       else if (options.move_files)
         archive.delete_files(indices);
+      Far::progress_notify();
+    }
+  }
+
+  static void bulk_extract(const vector<wstring> file_list) {
+    ExtractOptions options;
+    wstring dst_dir;
+    options.dst_dir = Far::get_panel_dir(PANEL_PASSIVE);
+    options.move_enabled = false;
+    options.move_files = false;
+    options.delete_archive = false;
+    options.show_dialog = true;
+    options.ignore_errors = g_options.extract_ignore_errors;
+    options.overwrite = static_cast<OverwriteOption>(g_options.extract_overwrite);
+    options.separate_dir = static_cast<TriState>(g_options.extract_separate_dir);
+    if (options.show_dialog) {
+      if (!extract_dialog(options))
+        FAIL(E_ABORT);
+      dst_dir = options.dst_dir;
+      if (dst_dir.empty())
+        dst_dir = L".";
+      if (!is_absolute_path(dst_dir))
+        dst_dir = Far::get_absolute_path(options.dst_dir);
+
+      g_options.extract_ignore_errors = options.ignore_errors;
+      g_options.extract_overwrite = options.overwrite;
+      g_options.extract_separate_dir = options.separate_dir;
+      g_options.save();
+    }
+
+    ErrorLog error_log;
+    for (unsigned i = 0; i < file_list.size(); i++) {
+      vector<Archive> archives = Archive::detect(file_list[i], false);
+      if (archives.empty())
+        continue;
+      Archive& archive = archives[0];
+
+      if (archive.password.empty())
+        archive.password = options.password;
+
+      archive.make_index();
+
+      FileIndexRange dir_list = archive.get_dir_list(c_root_index);
+      vector<UInt32> indices;
+      indices.reserve(dir_list.second - dir_list.first);
+      for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
+        indices.push_back(file_index);
+      });
+
+      if (options.separate_dir == triTrue || (options.separate_dir == triUndef && indices.size() > 1))
+        options.dst_dir = get_separate_dir_path(dst_dir, archive.arc_path);
+      else
+        options.dst_dir = dst_dir;
+
+      unsigned error_count = error_log.size();
+      archive.extract(c_root_index, indices, options, error_log);
+
+      if (options.delete_archive && error_count == error_log.size()) {
+        archive.close();
+        archive.delete_archive();
+      }
+    }
+
+    if (!error_log.empty()) {
+      show_error_log(error_log);
+    }
+    else {
       Far::progress_notify();
     }
   }
@@ -420,7 +437,7 @@ public:
   }
 };
 
-bool Plugin::auto_detect_next_time = true;
+TriState auto_detect_next_time = triUndef;
 
 int WINAPI GetMinFarVersion(void) {
   return FARMANAGERVERSION;
@@ -452,18 +469,91 @@ void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
   FAR_ERROR_HANDLER_END(return, return, false);
 }
 
-HANDLE WINAPI OpenPluginW(int OpenFrom,INT_PTR Item) {
+HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
   FAR_ERROR_HANDLER_BEGIN;
-  return new Plugin(OpenFrom, Item);
+  if (OpenFrom == OPEN_PLUGINSMENU) {
+    vector<wstring> menu_items;
+    menu_items.push_back(Far::get_msg(MSG_MENU_OPEN));
+    menu_items.push_back(Far::get_msg(MSG_MENU_DETECT));
+    menu_items.push_back(Far::get_msg(MSG_MENU_EXTRACT));
+    int item = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), menu_items);
+    if (item == 0 || item == 1) {
+      bool auto_detect = item == 0;
+      PanelInfo panel_info;
+      if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
+        return INVALID_HANDLE_VALUE;
+      Far::PanelItem panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
+      if (panel_item.file_attributes & FILE_ATTRIBUTE_DIRECTORY)
+        return INVALID_HANDLE_VALUE;
+      if (!Far::is_real_file_panel(panel_info)) {
+        if ((panel_item.file_attributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
+          Far::post_keys(vector<DWORD>(1, KEY_CTRLPGDN));
+          auto_detect_next_time = auto_detect ? triTrue : triFalse;
+        }
+        return INVALID_HANDLE_VALUE;
+      }
+      if (panel_item.file_name == L"..")
+        return INVALID_HANDLE_VALUE;
+      wstring dir = Far::get_panel_dir(PANEL_ACTIVE);
+      wstring path = add_trailing_slash(dir) + panel_item.file_name;
+      return new Plugin(path, auto_detect);
+    }
+    else if (item == 2) {
+      PanelInfo panel_info;
+      if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
+        return INVALID_HANDLE_VALUE;
+      if (!Far::is_real_file_panel(panel_info))
+        return INVALID_HANDLE_VALUE;
+      vector<wstring> file_list;
+      file_list.reserve(panel_info.SelectedItemsNumber);
+      wstring dir = Far::get_panel_dir(PANEL_ACTIVE);
+      for (int i = 0; i < panel_info.SelectedItemsNumber; i++) {
+        Far::PanelItem panel_item = Far::get_selected_panel_item(PANEL_ACTIVE, i);
+        if ((panel_item.file_attributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
+          wstring file_path = add_trailing_slash(dir) + panel_item.file_name;
+          file_list.push_back(file_path);
+        }
+      }
+      if (file_list.empty())
+        return INVALID_HANDLE_VALUE;
+      Plugin::bulk_extract(file_list);
+    }
+  }
+  else if (OpenFrom == OPEN_COMMANDLINE) {
+    wstring path = unquote(strip(reinterpret_cast<const wchar_t*>(Item)));
+    if (!is_absolute_path(path))
+      path = Far::get_absolute_path(path);
+    return new Plugin(path, true);
+  }
+  return INVALID_HANDLE_VALUE;
   FAR_ERROR_HANDLER_END(return INVALID_HANDLE_VALUE, return INVALID_HANDLE_VALUE, false);
 }
 
 HANDLE WINAPI OpenFilePluginW(const wchar_t *Name,const unsigned char *Data,int DataSize,int OpMode) {
   FAR_ERROR_HANDLER_BEGIN;
-  if (Name == nullptr)
+  if (Name == nullptr) {
+    if (!g_options.handle_create)
+      FAIL(E_ABORT);
     return new Plugin();
-  else
-    return new Plugin(Name);
+  }
+  else {
+    bool auto_detect;
+    if (auto_detect_next_time == triUndef) {
+      auto_detect = true;
+      if (!g_options.handle_commands)
+        FAIL(E_ABORT);
+      if (g_options.use_include_masks && !Far::match_masks(extract_file_name(Name), g_options.include_masks))
+        FAIL(E_ABORT);
+      if (g_options.use_exclude_masks && Far::match_masks(extract_file_name(Name), g_options.exclude_masks))
+        FAIL(E_ABORT);
+    }
+    else if (auto_detect_next_time == triTrue)
+      auto_detect = true;
+    else
+      auto_detect = false;
+    auto_detect_next_time = triUndef;
+    return new Plugin(Name, auto_detect);
+  }
   FAR_ERROR_HANDLER_END(return INVALID_HANDLE_VALUE, return INVALID_HANDLE_VALUE, (OpMode & (OPM_SILENT | OPM_FIND)) != 0);
 }
 
