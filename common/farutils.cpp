@@ -575,7 +575,7 @@ void Dialog::set_check(unsigned ctrl_id, bool check) {
 }
 
 TriState Dialog::get_check3(unsigned ctrl_id) const {
-  unsigned value = DlgItem_GetCheck(g_far, h_dlg, ctrl_id);
+  LONG_PTR value = DlgItem_GetCheck(g_far, h_dlg, ctrl_id);
   return value == BSTATE_3STATE ? triUndef : value == BSTATE_CHECKED ? triTrue : triFalse;
 }
 

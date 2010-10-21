@@ -264,7 +264,7 @@ public:
       else
         options.dst_dir = dst_dir;
 
-      unsigned error_count = error_log.size();
+      size_t error_count = error_log.size();
       archive.extract(c_root_index, indices, options, error_log);
 
       if (options.delete_archive && error_count == error_log.size()) {

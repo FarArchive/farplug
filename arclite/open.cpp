@@ -245,7 +245,7 @@ bool Archive::open(IInStream* in_stream) {
 }
 
 void Archive::detect(const wstring& arc_path, bool all, vector<Archive>& archives) {
-  unsigned parent_idx = -1;
+  size_t parent_idx = -1;
   if (!archives.empty())
     parent_idx = archives.size() - 1;
 
