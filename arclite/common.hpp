@@ -15,6 +15,7 @@ struct ExtractOptions {
   bool show_dialog;
   wstring password;
   TriState separate_dir;
+  bool delete_archive;
 };
 
 struct UpdateOptions {

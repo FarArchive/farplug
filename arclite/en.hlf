@@ -38,12 +38,15 @@ ask user, automatic overwrite or skip file.
 
 	#Delete files after extraction# - Delete files from archive after successful extraction.
  
-	#Password# - specify password for encrypted files.
+	#Password# - Specify password for encrypted files.
 If left blank password will be requested automatically when required.
 
-	#Extract archive into separate directory# - create a subdirectory inside target directory
+	#Extract archive into separate directory# - Create a subdirectory inside target directory
 and extract archive into it. If option value is undefined then subdirectory is created only when
 unpacking entire archive and archive's root directory contains more than one element.
+
+	#Delete archive after extraction# - Delete archive file (including all volumes) from disk
+after successful extraction.
 
 @Update
 $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#

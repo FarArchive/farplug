@@ -195,6 +195,7 @@ public:
     options.dst_dir = *dest_path;
     options.move_enabled = archive.updatable();
     options.move_files = move != 0 && options.move_enabled;
+    options.delete_archive = false;
     options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
     if (op_mode & (OPM_FIND | OPM_QUICKVIEW))
       options.ignore_errors = true;
@@ -252,7 +253,12 @@ public:
         show_error_log(error_log);
     }
     else {
-      if (options.move_files)
+      if (options.delete_archive) {
+        archive.close();
+        archive.delete_archive();
+        Far::close_plugin(this, archive.arc_dir());
+      }
+      else if (options.move_files)
         archive.delete_files(indices);
       Far::progress_notify();
     }

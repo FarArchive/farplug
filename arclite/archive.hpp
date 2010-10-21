@@ -154,7 +154,11 @@ public:
   static unsigned max_check_size;
   wstring arc_path;
   FileInfo arc_info;
+  set<wstring> volume_names;
   ArcChain arc_chain;
+  wstring arc_dir() const {
+    return extract_file_path(arc_path);
+  }
   static vector<Archive> detect(const wstring& file_path, bool all);
   void close();
   void reopen();
@@ -191,6 +195,7 @@ private:
 public:
   void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);
   void test(UInt32 src_dir_index, const vector<UInt32>& src_indices);
+  void delete_archive();
 
   // create & update archive
 private:
@@ -229,9 +234,7 @@ public:
   AttrList get_attr_list(UInt32 item_index);
 
 public:
-  Archive() {
-  }
-  Archive(const wstring& arc_path, const FileInfo& arc_info): arc_path(arc_path), arc_info(arc_info), update_props_defined(false) {
+  Archive(): update_props_defined(false) {
   }
 };
 

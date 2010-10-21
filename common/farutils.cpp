@@ -692,4 +692,8 @@ DWORD get_lang_id() {
   return lang_id;
 }
 
+void close_plugin(HANDLE h_plugin, const wstring& dir) {
+  g_far.Control(h_plugin, FCTL_CLOSEPLUGIN, 0, reinterpret_cast<LONG_PTR>(dir.c_str()));
+}
+
 };

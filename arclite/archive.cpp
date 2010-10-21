@@ -262,7 +262,7 @@ wstring Archive::get_temp_file_name() const {
   CHECK_COM(CoCreateGuid(&guid));
   wchar_t guid_str[50];
   CHECK(StringFromGUID2(guid, guid_str, ARRAYSIZE(guid_str)));
-  return add_trailing_slash(extract_file_path(arc_path)) + guid_str + L".tmp";
+  return add_trailing_slash(arc_dir()) + guid_str + L".tmp";
 }
 
 

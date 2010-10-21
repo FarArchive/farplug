@@ -666,3 +666,10 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
   set_dir_attr(index_range, options.dst_dir, ignore_errors, error_log, set_dir_attr_progress);
   set_dir_attr_progress.clean();
 }
+
+void Archive::delete_archive() {
+  DeleteFileW(long_path(arc_path).c_str());
+  for_each(volume_names.begin(), volume_names.end(), [&] (const wstring& volume_name) {
+    DeleteFileW(long_path(add_trailing_slash(arc_dir()) + volume_name).c_str());
+  });
+}

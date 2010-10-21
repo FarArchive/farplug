@@ -68,9 +68,8 @@ public:
 
 class ArchiveOpener: public IArchiveOpenCallback, public IArchiveOpenVolumeCallback, public ICryptoGetTextPassword, public ComBase, public ProgressMonitor {
 private:
-  wstring archive_dir;
+  Archive& archive;
   FileInfo volume_file_info;
-  wstring& password;
 
   UInt64 total_files;
   UInt64 total_bytes;
@@ -102,7 +101,7 @@ private:
   }
 
 public:
-  ArchiveOpener(const wstring& archive_dir, const FileInfo& file_info, wstring& password): archive_dir(archive_dir), volume_file_info(file_info), password(password), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
+  ArchiveOpener(Archive& archive): archive(archive), volume_file_info(archive.arc_info), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -154,13 +153,14 @@ public:
 
   STDMETHODIMP GetStream(const wchar_t *name, IInStream **inStream) {
     COM_ERROR_HANDLER_BEGIN
-    wstring file_path = add_trailing_slash(archive_dir) + name;
+    wstring file_path = add_trailing_slash(archive.arc_dir()) + name;
     ERROR_MESSAGE_BEGIN
     FindData find_data;
     if (!get_find_data_nt(file_path, find_data))
       return S_FALSE;
     if (find_data.is_dir())
       return S_FALSE;
+    archive.volume_names.insert(name);
     volume_file_info.convert(find_data);
     ComObject<IInStream> file_stream(new ArchiveOpenStream(file_path));
     file_stream.detach(inStream);
@@ -170,14 +170,14 @@ public:
     COM_ERROR_HANDLER_END
   }
 
-  STDMETHODIMP CryptoGetTextPassword(BSTR *pwd) {
+  STDMETHODIMP CryptoGetTextPassword(BSTR *password) {
     COM_ERROR_HANDLER_BEGIN
-    if (password.empty()) {
+    if (archive.password.empty()) {
       ProgressSuspend ps(*this);
-      if (!password_dialog(password))
+      if (!password_dialog(archive.password))
         FAIL(E_ABORT);
     }
-    BStr(password).detach(pwd);
+    BStr(archive.password).detach(password);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
@@ -237,7 +237,7 @@ bool Archive::open_sub_stream(IInStream** sub_stream, FileInfo& sub_arc_info) {
 
 bool Archive::open(IInStream* in_stream) {
   CHECK_COM(in_stream->Seek(0, STREAM_SEEK_SET, nullptr));
-  ComObject<IArchiveOpenCallback> opener(new ArchiveOpener(extract_file_path(arc_path), arc_info, password));
+  ComObject<IArchiveOpenCallback> opener(new ArchiveOpener(*this));
   const UInt64 max_check_start_position = max_check_size;
   HRESULT res = in_arc->Open(in_stream, &max_check_start_position, opener);
   COM_ERROR_CHECK(res);
@@ -321,7 +321,11 @@ void Archive::detect(const wstring& arc_path, bool all, vector<Archive>& archive
   }
 
   for (list<ArcEntry>::const_iterator arc_entry = arc_entries.begin(); arc_entry != arc_entries.end(); arc_entry++) {
-    Archive archive(arc_path, arc_info);
+    Archive archive;
+    archive.arc_path = arc_path;
+    archive.arc_info = arc_info;
+    if (parent_idx != -1)
+      archive.volume_names = archives[parent_idx].volume_names;
     ArcAPI::create_in_archive(arc_entry->type, &archive.in_arc);
     if (archive.open(stream)) {
       if (parent_idx != -1)
@@ -344,6 +348,7 @@ vector<Archive> Archive::detect(const wstring& file_path, bool all) {
 
 void Archive::reopen() {
   assert(!in_arc);
+  volume_names.clear();
   ArchiveOpenStream* stream_impl = new ArchiveOpenStream(arc_path);
   ComObject<IInStream> stream(stream_impl);
   arc_info = stream_impl->get_info();

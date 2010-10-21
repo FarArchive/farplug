@@ -13,6 +13,7 @@ extract.dlg.oo_skip = П&ропускать
 extract.dlg.move_files = &Удалить файлы из архива после распаковки
 extract.dlg.password = П&ароль:
 extract.dlg.separate_dir = Распаковать архив в &отдельный каталог
+extract.dlg.delete_archive = У&далить архив после распаковки
 
 # Update dialog
 update.dlg.title = Обновление архива
