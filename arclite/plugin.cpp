@@ -154,8 +154,8 @@ public:
     options.move_files = move != 0 && options.move_enabled;
     options.delete_archive = false;
     options.show_dialog = (op_mode & (OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
-    if ((op_mode & OPM_SILENT) && (op_mode & OPM_TOPLEVEL) == 0)
-      options.show_dialog = true;
+    if (options.show_dialog && (op_mode & OPM_SILENT) && (op_mode & OPM_TOPLEVEL) == 0)
+      options.show_dialog = false;
     if (op_mode & (OPM_FIND | OPM_QUICKVIEW))
       options.ignore_errors = true;
     else
@@ -244,14 +244,22 @@ public:
 
     ErrorLog error_log;
     for (unsigned i = 0; i < file_list.size(); i++) {
-      vector<Archive> archives = Archive::detect(file_list[i], false);
-      if (archives.empty())
+      vector<Archive> archives;
+      try {
+        archives = Archive::detect(file_list[i], false);
+        if (archives.empty())
+          FAIL(Far::get_msg(MSG_ERROR_NOT_ARCHIVE));
+      }
+      catch (const Error& error) {
+        if (error.code == E_ABORT)
+          throw;
+        error_log.add(file_list[i], error);
         continue;
-      Archive& archive = archives[0];
+      }
 
+      Archive& archive = archives[0];
       if (archive.password.empty())
         archive.password = options.password;
-
       archive.make_index();
 
       FileIndexRange dir_list = archive.get_dir_list(c_root_index);
@@ -279,6 +287,7 @@ public:
       show_error_log(error_log);
     }
     else {
+      Far::update_panel(PANEL_ACTIVE, false);
       Far::progress_notify();
     }
   }
@@ -300,15 +309,13 @@ public:
       vector<Archive> archives;
       try {
         archives = Archive::detect(file_list[i], false);
+        if (archives.empty())
+          FAIL(Far::get_msg(MSG_ERROR_NOT_ARCHIVE));
       }
       catch (const Error& error) {
         if (error.code == E_ABORT)
           throw;
         error_log.add(file_list[i], error);
-      }
-
-      if (archives.empty()) {
-        error_log.add(file_list[i], Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), __FILE__, __LINE__));
         continue;
       }
 
