@@ -48,7 +48,7 @@ void append_file(const wstring& src_path, File& dst_file, AttachSfxModuleProgres
   File source(src_path, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0);
   Buffer<char> buf(1024 * 1024);
   while (true) {
-    unsigned size_read = source.read(buf.data(), buf.size());
+    unsigned size_read = source.read(buf.data(), static_cast<unsigned>(buf.size()));
     if (size_read == 0)
       break;
     CHECK(dst_file.write(buf.data(), size_read) == size_read);
