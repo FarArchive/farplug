@@ -105,9 +105,10 @@ settings.dlg.generate_masks = &Сгенерировать маски
 attr.dlg.title = Атрибуты
 
 # Plugin menu
-menu.open = &Открыть
-menu.detect = Открыть (&все форматы)
-menu.extract = &Распаковать
+menu.open = &Открыть архив
+menu.detect = Открыть (&список форматов)
+menu.extract = &Распаковать архив(ы)
+menu.test = &Проверить архив(ы)
 
 # Progress messages
 progress.open = Чтение архива...
@@ -135,6 +136,7 @@ error.extract.crc_error.encrypted = Неправильный пароль либ
 error.update.error = Ошибка обновления
 error.no_format = Формат архива не найден
 error.not_updatable = Изменение архива невозможно
+error.not_archive = Файл не распознан как архив
 
 # Generic buttons
 button.ok = OK

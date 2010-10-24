@@ -105,9 +105,10 @@ settings.dlg.generate_masks = &Generate masks
 attr.dlg.title = Attributes
 
 # Plugin menu
-menu.open = &Open
-menu.detect = &Detect
-menu.extract = &Extract
+menu.open = &Open archive
+menu.detect = Open (&format menu)
+menu.extract = &Extract archive(s)
+menu.test = &Test archive(s)
 
 # Progress messages
 progress.open = Reading archive...
@@ -135,6 +136,7 @@ error.extract.crc_error.encrypted = Wrong password or CRC check failure
 error.update.error = Update error
 error.no_format = Archive format not found
 error.not_updatable = Archive modification not supported
+error.not_archive = File is not recognized as archive
 
 # Generic buttons
 button.ok = OK

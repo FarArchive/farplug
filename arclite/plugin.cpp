@@ -294,6 +294,53 @@ public:
     Far::info_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_TEST_OK));
   }
 
+  static void bulk_test(const vector<wstring> file_list) {
+    ErrorLog error_log;
+    for (unsigned i = 0; i < file_list.size(); i++) {
+      vector<Archive> archives;
+      try {
+        archives = Archive::detect(file_list[i], false);
+      }
+      catch (const Error& error) {
+        if (error.code == E_ABORT)
+          throw;
+        error_log.add(file_list[i], error);
+      }
+
+      if (archives.empty()) {
+        error_log.add(file_list[i], Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), __FILE__, __LINE__));
+        continue;
+      }
+
+      Archive& archive = archives[0];
+      archive.make_index();
+
+      FileIndexRange dir_list = archive.get_dir_list(c_root_index);
+      vector<UInt32> indices;
+      indices.reserve(dir_list.second - dir_list.first);
+      for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
+        indices.push_back(file_index);
+      });
+
+      try {
+        archive.test(c_root_index, indices);
+      }
+      catch (const Error& error) {
+        if (error.code == E_ABORT)
+          throw;
+        error_log.add(file_list[i], error);
+      }
+    }
+
+    if (!error_log.empty()) {
+      show_error_log(error_log);
+    }
+    else {
+      Far::update_panel(PANEL_ACTIVE, false);
+      Far::info_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_TEST_OK));
+    }
+  }
+
   void put_files(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t* src_path, int op_mode) {
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0)
       return;
@@ -478,6 +525,7 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
     menu_items.push_back(Far::get_msg(MSG_MENU_OPEN));
     menu_items.push_back(Far::get_msg(MSG_MENU_DETECT));
     menu_items.push_back(Far::get_msg(MSG_MENU_EXTRACT));
+    menu_items.push_back(Far::get_msg(MSG_MENU_TEST));
     int item = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), menu_items);
     if (item == 0 || item == 1) {
       bool auto_detect = item == 0;
@@ -500,7 +548,7 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
       wstring path = add_trailing_slash(dir) + panel_item.file_name;
       return new Plugin(path, auto_detect);
     }
-    else if (item == 2) {
+    else if (item == 2 || item == 3) {
       PanelInfo panel_info;
       if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
         return INVALID_HANDLE_VALUE;
@@ -518,7 +566,10 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
       }
       if (file_list.empty())
         return INVALID_HANDLE_VALUE;
-      Plugin::bulk_extract(file_list);
+      if (item == 2)
+        Plugin::bulk_extract(file_list);
+      else
+        Plugin::bulk_test(file_list);
     }
   }
   else if (OpenFrom == OPEN_COMMANDLINE) {
