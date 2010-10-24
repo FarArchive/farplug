@@ -153,7 +153,9 @@ public:
     options.move_enabled = archive.updatable();
     options.move_files = move != 0 && options.move_enabled;
     options.delete_archive = false;
-    options.show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
+    options.show_dialog = (op_mode & (OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
+    if ((op_mode & OPM_SILENT) && (op_mode & OPM_TOPLEVEL) == 0)
+      options.show_dialog = true;
     if (op_mode & (OPM_FIND | OPM_QUICKVIEW))
       options.ignore_errors = true;
     else
@@ -169,9 +171,6 @@ public:
     if (options.show_dialog) {
       if (!extract_dialog(options))
         FAIL(E_ABORT);
-      if (options.separate_dir == triTrue || (options.separate_dir == triUndef && items_number > 1 && (op_mode & OPM_TOPLEVEL))) {
-        options.dst_dir = get_separate_dir_path(options.dst_dir, archive.arc_path);
-      }
       if (options.dst_dir.empty())
         options.dst_dir = L".";
       if (!is_absolute_path(options.dst_dir))
@@ -179,6 +178,9 @@ public:
       if (options.dst_dir != *dest_path) {
         extract_dir = options.dst_dir;
         *dest_path = extract_dir.c_str();
+      }
+      if (options.separate_dir == triTrue || (options.separate_dir == triUndef && items_number > 1 && (op_mode & OPM_TOPLEVEL))) {
+        options.dst_dir = get_separate_dir_path(options.dst_dir, archive.arc_path);
       }
       if (!options.password.empty())
         archive.password = options.password;
