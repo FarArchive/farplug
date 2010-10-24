@@ -77,3 +77,5 @@ struct PluginSettings {
 bool settings_dialog(PluginSettings& settings);
 
 void attr_dialog(const AttrList& attr_list);
+
+bool sfx_convert_dialog(unsigned& sfx_module_idx);

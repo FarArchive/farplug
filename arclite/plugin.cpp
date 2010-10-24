@@ -491,6 +491,15 @@ public:
       g_options.save();
     }
   }
+
+  static void convert_to_sfx(const vector<wstring>& file_list) {
+    unsigned sfx_module_idx = g_options.update_sfx_module_idx;
+    if (!sfx_convert_dialog(sfx_module_idx))
+      FAIL(E_ABORT);
+    for (unsigned i = 0; i < file_list.size(); i++) {
+      attach_sfx_module(file_list[i], sfx_module_idx);
+    }
+  }
 };
 
 TriState auto_detect_next_time = triUndef;
@@ -533,6 +542,7 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
     menu_items.push_back(Far::get_msg(MSG_MENU_DETECT));
     menu_items.push_back(Far::get_msg(MSG_MENU_EXTRACT));
     menu_items.push_back(Far::get_msg(MSG_MENU_TEST));
+    menu_items.push_back(Far::get_msg(MSG_MENU_SFX_CONVERT));
     int item = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), menu_items);
     if (item == 0 || item == 1) {
       bool auto_detect = item == 0;
@@ -555,7 +565,7 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
       wstring path = add_trailing_slash(dir) + panel_item.file_name;
       return new Plugin(path, auto_detect);
     }
-    else if (item == 2 || item == 3) {
+    else if (item == 2 || item == 3 || item == 4) {
       PanelInfo panel_info;
       if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
         return INVALID_HANDLE_VALUE;
@@ -575,8 +585,11 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
         return INVALID_HANDLE_VALUE;
       if (item == 2)
         Plugin::bulk_extract(file_list);
-      else
+      else if (item == 3)
         Plugin::bulk_test(file_list);
+      else if (item == 4) {
+        Plugin::convert_to_sfx(file_list);
+      }
     }
   }
   else if (OpenFrom == OPEN_COMMANDLINE) {

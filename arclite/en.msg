@@ -104,11 +104,16 @@ settings.dlg.generate_masks = &Generate masks
 # Attributes dialog
 attr.dlg.title = Attributes
 
+# SFX convert dialog
+sfx_convert.dlg.title = Convert archive into SFX archive
+sfx_convert.dlg.module = Select SFX module:
+
 # Plugin menu
 menu.open = &Open archive
 menu.detect = Open (&format menu)
 menu.extract = &Extract archive(s)
 menu.test = &Test archive(s)
+menu.sfx_convert = Convert archive into SFX
 
 # Progress messages
 progress.open = Reading archive...
@@ -126,6 +131,7 @@ progress.unpause = paused (P = continue)
 progress.low_priority = B = low priority
 progress.normal_priority = low priority (B = normal)
 progress.paused = Paused
+progress.sfx_convert = Converting into SFX...
 
 # Error messages
 error.extract.unsupported_method = Unsupported compression method
@@ -137,6 +143,7 @@ error.update.error = Update error
 error.no_format = Archive format not found
 error.not_updatable = Archive modification not supported
 error.not_archive = File is not recognized as archive
+error.sfx_convert = Archive cannot be converted into SFX archive
 
 # Generic buttons
 button.ok = OK

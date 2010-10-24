@@ -104,11 +104,16 @@ settings.dlg.generate_masks = &Сгенерировать маски
 # Attributes dialog
 attr.dlg.title = Атрибуты
 
+# SFX convert dialog
+sfx_convert.dlg.title = Преобразование в SFX архив
+sfx_convert.dlg.module = Выберите SFX модуль:
+
 # Plugin menu
 menu.open = &Открыть архив
 menu.detect = Открыть (&список форматов)
 menu.extract = &Распаковать архив(ы)
 menu.test = &Проверить архив(ы)
+menu.sfx_convert = Преобразовать архив в SFX
 
 # Progress messages
 progress.open = Чтение архива...
@@ -126,6 +131,7 @@ progress.unpause = пауза (P = продолжить)
 progress.low_priority = B = низкий приоритет
 progress.normal_priority = низкий приоритет (B = нормальный)
 progress.paused = Пауза
+progress.sfx_convert = Преобразование в SFX...
 
 # Error messages
 error.extract.unsupported_method = Неподдерживаемый метод сжатия
@@ -137,6 +143,7 @@ error.update.error = Ошибка обновления
 error.no_format = Формат архива не найден
 error.not_updatable = Изменение архива невозможно
 error.not_archive = Файл не распознан как архив
+error.sfx_convert = Архив нельзя преобразовать в SFX архив
 
 # Generic buttons
 button.ok = OK
