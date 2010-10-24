@@ -391,9 +391,9 @@ public:
       seek_stream_pos += offset;
       break;
     case STREAM_SEEK_END:
-      if (offset > 0 && static_cast<unsigned>(offset) > stream_size)
+      if (offset < 0 && static_cast<unsigned>(-offset) > stream_size)
         FAIL(E_INVALIDARG);
-      seek_stream_pos = stream_size - offset;
+      seek_stream_pos = stream_size + offset;
       break;
     default:
       FAIL(E_INVALIDARG);
