@@ -488,6 +488,107 @@ public:
 };
 
 
+struct FileIndexInfo {
+  wstring rel_path;
+  FindData find_data;
+};
+
+class FileIndexMap: public map<UInt32, FileIndexInfo>, private ProgressMonitor {
+private:
+  const Archive& archive;
+  UInt32& new_index;
+  bool& ignore_errors;
+  ErrorLog& error_log;
+
+  const wstring* file_path;
+
+  virtual void do_update_ui() {
+    const unsigned c_width = 60;
+    wostringstream st;
+    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
+
+    st << Far::get_msg(MSG_PROGRESS_SCAN_DIRS) << L'\n';
+    st << left << setw(c_width) << fit_str(*file_path, c_width) << L'\n';
+
+    Far::message(st.str(), 0, FMSG_LEFTALIGN);
+
+    Far::set_progress_state(TBPF_INDETERMINATE);
+
+    SetConsoleTitleW(Far::get_msg(MSG_PROGRESS_SCAN_DIRS).c_str());
+  }
+
+  void update_progress(const wstring& file_path) {
+    this->file_path = &file_path;
+    update_ui();
+  }
+
+  UInt32 scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index) {
+    ArcFileInfo file_info;
+    file_info.attr = src_find_data.is_dir() ? FILE_ATTRIBUTE_DIRECTORY : 0;
+    file_info.parent = dst_dir_index;
+    file_info.name = src_find_data.cFileName;
+    FileIndexRange fi_range = std::equal_range(archive.file_list_index.begin(), archive.file_list_index.end(), -1, [&] (UInt32 left, UInt32 right) -> bool {
+      const ArcFileInfo& fi_left = left == -1 ? file_info : archive.file_list[left];
+      const ArcFileInfo& fi_right = right == -1 ? file_info : archive.file_list[right];
+      return fi_left < fi_right;
+    });
+    UInt32 file_index;
+    if (fi_range.first == fi_range.second) {
+      // new file
+      file_index = new_index;
+      new_index++;
+    }
+    else {
+      // updated file
+      file_index = *fi_range.first;
+      if (file_index >= archive.num_indices) { // fake index
+        file_index = new_index;
+        new_index++;
+      }
+    }
+    FileIndexInfo file_index_info;
+    file_index_info.rel_path = sub_dir;
+    file_index_info.find_data = src_find_data;
+    insert(pair<UInt32, FileIndexInfo>(file_index, file_index_info));
+    return file_index;
+  }
+
+  void scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index) {
+    wstring path = add_trailing_slash(src_dir) + sub_dir;
+    update_progress(path);
+    FileEnum file_enum(path);
+    while (true) {
+      while (true) {
+        try {
+          if (!file_enum.next())
+            return;
+          break;
+        }
+        catch (const Error& e) {
+          if (retry_or_ignore_error(path, e, ignore_errors, error_log, *this))
+            return;
+        }
+      }
+      UInt32 file_index = scan_file(sub_dir, file_enum.data(), dst_dir_index);
+      if (file_enum.data().is_dir()) {
+        scan_dir(src_dir, add_trailing_slash(sub_dir) + file_enum.data().cFileName, file_index);
+      }
+    }
+  }
+
+public:
+  FileIndexMap(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, const Archive& archive, UInt32& new_index, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(true), archive(archive), new_index(new_index), ignore_errors(ignore_errors), error_log(error_log) {
+    for (unsigned i = 0; i < file_names.size(); i++) {
+      FindData find_data = get_find_data(add_trailing_slash(src_dir) + file_names[i]);
+      UInt32 file_index = scan_file(wstring(), find_data, dst_dir_index);
+      if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        scan_dir(src_dir, file_names[i], file_index);
+      }
+    }
+  }
+};
+
+
 class ArchiveUpdater: public IArchiveUpdateCallback, public ICryptoGetTextPassword2, public ComBase {
 private:
   wstring src_dir;
@@ -618,88 +719,6 @@ public:
 };
 
 
-class PrepareUpdateProgress: private ProgressMonitor {
-private:
-  const wstring* file_path;
-
-  virtual void do_update_ui() {
-    const unsigned c_width = 60;
-    wostringstream st;
-    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-
-    st << Far::get_msg(MSG_PROGRESS_SCAN_DIRS) << L'\n';
-    st << left << setw(c_width) << fit_str(*file_path, c_width) << L'\n';
-
-    Far::message(st.str(), 0, FMSG_LEFTALIGN);
-
-    Far::set_progress_state(TBPF_INDETERMINATE);
-
-    SetConsoleTitleW(Far::get_msg(MSG_PROGRESS_SCAN_DIRS).c_str());
-  }
-
-public:
-  PrepareUpdateProgress(): ProgressMonitor(true) {
-  }
-  void update(const wstring& file_path) {
-    this->file_path = &file_path;
-    update_ui();
-  }
-};
-
-UInt32 Archive::scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map, PrepareUpdateProgress& progress) {
-  ArcFileInfo file_info;
-  file_info.attr = src_find_data.is_dir() ? FILE_ATTRIBUTE_DIRECTORY : 0;
-  file_info.parent = dst_dir_index;
-  file_info.name = src_find_data.cFileName;
-  FileIndexRange fi_range = equal_range(file_list_index.begin(), file_list_index.end(), -1, [&] (UInt32 left, UInt32 right) -> bool {
-    const ArcFileInfo& fi_left = left == -1 ? file_info : file_list[left];
-    const ArcFileInfo& fi_right = right == -1 ? file_info : file_list[right];
-    return fi_left < fi_right;
-  });
-  UInt32 file_index;
-  if (fi_range.first == fi_range.second) {
-    // new file
-    file_index = new_index;
-    new_index++;
-  }
-  else {
-    // updated file
-    file_index = *fi_range.first;
-    if (file_index >= num_indices) { // fake index
-      file_index = new_index;
-      new_index++;
-    }
-  }
-  FileIndexInfo file_index_info;
-  file_index_info.rel_path = sub_dir;
-  file_index_info.find_data = src_find_data;
-  file_index_map[file_index] = file_index_info;
-  return file_index;
-}
-
-void Archive::scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map, PrepareUpdateProgress& progress) {
-  wstring path = add_trailing_slash(src_dir) + sub_dir;
-  progress.update(path);
-  FileEnum file_enum(path);
-  while (file_enum.next()) {
-    UInt32 file_index = scan_file(sub_dir, file_enum.data(), dst_dir_index, new_index, file_index_map, progress);
-    if (file_enum.data().is_dir()) {
-      scan_dir(src_dir, add_trailing_slash(sub_dir) + file_enum.data().cFileName, file_index, new_index, file_index_map, progress);
-    }
-  }
-}
-
-void Archive::prepare_file_index_map(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map) {
-  PrepareUpdateProgress progress;
-  for (unsigned i = 0; i < file_names.size(); i++) {
-    FindData find_data = get_find_data(add_trailing_slash(src_dir) + file_names[i]);
-    UInt32 file_index = scan_file(wstring(), find_data, dst_dir_index, new_index, file_index_map, progress);
-    if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-      scan_dir(src_dir, file_names[i], file_index, new_index, file_index_map, progress);
-    }
-  }
-}
-
 void Archive::set_properties(IOutArchive* out_arc, const UpdateOptions& options) {
   ComObject<ISetProperties> set_props;
   if (SUCCEEDED(out_arc->QueryInterface(IID_ISetProperties, reinterpret_cast<void**>(&set_props)))) {
@@ -725,8 +744,11 @@ void Archive::set_properties(IOutArchive* out_arc, const UpdateOptions& options)
   }
 }
 
-class DeleteFilesProgress: public ProgressMonitor {
+class DeleteSrcFiles: public ProgressMonitor {
 private:
+  bool& ignore_errors;
+  ErrorLog& error_log;
+
   const wstring* file_path;
 
   virtual void do_update_ui() {
@@ -743,65 +765,76 @@ private:
     SetConsoleTitleW(Far::get_msg(MSG_PROGRESS_DELETE_FILES).c_str());
   }
 
-public:
-  DeleteFilesProgress(): ProgressMonitor(true) {
-  }
-  void update(const wstring& file_path) {
+  void update_progress(const wstring& file_path) {
     this->file_path = &file_path;
     update_ui();
   }
-};
 
-void Archive::delete_src_file(const wstring& file_path, DeleteFilesProgress& progress) {
-  progress.update(file_path);
-  ERROR_MESSAGE_BEGIN
-  if (!DeleteFileW(long_path(file_path).c_str())) {
-    CHECK_SYS(GetLastError() == ERROR_ACCESS_DENIED);
-    SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL);
-    CHECK_SYS(DeleteFileW(long_path(file_path).c_str()));
-  }
-  ERROR_MESSAGE_END(file_path)
-}
-
-void Archive::delete_src_dir(const wstring& dir_path, DeleteFilesProgress& progress) {
-  {
-    FileEnum file_enum(dir_path);
-    while (file_enum.next()) {
-      wstring path = add_trailing_slash(dir_path) + file_enum.data().cFileName;
-      progress.update(path);
-      if (file_enum.data().is_dir())
-        delete_src_dir(path, progress);
-      else
-        delete_src_file(path, progress);
+  void delete_src_file(const wstring& file_path) {
+    update_progress(file_path);
+    while (true) {
+      try {
+        if (!DeleteFileW(long_path(file_path).c_str())) {
+          CHECK_SYS(GetLastError() == ERROR_ACCESS_DENIED);
+          SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL);
+          CHECK_SYS(DeleteFileW(long_path(file_path).c_str()));
+        }
+        break;
+      }
+      catch (const Error& e) {
+        if (retry_or_ignore_error(file_path, e, ignore_errors, error_log, *this))
+          break;
+      }
     }
   }
-  ERROR_MESSAGE_BEGIN
-  if (!RemoveDirectoryW(long_path(dir_path).c_str())) {
-    CHECK_SYS(GetLastError() == ERROR_ACCESS_DENIED);
-    SetFileAttributesW(long_path(dir_path).c_str(), FILE_ATTRIBUTE_NORMAL);
-    CHECK_SYS(RemoveDirectoryW(long_path(dir_path).c_str()));
-  }
-  ERROR_MESSAGE_END(dir_path)
-}
 
-void Archive::delete_src_files(const wstring& src_dir, const vector<wstring>& file_names) {
-  DeleteFilesProgress delete_files_progress;
-  for (unsigned i = 0; i < file_names.size(); i++) {
-    wstring file_path = add_trailing_slash(src_dir) + file_names[i];
-    FindData find_data = get_find_data(file_path);
-    if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-      delete_src_dir(file_path, delete_files_progress);
-    else
-      delete_src_file(file_path, delete_files_progress);
+  void delete_src_dir(const wstring& dir_path) {
+    {
+      FileEnum file_enum(dir_path);
+      while (file_enum.next()) {
+        wstring path = add_trailing_slash(dir_path) + file_enum.data().cFileName;
+        update_progress(path);
+        if (file_enum.data().is_dir())
+          delete_src_dir(path);
+        else
+          delete_src_file(path);
+      }
+    }
+    while (true) {
+      try {
+        if (!RemoveDirectoryW(long_path(dir_path).c_str())) {
+          CHECK_SYS(GetLastError() == ERROR_ACCESS_DENIED);
+          SetFileAttributesW(long_path(dir_path).c_str(), FILE_ATTRIBUTE_NORMAL);
+          CHECK_SYS(RemoveDirectoryW(long_path(dir_path).c_str()));
+        }
+        break;
+      }
+      catch (const Error& e) {
+        if (retry_or_ignore_error(dir_path, e, ignore_errors, error_log, *this))
+          break;
+      }
+    }
   }
-}
+
+public:
+  DeleteSrcFiles(const wstring& src_dir, const vector<wstring>& file_names, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(true), ignore_errors(ignore_errors), error_log(error_log) {
+    for (unsigned i = 0; i < file_names.size(); i++) {
+      wstring file_path = add_trailing_slash(src_dir) + file_names[i];
+      FindData find_data = get_find_data(file_path);
+      if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        delete_src_dir(file_path);
+      else
+        delete_src_file(file_path);
+    }
+  }
+};
+
 
 void Archive::create(const wstring& src_dir, const vector<wstring>& file_names, const UpdateOptions& options, ErrorLog& error_log) {
   bool ignore_errors = options.ignore_errors;
-
-  FileIndexMap file_index_map;
   UInt32 new_index = 0;
-  prepare_file_index_map(src_dir, file_names, c_root_index, new_index, file_index_map);
+
+  FileIndexMap file_index_map(src_dir, file_names, c_root_index, *this, new_index, ignore_errors, error_log);
 
   ComObject<IOutArchive> out_arc;
   ArcAPI::create_out_archive(options.arc_type, &out_arc);
@@ -827,15 +860,14 @@ void Archive::create(const wstring& src_dir, const vector<wstring>& file_names, 
   }
 
   if (options.move_files && error_log.empty())
-    delete_src_files(src_dir, file_names);
+    DeleteSrcFiles delete_src_files(src_dir, file_names, ignore_errors, error_log);
 }
 
 void Archive::update(const wstring& src_dir, const vector<wstring>& file_names, const wstring& dst_dir, const UpdateOptions& options, ErrorLog& error_log) {
   bool ignore_errors = options.ignore_errors;
-
-  FileIndexMap file_index_map;
   UInt32 new_index = num_indices; // starting index for new files
-  prepare_file_index_map(src_dir, file_names, find_dir(dst_dir), new_index, file_index_map);
+
+  FileIndexMap file_index_map(src_dir, file_names, find_dir(dst_dir), *this, new_index, ignore_errors, error_log);
 
   wstring temp_arc_name = get_temp_file_name();
   try {
@@ -860,5 +892,5 @@ void Archive::update(const wstring& src_dir, const vector<wstring>& file_names, 
   reopen();
 
   if (options.move_files && error_log.empty())
-    delete_src_files(src_dir, file_names);
+    DeleteSrcFiles delete_src_files(src_dir, file_names, ignore_errors, error_log);
 }

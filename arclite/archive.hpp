@@ -119,12 +119,6 @@ const UInt32 c_root_index = -1;
 typedef vector<UInt32> FileIndex;
 typedef pair<FileIndex::const_iterator, FileIndex::const_iterator> FileIndexRange;
 
-struct FileIndexInfo {
-  wstring rel_path;
-  FindData find_data;
-};
-typedef map<UInt32, FileIndexInfo> FileIndexMap;
-
 struct ArcEntry {
   ArcType type;
   size_t sig_pos;
@@ -140,8 +134,6 @@ public:
 // forwards
 class SetDirAttrProgress;
 class PrepareExtractProgress;
-class DeleteFilesProgress;
-class PrepareUpdateProgress;
 
 class Archive {
   // open
@@ -173,11 +165,10 @@ public:
   }
 
   // archive contents
-private:
+public:
   UInt32 num_indices;
   FileList file_list;
   FileIndex file_list_index;
-public:
   void make_index();
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);
@@ -200,13 +191,7 @@ public:
   // create & update archive
 private:
   wstring get_temp_file_name() const;
-  UInt32 scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map, PrepareUpdateProgress& progress);
-  void scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map, PrepareUpdateProgress& progress);
-  void prepare_file_index_map(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
   void set_properties(IOutArchive* out_arc, const UpdateOptions& options);
-  void delete_src_file(const wstring& file_path, DeleteFilesProgress& progress);
-  void delete_src_dir(const wstring& dir_path, DeleteFilesProgress& progress);
-  void delete_src_files(const wstring& src_dir, const vector<wstring>& file_names);
   void load_sfx_module(Buffer<char>& buffer, const UpdateOptions& options);
 public:
   unsigned level;
