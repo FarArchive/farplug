@@ -111,6 +111,7 @@ sfx_convert.dlg.module = Select SFX module:
 # Plugin menu
 menu.open = &Open archive
 menu.detect = Open (&format menu)
+menu.create = &Create archive
 menu.extract = &Extract archive(s)
 menu.test = &Test archive(s)
 menu.sfx_convert = Convert archive into SFX

@@ -689,13 +689,13 @@ void Archive::scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 ds
   }
 }
 
-void Archive::prepare_file_index_map(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map) {
+void Archive::prepare_file_index_map(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map) {
   PrepareUpdateProgress progress;
-  for (unsigned i = 0; i < items_number; i++) {
-    const FAR_FIND_DATA& find_data = panel_items[i].FindData;
-    UInt32 file_index = scan_file(wstring(), get_find_data(add_trailing_slash(src_dir) + find_data.lpwszFileName), dst_dir_index, new_index, file_index_map, progress);
+  for (unsigned i = 0; i < file_names.size(); i++) {
+    FindData find_data = get_find_data(add_trailing_slash(src_dir) + file_names[i]);
+    UInt32 file_index = scan_file(wstring(), find_data, dst_dir_index, new_index, file_index_map, progress);
     if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-      scan_dir(src_dir, find_data.lpwszFileName, file_index, new_index, file_index_map, progress);
+      scan_dir(src_dir, file_names[i], file_index, new_index, file_index_map, progress);
     }
   }
 }
@@ -784,11 +784,11 @@ void Archive::delete_src_dir(const wstring& dir_path, DeleteFilesProgress& progr
   ERROR_MESSAGE_END(dir_path)
 }
 
-void Archive::delete_src_files(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number) {
+void Archive::delete_src_files(const wstring& src_dir, const vector<wstring>& file_names) {
   DeleteFilesProgress delete_files_progress;
-  for (unsigned i = 0; i < items_number; i++) {
-    const FAR_FIND_DATA& find_data = panel_items[i].FindData;
-    wstring file_path = add_trailing_slash(src_dir) + find_data.lpwszFileName;
+  for (unsigned i = 0; i < file_names.size(); i++) {
+    wstring file_path = add_trailing_slash(src_dir) + file_names[i];
+    FindData find_data = get_find_data(file_path);
     if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
       delete_src_dir(file_path, delete_files_progress);
     else
@@ -796,12 +796,12 @@ void Archive::delete_src_files(const wstring& src_dir, const PluginPanelItem* pa
   }
 }
 
-void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options, ErrorLog& error_log) {
+void Archive::create(const wstring& src_dir, const vector<wstring>& file_names, const UpdateOptions& options, ErrorLog& error_log) {
   bool ignore_errors = options.ignore_errors;
 
   FileIndexMap file_index_map;
   UInt32 new_index = 0;
-  prepare_file_index_map(src_dir, panel_items, items_number, c_root_index, new_index, file_index_map);
+  prepare_file_index_map(src_dir, file_names, c_root_index, new_index, file_index_map);
 
   ComObject<IOutArchive> out_arc;
   ArcAPI::create_out_archive(options.arc_type, &out_arc);
@@ -827,15 +827,15 @@ void Archive::create(const wstring& src_dir, const PluginPanelItem* panel_items,
   }
 
   if (options.move_files && error_log.empty())
-    delete_src_files(src_dir, panel_items, items_number);
+    delete_src_files(src_dir, file_names);
 }
 
-void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options, ErrorLog& error_log) {
+void Archive::update(const wstring& src_dir, const vector<wstring>& file_names, const wstring& dst_dir, const UpdateOptions& options, ErrorLog& error_log) {
   bool ignore_errors = options.ignore_errors;
 
   FileIndexMap file_index_map;
   UInt32 new_index = num_indices; // starting index for new files
-  prepare_file_index_map(src_dir, panel_items, items_number, find_dir(dst_dir), new_index, file_index_map);
+  prepare_file_index_map(src_dir, file_names, find_dir(dst_dir), new_index, file_index_map);
 
   wstring temp_arc_name = get_temp_file_name();
   try {
@@ -860,5 +860,5 @@ void Archive::update(const wstring& src_dir, const PluginPanelItem* panel_items,
   reopen();
 
   if (options.move_files && error_log.empty())
-    delete_src_files(src_dir, panel_items, items_number);
+    delete_src_files(src_dir, file_names);
 }

@@ -110,7 +110,8 @@ sfx_convert.dlg.module = Выберите SFX модуль:
 
 # Plugin menu
 menu.open = &Открыть архив
-menu.detect = Открыть (&список форматов)
+menu.detect = О&ткрыть (список форматов)
+menu.create = &Создать архив
 menu.extract = &Распаковать архив(ы)
 menu.test = &Проверить архив(ы)
 menu.sfx_convert = Преобразовать архив в SFX

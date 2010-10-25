@@ -202,11 +202,11 @@ private:
   wstring get_temp_file_name() const;
   UInt32 scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map, PrepareUpdateProgress& progress);
   void scan_dir(const wstring& src_dir, const wstring& sub_dir, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map, PrepareUpdateProgress& progress);
-  void prepare_file_index_map(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
+  void prepare_file_index_map(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, UInt32& new_index, FileIndexMap& file_index_map);
   void set_properties(IOutArchive* out_arc, const UpdateOptions& options);
   void delete_src_file(const wstring& file_path, DeleteFilesProgress& progress);
   void delete_src_dir(const wstring& dir_path, DeleteFilesProgress& progress);
-  void delete_src_files(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number);
+  void delete_src_files(const wstring& src_dir, const vector<wstring>& file_names);
   void load_sfx_module(Buffer<char>& buffer, const UpdateOptions& options);
 public:
   unsigned level;
@@ -217,8 +217,8 @@ public:
   bool update_props_defined;
   void load_update_props();
 public:
-  void create(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const UpdateOptions& options, ErrorLog& error_log);
-  void update(const wstring& src_dir, const PluginPanelItem* panel_items, unsigned items_number, const wstring& dst_dir, const UpdateOptions& options, ErrorLog& error_log);
+  void create(const wstring& src_dir, const vector<wstring>& file_names, const UpdateOptions& options, ErrorLog& error_log);
+  void update(const wstring& src_dir, const vector<wstring>& file_names, const wstring& dst_dir, const UpdateOptions& options, ErrorLog& error_log);
 
   // delete files in archive
 private:
