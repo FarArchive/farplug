@@ -432,7 +432,13 @@ private:
   vector<ArcType> main_formats;
   vector<ArcType> other_formats;
   UpdateOptions& options;
+  UpdateProfiles& profiles;
 
+  bool events_enabled;
+
+  int profile_ctrl_id;
+  int save_profile_ctrl_id;
+  int delete_profile_ctrl_id;
   int arc_path_ctrl_id;
   int main_formats_ctrl_id;
   int other_formats_ctrl_id;
@@ -534,100 +540,180 @@ private:
     }
   }
 
-  LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
-    if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
-      if (new_arc) {
-        options.arc_path = unquote(strip(get_text(arc_path_ctrl_id)));
+  UpdateOptions read_controls() {
+    UpdateOptions options;
+    if (new_arc) {
+      options.arc_path = unquote(strip(get_text(arc_path_ctrl_id)));
 
-        for (unsigned i = 0; i < main_formats.size(); i++) {
-          if (get_check(main_formats_ctrl_id + i)) {
-            arc_type = c_archive_types[i].value;
-            break;
-          }
-        }
-        if (!other_formats.empty() && get_check(other_formats_ctrl_id)) {
-          arc_type = other_formats[get_list_pos(other_formats_ctrl_id + 1)];
-        }
-        if (arc_type.empty()) {
-          FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_ARC_TYPE));
-        }
-        options.arc_type = arc_type;
-      }
-      bool is_7z = arc_type == c_7z;
-
-      unsigned level = -1;
-      for (unsigned i = 0; i < ARRAYSIZE(c_levels); i++) {
-        if (get_check(level_ctrl_id + i)) {
-          level = c_levels[i].value;
+      for (unsigned i = 0; i < main_formats.size(); i++) {
+        if (get_check(main_formats_ctrl_id + i)) {
+          arc_type = c_archive_types[i].value;
           break;
         }
       }
-      if (level == -1) {
-        FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_LEVEL));
+      if (!other_formats.empty() && get_check(other_formats_ctrl_id)) {
+        arc_type = other_formats[get_list_pos(other_formats_ctrl_id + 1)];
       }
-      options.level = level;
-
-      wstring method;
-      for (unsigned i = 0; i < ARRAYSIZE(c_methods); i++) {
-        if (get_check(method_ctrl_id + i)) {
-          method = c_methods[i].value;
-          break;
-        }
+      if (arc_type.empty()) {
+        FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_ARC_TYPE));
       }
-      if (method.empty() && is_7z && level != 0) {
-        FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_METHOD));
+      options.arc_type = arc_type;
+    }
+    bool is_7z = arc_type == c_7z;
+
+    unsigned level = -1;
+    for (unsigned i = 0; i < ARRAYSIZE(c_levels); i++) {
+      if (get_check(level_ctrl_id + i)) {
+        level = c_levels[i].value;
+        break;
       }
-      options.method = method;
+    }
+    if (level == -1) {
+      FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_LEVEL));
+    }
+    options.level = level;
 
-      options.solid = get_check(solid_ctrl_id);
+    wstring method;
+    for (unsigned i = 0; i < ARRAYSIZE(c_methods); i++) {
+      if (get_check(method_ctrl_id + i)) {
+        method = c_methods[i].value;
+        break;
+      }
+    }
+    if (method.empty() && is_7z && level != 0) {
+      FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_METHOD));
+    }
+    options.method = method;
 
-      options.encrypt = get_check(encrypt_ctrl_id);
-      if (options.encrypt) {
-        options.show_password = get_check(show_password_ctrl_id);
-        if (options.show_password) {
-          options.password = get_text(password_visible_ctrl_id);
-        }
-        else {
-          options.password = get_text(password_ctrl_id);
-          wstring password_verify = get_text(password_verify_ctrl_id);
-          if (options.password != password_verify) {
-            FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_PASSWORDS_DONT_MATCH));
-          }
-        }
-        if (options.password.empty()) {
-          FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_PASSWORD_IS_EMPTY));
-        }
-        options.encrypt_header_defined = is_check_defined(encrypt_header_ctrl_id);
-        options.encrypt_header = get_check(encrypt_header_ctrl_id);
+    options.solid = get_check(solid_ctrl_id);
+
+    options.encrypt = get_check(encrypt_ctrl_id);
+    if (options.encrypt) {
+      options.show_password = get_check(show_password_ctrl_id);
+      if (options.show_password) {
+        options.password = get_text(password_visible_ctrl_id);
       }
       else {
-        options.password.clear();
-      }
-
-      if (new_arc) {
-        options.create_sfx = get_check(create_sfx_ctrl_id);
-        if (options.create_sfx) {
-          options.sfx_module_idx = get_list_pos(sfx_module_ctrl_id);
-          if (options.sfx_module_idx >= ArcAPI::sfx().size()) {
-            FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_SFX_MODULE));
-          }
-        }
-
-        options.enable_volumes = get_check(enable_volumes_ctrl_id);
-        if (options.enable_volumes) {
-          options.volume_size = get_text(volume_size_ctrl_id);
-          if (parse_size_string(options.volume_size) < c_min_volume_size) {
-            FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_VOLUME_SIZE));
-          }
+        options.password = get_text(password_ctrl_id);
+        wstring password_verify = get_text(password_verify_ctrl_id);
+        if (options.password != password_verify) {
+          FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_PASSWORDS_DONT_MATCH));
         }
       }
+      if (options.password.empty()) {
+        FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_PASSWORD_IS_EMPTY));
+      }
+      options.encrypt_header_defined = is_check_defined(encrypt_header_ctrl_id);
+      options.encrypt_header = get_check(encrypt_header_ctrl_id);
+    }
+    else {
+      options.password.clear();
+    }
 
-      options.move_files = get_check(move_files_ctrl_id);
-      options.open_shared = get_check(open_shared_ctrl_id);
-      options.ignore_errors = get_check(ignore_errors_ctrl_id);
+    if (new_arc) {
+      options.create_sfx = get_check(create_sfx_ctrl_id);
+      if (options.create_sfx) {
+        options.sfx_module_idx = get_list_pos(sfx_module_ctrl_id);
+        if (options.sfx_module_idx >= ArcAPI::sfx().size()) {
+          FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_SFX_MODULE));
+        }
+      }
+
+      options.enable_volumes = get_check(enable_volumes_ctrl_id);
+      if (options.enable_volumes) {
+        options.volume_size = get_text(volume_size_ctrl_id);
+        if (parse_size_string(options.volume_size) < c_min_volume_size) {
+          FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_VOLUME_SIZE));
+        }
+      }
+    }
+
+    options.move_files = get_check(move_files_ctrl_id);
+    options.open_shared = get_check(open_shared_ctrl_id);
+    options.ignore_errors = get_check(ignore_errors_ctrl_id);
+
+    return options;
+  }
+
+  void write_controls(const UpdateOptions& options) {
+    if (new_arc) {
+      for (unsigned i = 0; i < main_formats.size(); i++) {
+        set_check(main_formats_ctrl_id + i, options.arc_type == main_formats[i]);
+      };
+      unsigned fmt_idx = -1;
+      for (unsigned i = 0; i < other_formats.size(); i++) {
+        if (options.arc_type == other_formats[i]) {
+          fmt_idx = i;
+          break;
+        }
+      };
+      set_check(other_formats_ctrl_id, fmt_idx != -1);
+      if (fmt_idx != -1) {
+        set_list_pos(other_formats_ctrl_id + 1, fmt_idx);
+      }
+    }
+
+    for (unsigned i = 0; i < ARRAYSIZE(c_levels); i++) {
+      set_check(level_ctrl_id + i, options.level == c_levels[i].value);
+    };
+
+    for (unsigned i = 0; i < ARRAYSIZE(c_methods); i++) {
+      set_check(method_ctrl_id + i, options.method == c_methods[i].value);
+    };
+
+    set_check(solid_ctrl_id, options.solid);
+
+    set_check(encrypt_ctrl_id, options.encrypt);
+    set_check3(encrypt_header_ctrl_id, options.encrypt_header_defined ? (options.encrypt_header ? triTrue : triFalse) : triUndef);
+    set_check(show_password_ctrl_id, options.show_password);
+    set_text(password_ctrl_id, options.password);
+    set_text(password_verify_ctrl_id, options.password);
+    set_text(password_visible_ctrl_id, options.password);
+
+    if (new_arc) {
+      set_check(create_sfx_ctrl_id, options.create_sfx);
+      set_list_pos(sfx_module_ctrl_id, options.sfx_module_idx);
+
+      set_check(enable_volumes_ctrl_id, options.enable_volumes);
+      set_text(volume_size_ctrl_id, options.volume_size);
+    }
+
+    set_check(move_files_ctrl_id, options.move_files);
+    set_check(open_shared_ctrl_id, options.open_shared);
+    set_check(ignore_errors_ctrl_id, options.ignore_errors);
+  }
+
+  class DisableEvents {
+  private:
+    UpdateDialog& dlg;
+  public:
+    DisableEvents(UpdateDialog& dlg): dlg(dlg) {
+      dlg.events_enabled = false;
+      dlg.send_message(DM_ENABLEREDRAW, FALSE, 0);
+    }
+    ~DisableEvents() {
+      dlg.send_message(DM_ENABLEREDRAW, TRUE, 0);
+      dlg.events_enabled = true;
+    }
+  };
+
+  LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
+    if (!events_enabled)
+      return default_dialog_proc(msg, param1, param2);
+
+    if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
+      options = read_controls();
     }
     else if (msg == DN_INITDIALOG) {
       set_control_state();
+    }
+    else if (msg == DN_EDITCHANGE && param1 == profile_ctrl_id) {
+      unsigned profile_idx = get_list_pos(profile_ctrl_id);
+      if (profile_idx != -1 && profile_idx < profiles.size()) {
+        DisableEvents de(*this);
+        write_controls(profiles[profile_idx].options);
+        set_control_state();
+      }
     }
     else if (new_arc && msg == DN_BTNCLICK && !main_formats.empty() && param1 >= main_formats_ctrl_id && param1 < main_formats_ctrl_id + static_cast<int>(main_formats.size())) {
       if (param2) {
@@ -667,16 +753,54 @@ private:
         set_text(password_visible_ctrl_id, get_text(password_ctrl_id));
       }
     }
+
+    if (msg == DN_EDITCHANGE || msg == DN_BTNCLICK) {
+      unsigned profile_idx = profiles.size();
+      UpdateOptions options;
+      try {
+        options = read_controls();
+      }
+      catch (const Error&) {
+      }
+      for (unsigned i = 0; i < profiles.size(); i++) {
+        if (options == profiles[i].options) {
+          profile_idx = i;
+          break;
+        }
+      }
+      DisableEvents de(*this);
+      set_list_pos(profile_ctrl_id, profile_idx);
+    }
+
     return default_dialog_proc(msg, param1, param2);
   }
 
 public:
-  UpdateDialog(bool new_arc, UpdateOptions& options): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), c_client_xs, L"Update"), new_arc(new_arc), options(options), arc_type(options.arc_type) {
+  UpdateDialog(bool new_arc, UpdateOptions& options, UpdateProfiles& profiles): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), c_client_xs, L"Update"), new_arc(new_arc), options(options), profiles(profiles), arc_type(options.arc_type), events_enabled(true) {
   }
 
   bool show() {
     if (new_arc) {
       old_ext = extract_file_ext(options.arc_path);
+
+      vector<wstring> profile_names;
+      profile_names.reserve(profiles.size());
+      unsigned profile_idx = profiles.size();
+      for_each(profiles.begin(), profiles.end(), [&] (const UpdateProfile& profile) {
+        profile_names.push_back(profile.name);
+        if (profile.options == options)
+          profile_idx = profile_names.size() - 1;
+      });
+      profile_names.push_back(wstring());
+      label(Far::get_msg(MSG_UPDATE_DLG_PROFILE));
+      profile_ctrl_id = combo_box(profile_names, profile_idx, 30, DIF_DROPDOWNLIST);
+      spacer(1);
+      save_profile_ctrl_id = button(Far::get_msg(MSG_UPDATE_DLG_SAVE_PROFILE), DIF_BTNNOCLOSE);
+      spacer(1);
+      delete_profile_ctrl_id = button(Far::get_msg(MSG_UPDATE_DLG_DELETE_PROFILE), DIF_BTNNOCLOSE);
+      new_line();
+      separator();
+      new_line();
 
       label(Far::get_msg(MSG_UPDATE_DLG_ARC_PATH));
       new_line();
@@ -814,8 +938,8 @@ public:
   }
 };
 
-bool update_dialog(bool new_arc, UpdateOptions& options) {
-  return UpdateDialog(new_arc, options).show();
+bool update_dialog(bool new_arc, UpdateOptions& options, UpdateProfiles& profiles) {
+  return UpdateDialog(new_arc, options, profiles).show();
 }
 
 class SettingsDialog: public Far::Dialog {

@@ -331,6 +331,30 @@ bool Key::query_str_nt(wstring& value, const wchar_t* name) {
   return true;
 }
 
+ByteVector Key::query_binary(const wchar_t* name) {
+  ByteVector value;
+  CHECK_SYS(query_binary_nt(value, name));
+  return value;
+}
+
+bool Key::query_binary_nt(ByteVector& value, const wchar_t* name) {
+  DWORD type = REG_BINARY;
+  DWORD data_size;
+  LONG res = RegQueryValueExW(h_key, name, nullptr, &type, nullptr, &data_size);
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
+  }
+  Buffer<unsigned char> buf(data_size);
+  res = RegQueryValueExW(h_key, name, nullptr, &type, buf.data(), &data_size);
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
+  }
+  value.assign(buf.data(), buf.data() + data_size);
+  return true;
+}
+
 void Key::set_bool(const wchar_t* name, bool value) {
   CHECK_SYS(set_bool_nt(name, value));
 }
@@ -372,12 +396,67 @@ bool Key::set_str_nt(const wchar_t* name, const wstring& value) {
   return true;
 }
 
+void Key::set_binary(const wchar_t* name, const unsigned char* value, unsigned size) {
+  CHECK_SYS(set_binary_nt(name, value, size));
+}
+
+bool Key::set_binary_nt(const wchar_t* name, const unsigned char* value, unsigned size) {
+  LONG res = RegSetValueExW(h_key, name, 0, REG_BINARY, value, size);
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
+  }
+  return true;
+}
+
 void Key::delete_value(const wchar_t* name) {
   CHECK_SYS(delete_value_nt(name));
 }
 
 bool Key::delete_value_nt(const wchar_t* name) {
   LONG res = RegDeleteValueW(h_key, name);
+  if (res != ERROR_SUCCESS) {
+    SetLastError(res);
+    return false;
+  }
+  return true;
+}
+
+vector<wstring> Key::enum_sub_keys() {
+  vector<wstring> names;
+  CHECK_SYS(enum_sub_keys_nt(names));
+  return names;
+}
+
+bool Key::enum_sub_keys_nt(vector<wstring>& names) {
+  DWORD index = 0;
+  const unsigned c_key_name_size = 256;
+  Buffer<wchar_t> name(c_key_name_size);
+  while (true) {
+    DWORD name_size = name.size();
+    LONG res = RegEnumKeyExW(h_key, index, name.data(), &name_size, nullptr, nullptr, nullptr, nullptr);
+    if (res == ERROR_NO_MORE_ITEMS)
+      break;
+    if (res == ERROR_MORE_DATA) {
+      name.resize(name.size() * 2);
+      continue;
+    }
+    if (res != ERROR_SUCCESS) {
+      SetLastError(res);
+      return false;
+    }
+    names.push_back(wstring(name.data(), name_size));
+    index++;
+  }
+  return true;
+}
+
+void Key::delete_sub_key(const wchar_t* name, REGSAM sam_desired) {
+  CHECK_SYS(delete_sub_key_nt(name, sam_desired));
+}
+
+bool Key::delete_sub_key_nt(const wchar_t* name, REGSAM sam_desired) {
+  LONG res = RegDeleteKeyExW(h_key, name, sam_desired, 0);
   if (res != ERROR_SUCCESS) {
     SetLastError(res);
     return false;

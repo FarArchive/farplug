@@ -183,6 +183,7 @@ public:
   TriState get_check3(unsigned ctrl_id) const;
   void set_check3(unsigned ctrl_id, TriState check);
   unsigned get_list_pos(unsigned ctrl_id) const;
+  void set_list_pos(unsigned ctrl_id, unsigned pos);
   void set_color(unsigned ctrl_id, unsigned char color);
   void set_focus(unsigned ctrl_id);
   void enable(unsigned ctrl_id, bool enable);

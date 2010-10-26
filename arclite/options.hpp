@@ -2,16 +2,7 @@
 
 extern const wchar_t* c_plugin_key_name;
 
-class Options {
-private:
-  Key plugin_key;
-  unsigned get_int(const wchar_t* name, unsigned def_value);
-  bool get_bool(const wchar_t* name, bool def_value);
-  wstring get_str(const wchar_t* name, const wstring& def_value);
-  void set_int(const wchar_t* name, unsigned value, unsigned def_value);
-  void set_bool(const wchar_t* name, bool value, bool def_value);
-  void set_str(const wchar_t* name, const wstring& value, const wstring& def_value);
-public:
+struct Options {
   bool handle_create;
   bool handle_commands;
   wstring plugin_prefix;
@@ -39,9 +30,11 @@ public:
   wstring include_masks;
   bool use_exclude_masks;
   wstring exclude_masks;
-public:
+  // profiles
+  UpdateProfiles profiles;
+
   void load();
-  void save();
+  void save() const;
 };
 
 extern Options g_options;

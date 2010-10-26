@@ -587,6 +587,13 @@ unsigned Dialog::get_list_pos(unsigned ctrl_id) const {
   return static_cast<unsigned>(g_far.SendDlgMessage(h_dlg, DM_LISTGETCURPOS, ctrl_id, 0));
 }
 
+void Dialog::set_list_pos(unsigned ctrl_id, unsigned pos) {
+  FarListPos list_pos;
+  list_pos.SelectPos = pos;
+  list_pos.TopPos = -1;
+  g_far.SendDlgMessage(h_dlg, DM_LISTSETCURPOS, ctrl_id, reinterpret_cast<LONG_PTR>(&list_pos));
+}
+
 void Dialog::set_color(unsigned ctrl_id, unsigned char color) {
   size_t size = g_far.SendDlgMessage(h_dlg, DM_GETDLGITEM, ctrl_id, NULL);
   Buffer<unsigned char> buf(size);

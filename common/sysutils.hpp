@@ -84,14 +84,22 @@ public:
   bool query_int_nt(unsigned& value, const wchar_t* name) throw();
   wstring query_str(const wchar_t* name);
   bool query_str_nt(wstring& value, const wchar_t* name) throw();
+  ByteVector query_binary(const wchar_t* name);
+  bool query_binary_nt(ByteVector& value, const wchar_t* name) throw();
   void set_bool(const wchar_t* name, bool value);
   bool set_bool_nt(const wchar_t* name, bool value) throw();
   void set_int(const wchar_t* name, unsigned value);
   bool set_int_nt(const wchar_t* name, unsigned value) throw();
   void set_str(const wchar_t* name, const wstring& value);
   bool set_str_nt(const wchar_t* name, const wstring& value) throw();
+  void set_binary(const wchar_t* name, const unsigned char* value, unsigned size);
+  bool set_binary_nt(const wchar_t* name, const unsigned char* value, unsigned size) throw();
   void delete_value(const wchar_t* name);
   bool delete_value_nt(const wchar_t* name) throw();
+  vector<wstring> enum_sub_keys();
+  bool enum_sub_keys_nt(vector<wstring>& names) throw();
+  void delete_sub_key(const wchar_t* name, REGSAM sam_desired = 0);
+  bool delete_sub_key_nt(const wchar_t* name, REGSAM sam_desired = 0) throw();
 };
 
 struct FindData: public WIN32_FIND_DATAW {

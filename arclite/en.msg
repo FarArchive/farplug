@@ -18,6 +18,9 @@ extract.dlg.delete_archive = De&lete archive after extraction
 # Update dialog
 update.dlg.title = Add files to archive
 update.dlg.title.create = Create archive
+update.dlg.profile = Profile:
+update.dlg.save_profile = Save
+update.dlg.delete_profile = Delete
 update.dlg.arc_path = &Archive path:
 update.dlg.arc_type = Select archiver:
 update.dlg.arc_type.other = &0ther:

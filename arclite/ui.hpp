@@ -63,7 +63,7 @@ RetryDialogResult error_retry_ignore_dialog(const wstring& file_path, const Erro
 
 void show_error_log(const ErrorLog& error_log);
 
-bool update_dialog(bool new_arc, UpdateOptions& options);
+bool update_dialog(bool new_arc, UpdateOptions& options, UpdateProfiles& profiles);
 
 struct PluginSettings {
   bool handle_create;

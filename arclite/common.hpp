@@ -40,6 +40,14 @@ struct UpdateOptions {
   bool ignore_errors;
 };
 
+struct UpdateProfile {
+  wstring name;
+  UpdateOptions options;
+  void load();
+  void save() const;
+};
+typedef vector<UpdateProfile> UpdateProfiles;
+
 struct Attr {
   wstring name;
   wstring value;
