@@ -363,7 +363,7 @@ public:
         options.arc_path = extract_file_name(src_path);
       ArcTypes arc_types = ArcAPI::formats().find_by_name(g_options.update_arc_format_name);
       if (arc_types.empty())
-        options.arc_type = c_guid_7z;
+        options.arc_type = c_7z;
       else
         options.arc_type = arc_types.front();
       options.sfx_module_idx = g_options.update_sfx_module_idx;
@@ -477,7 +477,7 @@ public:
       options.arc_path = extract_file_name(src_path);
     ArcTypes arc_types = ArcAPI::formats().find_by_name(g_options.update_arc_format_name);
     if (arc_types.empty())
-      options.arc_type = c_guid_7z;
+      options.arc_type = c_7z;
     else
       options.arc_type = arc_types.front();
     options.sfx_module_idx = g_options.update_sfx_module_idx;

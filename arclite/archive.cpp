@@ -11,10 +11,16 @@ const wchar_t* c_method_lzma = L"LZMA";
 const wchar_t* c_method_lzma2 = L"LZMA2";
 const wchar_t* c_method_ppmd = L"PPMD";
 
-const string c_guid_7z("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x07\x00\x00", 16);
-const string c_guid_zip("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x01\x00\x00", 16);
-const string c_guid_iso("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE7\x00\x00", 16);
-const string c_guid_udf("\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE0\x00\x00", 16);
+const unsigned char c_guid_7z[] = "\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x07\x00\x00";
+const unsigned char c_guid_zip[] = "\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x01\x00\x00";
+const unsigned char c_guid_iso[] = "\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE7\x00\x00";
+const unsigned char c_guid_udf[] = "\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE0\x00\x00";
+const unsigned c_guid_size = 16;
+
+const ArcType c_7z(c_guid_7z, c_guid_7z + c_guid_size);
+const ArcType c_zip(c_guid_zip, c_guid_zip + c_guid_size);
+const ArcType c_iso(c_guid_iso, c_guid_iso + c_guid_size);
+const ArcType c_udf(c_guid_udf, c_guid_udf + c_guid_size);
 
 const unsigned __int64 c_min_volume_size = 16 * 1024;
 
@@ -55,14 +61,15 @@ HRESULT ArcLib::get_string_prop(UInt32 index, PROPID prop_id, wstring& value) co
   return S_OK;
 }
 
-HRESULT ArcLib::get_bytes_prop(UInt32 index, PROPID prop_id, string& value) const {
+HRESULT ArcLib::get_bytes_prop(UInt32 index, PROPID prop_id, ByteVector& value) const {
   PropVariant prop;
   HRESULT res = get_prop(index, prop_id, prop.ref());
   if (res != S_OK)
     return res;
   if (prop.vt == VT_BSTR) {
     UINT len = SysStringByteLen(prop.bstrVal);
-    value.assign(reinterpret_cast<string::const_pointer>(prop.bstrVal), len);
+    unsigned char* data =  reinterpret_cast<unsigned char*>(prop.bstrVal);
+    value.assign(data, data + len);
   }
   else
     return E_FAIL;

@@ -1,3 +1,4 @@
+#include "utils.hpp"
 #include "msearch.hpp"
 
 typedef unsigned short State;
@@ -31,7 +32,7 @@ public:
   }
 };
 
-StateMatrix* create_state_matrix(const vector<string>& str_list) {
+StateMatrix* create_state_matrix(const vector<ByteVector>& str_list) {
   size_t max_states = 0;
   for (unsigned i = 0; i < str_list.size(); i++) {
     max_states += str_list[i].size();
@@ -39,7 +40,7 @@ StateMatrix* create_state_matrix(const vector<string>& str_list) {
   StateMatrix* matrix = new StateMatrix(max_states);
   State current_state = 0;
   for (StrIndex i = 0; i < str_list.size(); i++) {
-    const string& str = str_list[i];
+    const ByteVector& str = str_list[i];
     State state = 0;
     for (unsigned j = 0; j + 1 < str.size(); j++) {
       StateElement& st_elem = matrix->at(state, str[j]);
@@ -59,7 +60,7 @@ StateMatrix* create_state_matrix(const vector<string>& str_list) {
   return matrix;
 }
 
-vector<StrPos> msearch(unsigned char* data, size_t size, const vector<string>& str_list) {
+vector<StrPos> msearch(unsigned char* data, size_t size, const vector<ByteVector>& str_list) {
   vector<StrPos> result;
   if (str_list.empty())
     return result;

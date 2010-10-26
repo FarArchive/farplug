@@ -2,10 +2,10 @@
 
 #include "comutils.hpp"
 
-extern const string c_guid_7z;
-extern const string c_guid_zip;
-extern const string c_guid_iso;
-extern const string c_guid_udf;
+extern const ArcType c_7z;
+extern const ArcType c_zip;
+extern const ArcType c_iso;
+extern const ArcType c_udf;
 
 extern const wchar_t* c_method_copy;
 extern const wchar_t* c_method_lzma;
@@ -38,21 +38,20 @@ struct ArcLib {
   HRESULT get_prop(UInt32 index, PROPID prop_id, PROPVARIANT* prop) const;
   HRESULT get_bool_prop(UInt32 index, PROPID prop_id, bool& value) const;
   HRESULT get_string_prop(UInt32 index, PROPID prop_id, wstring& value) const;
-  HRESULT get_bytes_prop(UInt32 index, PROPID prop_id, string& value) const;
+  HRESULT get_bytes_prop(UInt32 index, PROPID prop_id, ByteVector& value) const;
 };
 
 struct ArcFormat {
   unsigned lib_index;
   wstring name;
   bool updatable;
-  string start_signature;
+  ByteVector start_signature;
   wstring extension_list;
   wstring default_extension() const;
 };
 
 typedef vector<ArcLib> ArcLibs;
 
-typedef string ArcType;
 typedef list<ArcType> ArcTypes;
 
 class ArcFormats: public map<ArcType, ArcFormat> {
@@ -161,7 +160,7 @@ public:
     return arc_chain.size() == 1 && ArcAPI::formats().at(arc_chain.back().type).updatable;
   }
   bool is_pure_7z() const {
-    return arc_chain.size() == 1 && arc_chain.back().type == c_guid_7z && arc_chain.back().sig_pos == 0;
+    return arc_chain.size() == 1 && arc_chain.back().type == c_7z && arc_chain.back().sig_pos == 0;
   }
 
   // archive contents

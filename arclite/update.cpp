@@ -726,7 +726,7 @@ void Archive::set_properties(IOutArchive* out_arc, const UpdateOptions& options)
     vector<PropVariant> values;
     names.push_back(L"x");
     values.push_back(options.level);
-    if (options.arc_type == c_guid_7z) {
+    if (options.arc_type == c_7z) {
       if (options.level != 0) {
         names.push_back(L"0");
         values.push_back(options.method);
@@ -845,7 +845,7 @@ void Archive::create(const wstring& src_dir, const vector<wstring>& file_names, 
   UpdateStream* stream_impl;
   if (options.enable_volumes)
     stream_impl = new MultiVolumeUpdateStream(options.arc_path, parse_size_string(options.volume_size));
-  else if (options.create_sfx && options.arc_type == c_guid_7z)
+  else if (options.create_sfx && options.arc_type == c_7z)
     stream_impl = new SfxUpdateStream(options.arc_path, options.sfx_module_idx);
   else
     stream_impl = new SimpleUpdateStream(options.arc_path);

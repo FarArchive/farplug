@@ -1,5 +1,7 @@
 #pragma once
 
+typedef ByteVector ArcType;
+
 enum OverwriteOption {
   ooAsk = 0,
   ooOverwrite = 1,
@@ -20,7 +22,7 @@ struct ExtractOptions {
 
 struct UpdateOptions {
   wstring arc_path;
-  string arc_type;
+  ArcType arc_type;
   unsigned level;
   wstring method;
   bool solid;

@@ -267,7 +267,7 @@ void Archive::detect(const wstring& arc_path, bool all, vector<Archive>& archive
   set<ArcType> found_types;
 
   // 1. find formats by signature
-  vector<string> signatures;
+  vector<ByteVector> signatures;
   signatures.reserve(arc_formats.size());
   vector<ArcType> sig_types;
   sig_types.reserve(arc_formats.size());
@@ -308,10 +308,10 @@ void Archive::detect(const wstring& arc_path, bool all, vector<Archive>& archive
   // special case: UDF must go before ISO
   list<ArcEntry>::iterator iso_iter = arc_entries.end();
   for (list<ArcEntry>::iterator arc_entry = arc_entries.begin(); arc_entry != arc_entries.end(); arc_entry++) {
-    if (arc_entry->type == c_guid_iso) {
+    if (arc_entry->type == c_iso) {
       iso_iter = arc_entry;
     }
-    if (arc_entry->type == c_guid_udf) {
+    if (arc_entry->type == c_udf) {
       if (iso_iter != arc_entries.end()) {
         arc_entries.insert(iso_iter, *arc_entry);
         arc_entries.erase(arc_entry);

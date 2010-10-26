@@ -389,12 +389,12 @@ void show_error_log(const ErrorLog& error_log) {
 
 struct ArchiveType {
   unsigned name_id;
-  const string& value;
+  const ArcType& value;
 };
 
 const ArchiveType c_archive_types[] = {
-  { MSG_COMPRESSION_ARCHIVE_7Z, c_guid_7z },
-  { MSG_COMPRESSION_ARCHIVE_ZIP, c_guid_zip },
+  { MSG_COMPRESSION_ARCHIVE_7Z, c_7z },
+  { MSG_COMPRESSION_ARCHIVE_ZIP, c_zip },
 };
 
 struct CompressionLevel {
@@ -466,7 +466,7 @@ private:
     bool enable_volumes = get_check(enable_volumes_ctrl_id);
     if (ArcAPI::formats().count(arc_type))
       new_ext = ArcAPI::formats().at(arc_type).default_extension();
-    if (create_sfx && arc_type == c_guid_7z)
+    if (create_sfx && arc_type == c_7z)
       new_ext += c_sfx_ext;
     else if (enable_volumes)
       new_ext += c_volume_ext;
@@ -496,7 +496,7 @@ private:
   }
 
   void set_control_state() {
-    bool is_7z = arc_type == c_guid_7z;
+    bool is_7z = arc_type == c_7z;
     bool is_compressed = !get_check(level_ctrl_id + 0);
     for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
       enable(i, is_7z & is_compressed);
@@ -553,7 +553,7 @@ private:
         }
         options.arc_type = arc_type;
       }
-      bool is_7z = arc_type == c_guid_7z;
+      bool is_7z = arc_type == c_7z;
 
       unsigned level = -1;
       for (unsigned i = 0; i < ARRAYSIZE(c_levels); i++) {

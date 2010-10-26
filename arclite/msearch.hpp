@@ -12,4 +12,4 @@ struct StrPos {
   }
 };
 
-vector<StrPos> msearch(unsigned char* data, size_t size, const vector<string>& str_list);
+vector<StrPos> msearch(unsigned char* data, size_t size, const vector<ByteVector>& str_list);
