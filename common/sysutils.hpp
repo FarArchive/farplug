@@ -98,8 +98,8 @@ public:
   bool delete_value_nt(const wchar_t* name) throw();
   vector<wstring> enum_sub_keys();
   bool enum_sub_keys_nt(vector<wstring>& names) throw();
-  void delete_sub_key(const wchar_t* name, REGSAM sam_desired = 0);
-  bool delete_sub_key_nt(const wchar_t* name, REGSAM sam_desired = 0) throw();
+  void delete_sub_key(const wchar_t* name);
+  bool delete_sub_key_nt(const wchar_t* name) throw();
 };
 
 struct FindData: public WIN32_FIND_DATAW {

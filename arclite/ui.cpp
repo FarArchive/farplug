@@ -387,6 +387,57 @@ void show_error_log(const ErrorLog& error_log) {
   Far::viewer(temp_file.get_path(), Far::get_msg(MSG_LOG_TITLE));
 }
 
+bool operator==(const UpdateOptions& o1, const UpdateOptions& o2) {
+  if (o1.arc_type != o2.arc_type || o1.level != o2.level)
+    return false;
+  bool is_7z = o1.arc_type == c_7z;
+  bool is_zip = o1.arc_type == c_zip;
+  bool is_compressed = o1.level != 0;
+
+  if (is_7z) {
+    if (is_compressed) {
+      if (o1.method != o2.method)
+        return false;
+    }
+    if (o1.solid != o2.solid)
+      return false;
+  }
+  if (is_7z || is_zip) {
+    if (o1.encrypt != o2.encrypt)
+      return false;
+    bool is_encrypted = o1.encrypt;
+    if (is_encrypted) {
+      if (o1.password != o2.password || o1.show_password == o2.show_password)
+        return false;
+      if (is_7z) {
+        if (o1.encrypt_header != o2.encrypt_header || o1.encrypt_header_defined != o2.encrypt_header_defined)
+          return false;
+      }
+    }
+  }
+  bool is_sfx = o1.create_sfx;
+  if (is_7z) {
+    if (o1.create_sfx != o2.create_sfx)
+      return false;
+    if (is_sfx) {
+      if (o1.sfx_module_idx != o2.sfx_module_idx)
+        return false;
+    }
+  }
+  if (!is_7z || !is_sfx) {
+    if (o1.enable_volumes != o2.enable_volumes)
+      return false;
+    bool is_multi_volume = o1.enable_volumes;
+    if (is_multi_volume) {
+      if (o1.volume_size != o2.volume_size)
+        return false;
+    }
+  }
+  if (o1.move_files != o2.move_files || o1.open_shared != o2.open_shared || o1.ignore_errors != o2.ignore_errors)
+    return false;
+  return true;
+}
+
 struct ArchiveType {
   unsigned name_id;
   const ArcType& value;
@@ -501,7 +552,23 @@ private:
     return true;
   }
 
+  class DisableEvents {
+  private:
+    UpdateDialog& dlg;
+    bool events_enabled;
+  public:
+    DisableEvents(UpdateDialog& dlg): dlg(dlg), events_enabled(dlg.events_enabled) {
+      dlg.events_enabled = false;
+      dlg.send_message(DM_ENABLEREDRAW, FALSE);
+    }
+    ~DisableEvents() {
+      dlg.send_message(DM_ENABLEREDRAW, TRUE);
+      dlg.events_enabled = events_enabled;
+    }
+  };
+
   void set_control_state() {
+    DisableEvents de(*this);
     bool is_7z = arc_type == c_7z;
     bool is_compressed = !get_check(level_ctrl_id + 0);
     for (int i = method_ctrl_id - 1; i < method_ctrl_id + static_cast<int>(ARRAYSIZE(c_methods)); i++) {
@@ -537,6 +604,8 @@ private:
         enable(i, enable_volumes && (!is_7z || !create_sfx));
       }
       enable(other_formats_ctrl_id + 1, other_format);
+      unsigned profile_idx = get_list_pos(profile_ctrl_id);
+      enable(delete_profile_ctrl_id, profile_idx != -1 && profile_idx < profiles.size());
     }
   }
 
@@ -547,43 +616,42 @@ private:
 
       for (unsigned i = 0; i < main_formats.size(); i++) {
         if (get_check(main_formats_ctrl_id + i)) {
-          arc_type = c_archive_types[i].value;
+          options.arc_type = c_archive_types[i].value;
           break;
         }
       }
       if (!other_formats.empty() && get_check(other_formats_ctrl_id)) {
-        arc_type = other_formats[get_list_pos(other_formats_ctrl_id + 1)];
+        options.arc_type = other_formats[get_list_pos(other_formats_ctrl_id + 1)];
       }
-      if (arc_type.empty()) {
+      if (options.arc_type.empty()) {
         FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_ARC_TYPE));
       }
-      options.arc_type = arc_type;
     }
     bool is_7z = arc_type == c_7z;
 
-    unsigned level = -1;
+    options.level = -1;
     for (unsigned i = 0; i < ARRAYSIZE(c_levels); i++) {
       if (get_check(level_ctrl_id + i)) {
-        level = c_levels[i].value;
+        options.level = c_levels[i].value;
         break;
       }
     }
-    if (level == -1) {
+    if (options.level == -1) {
       FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_LEVEL));
     }
-    options.level = level;
 
-    wstring method;
-    for (unsigned i = 0; i < ARRAYSIZE(c_methods); i++) {
-      if (get_check(method_ctrl_id + i)) {
-        method = c_methods[i].value;
-        break;
+    if (is_7z && options.level != 0) {
+      options.method.clear();
+      for (unsigned i = 0; i < ARRAYSIZE(c_methods); i++) {
+        if (get_check(method_ctrl_id + i)) {
+          options.method = c_methods[i].value;
+          break;
+        }
+      }
+      if (options.method.empty()) {
+        FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_METHOD));
       }
     }
-    if (method.empty() && is_7z && level != 0) {
-      FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_METHOD));
-    }
-    options.method = method;
 
     options.solid = get_check(solid_ctrl_id);
 
@@ -636,29 +704,30 @@ private:
   }
 
   void write_controls(const UpdateOptions& options) {
+    DisableEvents de(*this);
     if (new_arc) {
+      arc_type = options.arc_type;
       for (unsigned i = 0; i < main_formats.size(); i++) {
-        set_check(main_formats_ctrl_id + i, options.arc_type == main_formats[i]);
+        if (options.arc_type == main_formats[i])
+          set_check(main_formats_ctrl_id + i);
       };
-      unsigned fmt_idx = -1;
       for (unsigned i = 0; i < other_formats.size(); i++) {
         if (options.arc_type == other_formats[i]) {
-          fmt_idx = i;
+          set_check(other_formats_ctrl_id);
+          set_list_pos(other_formats_ctrl_id + 1, i);
           break;
         }
       };
-      set_check(other_formats_ctrl_id, fmt_idx != -1);
-      if (fmt_idx != -1) {
-        set_list_pos(other_formats_ctrl_id + 1, fmt_idx);
-      }
     }
 
     for (unsigned i = 0; i < ARRAYSIZE(c_levels); i++) {
-      set_check(level_ctrl_id + i, options.level == c_levels[i].value);
+      if (options.level == c_levels[i].value)
+        set_check(level_ctrl_id + i);
     };
 
     for (unsigned i = 0; i < ARRAYSIZE(c_methods); i++) {
-      set_check(method_ctrl_id + i, options.method == c_methods[i].value);
+      if (options.method == c_methods[i].value)
+        set_check(method_ctrl_id + i);
     };
 
     set_check(solid_ctrl_id, options.solid);
@@ -683,20 +752,6 @@ private:
     set_check(ignore_errors_ctrl_id, options.ignore_errors);
   }
 
-  class DisableEvents {
-  private:
-    UpdateDialog& dlg;
-  public:
-    DisableEvents(UpdateDialog& dlg): dlg(dlg) {
-      dlg.events_enabled = false;
-      dlg.send_message(DM_ENABLEREDRAW, FALSE, 0);
-    }
-    ~DisableEvents() {
-      dlg.send_message(DM_ENABLEREDRAW, TRUE, 0);
-      dlg.events_enabled = true;
-    }
-  };
-
   LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
     if (!events_enabled)
       return default_dialog_proc(msg, param1, param2);
@@ -706,11 +761,11 @@ private:
     }
     else if (msg == DN_INITDIALOG) {
       set_control_state();
+      set_focus(arc_path_ctrl_id);
     }
     else if (msg == DN_EDITCHANGE && param1 == profile_ctrl_id) {
       unsigned profile_idx = get_list_pos(profile_ctrl_id);
       if (profile_idx != -1 && profile_idx < profiles.size()) {
-        DisableEvents de(*this);
         write_controls(profiles[profile_idx].options);
         set_control_state();
       }
@@ -753,6 +808,34 @@ private:
         set_text(password_visible_ctrl_id, get_text(password_ctrl_id));
       }
     }
+    else if (msg == DN_BTNCLICK && param1 == save_profile_ctrl_id) {
+      UpdateProfile profile;
+      profile.options = read_controls();
+      if (Far::input_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_UPDATE_DLG_INPUT_PROFILE_NAME), profile.name)) {
+        unsigned profile_idx = profiles.size();
+        profiles.push_back(profile);
+        DisableEvents de(*this);
+        FarListInsert fli;
+        memset(&fli, 0, sizeof(fli));
+        fli.Index = profile_idx;
+        fli.Item.Text = profile.name.c_str();
+        unsigned pos = send_message(DM_LISTINSERT, profile_ctrl_id, &fli);
+        set_list_pos(profile_ctrl_id, profile_idx);
+      }
+    }
+    else if (msg == DN_BTNCLICK && param1 == delete_profile_ctrl_id) {
+      unsigned profile_idx = get_list_pos(profile_ctrl_id);
+      if (profile_idx != -1 && profile_idx < profiles.size()) {
+        if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L'\n' + Far::get_msg(MSG_UPDATE_DLG_CONFIRM_PROFILE_DELETE), 0, FMSG_MB_YESNO) == 0) {
+          profiles.erase(profiles.cbegin() + profile_idx);
+          DisableEvents de(*this);
+          FarListDelete fld = { profile_idx, 1 };
+          send_message(DM_LISTDELETE, profile_ctrl_id, &fld);
+          set_list_pos(profile_ctrl_id, profiles.size());
+        }
+      }
+
+    }
 
     if (msg == DN_EDITCHANGE || msg == DN_BTNCLICK) {
       unsigned profile_idx = profiles.size();
@@ -768,8 +851,11 @@ private:
           break;
         }
       }
-      DisableEvents de(*this);
-      set_list_pos(profile_ctrl_id, profile_idx);
+      if (profile_idx != get_list_pos(profile_ctrl_id)) {
+        DisableEvents de(*this);
+        set_list_pos(profile_ctrl_id, profile_idx);
+        set_control_state();
+      }
     }
 
     return default_dialog_proc(msg, param1, param2);
@@ -1045,16 +1131,16 @@ private:
   LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
     if (msg == DN_INITDIALOG) {
       FarDialogItem dlg_item;
-      for (unsigned ctrl_id = 0; send_message(DM_GETDLGITEMSHORT, ctrl_id, reinterpret_cast<LONG_PTR>(&dlg_item)); ctrl_id++) {
+      for (unsigned ctrl_id = 0; send_message(DM_GETDLGITEMSHORT, ctrl_id, &dlg_item); ctrl_id++) {
         if (dlg_item.Type == DI_EDIT) {
           EditorSetPosition esp = { 0 };
-          send_message(DM_SETEDITPOSITION, ctrl_id, reinterpret_cast<LONG_PTR>(&esp));
+          send_message(DM_SETEDITPOSITION, ctrl_id, &esp);
         }
       }
     }
     else if (msg == DN_CTLCOLORDLGITEM) {
       FarDialogItem dlg_item;
-      if (send_message(DM_GETDLGITEMSHORT, param1, reinterpret_cast<LONG_PTR>(&dlg_item)) && dlg_item.Type == DI_EDIT) {
+      if (send_message(DM_GETDLGITEMSHORT, param1, &dlg_item) && dlg_item.Type == DI_EDIT) {
         unsigned color = Far::get_colors(COL_DIALOGTEXT);
         return param2 & 0xFF00FF00 | (color << 16) | color;
       }

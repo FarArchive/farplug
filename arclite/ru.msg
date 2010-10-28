@@ -18,9 +18,9 @@ extract.dlg.delete_archive = У&далить архив после распак�
 # Update dialog
 update.dlg.title = Обновление архива
 update.dlg.title.create = Создание архива
-update.dlg.profile = Profile:
-update.dlg.save_profile = Save
-update.dlg.delete_profile = Delete
+update.dlg.profile = Профиль:
+update.dlg.save_profile = Создать
+update.dlg.delete_profile = Удалить
 update.dlg.arc_path = &Путь:
 update.dlg.arc_type = Формат архива:
 update.dlg.arc_type.other = П&рочие:
@@ -46,6 +46,8 @@ update.dlg.password_is_empty = Необходимо указать пароль
 update.dlg.wrong_sfx_module = Необходимо выбрать SFX модуль
 update.dlg.wrong_volume_size = Неверно указан размер куска
 update.dlg.confirm_overwrite = Целевой архив уже существует. Хотите перезаписать его?
+update.dlg.input_profile_name = Введите название профиля
+update.dlg.confirm_profile_delete = Хотите удалить текущий профиль?
 
 # Archive types
 compression.archive.7z = &7z

@@ -19,7 +19,7 @@ extract.dlg.delete_archive = De&lete archive after extraction
 update.dlg.title = Add files to archive
 update.dlg.title.create = Create archive
 update.dlg.profile = Profile:
-update.dlg.save_profile = Save
+update.dlg.save_profile = Create
 update.dlg.delete_profile = Delete
 update.dlg.arc_path = &Archive path:
 update.dlg.arc_type = Select archiver:
@@ -46,6 +46,8 @@ update.dlg.password_is_empty = Password is empty
 update.dlg.wrong_sfx_module = Select SFX module
 update.dlg.wrong_volume_size = Invalid volume size
 update.dlg.confirm_overwrite = Target file already exists. Do you want to overwrite it?
+update.dlg.input_profile_name = Input profile name
+update.dlg.confirm_profile_delete = Do you want to delete selected profile?
 
 # Archive types
 compression.archive.7z = &7z

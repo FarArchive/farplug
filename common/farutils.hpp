@@ -90,6 +90,7 @@ PanelItem get_selected_panel_item(HANDLE h_panel, unsigned index);
 
 void error_dlg(const wstring& title, const Error& e);
 void info_dlg(const wstring& title, const wstring& msg);
+bool input_dlg(const wstring& title, const wstring& msg, wstring& text, DWORD flags = 0);
 
 #define AUTO_SIZE (-1)
 const unsigned c_x_frame = 5;
@@ -141,7 +142,7 @@ protected:
   void set_width(unsigned width) {
     client_xs = width;
   }
-  LONG_PTR send_message(int msg, int param1, LONG_PTR param2);
+  LONG_PTR send_message(int msg, int param1, const void* param2 = nullptr);
 public:
   Dialog(const wstring& title, unsigned width = 60, const wchar_t* help = NULL);
   // create different controls
@@ -179,7 +180,7 @@ public:
   void set_text(unsigned ctrl_id, const wstring& text);
   bool get_check(unsigned ctrl_id) const;
   bool is_check_defined(unsigned ctrl_id) const;
-  void set_check(unsigned ctrl_id, bool check);
+  void set_check(unsigned ctrl_id, bool check = true);
   TriState get_check3(unsigned ctrl_id) const;
   void set_check3(unsigned ctrl_id, TriState check);
   unsigned get_list_pos(unsigned ctrl_id) const;

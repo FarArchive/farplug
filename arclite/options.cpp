@@ -168,6 +168,7 @@ void Options::load() {
       UpdateProfile profile;
       profile.name = profile_names[i];
       profile.load();
+      profiles.push_back(profile);
     }
   }
 };
@@ -247,11 +248,30 @@ const bool c_def_profile_move_files = false;
 const bool c_def_profile_open_shared = false;
 const bool c_def_profile_ignore_errors = false;
 
+UpdateOptions::UpdateOptions():
+  arc_path(c_def_profile_arc_path),
+  arc_type(c_def_profile_arc_type),
+  level(c_def_profile_level),
+  method(c_def_profile_method),
+  solid(c_def_profile_solid),
+  password(c_def_profile_password),
+  show_password(c_def_profile_show_password),
+  encrypt(c_def_profile_encrypt),
+  encrypt_header(c_def_profile_encrypt_header),
+  encrypt_header_defined(c_def_profile_encrypt_header_defined),
+  create_sfx(c_def_profile_create_sfx),
+  sfx_module_idx(c_def_profile_sfx_module_idx),
+  enable_volumes(c_def_profile_enable_volumes),
+  volume_size(c_def_profile_volume_size),
+  move_files(c_def_profile_move_files),
+  open_shared(c_def_profile_open_shared),
+  ignore_errors(c_def_profile_ignore_errors)
+{}
+
 void UpdateProfile::save() const {
   OptionsKey key;
   key.open_nt(HKEY_CURRENT_USER, get_profile_key_name(name).c_str(), KEY_SET_VALUE, true);
 #define SET_VALUE(name, type) key.set_##type(c_param_profile_##name, options.name, c_def_profile_##name)
-  SET_VALUE(arc_path, str);
   SET_VALUE(arc_type, binary);
   SET_VALUE(level, int);
   SET_VALUE(method, str);
@@ -275,7 +295,6 @@ void UpdateProfile::load() {
   OptionsKey key;
   key.open_nt(HKEY_CURRENT_USER, get_profile_key_name(name).c_str(), KEY_QUERY_VALUE, false);
 #define GET_VALUE(name, type) options.name = key.get_##type(c_param_profile_##name, c_def_profile_##name)
-  GET_VALUE(arc_path, str);
   GET_VALUE(arc_type, binary);
   GET_VALUE(level, int);
   GET_VALUE(method, str);

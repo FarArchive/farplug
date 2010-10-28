@@ -38,6 +38,7 @@ struct UpdateOptions {
   bool move_files;
   bool open_shared;
   bool ignore_errors;
+  UpdateOptions();
 };
 
 struct UpdateProfile {

@@ -451,12 +451,12 @@ bool Key::enum_sub_keys_nt(vector<wstring>& names) {
   return true;
 }
 
-void Key::delete_sub_key(const wchar_t* name, REGSAM sam_desired) {
-  CHECK_SYS(delete_sub_key_nt(name, sam_desired));
+void Key::delete_sub_key(const wchar_t* name) {
+  CHECK_SYS(delete_sub_key_nt(name));
 }
 
-bool Key::delete_sub_key_nt(const wchar_t* name, REGSAM sam_desired) {
-  LONG res = RegDeleteKeyExW(h_key, name, sam_desired, 0);
+bool Key::delete_sub_key_nt(const wchar_t* name) {
+  LONG res = RegDeleteKeyW(h_key, name);
   if (res != ERROR_SUCCESS) {
     SetLastError(res);
     return false;

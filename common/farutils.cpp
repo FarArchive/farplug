@@ -237,6 +237,15 @@ void info_dlg(const wstring& title, const wstring& msg) {
   message(title + L'\n' + msg, 0, FMSG_MB_OK);
 }
 
+bool input_dlg(const wstring& title, const wstring& msg, wstring& text, DWORD flags) {
+  Buffer<wchar_t> buf(1024);
+  if (g_far.InputBox(title.c_str(), msg.c_str(), nullptr, text.c_str(), buf.data(), buf.size(), nullptr, flags)) {
+    text.assign(buf.data());
+    return true;
+  }
+  return false;
+}
+
 unsigned Dialog::get_label_len(const wstring& str) {
   unsigned cnt = 0;
   for (unsigned i = 0; i < str.size(); i++) {
@@ -289,8 +298,8 @@ LONG_PTR Dialog::default_dialog_proc(int msg, int param1, LONG_PTR param2) {
   return g_far.DefDlgProc(h_dlg, msg, param1, param2);
 }
 
-LONG_PTR Dialog::send_message(int msg, int param1, LONG_PTR param2) {
-  return g_far.SendDlgMessage(h_dlg, msg, param1, param2);
+LONG_PTR Dialog::send_message(int msg, int param1, const void* param2) {
+  return g_far.SendDlgMessage(h_dlg, msg, param1, reinterpret_cast<LONG_PTR>(param2));
 }
 
 Dialog::Dialog(const wstring& title, unsigned width, const wchar_t* help): client_xs(width), x(c_x_frame), y(c_y_frame), help(help) {
