@@ -395,8 +395,9 @@ public:
     options.open_shared = (Far::adv_control(ACTL_GETSYSTEMSETTINGS) & FSS_COPYFILESOPENEDFORWRITING) != 0;
     options.ignore_errors = g_options.update_ignore_errors;
 
-    UpdateProfiles profiles = g_options.profiles;
-    if (!update_dialog(new_arc, options, profiles))
+    bool res = update_dialog(new_arc, options, g_profiles);
+    g_profiles.save();
+    if (!res)
       FAIL(E_ABORT);
     if (ArcAPI::formats().count(options.arc_type) == 0)
       FAIL_MSG(Far::get_msg(MSG_ERROR_NO_FORMAT));
@@ -414,7 +415,6 @@ public:
       g_options.update_method = options.method;
       g_options.update_solid = options.solid;
       g_options.update_encrypt_header = options.encrypt_header;
-      g_options.profiles = profiles;
     }
     else {
       archive.level = options.level;
@@ -500,8 +500,9 @@ public:
     options.open_shared = (Far::adv_control(ACTL_GETSYSTEMSETTINGS) & FSS_COPYFILESOPENEDFORWRITING) != 0;
     options.ignore_errors = g_options.update_ignore_errors;
 
-    UpdateProfiles profiles = g_options.profiles;
-    if (!update_dialog(true, options, profiles))
+    bool res = update_dialog(true, options, g_profiles);
+    g_profiles.save();
+    if (!res)
       FAIL(E_ABORT);
     if (ArcAPI::formats().count(options.arc_type) == 0)
       FAIL_MSG(Far::get_msg(MSG_ERROR_NO_FORMAT));
@@ -521,7 +522,6 @@ public:
     g_options.update_encrypt_header = options.encrypt_header;
     g_options.update_show_password = options.show_password;
     g_options.update_ignore_errors = options.ignore_errors;
-    g_options.profiles = profiles;
     g_options.save();
 
     ErrorLog error_log;
@@ -610,6 +610,7 @@ int WINAPI GetMinFarVersionW(void) {
 void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info) {
   Far::init(Info);
   g_options.load();
+  g_profiles.load();
   g_plugin_prefix = g_options.plugin_prefix;
 }
 

@@ -605,6 +605,7 @@ private:
       }
       enable(other_formats_ctrl_id + 1, other_format);
       unsigned profile_idx = get_list_pos(profile_ctrl_id);
+      enable(save_profile_ctrl_id, profile_idx == -1 || profile_idx == profiles.size());
       enable(delete_profile_ctrl_id, profile_idx != -1 && profile_idx < profiles.size());
     }
   }

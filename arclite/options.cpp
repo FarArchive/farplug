@@ -70,6 +70,7 @@ public:
 };
 
 Options g_options;
+UpdateProfiles g_profiles;
 
 const wchar_t* c_plugin_key_name = L"arclite";
 const wchar_t* c_profiles_key_name = L"profiles";
@@ -160,17 +161,6 @@ void Options::load() {
   include_masks = key.get_str(c_param_include_masks, c_def_include_masks);
   use_exclude_masks = key.get_bool(c_param_use_exclude_masks, c_def_use_exclude_masks);
   exclude_masks = key.get_str(c_param_exclude_masks, c_def_exclude_masks);
-
-  Key profiles_key;
-  if (profiles_key.open_nt(HKEY_CURRENT_USER, get_profiles_key_name().c_str(), KEY_ENUMERATE_SUB_KEYS, false)) {
-    vector<wstring> profile_names = profiles_key.enum_sub_keys();
-    for (unsigned i = 0; i < profile_names.size(); i++) {
-      UpdateProfile profile;
-      profile.name = profile_names[i];
-      profile.load();
-      profiles.push_back(profile);
-    }
-  }
 };
 
 void Options::save() const {
@@ -199,17 +189,6 @@ void Options::save() const {
   key.set_str(c_param_include_masks, include_masks, c_def_include_masks);
   key.set_bool(c_param_use_exclude_masks, use_exclude_masks, c_def_use_exclude_masks);
   key.set_str(c_param_exclude_masks, exclude_masks, c_def_exclude_masks);
-
-  Key profiles_key;
-  if (profiles_key.open_nt(HKEY_CURRENT_USER, get_profiles_key_name().c_str(), KEY_ENUMERATE_SUB_KEYS, true)) {
-    vector<wstring> profile_names = profiles_key.enum_sub_keys();
-    for (unsigned i = 0; i < profile_names.size(); i++) {
-      profiles_key.delete_sub_key(profile_names[i].c_str());
-    }
-  }
-  for_each(profiles.begin(), profiles.end(), [&] (const UpdateProfile& profile) {
-    profile.save();
-  });
 }
 
 const wchar_t* c_param_profile_arc_path = L"arc_path";
@@ -268,48 +247,67 @@ UpdateOptions::UpdateOptions():
   ignore_errors(c_def_profile_ignore_errors)
 {}
 
-void UpdateProfile::save() const {
-  OptionsKey key;
-  key.open_nt(HKEY_CURRENT_USER, get_profile_key_name(name).c_str(), KEY_SET_VALUE, true);
-#define SET_VALUE(name, type) key.set_##type(c_param_profile_##name, options.name, c_def_profile_##name)
-  SET_VALUE(arc_type, binary);
-  SET_VALUE(level, int);
-  SET_VALUE(method, str);
-  SET_VALUE(solid, bool);
-  SET_VALUE(password, str);
-  SET_VALUE(show_password, bool);
-  SET_VALUE(encrypt, bool);
-  SET_VALUE(encrypt_header, bool);
-  SET_VALUE(encrypt_header_defined, bool);
-  SET_VALUE(create_sfx, bool);
-  SET_VALUE(sfx_module_idx, int);
-  SET_VALUE(enable_volumes, bool);
-  SET_VALUE(volume_size, str);
-  SET_VALUE(move_files, bool);
-  SET_VALUE(open_shared, bool);
-  SET_VALUE(ignore_errors, bool);
-#undef SET_VALUE
+void UpdateProfiles::load() {
+  clear();
+  Key profiles_key;
+  if (profiles_key.open_nt(HKEY_CURRENT_USER, get_profiles_key_name().c_str(), KEY_ENUMERATE_SUB_KEYS, false)) {
+    vector<wstring> profile_names = profiles_key.enum_sub_keys();
+    for (unsigned i = 0; i < profile_names.size(); i++) {
+      UpdateProfile profile;
+      profile.name = profile_names[i];
+      OptionsKey key;
+      key.open_nt(HKEY_CURRENT_USER, get_profile_key_name(profile.name).c_str(), KEY_QUERY_VALUE, false);
+#define GET_VALUE(name, type) profile.options.name = key.get_##type(c_param_profile_##name, c_def_profile_##name)
+      GET_VALUE(arc_type, binary);
+      GET_VALUE(level, int);
+      GET_VALUE(method, str);
+      GET_VALUE(solid, bool);
+      GET_VALUE(password, str);
+      GET_VALUE(show_password, bool);
+      GET_VALUE(encrypt, bool);
+      GET_VALUE(encrypt_header, bool);
+      GET_VALUE(encrypt_header_defined, bool);
+      GET_VALUE(create_sfx, bool);
+      GET_VALUE(sfx_module_idx, int);
+      GET_VALUE(enable_volumes, bool);
+      GET_VALUE(volume_size, str);
+      GET_VALUE(move_files, bool);
+      GET_VALUE(open_shared, bool);
+      GET_VALUE(ignore_errors, bool);
+#undef GET_VALUE
+      push_back(profile);
+    }
+  }
 }
 
-void UpdateProfile::load() {
-  OptionsKey key;
-  key.open_nt(HKEY_CURRENT_USER, get_profile_key_name(name).c_str(), KEY_QUERY_VALUE, false);
-#define GET_VALUE(name, type) options.name = key.get_##type(c_param_profile_##name, c_def_profile_##name)
-  GET_VALUE(arc_type, binary);
-  GET_VALUE(level, int);
-  GET_VALUE(method, str);
-  GET_VALUE(solid, bool);
-  GET_VALUE(password, str);
-  GET_VALUE(show_password, bool);
-  GET_VALUE(encrypt, bool);
-  GET_VALUE(encrypt_header, bool);
-  GET_VALUE(encrypt_header_defined, bool);
-  GET_VALUE(create_sfx, bool);
-  GET_VALUE(sfx_module_idx, int);
-  GET_VALUE(enable_volumes, bool);
-  GET_VALUE(volume_size, str);
-  GET_VALUE(move_files, bool);
-  GET_VALUE(open_shared, bool);
-  GET_VALUE(ignore_errors, bool);
-#undef GET_VALUE
+void UpdateProfiles::save() const {
+  Key profiles_key;
+  if (profiles_key.open_nt(HKEY_CURRENT_USER, get_profiles_key_name().c_str(), KEY_ENUMERATE_SUB_KEYS, true)) {
+    vector<wstring> profile_names = profiles_key.enum_sub_keys();
+    for (unsigned i = 0; i < profile_names.size(); i++) {
+      profiles_key.delete_sub_key(profile_names[i].c_str());
+    }
+  }
+  for_each(begin(), end(), [&] (const UpdateProfile& profile) {
+    OptionsKey key;
+    key.open_nt(HKEY_CURRENT_USER, get_profile_key_name(profile.name).c_str(), KEY_SET_VALUE, true);
+#define SET_VALUE(name, type) key.set_##type(c_param_profile_##name, profile.options.name, c_def_profile_##name)
+    SET_VALUE(arc_type, binary);
+    SET_VALUE(level, int);
+    SET_VALUE(method, str);
+    SET_VALUE(solid, bool);
+    SET_VALUE(password, str);
+    SET_VALUE(show_password, bool);
+    SET_VALUE(encrypt, bool);
+    SET_VALUE(encrypt_header, bool);
+    SET_VALUE(encrypt_header_defined, bool);
+    SET_VALUE(create_sfx, bool);
+    SET_VALUE(sfx_module_idx, int);
+    SET_VALUE(enable_volumes, bool);
+    SET_VALUE(volume_size, str);
+    SET_VALUE(move_files, bool);
+    SET_VALUE(open_shared, bool);
+    SET_VALUE(ignore_errors, bool);
+#undef SET_VALUE
+  });
 }

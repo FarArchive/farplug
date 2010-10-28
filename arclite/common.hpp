@@ -44,10 +44,11 @@ struct UpdateOptions {
 struct UpdateProfile {
   wstring name;
   UpdateOptions options;
+};
+struct UpdateProfiles: public vector<UpdateProfile> {
   void load();
   void save() const;
 };
-typedef vector<UpdateProfile> UpdateProfiles;
 
 struct Attr {
   wstring name;

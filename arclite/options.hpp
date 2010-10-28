@@ -31,10 +31,9 @@ struct Options {
   bool use_exclude_masks;
   wstring exclude_masks;
   // profiles
-  UpdateProfiles profiles;
-
   void load();
   void save() const;
 };
 
 extern Options g_options;
+extern UpdateProfiles g_profiles;
