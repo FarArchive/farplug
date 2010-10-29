@@ -239,7 +239,7 @@ void info_dlg(const wstring& title, const wstring& msg) {
 
 bool input_dlg(const wstring& title, const wstring& msg, wstring& text, DWORD flags) {
   Buffer<wchar_t> buf(1024);
-  if (g_far.InputBox(title.c_str(), msg.c_str(), nullptr, text.c_str(), buf.data(), buf.size(), nullptr, flags)) {
+  if (g_far.InputBox(title.c_str(), msg.c_str(), nullptr, text.c_str(), buf.data(), static_cast<int>(buf.size()), nullptr, flags)) {
     text.assign(buf.data());
     return true;
   }

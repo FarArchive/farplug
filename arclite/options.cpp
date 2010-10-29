@@ -65,7 +65,7 @@ public:
     if (value == def_value)
       delete_value_nt(name);
     else
-      set_binary_nt(name, value.data(), value.size());
+      set_binary_nt(name, value.data(), static_cast<unsigned>(value.size()));
   }
 };
 

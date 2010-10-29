@@ -818,14 +818,14 @@ private:
       UpdateProfile profile;
       profile.options = read_controls();
       if (Far::input_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_UPDATE_DLG_INPUT_PROFILE_NAME), profile.name)) {
-        unsigned profile_idx = profiles.size();
+        unsigned profile_idx = static_cast<unsigned>(profiles.size());
         profiles.push_back(profile);
         DisableEvents de(*this);
         FarListInsert fli;
         memset(&fli, 0, sizeof(fli));
         fli.Index = profile_idx;
         fli.Item.Text = profile.name.c_str();
-        unsigned pos = send_message(DM_LISTINSERT, profile_ctrl_id, &fli);
+        send_message(DM_LISTINSERT, profile_ctrl_id, &fli);
         set_list_pos(profile_ctrl_id, profile_idx);
       }
     }
@@ -837,7 +837,7 @@ private:
           DisableEvents de(*this);
           FarListDelete fld = { profile_idx, 1 };
           send_message(DM_LISTDELETE, profile_ctrl_id, &fld);
-          set_list_pos(profile_ctrl_id, profiles.size());
+          set_list_pos(profile_ctrl_id, static_cast<unsigned>(profiles.size()));
         }
       }
     }
@@ -846,7 +846,7 @@ private:
     }
 
     if (new_arc && msg == DN_EDITCHANGE || msg == DN_BTNCLICK) {
-      unsigned profile_idx = profiles.size();
+      unsigned profile_idx = static_cast<unsigned>(profiles.size());
       UpdateOptions options;
       try {
         options = read_controls();
@@ -879,11 +879,11 @@ public:
 
       vector<wstring> profile_names;
       profile_names.reserve(profiles.size());
-      unsigned profile_idx = profiles.size();
+      unsigned profile_idx = static_cast<unsigned>(profiles.size());
       for_each(profiles.begin(), profiles.end(), [&] (const UpdateProfile& profile) {
         profile_names.push_back(profile.name);
         if (profile.options == options)
-          profile_idx = profile_names.size() - 1;
+          profile_idx = static_cast<unsigned>(profile_names.size()) - 1;
       });
       profile_names.push_back(wstring());
       label(Far::get_msg(MSG_UPDATE_DLG_PROFILE));

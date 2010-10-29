@@ -444,7 +444,7 @@ bool Key::enum_sub_keys_nt(vector<wstring>& names) {
   const unsigned c_key_name_size = 256;
   Buffer<wchar_t> name(c_key_name_size);
   while (true) {
-    DWORD name_size = name.size();
+    DWORD name_size = static_cast<DWORD>(name.size());
     LONG res = RegEnumKeyExW(h_key, index, name.data(), &name_size, nullptr, nullptr, nullptr, nullptr);
     if (res == ERROR_NO_MORE_ITEMS)
       break;
