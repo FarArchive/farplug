@@ -12,6 +12,8 @@ struct Error {
   }
   Error(HRESULT code, const char* file, int line): code(code), file(file), line(line) {
   }
+  Error(HRESULT code, const wstring& message, const char* file, int line): code(code), messages(1, message), file(file), line(line) {
+  }
   Error(const wstring& message, const char* file, int line): code(E_MESSAGE), messages(1, message), file(file), line(line) {
   }
   Error(const std::exception& e): code(E_MESSAGE), file(__FILE__), line(__LINE__) {

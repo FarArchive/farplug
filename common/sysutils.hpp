@@ -43,6 +43,7 @@ public:
 class File: private NonCopyable {
 protected:
   HANDLE h_file;
+  wstring file_path;
 public:
   File() throw();
   ~File() throw();
@@ -51,6 +52,7 @@ public:
   bool open_nt(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD flags_and_attributes) throw();
   void close() throw();
   HANDLE handle() const throw();
+  const wstring& path() const throw();
   unsigned __int64 size();
   bool size_nt(unsigned __int64& file_size) throw();
   unsigned read(void* data, unsigned size);

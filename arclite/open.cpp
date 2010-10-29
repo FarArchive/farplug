@@ -23,23 +23,19 @@ public:
 
   STDMETHODIMP Read(void *data, UInt32 size, UInt32 *processedSize) {
     COM_ERROR_HANDLER_BEGIN
-    ERROR_MESSAGE_BEGIN
     unsigned bytes_read = read(data, size);
     if (processedSize)
       *processedSize = bytes_read;
     return S_OK;
-    ERROR_MESSAGE_END(file_path)
     COM_ERROR_HANDLER_END
   }
 
   STDMETHODIMP Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
     COM_ERROR_HANDLER_BEGIN
-    ERROR_MESSAGE_BEGIN
     unsigned __int64 new_position = set_pos(offset, translate_seek_method(seekOrigin));
     if (newPosition)
       *newPosition = new_position;
     return S_OK;
-    ERROR_MESSAGE_END(file_path)
     COM_ERROR_HANDLER_END
   }
 
@@ -154,7 +150,6 @@ public:
   STDMETHODIMP GetStream(const wchar_t *name, IInStream **inStream) {
     COM_ERROR_HANDLER_BEGIN
     wstring file_path = add_trailing_slash(archive.arc_dir()) + name;
-    ERROR_MESSAGE_BEGIN
     FindData find_data;
     if (!get_find_data_nt(file_path, find_data))
       return S_FALSE;
@@ -166,7 +161,6 @@ public:
     file_stream.detach(inStream);
     update_ui();
     return S_OK;
-    ERROR_MESSAGE_END(file_path)
     COM_ERROR_HANDLER_END
   }
 

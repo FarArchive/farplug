@@ -109,6 +109,9 @@ wstring get_current_directory() {
   return wstring(buf.data(), size);
 }
 
+
+#define CHECK_FILE(code) { if (!(code)) throw Error(HRESULT_FROM_WIN32(GetLastError()), file_path, __FILE__, __LINE__); }
+
 File::File(): h_file(INVALID_HANDLE_VALUE) {
 }
 
@@ -121,11 +124,12 @@ File::File(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWO
 }
 
 void File::open(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD dlags_and_attributes) {
-  CHECK_SYS(open_nt(file_path, desired_access, share_mode, creation_disposition, dlags_and_attributes));
+  CHECK_FILE(open_nt(file_path, desired_access, share_mode, creation_disposition, dlags_and_attributes));
 }
 
 bool File::open_nt(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD flags_and_attributes) {
   close();
+  this->file_path = file_path;
   h_file = CreateFileW(long_path(file_path).c_str(), desired_access, share_mode, nullptr, creation_disposition, flags_and_attributes, nullptr);
   return h_file != INVALID_HANDLE_VALUE;
 }
@@ -141,9 +145,13 @@ HANDLE File::handle() const {
   return h_file;
 }
 
+const wstring& File::path() const {
+  return file_path;
+}
+
 unsigned __int64 File::size() {
   unsigned __int64 file_size;
-  CHECK_SYS(size_nt(file_size));
+  CHECK_FILE(size_nt(file_size));
   return file_size;
 }
 
@@ -159,7 +167,7 @@ bool File::size_nt(unsigned __int64& file_size) {
 
 unsigned File::read(void* data, unsigned size) {
   unsigned size_read;
-  CHECK_SYS(read_nt(data, size, size_read));
+  CHECK_FILE(read_nt(data, size, size_read));
   return size_read;
 }
 
@@ -175,7 +183,7 @@ bool File::read_nt(void* data, unsigned size, unsigned& size_read) {
 
 unsigned File::write(const void* data, unsigned size) {
   unsigned size_written;
-  CHECK_SYS(write_nt(data, size, size_written));
+  CHECK_FILE(write_nt(data, size, size_written));
   return size_written;
 }
 
@@ -190,7 +198,7 @@ bool File::write_nt(const void* data, unsigned size, unsigned& size_written) {
 }
 
 void File::set_time(const FILETIME& ctime, const FILETIME& atime, const FILETIME& mtime) {
-  CHECK_SYS(set_time_nt(ctime, atime, mtime));
+  CHECK_FILE(set_time_nt(ctime, atime, mtime));
 };
 
 bool File::set_time_nt(const FILETIME& ctime, const FILETIME& atime, const FILETIME& mtime) {
@@ -199,7 +207,7 @@ bool File::set_time_nt(const FILETIME& ctime, const FILETIME& atime, const FILET
 
 unsigned __int64 File::set_pos(__int64 offset, DWORD method) {
   unsigned __int64 new_pos;
-  CHECK_SYS(set_pos_nt(offset, method, &new_pos));
+  CHECK_FILE(set_pos_nt(offset, method, &new_pos));
   return new_pos;
 }
 
@@ -214,7 +222,7 @@ bool File::set_pos_nt(__int64 offset, DWORD method, unsigned __int64* new_pos) {
 }
 
 void File::set_end() {
-  CHECK_SYS(set_end_nt());
+  CHECK_FILE(set_end_nt());
 }
 
 bool File::set_end_nt() {
@@ -223,13 +231,16 @@ bool File::set_end_nt() {
 
 BY_HANDLE_FILE_INFORMATION File::get_info() {
   BY_HANDLE_FILE_INFORMATION info;
-  CHECK_SYS(get_info_nt(info));
+  CHECK_FILE(get_info_nt(info));
   return info;
 }
 
 bool File::get_info_nt(BY_HANDLE_FILE_INFORMATION& info) {
   return GetFileInformationByHandle(h_file, &info) != 0;
 }
+
+#undef CHECK_FILE
+
 
 void Key::close() {
   if (h_key) {
