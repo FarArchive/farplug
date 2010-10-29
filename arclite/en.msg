@@ -18,10 +18,10 @@ extract.dlg.delete_archive = De&lete archive after extraction
 # Update dialog
 update.dlg.title = Add files to archive
 update.dlg.title.create = Create archive
-update.dlg.profile = Profile:
+update.dlg.profile = &Profile:
 update.dlg.save_profile = Create
 update.dlg.delete_profile = Delete
-update.dlg.arc_path = &Archive path:
+update.dlg.arc_path = Archive path:
 update.dlg.arc_path_eval = Evaluate
 update.dlg.arc_type = Select archiver:
 update.dlg.arc_type.other = &0ther:
@@ -59,13 +59,13 @@ compression.level.store = &Store
 compression.level.fastest = Fas&test
 compression.level.fast = &Fast
 compression.level.normal = &Normal
-compression.level.maximum = &Maximum
+compression.level.maximum = M&aximum
 compression.level.ultra = &Ultra
 
 # Compression methods
 compression.method.lzma = &LZMA
 compression.method.lzma2 = LZMA&2
-compression.method.ppmd = &PPMD
+compression.method.ppmd = PP&MD
 
 # Delete files
 delete.dlg.confirm = Do you want to delete selected files?

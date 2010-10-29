@@ -18,10 +18,10 @@ extract.dlg.delete_archive = У&далить архив после распак�
 # Update dialog
 update.dlg.title = Обновление архива
 update.dlg.title.create = Создание архива
-update.dlg.profile = Профиль:
+update.dlg.profile = &Профиль:
 update.dlg.save_profile = Создать
 update.dlg.delete_profile = Удалить
-update.dlg.arc_path = &Путь:
+update.dlg.arc_path = Путь:
 update.dlg.arc_path_eval = Показать
 update.dlg.arc_type = Формат архива:
 update.dlg.arc_type.other = П&рочие:

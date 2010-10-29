@@ -618,7 +618,6 @@ private:
   UpdateOptions read_controls() {
     UpdateOptions options;
     if (new_arc) {
-      options.arc_path = eval_arc_path();
       for (unsigned i = 0; i < main_formats.size(); i++) {
         if (get_check(main_formats_ctrl_id + i)) {
           options.arc_type = c_archive_types[i].value;
@@ -763,6 +762,8 @@ private:
 
     if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
       options = read_controls();
+      if (new_arc)
+        options.arc_path = eval_arc_path();
     }
     else if (msg == DN_INITDIALOG) {
       set_control_state();
@@ -813,7 +814,7 @@ private:
         set_text(password_visible_ctrl_id, get_text(password_ctrl_id));
       }
     }
-    else if (msg == DN_BTNCLICK && param1 == save_profile_ctrl_id) {
+    else if (new_arc && msg == DN_BTNCLICK && param1 == save_profile_ctrl_id) {
       UpdateProfile profile;
       profile.options = read_controls();
       if (Far::input_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_UPDATE_DLG_INPUT_PROFILE_NAME), profile.name)) {
@@ -828,7 +829,7 @@ private:
         set_list_pos(profile_ctrl_id, profile_idx);
       }
     }
-    else if (msg == DN_BTNCLICK && param1 == delete_profile_ctrl_id) {
+    else if (new_arc && msg == DN_BTNCLICK && param1 == delete_profile_ctrl_id) {
       unsigned profile_idx = get_list_pos(profile_ctrl_id);
       if (profile_idx != -1 && profile_idx < profiles.size()) {
         if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L'\n' + Far::get_msg(MSG_UPDATE_DLG_CONFIRM_PROFILE_DELETE), 0, FMSG_MB_YESNO) == 0) {
@@ -840,11 +841,11 @@ private:
         }
       }
     }
-    else if (msg == DN_BTNCLICK && param1 == arc_path_eval_ctrl_id) {
+    else if (new_arc && msg == DN_BTNCLICK && param1 == arc_path_eval_ctrl_id) {
       Far::info_dlg(wstring(), word_wrap(eval_arc_path(), Far::get_optimal_msg_width()));
     }
 
-    if (msg == DN_EDITCHANGE || msg == DN_BTNCLICK) {
+    if (new_arc && msg == DN_EDITCHANGE || msg == DN_BTNCLICK) {
       unsigned profile_idx = profiles.size();
       UpdateOptions options;
       try {
