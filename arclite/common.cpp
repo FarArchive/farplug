@@ -1,6 +1,7 @@
 #include "utils.hpp"
 #include "error.hpp"
 #include "common.hpp"
+#include "farutils.hpp"
 
 Error g_com_error;
 
@@ -50,4 +51,37 @@ unsigned __int64 parse_size_string(const wstring& str) {
     size *= mod_mul;
   }
   return size;
+}
+
+// expand macros enclosed in question marks
+wstring expand_macros(const wstring& text) {
+  const wchar_t c_macro_sep = L'?';
+  wstring result;
+  size_t b_pos, e_pos;
+  size_t pos = 0;
+  while (true) {
+    b_pos = text.find(c_macro_sep, pos);
+    if (b_pos == wstring::npos)
+      break;
+    e_pos = text.find(c_macro_sep, b_pos + 1);
+    if (e_pos == wstring::npos)
+      break;
+
+    wstring macro = L"print(" + text.substr(b_pos + 1, e_pos - b_pos - 1) + L") Enter";
+    ActlKeyMacro akm;
+    akm.Command = MCMD_POSTMACROSTRING;
+    akm.Param.PlainText.SequenceText = macro.c_str();
+    akm.Param.PlainText.Flags = 0;
+    wstring mresult;
+    if (Far::adv_control(ACTL_KEYMACRO, &akm))
+      Far::input_dlg(wstring(), wstring(), mresult);
+    else
+      FAIL(E_ABORT);
+
+    result.append(text.data() + pos, b_pos - pos);
+    result.append(mresult);
+    pos = e_pos + 1;
+  }
+  result.append(text.data() + pos, text.size() - pos);
+  return result;
 }

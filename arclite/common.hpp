@@ -74,3 +74,5 @@ unsigned __int64 parse_size_string(const wstring& str);
 DWORD translate_seek_method(UInt32 seek_origin);
 
 void attach_sfx_module(const wstring& file_path, unsigned sfx_module_idx);
+
+wstring expand_macros(const wstring& text);

@@ -491,6 +491,7 @@ private:
   int save_profile_ctrl_id;
   int delete_profile_ctrl_id;
   int arc_path_ctrl_id;
+  int arc_path_eval_ctrl_id;
   int main_formats_ctrl_id;
   int other_formats_ctrl_id;
   int level_ctrl_id;
@@ -610,11 +611,14 @@ private:
     }
   }
 
+  wstring eval_arc_path() {
+    return Far::get_absolute_path(expand_macros(unquote(strip(get_text(arc_path_ctrl_id)))));
+  }
+
   UpdateOptions read_controls() {
     UpdateOptions options;
     if (new_arc) {
-      options.arc_path = unquote(strip(get_text(arc_path_ctrl_id)));
-
+      options.arc_path = eval_arc_path();
       for (unsigned i = 0; i < main_formats.size(); i++) {
         if (get_check(main_formats_ctrl_id + i)) {
           options.arc_type = c_archive_types[i].value;
@@ -835,7 +839,9 @@ private:
           set_list_pos(profile_ctrl_id, profiles.size());
         }
       }
-
+    }
+    else if (msg == DN_BTNCLICK && param1 == arc_path_eval_ctrl_id) {
+      Far::info_dlg(wstring(), word_wrap(eval_arc_path(), Far::get_optimal_msg_width()));
     }
 
     if (msg == DN_EDITCHANGE || msg == DN_BTNCLICK) {
@@ -890,6 +896,8 @@ public:
       new_line();
 
       label(Far::get_msg(MSG_UPDATE_DLG_ARC_PATH));
+      spacer(1);
+      arc_path_eval_ctrl_id = button(Far::get_msg(MSG_UPDATE_DLG_ARC_PATH_EVAL), DIF_BTNNOCLOSE);
       new_line();
       arc_path_ctrl_id = history_edit_box(options.arc_path, L"arclite.arc_path", c_client_xs, DIF_EDITPATH);
       new_line();

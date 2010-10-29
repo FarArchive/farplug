@@ -22,6 +22,7 @@ update.dlg.profile = Profile:
 update.dlg.save_profile = Create
 update.dlg.delete_profile = Delete
 update.dlg.arc_path = &Archive path:
+update.dlg.arc_path_eval = Evaluate
 update.dlg.arc_type = Select archiver:
 update.dlg.arc_type.other = &0ther:
 update.dlg.level = Compression level:

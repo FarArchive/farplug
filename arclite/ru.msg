@@ -22,6 +22,7 @@ update.dlg.profile = Профиль:
 update.dlg.save_profile = Создать
 update.dlg.delete_profile = Удалить
 update.dlg.arc_path = &Путь:
+update.dlg.arc_path_eval = Показать
 update.dlg.arc_type = Формат архива:
 update.dlg.arc_type.other = П&рочие:
 update.dlg.level = Уровень сжатия:
