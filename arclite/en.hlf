@@ -59,6 +59,12 @@ selected needed files on disk and press #F5#.
 	"Create archive" allows you to specify archive path and various archival parameters.
 Reduced version of this dialog is used when updating existing archives.
 
+	#Profile# - Select named collection of archival settings. #Create# button creates new profile using current settings.
+#Delete# button deletes selected profile.
+
+	#Archive path# - Full or relative archive path. Far's macro sequences can be used to form path by enclosing them inside
+question marks. Example #archive-?date("%x")?.7z# puts current date into archive name. #Evaluate# button displays final archive path.
+
 	#Select archiver# - Select one of the available archive formats.
 
 	#Compression level# - Compression level determines resulting archive size, processing time, memory consumption during compression
