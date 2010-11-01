@@ -9,6 +9,7 @@ struct ContentInfo {
   Array<u8> crc32;
   Array<u8> md5;
   Array<u8> sha1;
+  Array<u8> sha256;
   Array<u8> ed2k;
 };
 

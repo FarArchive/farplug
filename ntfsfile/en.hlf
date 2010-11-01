@@ -19,7 +19,7 @@ This plugin provides various information about files on NTFS file system. Featur
 
 4. Analyze file contents:
   - estimate if compression of file data is possible (using very FAST LZO algorithm)
-  - calculate most useful file hashes: crc32, md5, sha1, ed2k (eMule variation).
+  - calculate most useful file hashes: crc32, md5, sha1, sha256, ed2k (eMule variation).
   Prefix: #nfc#
 
 5. Perform fast file search over entire volume using MFT index mode.

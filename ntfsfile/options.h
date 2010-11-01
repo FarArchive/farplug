@@ -6,6 +6,7 @@ struct ContentOptions {
   bool crc32;
   bool md5;
   bool sha1;
+  bool sha256;
   bool ed2k;
 };
 

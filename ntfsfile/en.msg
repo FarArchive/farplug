@@ -96,6 +96,7 @@ content.settings.zeros = &Zero clusters
 content.settings.crc32 = CRC&32 checksum
 content.settings.md5 = MD&5 hash
 content.settings.sha1 = SHA&1 hash
+content.settings.sha256 = SHA25&6 hash
 content.settings.ed2k = ED&2K hash
 content.settings.set_all = &Set all
 content.settings.reset_all = &Reset all
@@ -108,6 +109,7 @@ content.result.compression = &Compression ratio: %S / %S =
 content.result.crc32 = CRC&32 checksum:
 content.result.md5 = MD&5 hash:
 content.result.sha1 = SHA&1 hash:
+content.result.sha256 = SHA25&6 hash:
 content.result.ed2k = ED&2K hash:
 content.result.verify = &Verify hash:
 content.result.result = Result:

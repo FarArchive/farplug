@@ -11,7 +11,7 @@ FAR Manager plugin
 3. Определение степени фрагментации файлов. Дефрагментация файлов и каталогов.
 4. Функции анализа данных:
   - оценка сжимаемости данных для группы файлов/каталогов (производится сжатие данных с помощью быстрого алгоритма LZO, полезно чтобы определить - стоит ли сжимать файлы средствами NTFS или архиватором).
-  - расчёт наиболее полезных хешей для выбранного файла: crc32, md5, sha1, ed2k (вариант eMule).
+  - расчёт наиболее полезных хешей для выбранного файла: crc32, md5, sha1, sha256, ed2k (вариант eMule).
 5. Быстрый поиск файлов по всему тому в режиме MFT index.
 6. Управление альтернативными потоками данных.
 7. Просмотр информации о версии файла.
@@ -36,7 +36,7 @@ This plugin provides various information about files on NTFS file system. Featur
 3. Analyze file fragmentation and perform defragmentation.
 4. Analyze file contents:
   - estimate if compression of file data is possible (using very FAST LZO algorithm)
-  - calculate most useful file hashes: crc32, md5, sha1, ed2k (eMule variation).
+  - calculate most useful file hashes: crc32, md5, sha1, sha256, ed2k (eMule variation).
 5. Perform fast file search over entire volume using MFT index mode.
 6. Manage alternate data streams.
 7. Examine file version info.

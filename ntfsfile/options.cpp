@@ -131,6 +131,7 @@ void load_plugin_options() {
   g_content_options.crc32 = get_bool_option(L"ContentOptionsCRC32", false);
   g_content_options.md5 = get_bool_option(L"ContentOptionsMD5", false);
   g_content_options.sha1 = get_bool_option(L"ContentOptionsSHA1", false);
+  g_content_options.sha256 = get_bool_option(L"ContentOptionsSHA256", false);
   g_content_options.ed2k = get_bool_option(L"ContentOptionsED2K", false);
   g_file_panel_mode.col_types = get_str_option(L"FilePanelColTypes", L"N,DSZ,RSZ,FRG,STM,LNK,MFT");
   g_file_panel_mode.col_widths = get_str_option(L"FilePanelColWidths", L"0,7,7,5,3,3,3");
@@ -164,6 +165,7 @@ void store_plugin_options() {
   set_bool_option(L"ContentOptionsCRC32", g_content_options.crc32);
   set_bool_option(L"ContentOptionsMD5", g_content_options.md5);
   set_bool_option(L"ContentOptionsSHA1", g_content_options.sha1);
+  set_bool_option(L"ContentOptionsSHA256", g_content_options.sha256);
   set_bool_option(L"ContentOptionsED2K", g_content_options.ed2k);
   set_str_option(L"FilePanelColTypes", g_file_panel_mode.col_types);
   set_str_option(L"FilePanelColWidths", g_file_panel_mode.col_widths);

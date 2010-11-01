@@ -45,6 +45,7 @@ struct OptionsDlgData {
   int crc32_ctrl_id;
   int md5_ctrl_id;
   int sha1_ctrl_id;
+  int sha256_ctrl_id;
   int ed2k_ctrl_id;
   int set_all_ctrl_id;
   int reset_all_ctrl_id;
@@ -65,6 +66,7 @@ LONG_PTR WINAPI options_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR par
         dlg->set_check(dlg_data->crc32_ctrl_id, true);
         dlg->set_check(dlg_data->md5_ctrl_id, true);
         dlg->set_check(dlg_data->sha1_ctrl_id, true);
+        dlg->set_check(dlg_data->sha256_ctrl_id, true);
         dlg->set_check(dlg_data->ed2k_ctrl_id, true);
         dlg->set_focus(dlg_data->ok_ctrl_id);
         return TRUE;
@@ -74,6 +76,7 @@ LONG_PTR WINAPI options_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR par
         dlg->set_check(dlg_data->crc32_ctrl_id, false);
         dlg->set_check(dlg_data->md5_ctrl_id, false);
         dlg->set_check(dlg_data->sha1_ctrl_id, false);
+        dlg->set_check(dlg_data->sha256_ctrl_id, false);
         dlg->set_check(dlg_data->ed2k_ctrl_id, false);
         dlg->set_focus(dlg_data->ok_ctrl_id);
         return TRUE;
@@ -85,6 +88,7 @@ LONG_PTR WINAPI options_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR par
       options->crc32 = dlg->get_check(dlg_data->crc32_ctrl_id);
       options->md5 = dlg->get_check(dlg_data->md5_ctrl_id);
       options->sha1 = dlg->get_check(dlg_data->sha1_ctrl_id);
+      options->sha256 = dlg->get_check(dlg_data->sha256_ctrl_id);
       options->ed2k = dlg->get_check(dlg_data->ed2k_ctrl_id);
     }
   }
@@ -117,6 +121,8 @@ bool show_options_dialog(ContentOptions& options, bool single_file) {
     dlg_data.md5_ctrl_id = dlg.check_box(far_get_msg(MSG_CONTENT_SETTINGS_MD5), options.md5);
     dlg.new_line();
     dlg_data.sha1_ctrl_id = dlg.check_box(far_get_msg(MSG_CONTENT_SETTINGS_SHA1), options.sha1);
+    dlg.new_line();
+    dlg_data.sha256_ctrl_id = dlg.check_box(far_get_msg(MSG_CONTENT_SETTINGS_SHA256), options.sha256);
     dlg.new_line();
     dlg_data.ed2k_ctrl_id = dlg.check_box(far_get_msg(MSG_CONTENT_SETTINGS_ED2K), options.ed2k);
     dlg.new_line();
@@ -175,14 +181,16 @@ void save_hashes_to_file(const UnicodeString& file_name, const ContentOptions& o
     AnsiString line = "SHA1: " + unicode_to_oem(format_hex_array(info.sha1)) + "\n";
     CHECK_SYS(WriteFile(h_file, line.data(), line.size(), &bw, NULL));
   }
+  if (options.sha256) {
+    AnsiString line = "SHA256: " + unicode_to_oem(format_hex_array(info.sha256)) + "\n";
+    CHECK_SYS(WriteFile(h_file, line.data(), line.size(), &bw, NULL));
+  }
   if (options.ed2k) {
     AnsiString line = "ED2K: " + unicode_to_oem(format_hex_array(info.ed2k)) + "\n";
     CHECK_SYS(WriteFile(h_file, line.data(), line.size(), &bw, NULL));
   }
   far_message(far_get_msg(MSG_CONTENT_RESULT_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_CONTENT_RESULT_FILE_SAVED), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK), 1);
 }
-
-const unsigned c_verify_box_size = 20 * 2 + 1;
 
 struct ResultDlgData {
   int verify_edit_ctrl_id;
@@ -205,6 +213,7 @@ LONG_PTR WINAPI result_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR para
         ((options->crc32) && (format_hex_array(info->crc32).icompare(user_hash) == 0)) ||
         ((options->md5) && (format_hex_array(info->md5).icompare(user_hash) == 0)) ||
         ((options->sha1) && (format_hex_array(info->sha1).icompare(user_hash) == 0)) ||
+        ((options->sha256) && (format_hex_array(info->sha256).icompare(user_hash) == 0)) ||
         ((options->ed2k) && ((format_hex_array(info->ed2k).icompare(user_hash) == 0) ||
         (format_hex_array(info->ed2k).icompare(ed2k_extract_hash_from_url(user_hash)) == 0)));
       unsigned char result_color;
@@ -265,39 +274,57 @@ void show_result_dialog(const UnicodeString& file_name, const ContentOptions& op
     dlg.new_line();
   }
 
-  bool hash_opt = options.crc32 || options.md5 || options.sha1 || options.ed2k;
+  bool hash_opt = options.crc32 || options.md5 || options.sha1 || options.sha256 || options.ed2k;
   if (hash_opt) {
     dlg.separator();
     dlg.new_line();
 
-    unsigned pad_size = max(max(max(max(far_get_msg(MSG_CONTENT_RESULT_CRC32).size(), far_get_msg(MSG_CONTENT_RESULT_MD5).size()), far_get_msg(MSG_CONTENT_RESULT_SHA1).size()), far_get_msg(MSG_CONTENT_RESULT_ED2K).size()), far_get_msg(MSG_CONTENT_RESULT_VERIFY).size()) + 1;
+    unsigned pad_size = max(max(max(max(max(far_get_msg(MSG_CONTENT_RESULT_CRC32).size(), far_get_msg(MSG_CONTENT_RESULT_MD5).size()), far_get_msg(MSG_CONTENT_RESULT_SHA1).size()), far_get_msg(MSG_CONTENT_RESULT_SHA256).size()), far_get_msg(MSG_CONTENT_RESULT_ED2K).size()), far_get_msg(MSG_CONTENT_RESULT_VERIFY).size()) + 1;
+    unsigned verify_box_size = 0;
 
     if (options.crc32) {
       dlg.label(far_get_msg(MSG_CONTENT_RESULT_CRC32));
       dlg.pad(pad_size);
-      dlg.fix_edit_box(format_hex_array(info.crc32), AUTO_SIZE, DIF_READONLY | DIF_SELECTONENTRY);
+      UnicodeString hash_str = format_hex_array(info.crc32);
+      dlg.fix_edit_box(hash_str, AUTO_SIZE, DIF_READONLY | DIF_SELECTONENTRY);
       dlg.new_line();
+      if (verify_box_size < hash_str.size()) verify_box_size = hash_str.size();
     }
 
     if (options.md5) {
       dlg.label(far_get_msg(MSG_CONTENT_RESULT_MD5));
       dlg.pad(pad_size);
-      dlg.fix_edit_box(format_hex_array(info.md5), AUTO_SIZE, DIF_READONLY | DIF_SELECTONENTRY);
+      UnicodeString hash_str = format_hex_array(info.md5);
+      dlg.fix_edit_box(hash_str, AUTO_SIZE, DIF_READONLY | DIF_SELECTONENTRY);
       dlg.new_line();
+      if (verify_box_size < hash_str.size()) verify_box_size = hash_str.size();
     }
 
     if (options.sha1) {
       dlg.label(far_get_msg(MSG_CONTENT_RESULT_SHA1));
       dlg.pad(pad_size);
-      dlg.fix_edit_box(format_hex_array(info.sha1), AUTO_SIZE, DIF_READONLY | DIF_SELECTONENTRY);
+      UnicodeString hash_str = format_hex_array(info.sha1);
+      dlg.fix_edit_box(hash_str, AUTO_SIZE, DIF_READONLY | DIF_SELECTONENTRY);
       dlg.new_line();
+      if (verify_box_size < hash_str.size()) verify_box_size = hash_str.size();
+    }
+
+    if (options.sha256) {
+      dlg.label(far_get_msg(MSG_CONTENT_RESULT_SHA256));
+      dlg.pad(pad_size);
+      UnicodeString hash_str = format_hex_array(info.sha256);
+      dlg.fix_edit_box(hash_str, AUTO_SIZE, DIF_READONLY | DIF_SELECTONENTRY);
+      dlg.new_line();
+      if (verify_box_size < hash_str.size()) verify_box_size = hash_str.size();
     }
 
     if (options.ed2k) {
       dlg.label(far_get_msg(MSG_CONTENT_RESULT_ED2K));
       dlg.pad(pad_size);
-      dlg.fix_edit_box(format_hex_array(info.ed2k), AUTO_SIZE, DIF_READONLY | DIF_SELECTONENTRY);
+      UnicodeString hash_str = format_hex_array(info.ed2k);
+      dlg.fix_edit_box(hash_str, AUTO_SIZE, DIF_READONLY | DIF_SELECTONENTRY);
       dlg.new_line();
+      if (verify_box_size < hash_str.size()) verify_box_size = hash_str.size();
     }
 
     // hash check if apropriate
@@ -306,7 +333,7 @@ void show_result_dialog(const UnicodeString& file_name, const ContentOptions& op
 
     dlg.label(far_get_msg(MSG_CONTENT_RESULT_VERIFY));
     dlg.pad(pad_size);
-    dlg_data.verify_edit_ctrl_id = dlg.var_edit_box(L"", 1024, c_verify_box_size);
+    dlg_data.verify_edit_ctrl_id = dlg.var_edit_box(L"", 1024, verify_box_size + 1);
     dlg.new_line();
 
     dlg.label(far_get_msg(MSG_CONTENT_RESULT_RESULT));
@@ -574,6 +601,9 @@ void process_file_content(const UnicodeString& file_name, const ContentOptions& 
   // SHA1 hash
   SHA_CTX sha1_ctx;
   SHA1_Init(&sha1_ctx);
+  // SHA256 hash
+  SHA256_CTX sha256_ctx;
+  SHA256_Init(&sha256_ctx);
   // ed2k hash
   Array<u8> ed2k_block_hashes;
   unsigned ed2k_last_block_slack = 0;
@@ -657,6 +687,7 @@ void process_file_content(const UnicodeString& file_name, const ContentOptions& 
         if (options.crc32) crc32 = lzo_crc32(crc32, buffer, size);
         if (options.md5) MD5_Update(&md5_ctx, buffer, size);
         if (options.sha1) SHA1_Update(&sha1_ctx, buffer, size);
+        if (options.sha256) SHA256_Update(&sha256_ctx, buffer, size);
         if (options.ed2k) ed2k_update_block_hashes(buffer, size, ed2k_block_hashes, ed2k_last_block_slack, md4_ctx);
       }
 
@@ -728,6 +759,11 @@ void process_file_content(const UnicodeString& file_name, const ContentOptions& 
     u8 sha1[SHA_DIGEST_LENGTH];
     SHA1_Final(sha1, &sha1_ctx);
     result.sha1.copy(sha1, sizeof(sha1));
+  }
+  if (options.sha256) {
+    u8 sha256[SHA256_DIGEST_LENGTH];
+    SHA256_Final(sha256, &sha256_ctx);
+    result.sha256.copy(sha256, sizeof(sha256));
   }
   if (options.ed2k) {
     result.ed2k = ed2k_finalize_block_hashes(ed2k_block_hashes, ed2k_last_block_slack, md4_ctx);
