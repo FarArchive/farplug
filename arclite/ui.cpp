@@ -407,7 +407,7 @@ bool operator==(const UpdateOptions& o1, const UpdateOptions& o2) {
       return false;
     bool is_encrypted = o1.encrypt;
     if (is_encrypted) {
-      if (o1.password != o2.password || o1.show_password == o2.show_password)
+      if (o1.password != o2.password || o1.show_password != o2.show_password)
         return false;
       if (is_7z) {
         if (o1.encrypt_header != o2.encrypt_header || o1.encrypt_header_defined != o2.encrypt_header_defined)
@@ -827,6 +827,7 @@ private:
         fli.Item.Text = profile.name.c_str();
         send_message(DM_LISTINSERT, profile_ctrl_id, &fli);
         set_list_pos(profile_ctrl_id, profile_idx);
+        set_control_state();
       }
     }
     else if (new_arc && msg == DN_BTNCLICK && param1 == delete_profile_ctrl_id) {
@@ -838,6 +839,7 @@ private:
           FarListDelete fld = { profile_idx, 1 };
           send_message(DM_LISTDELETE, profile_ctrl_id, &fld);
           set_list_pos(profile_ctrl_id, static_cast<unsigned>(profiles.size()));
+          set_control_state();
         }
       }
     }
