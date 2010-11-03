@@ -726,6 +726,9 @@
     <ClCompile Include="..\..\Archive\CpioHandler.cpp">
       <Filter>Archive</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Archive\CramfsHandler.cpp">
+      <Filter>Archive</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Archive\DebHandler.cpp">
       <Filter>Archive</Filter>
     </ClCompile>
@@ -778,6 +781,9 @@
       <Filter>Archive</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Archive\SplitHandler.cpp">
+      <Filter>Archive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Archive\SquashfsHandler.cpp">
       <Filter>Archive</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Archive\SwfHandler.cpp">
@@ -1507,6 +1513,9 @@
       <Filter>Spec\Icons</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\Archive\Icons\split.ico">
+      <Filter>Spec\Icons</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\Archive\Icons\squashfs.ico">
       <Filter>Spec\Icons</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\Archive\Icons\tar.ico">

@@ -226,6 +226,7 @@
     <CustomBuild Include="..\..\Archive\Icons\rar.ico" />
     <CustomBuild Include="..\..\Archive\Icons\rpm.ico" />
     <CustomBuild Include="..\..\Archive\Icons\split.ico" />
+    <CustomBuild Include="..\..\Archive\Icons\squashfs.ico" />
     <CustomBuild Include="..\..\Archive\Icons\tar.ico" />
     <CustomBuild Include="..\..\Archive\Icons\vhd.ico" />
     <CustomBuild Include="..\..\Archive\Icons\wim.ico" />
@@ -914,6 +915,7 @@
     <ClCompile Include="..\..\Archive\ArjHandler.cpp" />
     <ClCompile Include="..\..\Archive\Bz2Handler.cpp" />
     <ClCompile Include="..\..\Archive\CpioHandler.cpp" />
+    <ClCompile Include="..\..\Archive\CramfsHandler.cpp" />
     <ClCompile Include="..\..\Archive\DebHandler.cpp" />
     <ClCompile Include="..\..\Archive\DeflateProps.cpp" />
     <ClCompile Include="..\..\Archive\DmgHandler.cpp" />
@@ -939,6 +941,7 @@
     </ClCompile>
     <ClCompile Include="..\..\Archive\RpmHandler.cpp" />
     <ClCompile Include="..\..\Archive\SplitHandler.cpp" />
+    <ClCompile Include="..\..\Archive\SquashfsHandler.cpp" />
     <ClCompile Include="..\..\Archive\SwfHandler.cpp" />
     <ClCompile Include="..\..\Archive\VhdHandler.cpp" />
     <ClCompile Include="..\..\Archive\XarHandler.cpp" />
