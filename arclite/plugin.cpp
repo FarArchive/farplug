@@ -234,7 +234,7 @@ public:
       if (dst_dir.empty())
         dst_dir = L".";
       if (!is_absolute_path(dst_dir))
-        dst_dir = Far::get_absolute_path(options.dst_dir);
+        dst_dir = Far::get_absolute_path(dst_dir);
 
       g_options.extract_ignore_errors = options.ignore_errors;
       g_options.extract_overwrite = options.overwrite;
