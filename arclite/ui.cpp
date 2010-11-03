@@ -631,6 +631,9 @@ private:
         FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_ARC_TYPE));
       }
     }
+    else {
+      options.arc_type = arc_type;
+    }
     bool is_7z = arc_type == c_7z;
 
     options.level = -1;
