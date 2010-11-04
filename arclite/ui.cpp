@@ -403,6 +403,8 @@ bool operator==(const UpdateOptions& o1, const UpdateOptions& o2) {
     if (o1.solid != o2.solid)
       return false;
   }
+  if (o1.advanced != o2.advanced)
+    return false;
   if (is_7z || is_zip) {
     if (o1.encrypt != o2.encrypt)
       return false;
@@ -498,6 +500,7 @@ private:
   int level_ctrl_id;
   int method_ctrl_id;
   int solid_ctrl_id;
+  int advanced_ctrl_id;
   int encrypt_ctrl_id;
   int encrypt_header_ctrl_id;
   int show_password_ctrl_id;
@@ -663,6 +666,8 @@ private:
 
     options.solid = get_check(solid_ctrl_id);
 
+    options.advanced = get_text(advanced_ctrl_id);
+
     options.encrypt = get_check(encrypt_ctrl_id);
     if (options.encrypt) {
       options.show_password = get_check(show_password_ctrl_id);
@@ -738,6 +743,8 @@ private:
     };
 
     set_check(solid_ctrl_id, options.solid);
+
+    set_text(advanced_ctrl_id, options.advanced);
 
     set_check(encrypt_ctrl_id, options.encrypt);
     set_check3(encrypt_header_ctrl_id, options.encrypt_header);
@@ -976,6 +983,9 @@ public:
     new_line();
 
     solid_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_SOLID), options.solid);
+    new_line();
+    label(Far::get_msg(MSG_UPDATE_DLG_ADVANCED));
+    advanced_ctrl_id = history_edit_box(options.advanced, L"arclite.advanced");
     new_line();
     separator();
     new_line();

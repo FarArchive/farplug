@@ -30,6 +30,7 @@ struct UpdateOptions {
   bool move_files;
   bool open_shared;
   bool ignore_errors;
+  wstring advanced;
   UpdateOptions();
 };
 

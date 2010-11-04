@@ -223,6 +223,7 @@ const wchar_t* c_param_profile_volume_size = L"volume_size";
 const wchar_t* c_param_profile_move_files = L"move_files";
 const wchar_t* c_param_profile_open_shared = L"open_shared";
 const wchar_t* c_param_profile_ignore_errors = L"ignore_errors";
+const wchar_t* c_param_profile_advanced = L"advanced";
 
 const wchar_t* c_def_profile_arc_path = L"";
 const ArcType c_def_profile_arc_type = c_7z;
@@ -240,6 +241,7 @@ const wchar_t* c_def_profile_volume_size = L"";
 const bool c_def_profile_move_files = false;
 const bool c_def_profile_open_shared = false;
 const bool c_def_profile_ignore_errors = false;
+const wchar_t* c_def_profile_advanced = L"";
 
 UpdateOptions::UpdateOptions():
   arc_path(c_def_profile_arc_path),
@@ -257,7 +259,8 @@ UpdateOptions::UpdateOptions():
   volume_size(c_def_profile_volume_size),
   move_files(c_def_profile_move_files),
   open_shared(c_def_profile_open_shared),
-  ignore_errors(c_def_profile_ignore_errors)
+  ignore_errors(c_def_profile_ignore_errors),
+  advanced(c_def_profile_advanced)
 {}
 
 void UpdateProfiles::load() {
@@ -286,6 +289,7 @@ void UpdateProfiles::load() {
       GET_VALUE(move_files, bool);
       GET_VALUE(open_shared, bool);
       GET_VALUE(ignore_errors, bool);
+      GET_VALUE(advanced, str);
 #undef GET_VALUE
       push_back(profile);
     }
@@ -319,6 +323,7 @@ void UpdateProfiles::save() const {
     SET_VALUE(move_files, bool);
     SET_VALUE(open_shared, bool);
     SET_VALUE(ignore_errors, bool);
+    SET_VALUE(advanced, str);
 #undef SET_VALUE
   });
 }

@@ -28,6 +28,7 @@ update.dlg.arc_type.other = П&рочие:
 update.dlg.level = Уровень сжатия:
 update.dlg.method = Метод сжатия:
 update.dlg.solid = &Непрерывный архив
+update.dlg.advanced = Прод&винутые параметры:
 update.dlg.encrypt = &Шифрование файлов
 update.dlg.show_password = Показать пароль
 update.dlg.password = Паро&ль:

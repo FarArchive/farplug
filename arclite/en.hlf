@@ -88,6 +88,9 @@ it uses equal amounts of memory for compression and decompression.
 It also makes more difficult to access individual files because when extracting single file
 all preceding files must be extracted too.
 
+	#Advanced parameters# - Additional compression settings described in 7-Zip documentation for -m switch.
+Example: #0=delta:1 1=lzma2:pb0# - enable delta filter (for bitmap compression).
+
 	#Encrypt archive# - Encrypt archived files with password.
 #Encrypt header# option can be used to encrypt archived file names too.
 

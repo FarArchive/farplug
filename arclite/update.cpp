@@ -715,7 +715,7 @@ public:
 void Archive::set_properties(IOutArchive* out_arc, const UpdateOptions& options) {
   ComObject<ISetProperties> set_props;
   if (SUCCEEDED(out_arc->QueryInterface(IID_ISetProperties, reinterpret_cast<void**>(&set_props)))) {
-    vector<const wchar_t*> names;
+    vector<wstring> names;
     vector<PropVariant> values;
     names.push_back(L"x");
     values.push_back(options.level);
@@ -733,7 +733,35 @@ void Archive::set_properties(IOutArchive* out_arc, const UpdateOptions& options)
         }
       }
     }
-    CHECK_COM(set_props->SetProperties(names.data(), values.data(), static_cast<Int32>(names.size())));
+
+    list<wstring> params = split(options.advanced, L' ');
+    for_each(params.begin(), params.end(), [&] (const wstring& param) {
+      size_t sep = param.find(L'=');
+      if (sep != wstring::npos) {
+        wstring name = param.substr(0, sep);
+        wstring value = param.substr(sep + 1);
+        bool found = false;
+        for (unsigned i = 0; i < names.size(); i++) {
+          if (_wcsicmp(names[i].c_str(), name.c_str()) == 0) {
+            found = true;
+            values[i] = value;
+            break;
+          }
+        }
+        if (!found) {
+          names.push_back(name);
+          values.push_back(value);
+        }
+      }
+    });
+
+    vector<const wchar_t*> name_ptrs;
+    name_ptrs.reserve(names.size());
+    for (unsigned i = 0; i < names.size(); i++) {
+      name_ptrs.push_back(names[i].c_str());
+    }
+
+    CHECK_COM(set_props->SetProperties(name_ptrs.data(), values.data(), static_cast<Int32>(values.size())));
   }
 }
 
