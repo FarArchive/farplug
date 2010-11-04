@@ -90,6 +90,14 @@ void show_changelog(unsigned build1, unsigned build2) {
   Far::flush_screen();
 }
 
+
+const GUID c_update_dialog_guid = { /* BBE496E8-B5A8-48AC-B0D1-2141951B2C80 */
+  0xBBE496E8,
+  0xB5A8,
+  0x48AC,
+  {0xB0, 0xD1, 0x21, 0x41, 0x95, 0x1B, 0x2C, 0x80}
+};
+
 enum UpdateDialogResult {
   udrYes,
   udrNo,
@@ -121,7 +129,7 @@ private:
   }
 
 public:
-  UpdateDialog(const UpdateInfo& update_info): Far::Dialog(Far::get_msg(MSG_PLUGIN_NAME), c_client_xs, L"update"), update_info(update_info) {
+  UpdateDialog(const UpdateInfo& update_info): Far::Dialog(Far::get_msg(MSG_PLUGIN_NAME), &c_update_dialog_guid, c_client_xs, L"update"), update_info(update_info) {
   }
 
   UpdateDialogResult show() {

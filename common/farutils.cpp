@@ -299,7 +299,14 @@ LONG_PTR WINAPI Dialog::internal_dialog_proc(HANDLE h_dlg, int msg, int param1, 
   Dialog* dlg = reinterpret_cast<Dialog*>(g_far.SendDlgMessage(h_dlg, DM_GETDLGDATA, 0, 0));
   dlg->h_dlg = h_dlg;
   FAR_ERROR_HANDLER_BEGIN
-  return dlg->dialog_proc(msg, param1, param2);
+  if (msg == DN_GETDIALOGINFO && dlg->guid) {
+    DialogInfo* dialog_info = reinterpret_cast<DialogInfo*>(param2);
+    dialog_info->StructSize = sizeof(DialogInfo);
+    dialog_info->Id = *dlg->guid;
+    return TRUE;
+  }
+  else
+    return dlg->dialog_proc(msg, param1, param2);
   FAR_ERROR_HANDLER_END(return 0, return 0, false)
 }
 
@@ -311,7 +318,7 @@ LONG_PTR Dialog::send_message(int msg, int param1, const void* param2) {
   return g_far.SendDlgMessage(h_dlg, msg, param1, reinterpret_cast<LONG_PTR>(param2));
 }
 
-Dialog::Dialog(const wstring& title, unsigned width, const wchar_t* help): client_xs(width), x(c_x_frame), y(c_y_frame), help(help) {
+Dialog::Dialog(const wstring& title, const GUID* guid, unsigned width, const wchar_t* help): guid(guid), client_xs(width), x(c_x_frame), y(c_y_frame), help(help) {
   frame(title);
 }
 

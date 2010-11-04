@@ -85,6 +85,14 @@ void attach_sfx_module(const wstring& file_path, const wstring& sfx_module) {
   DeleteFileW(long_path(file_path).c_str());
 }
 
+
+const GUID c_sfx_convert_dialog_guid = { /* 0DCE48E5-B205-44A0-B8BF-96B28E2FD3B3 */
+  0x0DCE48E5,
+  0xB205,
+  0x44A0,
+  {0xB8, 0xBF, 0x96, 0xB2, 0x8E, 0x2F, 0xD3, 0xB3}
+};
+
 class SfxConvertDialog: public Far::Dialog {
 private:
   enum {
@@ -108,7 +116,7 @@ private:
   }
 
 public:
-  SfxConvertDialog(wstring& sfx_module): Far::Dialog(Far::get_msg(MSG_SFX_CONVERT_DLG_TITLE), c_client_xs), sfx_module(sfx_module) {
+  SfxConvertDialog(wstring& sfx_module): Far::Dialog(Far::get_msg(MSG_SFX_CONVERT_DLG_TITLE), &c_sfx_convert_dialog_guid, c_client_xs), sfx_module(sfx_module) {
   }
 
   bool show() {

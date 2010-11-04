@@ -50,6 +50,14 @@ void ProgressMonitor::update_ui(bool force) {
   }
 }
 
+
+const GUID c_config_dialog_guid = { /* 9106A360-BF20-47B0-8922-2EB46F18751B */
+  0x9106A360,
+  0xBF20,
+  0x47B0,
+  {0x89, 0x22, 0x2E, 0xB4, 0x6F, 0x18, 0x75, 0x1B}
+};
+
 class ConfigDialog: public Far::Dialog {
 private:
   enum {
@@ -113,7 +121,7 @@ private:
   }
 
 public:
-  ConfigDialog(Options& options): Far::Dialog(Far::get_msg(MSG_CONFIG_TITLE), c_client_xs, L"config"), options(options) {
+  ConfigDialog(Options& options): Far::Dialog(Far::get_msg(MSG_CONFIG_TITLE), &c_config_dialog_guid, c_client_xs, L"config"), options(options) {
   }
 
   bool show() {

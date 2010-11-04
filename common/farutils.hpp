@@ -133,6 +133,7 @@ private:
   vector<wstring> values;
   vector<DialogItem> items;
   HANDLE h_dlg;
+  const GUID* guid;
   unsigned new_value(const wstring& text);
   const wchar_t* get_value(unsigned idx) const;
   void frame(const wstring& text);
@@ -150,7 +151,7 @@ protected:
   }
   LONG_PTR send_message(int msg, int param1, const void* param2 = nullptr);
 public:
-  Dialog(const wstring& title, unsigned width = 60, const wchar_t* help = NULL);
+  Dialog(const wstring& title, const GUID* guid = nullptr, unsigned width = 60, const wchar_t* help = nullptr);
   // create different controls
   void new_line();
   void reset_line();
