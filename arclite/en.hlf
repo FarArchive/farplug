@@ -98,6 +98,8 @@ Example: #0=delta:1 1=lzma2:pb0# - enable delta filter (for bitmap compression).
 Plugin searches for modules with SFX extension inside its directory and inside 7-Zip directory.
 Standard SFX modules can unpack 7z archives only.
 
+	#Split into volumes# - Create multi-volume archive. #Volume size# can have K, M or G suffix.
+
 	#Delete files after archiving# - Delete files from disk after successful archival.
 
 	#Archive files open for writing# - This option value is taken from ~Far system settings~@<..\..>SystemSettings@

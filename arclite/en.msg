@@ -121,7 +121,7 @@ menu.detect = Open (&format menu)
 menu.create = &Create archive
 menu.extract = &Extract archive(s)
 menu.test = &Test archive(s)
-menu.sfx_convert = Convert archive into SFX
+menu.sfx_convert = C&onvert archive into SFX
 
 # Progress messages
 progress.open = Reading archive...
