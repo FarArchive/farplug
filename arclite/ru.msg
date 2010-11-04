@@ -120,7 +120,7 @@ menu.detect = О&ткрыть (список форматов)
 menu.create = &Создать архив
 menu.extract = &Распаковать архив(ы)
 menu.test = &Проверить архив(ы)
-menu.sfx_convert = Преобразовать архив в SFX
+menu.sfx_convert = Прео&бразовать архив в SFX
 
 # Progress messages
 progress.open = Чтение архива...
