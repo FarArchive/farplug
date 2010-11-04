@@ -111,6 +111,11 @@ ArcTypes ArcFormats::find_by_ext(const wstring& ext) const {
 }
 
 
+unsigned SfxModules::find(const wstring& module) const {
+  return distance(begin(), std::find(begin(), end(), module));
+}
+
+
 wstring ArcChain::to_string() const {
   wstring result;
   for_each(begin(), end(), [&] (const ArcEntry& arc) {
@@ -182,9 +187,7 @@ void ArcAPI::find_sfx_modules(const wstring& path) {
     string sig(buffer.data(), sz);
     if (sig != "MZ")
       continue;
-    SfxModule sfx_module;
-    sfx_module.path = file_path;
-    sfx_modules.push_back(sfx_module);
+    sfx_modules.push_back(file_path);
   }
 }
 

@@ -9,16 +9,16 @@ struct Options {
   unsigned max_check_size;
   // extract
   bool extract_ignore_errors;
-  unsigned extract_overwrite;
-  unsigned extract_separate_dir;
+  TriState extract_overwrite;
+  TriState extract_separate_dir;
   // update
   wstring update_arc_format_name;
   unsigned update_level;
   wstring update_method;
   bool update_solid;
   bool update_show_password;
-  bool update_encrypt_header;
-  unsigned update_sfx_module_idx;
+  TriState update_encrypt_header;
+  wstring update_sfx_module;
   wstring update_volume_size;
   bool update_ignore_errors;
   // panel mode

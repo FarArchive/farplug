@@ -36,9 +36,9 @@ public:
       format_idx = 0;
     }
     else {
-      vector<wstring> format_names;
+      Far::MenuItems format_names;
       for (unsigned i = 0; i < archives.size(); i++) {
-        format_names.push_back(archives[i].arc_chain.to_string());
+        format_names.add(archives[i].arc_chain.to_string());
       }
       format_idx = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), format_names);
       if (format_idx == -1)
@@ -150,25 +150,24 @@ public:
     if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
     ExtractOptions options;
     options.dst_dir = *dest_path;
-    options.move_enabled = archive.updatable();
-    options.move_files = move != 0 && options.move_enabled;
+    options.move_files = archive.updatable() ? (move ? triTrue : triFalse) : triUndef;
     options.delete_archive = false;
-    options.show_dialog = (op_mode & (OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
-    if (options.show_dialog && (op_mode & OPM_SILENT) && (op_mode & OPM_TOPLEVEL) == 0)
-      options.show_dialog = false;
+    bool show_dialog = (op_mode & (OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
+    if (show_dialog && (op_mode & OPM_SILENT) && (op_mode & OPM_TOPLEVEL) == 0)
+      show_dialog = false;
     if (op_mode & (OPM_FIND | OPM_QUICKVIEW))
       options.ignore_errors = true;
     else
       options.ignore_errors = g_options.extract_ignore_errors;
-    if (options.show_dialog) {
-      options.overwrite = static_cast<OverwriteOption>(g_options.extract_overwrite);
-      options.separate_dir = static_cast<TriState>(g_options.extract_separate_dir);
+    if (show_dialog) {
+      options.overwrite = g_options.extract_overwrite;
+      options.separate_dir = g_options.extract_separate_dir;
     }
     else {
-      options.overwrite = ooOverwrite;
+      options.overwrite = triTrue;
       options.separate_dir = triFalse;
     }
-    if (options.show_dialog) {
+    if (show_dialog) {
       if (!extract_dialog(options))
         FAIL(E_ABORT);
       if (options.dst_dir.empty())
@@ -201,7 +200,7 @@ public:
     ErrorLog error_log;
     archive.extract(src_dir_index, indices, options, error_log);
     if (!error_log.empty()) {
-      if (options.show_dialog)
+      if (show_dialog)
         show_error_log(error_log);
     }
     else {
@@ -220,27 +219,24 @@ public:
     ExtractOptions options;
     wstring dst_dir;
     options.dst_dir = Far::get_panel_dir(PANEL_PASSIVE);
-    options.move_enabled = false;
-    options.move_files = false;
+    options.move_files = triUndef;
     options.delete_archive = false;
-    options.show_dialog = true;
     options.ignore_errors = g_options.extract_ignore_errors;
-    options.overwrite = static_cast<OverwriteOption>(g_options.extract_overwrite);
-    options.separate_dir = static_cast<TriState>(g_options.extract_separate_dir);
-    if (options.show_dialog) {
-      if (!extract_dialog(options))
-        FAIL(E_ABORT);
-      dst_dir = options.dst_dir;
-      if (dst_dir.empty())
-        dst_dir = L".";
-      if (!is_absolute_path(dst_dir))
-        dst_dir = Far::get_absolute_path(dst_dir);
+    options.overwrite = g_options.extract_overwrite;
+    options.separate_dir = g_options.extract_separate_dir;
 
-      g_options.extract_ignore_errors = options.ignore_errors;
-      g_options.extract_overwrite = options.overwrite;
-      g_options.extract_separate_dir = options.separate_dir;
-      g_options.save();
-    }
+    if (!extract_dialog(options))
+      FAIL(E_ABORT);
+    dst_dir = options.dst_dir;
+    if (dst_dir.empty())
+      dst_dir = L".";
+    if (!is_absolute_path(dst_dir))
+      dst_dir = Far::get_absolute_path(options.dst_dir);
+
+    g_options.extract_ignore_errors = options.ignore_errors;
+    g_options.extract_overwrite = options.overwrite;
+    g_options.extract_separate_dir = options.separate_dir;
+    g_options.save();
 
     ErrorLog error_log;
     for (unsigned i = 0; i < file_list.size(); i++) {
@@ -366,7 +362,7 @@ public:
         options.arc_type = c_7z;
       else
         options.arc_type = arc_types.front();
-      options.sfx_module_idx = g_options.update_sfx_module_idx;
+      options.sfx_module = g_options.update_sfx_module;
       if (ArcAPI::formats().count(options.arc_type))
         options.arc_path += ArcAPI::formats().at(options.arc_type).default_extension();
 
@@ -374,7 +370,6 @@ public:
       options.method = g_options.update_method;
       options.solid = g_options.update_solid;
       options.encrypt = false;
-      options.encrypt_header_defined = true;
       options.encrypt_header = g_options.update_encrypt_header;
       options.volume_size = g_options.update_volume_size;
     }
@@ -385,7 +380,7 @@ public:
       options.method = archive.method;
       options.solid = archive.solid;
       options.encrypt = archive.encrypted;
-      options.encrypt_header_defined = false;
+      options.encrypt_header = triUndef;
       options.password = archive.password;
     }
     options.create_sfx = false;
@@ -409,7 +404,7 @@ public:
           FAIL(E_ABORT);
       }
       g_options.update_arc_format_name = ArcAPI::formats().at(options.arc_type).name;
-      g_options.update_sfx_module_idx = options.sfx_module_idx;
+      g_options.update_sfx_module = options.sfx_module;
       g_options.update_volume_size = options.volume_size;
       g_options.update_level = options.level;
       g_options.update_method = options.method;
@@ -482,7 +477,7 @@ public:
       options.arc_type = c_7z;
     else
       options.arc_type = arc_types.front();
-    options.sfx_module_idx = g_options.update_sfx_module_idx;
+    options.sfx_module = g_options.update_sfx_module;
     if (ArcAPI::formats().count(options.arc_type))
       options.arc_path += ArcAPI::formats().at(options.arc_type).default_extension();
 
@@ -492,7 +487,6 @@ public:
     options.show_password = g_options.update_show_password;
     options.encrypt = false;
     options.encrypt_header = g_options.update_encrypt_header;
-    options.encrypt_header_defined = true;
     options.create_sfx = false;
     options.enable_volumes = false;
     options.volume_size = g_options.update_volume_size;
@@ -514,7 +508,7 @@ public:
         FAIL(E_ABORT);
     }
     g_options.update_arc_format_name = ArcAPI::formats().at(options.arc_type).name;
-    g_options.update_sfx_module_idx = options.sfx_module_idx;
+    g_options.update_sfx_module = options.sfx_module;
     g_options.update_volume_size = options.volume_size;
     g_options.update_level = options.level;
     g_options.update_method = options.method;
@@ -588,11 +582,11 @@ public:
   }
 
   static void convert_to_sfx(const vector<wstring>& file_list) {
-    unsigned sfx_module_idx = g_options.update_sfx_module_idx;
-    if (!sfx_convert_dialog(sfx_module_idx))
+    wstring sfx_module = g_options.update_sfx_module;
+    if (!sfx_convert_dialog(sfx_module))
       FAIL(E_ABORT);
     for (unsigned i = 0; i < file_list.size(); i++) {
-      attach_sfx_module(file_list[i], sfx_module_idx);
+      attach_sfx_module(file_list[i], sfx_module);
     }
   }
 };
@@ -633,16 +627,16 @@ void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
 HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
   FAR_ERROR_HANDLER_BEGIN;
   if (OpenFrom == OPEN_PLUGINSMENU) {
-    vector<wstring> menu_items;
-    menu_items.push_back(Far::get_msg(MSG_MENU_OPEN));
-    menu_items.push_back(Far::get_msg(MSG_MENU_DETECT));
-    menu_items.push_back(Far::get_msg(MSG_MENU_CREATE));
-    menu_items.push_back(Far::get_msg(MSG_MENU_EXTRACT));
-    menu_items.push_back(Far::get_msg(MSG_MENU_TEST));
-    menu_items.push_back(Far::get_msg(MSG_MENU_SFX_CONVERT));
+    Far::MenuItems menu_items;
+    unsigned open_menu_id = menu_items.add(Far::get_msg(MSG_MENU_OPEN));
+    unsigned detect_menu_id = menu_items.add(Far::get_msg(MSG_MENU_DETECT));
+    unsigned create_menu_id = menu_items.add(Far::get_msg(MSG_MENU_CREATE));
+    unsigned extract_menu_id = menu_items.add(Far::get_msg(MSG_MENU_EXTRACT));
+    unsigned test_menu_id = menu_items.add(Far::get_msg(MSG_MENU_TEST));
+    unsigned sfx_convert_menu_id = menu_items.add(Far::get_msg(MSG_MENU_SFX_CONVERT));
     int item = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), menu_items);
-    if (item == 0 || item == 1) {
-      bool auto_detect = item == 0;
+    if (item == open_menu_id || item == detect_menu_id) {
+      bool auto_detect = item == open_menu_id;
       PanelInfo panel_info;
       if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
         return INVALID_HANDLE_VALUE;
@@ -656,16 +650,14 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
         }
         return INVALID_HANDLE_VALUE;
       }
-      if (panel_item.file_name == L"..")
-        return INVALID_HANDLE_VALUE;
       wstring dir = Far::get_panel_dir(PANEL_ACTIVE);
       wstring path = add_trailing_slash(dir) + panel_item.file_name;
       return new Plugin(path, auto_detect);
     }
-    else if (item == 2) {
+    else if (item == create_menu_id) {
       Plugin::create_archive();
     }
-    else if (item == 3 || item == 4 || item == 5) {
+    else if (item == extract_menu_id || item == test_menu_id || item == sfx_convert_menu_id) {
       PanelInfo panel_info;
       if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
         return INVALID_HANDLE_VALUE;
@@ -683,11 +675,11 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
       }
       if (file_list.empty())
         return INVALID_HANDLE_VALUE;
-      if (item == 3)
+      if (item == extract_menu_id)
         Plugin::bulk_extract(file_list);
-      else if (item == 4)
+      else if (item == test_menu_id)
         Plugin::bulk_test(file_list);
-      else if (item == 5) {
+      else if (item == sfx_convert_menu_id) {
         Plugin::convert_to_sfx(file_list);
       }
     }
@@ -787,8 +779,8 @@ int WINAPI DeleteFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int Ite
 
 int WINAPI ProcessHostFileW(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int OpMode) {
   FAR_ERROR_HANDLER_BEGIN;
-  vector<wstring> menu_items;
-  menu_items.push_back(Far::get_msg(MSG_TEST_MENU));
+  Far::MenuItems menu_items;
+  menu_items.add(Far::get_msg(MSG_TEST_MENU));
   int item = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), menu_items);
   if (item == 0)
     reinterpret_cast<Plugin*>(hPlugin)->test_files(PanelItem, ItemsNumber, OpMode);

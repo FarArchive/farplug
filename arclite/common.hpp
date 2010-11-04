@@ -2,22 +2,15 @@
 
 typedef ByteVector ArcType;
 
-enum OverwriteOption {
-  ooAsk = 0,
-  ooOverwrite = 1,
-  ooSkip = 2,
-};
-
 struct ExtractOptions {
   wstring dst_dir;
   bool ignore_errors;
-  OverwriteOption overwrite;
-  bool move_enabled;
-  bool move_files;
-  bool show_dialog;
+  TriState overwrite;
+  TriState move_files;
   wstring password;
   TriState separate_dir;
   bool delete_archive;
+  ExtractOptions();
 };
 
 struct UpdateOptions {
@@ -29,10 +22,9 @@ struct UpdateOptions {
   wstring password;
   bool show_password;
   bool encrypt;
-  bool encrypt_header;
-  bool encrypt_header_defined;
+  TriState encrypt_header;
   bool create_sfx;
-  unsigned sfx_module_idx;
+  wstring sfx_module;
   bool enable_volumes;
   wstring volume_size;
   bool move_files;
@@ -72,7 +64,5 @@ unsigned calc_percent(unsigned __int64 completed, unsigned __int64 total);
 unsigned __int64 get_module_version(const wstring& file_path);
 unsigned __int64 parse_size_string(const wstring& str);
 DWORD translate_seek_method(UInt32 seek_origin);
-
-void attach_sfx_module(const wstring& file_path, unsigned sfx_module_idx);
 
 wstring expand_macros(const wstring& text);

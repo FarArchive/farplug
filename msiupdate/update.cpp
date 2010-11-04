@@ -86,7 +86,7 @@ void show_changelog(unsigned build1, unsigned build2) {
     file.write(text.data() + pos2, static_cast<unsigned>((pos1 - pos2) * sizeof(wchar_t)));
   }
 
-  Far::viewer(temp_file.get_path(), L"Changelog");
+  Far::viewer(temp_file.get_path(), L"Changelog", VF_DISABLEHISTORY | VF_ENABLE_F6);
   Far::flush_screen();
 }
 

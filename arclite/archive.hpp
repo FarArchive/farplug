@@ -60,10 +60,10 @@ public:
   ArcTypes find_by_ext(const wstring& ext) const;
 };
 
-struct SfxModule {
-  wstring path;
+class SfxModules: public vector<wstring> {
+public:
+  unsigned find(const wstring& module) const;
 };
-typedef vector<SfxModule> SfxModules;
 
 class ArcAPI {
 private:
@@ -223,3 +223,5 @@ public:
 };
 
 IOutStream* get_simple_update_stream(const wstring& arc_path);
+
+void attach_sfx_module(const wstring& file_path, const wstring& sfx_module);

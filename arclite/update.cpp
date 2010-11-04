@@ -219,23 +219,20 @@ private:
   wstring file_path;
   unsigned __int64 start_offset;
 
-  void write_sfx_header(unsigned sfx_module_idx) {
-    const SfxModules& sfx_modules = ArcAPI::sfx();
-    CHECK(sfx_module_idx < sfx_modules.size());
-    wstring sfx_module_path = sfx_modules[sfx_module_idx].path;
-    File sfx_module(sfx_module_path, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0);
-    unsigned __int64 sfx_module_size = sfx_module.size();
+  void write_sfx_header(const wstring& sfx_module) {
+    File sfx_module_file(sfx_module, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0);
+    unsigned __int64 sfx_module_size = sfx_module_file.size();
     CHECK(sfx_module_size < 1024 * 1024);
     Buffer<char> buffer(static_cast<size_t>(sfx_module_size));
-    CHECK(sfx_module.read(buffer.data(), static_cast<unsigned>(buffer.size())) == sfx_module_size);
+    CHECK(sfx_module_file.read(buffer.data(), static_cast<unsigned>(buffer.size())) == sfx_module_size);
     CHECK(write(buffer.data(), static_cast<unsigned>(buffer.size())) == buffer.size());
     start_offset = buffer.size();
   }
 
 public:
-  SfxUpdateStream(const wstring& file_path, unsigned sfx_module_idx): file_path(file_path), start_offset(0) {
+  SfxUpdateStream(const wstring& file_path, const wstring& sfx_module): file_path(file_path), start_offset(0) {
     open(file_path, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
-    write_sfx_header(sfx_module_idx);
+    write_sfx_header(sfx_module);
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -730,9 +727,9 @@ void Archive::set_properties(IOutArchive* out_arc, const UpdateOptions& options)
         values.push_back(options.solid);
       }
       if (options.encrypt) {
-        if (options.encrypt_header_defined) {
+        if (options.encrypt_header != triUndef) {
           names.push_back(L"he");
-          values.push_back(options.encrypt_header);
+          values.push_back(options.encrypt_header == triTrue);
         }
       }
     }
@@ -842,7 +839,7 @@ void Archive::create(const wstring& src_dir, const vector<wstring>& file_names, 
   if (options.enable_volumes)
     stream_impl = new MultiVolumeUpdateStream(options.arc_path, parse_size_string(options.volume_size));
   else if (options.create_sfx && options.arc_type == c_7z)
-    stream_impl = new SfxUpdateStream(options.arc_path, options.sfx_module_idx);
+    stream_impl = new SfxUpdateStream(options.arc_path, options.sfx_module);
   else
     stream_impl = new SimpleUpdateStream(options.arc_path);
   ComObject<IOutStream> update_stream(stream_impl);

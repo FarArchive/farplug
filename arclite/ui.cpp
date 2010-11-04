@@ -260,10 +260,11 @@ private:
       options.dst_dir = get_text(dst_dir_ctrl_id);
       options.dst_dir = unquote(strip(options.dst_dir));
       options.ignore_errors = get_check(ignore_errors_ctrl_id);
-      if (get_check(oo_ask_ctrl_id)) options.overwrite = ooAsk;
-      else if (get_check(oo_overwrite_ctrl_id)) options.overwrite = ooOverwrite;
-      else options.overwrite = ooSkip;
-      options.move_files = get_check(move_files_ctrl_id);
+      if (get_check(oo_ask_ctrl_id)) options.overwrite = triUndef;
+      else if (get_check(oo_overwrite_ctrl_id)) options.overwrite = triTrue;
+      else options.overwrite = triFalse;
+      if (options.move_files != triUndef)
+        options.move_files = get_check3(move_files_ctrl_id);
       options.password = get_text(password_ctrl_id);
       options.separate_dir = get_check3(separate_dir_ctrl_id);
       options.delete_archive = get_check(delete_archive_ctrl_id);
@@ -289,14 +290,14 @@ public:
     label(Far::get_msg(MSG_EXTRACT_DLG_OO));
     new_line();
     spacer(2);
-    oo_ask_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OO_ASK), options.overwrite == ooAsk);
+    oo_ask_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OO_ASK), options.overwrite == triUndef);
     spacer(2);
-    oo_overwrite_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OO_OVERWRITE), options.overwrite == ooOverwrite);
+    oo_overwrite_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OO_OVERWRITE), options.overwrite == triTrue);
     spacer(2);
-    oo_skip_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OO_SKIP), options.overwrite == ooSkip);
+    oo_skip_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OO_SKIP), options.overwrite == triFalse);
     new_line();
 
-    move_files_ctrl_id = check_box(Far::get_msg(MSG_EXTRACT_DLG_MOVE_FILES), options.move_files, options.move_enabled ? 0 : DIF_DISABLE);
+    move_files_ctrl_id = check_box3(Far::get_msg(MSG_EXTRACT_DLG_MOVE_FILES), options.move_files, options.move_files == triUndef ? DIF_DISABLE : 0);
     new_line();
     separate_dir_ctrl_id = check_box3(Far::get_msg(MSG_EXTRACT_DLG_SEPARATE_DIR), options.separate_dir);
     new_line();
@@ -384,7 +385,7 @@ void show_error_log(const ErrorLog& error_log) {
     file.write(line.data(), static_cast<unsigned>(line.size()) * sizeof(wchar_t));
   }
 
-  Far::viewer(temp_file.get_path(), Far::get_msg(MSG_LOG_TITLE));
+  Far::viewer(temp_file.get_path(), Far::get_msg(MSG_LOG_TITLE), VF_DISABLEHISTORY | VF_ENABLE_F6);
 }
 
 bool operator==(const UpdateOptions& o1, const UpdateOptions& o2) {
@@ -410,7 +411,7 @@ bool operator==(const UpdateOptions& o1, const UpdateOptions& o2) {
       if (o1.password != o2.password || o1.show_password != o2.show_password)
         return false;
       if (is_7z) {
-        if (o1.encrypt_header != o2.encrypt_header || o1.encrypt_header_defined != o2.encrypt_header_defined)
+        if (o1.encrypt_header != o2.encrypt_header)
           return false;
       }
     }
@@ -420,7 +421,7 @@ bool operator==(const UpdateOptions& o1, const UpdateOptions& o2) {
     if (o1.create_sfx != o2.create_sfx)
       return false;
     if (is_sfx) {
-      if (o1.sfx_module_idx != o2.sfx_module_idx)
+      if (o1.sfx_module != o2.sfx_module)
         return false;
     }
   }
@@ -678,8 +679,7 @@ private:
       if (options.password.empty()) {
         FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_PASSWORD_IS_EMPTY));
       }
-      options.encrypt_header_defined = is_check_defined(encrypt_header_ctrl_id);
-      options.encrypt_header = get_check(encrypt_header_ctrl_id);
+      options.encrypt_header = get_check3(encrypt_header_ctrl_id);
     }
     else {
       options.password.clear();
@@ -688,8 +688,8 @@ private:
     if (new_arc) {
       options.create_sfx = get_check(create_sfx_ctrl_id);
       if (options.create_sfx) {
-        options.sfx_module_idx = get_list_pos(sfx_module_ctrl_id);
-        if (options.sfx_module_idx >= ArcAPI::sfx().size()) {
+        options.sfx_module = get_text(sfx_module_ctrl_id);
+        if (options.sfx_module.empty()) {
           FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_SFX_MODULE));
         }
       }
@@ -740,7 +740,7 @@ private:
     set_check(solid_ctrl_id, options.solid);
 
     set_check(encrypt_ctrl_id, options.encrypt);
-    set_check3(encrypt_header_ctrl_id, options.encrypt_header_defined ? (options.encrypt_header ? triTrue : triFalse) : triUndef);
+    set_check3(encrypt_header_ctrl_id, options.encrypt_header);
     set_check(show_password_ctrl_id, options.show_password);
     set_text(password_ctrl_id, options.password);
     set_text(password_verify_ctrl_id, options.password);
@@ -748,7 +748,7 @@ private:
 
     if (new_arc) {
       set_check(create_sfx_ctrl_id, options.create_sfx);
-      set_list_pos(sfx_module_ctrl_id, options.sfx_module_idx);
+      set_list_pos(sfx_module_ctrl_id, ArcAPI::sfx().find(options.sfx_module));
 
       set_check(enable_volumes_ctrl_id, options.enable_volumes);
       set_text(volume_size_ctrl_id, options.volume_size);
@@ -982,7 +982,7 @@ public:
 
     encrypt_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT), options.encrypt);
     spacer(2);
-    encrypt_header_ctrl_id = check_box3(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT_HEADER), options.encrypt_header, options.encrypt_header_defined);
+    encrypt_header_ctrl_id = check_box3(Far::get_msg(MSG_UPDATE_DLG_ENCRYPT_HEADER), options.encrypt_header);
     spacer(2);
     show_password_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_SHOW_PASSWORD), options.show_password);
     new_line();
@@ -1003,10 +1003,12 @@ public:
       new_line();
       vector<wstring> sfx_module_list;
       const SfxModules& sfx_modules = ArcAPI::sfx();
-      for_each(sfx_modules.begin(), sfx_modules.end(), [&] (const SfxModule& sfx_module) {
-        sfx_module_list.push_back(sfx_module.path);
+      sfx_module_list.reserve(sfx_modules.size() + 1);
+      for_each(sfx_modules.begin(), sfx_modules.end(), [&] (const wstring& sfx_module) {
+        sfx_module_list.push_back(sfx_module);
       });
-      sfx_module_ctrl_id = combo_box(sfx_module_list, options.sfx_module_idx, c_client_xs, DIF_DROPDOWNLIST);
+      sfx_module_list.push_back(wstring());
+      sfx_module_ctrl_id = combo_box(sfx_module_list, sfx_modules.find(options.sfx_module), c_client_xs, DIF_DROPDOWNLIST | DIF_EDITPATH);
       new_line();
       separator();
       new_line();

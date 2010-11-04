@@ -45,7 +45,12 @@ wstring get_msg(int id);
 
 unsigned get_optimal_msg_width();
 int message(const wstring& msg, int button_cnt, DWORD flags = 0);
-int menu(const wstring& title, const vector<wstring>& items, const wchar_t* help = NULL);
+
+class MenuItems: public vector<wstring> {
+public:
+  unsigned add(const wstring& item);
+};
+int menu(const wstring& title, const MenuItems& items, const wchar_t* help = NULL);
 
 wstring get_progress_bar_str(unsigned width, unsigned __int64 completed, unsigned __int64 total);
 void set_progress_state(TBPFLAG state);
@@ -60,7 +65,8 @@ HANDLE save_screen();
 void restore_screen(HANDLE h_scr);
 void flush_screen();
 
-int viewer(const wstring& file_name, const wstring& title);
+int viewer(const wstring& file_name, const wstring& title, DWORD flags = 0);
+int editor(const wstring& file_name, const wstring& title, DWORD flags = 0);
 
 void update_panel(HANDLE h_panel, bool keep_selection);
 void set_view_mode(HANDLE h_panel, unsigned view_mode);
@@ -179,7 +185,6 @@ public:
   wstring get_text(unsigned ctrl_id) const;
   void set_text(unsigned ctrl_id, const wstring& text);
   bool get_check(unsigned ctrl_id) const;
-  bool is_check_defined(unsigned ctrl_id) const;
   void set_check(unsigned ctrl_id, bool check = true);
   TriState get_check3(unsigned ctrl_id) const;
   void set_check3(unsigned ctrl_id, TriState check);

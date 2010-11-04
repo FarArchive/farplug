@@ -56,7 +56,7 @@ void append_file(const wstring& src_path, File& dst_file, AttachSfxModuleProgres
   }
 }
 
-void attach_sfx_module(const wstring& file_path, unsigned sfx_module_idx) {
+void attach_sfx_module(const wstring& file_path, const wstring& sfx_module) {
   AttachSfxModuleProgress progress(file_path);
 
   {
@@ -67,17 +67,13 @@ void attach_sfx_module(const wstring& file_path, unsigned sfx_module_idx) {
       FAIL_MSG(Far::get_msg(MSG_ERROR_SFX_CONVERT));
   }
 
-  const SfxModules& sfx_modules = ArcAPI::sfx();
-  CHECK(sfx_module_idx < sfx_modules.size());
-  wstring sfx_module_path = sfx_modules[sfx_module_idx].path;
-
   FindData file_data = get_find_data(file_path);
   progress.set_total(file_data.size());
 
   wstring dst_path = file_path + c_sfx_ext;
   try {
     File dst_file(dst_path, FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, CREATE_NEW, FILE_ATTRIBUTE_NORMAL);
-    append_file(sfx_module_path, dst_file, progress);
+    append_file(sfx_module, dst_file, progress);
     append_file(file_path, dst_file, progress);
     CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), file_data.dwFileAttributes));
     dst_file.set_time(file_data.ftCreationTime, file_data.ftLastAccessTime, file_data.ftLastWriteTime);
@@ -95,7 +91,7 @@ private:
     c_client_xs = 69
   };
 
-  unsigned& sfx_module_idx;
+  wstring& sfx_module;
 
   int sfx_module_ctrl_id;
   int ok_ctrl_id;
@@ -103,8 +99,8 @@ private:
 
   LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
     if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
-      sfx_module_idx = get_list_pos(sfx_module_ctrl_id);
-      if (sfx_module_idx >= ArcAPI::sfx().size()) {
+      sfx_module = get_text(sfx_module_ctrl_id);
+      if (sfx_module.empty()) {
         FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_SFX_MODULE));
       }
     }
@@ -112,7 +108,7 @@ private:
   }
 
 public:
-  SfxConvertDialog(unsigned& sfx_module_idx): Far::Dialog(Far::get_msg(MSG_SFX_CONVERT_DLG_TITLE), c_client_xs), sfx_module_idx(sfx_module_idx) {
+  SfxConvertDialog(wstring& sfx_module): Far::Dialog(Far::get_msg(MSG_SFX_CONVERT_DLG_TITLE), c_client_xs), sfx_module(sfx_module) {
   }
 
   bool show() {
@@ -120,10 +116,12 @@ public:
     new_line();
     vector<wstring> sfx_module_list;
     const SfxModules& sfx_modules = ArcAPI::sfx();
-    for_each(sfx_modules.begin(), sfx_modules.end(), [&] (const SfxModule& sfx_module) {
-      sfx_module_list.push_back(sfx_module.path);
+    sfx_module_list.reserve(sfx_modules.size() + 1);
+    for_each(sfx_modules.begin(), sfx_modules.end(), [&] (const wstring& sfx_module) {
+      sfx_module_list.push_back(sfx_module);
     });
-    sfx_module_ctrl_id = combo_box(sfx_module_list, sfx_module_idx, c_client_xs, DIF_DROPDOWNLIST);
+    sfx_module_list.push_back(wstring());
+    sfx_module_ctrl_id = combo_box(sfx_module_list, sfx_modules.find(sfx_module), c_client_xs, DIF_DROPDOWNLIST | DIF_EDITPATH);
     new_line();
 
     separator();
@@ -138,6 +136,6 @@ public:
   }
 };
 
-bool sfx_convert_dialog(unsigned& sfx_module_idx) {
-  return SfxConvertDialog(sfx_module_idx).show();
+bool sfx_convert_dialog(wstring& sfx_module) {
+  return SfxConvertDialog(sfx_module).show();
 }

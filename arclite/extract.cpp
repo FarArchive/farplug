@@ -6,6 +6,14 @@
 #include "ui.hpp"
 #include "archive.hpp"
 
+ExtractOptions::ExtractOptions():
+  ignore_errors(false),
+  overwrite(triTrue),
+  move_files(triUndef),
+  separate_dir(triFalse),
+  delete_archive(false)
+{}
+
 bool retry_or_ignore_error(const wstring& path, const Error& error, bool& ignore_errors, ErrorLog& error_log, ProgressMonitor& progress) {
   if (error.code == E_ABORT)
     throw error;
@@ -382,14 +390,14 @@ private:
   wstring dst_dir;
   const FileList& file_list;
   wstring& password;
-  OverwriteOption& oo;
+  TriState& overwrite_option;
   bool& ignore_errors;
   ErrorLog& error_log;
   FileWriteCache& cache;
   ExtractProgress& progress;
 
 public:
-  ArchiveExtractor(UInt32 src_dir_index, const wstring& dst_dir, const FileList& file_list, wstring& password, OverwriteOption& oo, bool& ignore_errors, ErrorLog& error_log, FileWriteCache& cache, ExtractProgress& progress): src_dir_index(src_dir_index), dst_dir(dst_dir), file_list(file_list), password(password), oo(oo), ignore_errors(ignore_errors), error_log(error_log), cache(cache), progress(progress) {
+  ArchiveExtractor(UInt32 src_dir_index, const wstring& dst_dir, const FileList& file_list, wstring& password, TriState& overwrite_option, bool& ignore_errors, ErrorLog& error_log, FileWriteCache& cache, ExtractProgress& progress): src_dir_index(src_dir_index), dst_dir(dst_dir), file_list(file_list), password(password), overwrite_option(overwrite_option), ignore_errors(ignore_errors), error_log(error_log), cache(cache), progress(progress) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -436,7 +444,7 @@ public:
     if (h_find != INVALID_HANDLE_VALUE) {
       FindClose(h_find);
       bool overwrite;
-      if (oo == ooAsk) {
+      if (overwrite_option == triUndef) {
         FindData src_file_info = file_info.convert();
         ProgressSuspend ps(progress);
         OverwriteAction oa = overwrite_dialog(file_path, src_file_info, dst_file_info);
@@ -444,20 +452,20 @@ public:
           overwrite = true;
         else if (oa == oaYesAll) {
           overwrite = true;
-          oo = ooOverwrite;
+          overwrite_option = triTrue;
         }
         else if (oa == oaNo)
           overwrite = false;
         else if (oa == oaNoAll) {
           overwrite = false;
-          oo = ooSkip;
+          overwrite_option = triFalse;
         }
         else if (oa == oaCancel)
           return E_ABORT;
       }
-      else if (oo == ooOverwrite)
+      else if (overwrite_option == triTrue)
         overwrite = true;
-      else if (oo == ooSkip)
+      else if (overwrite_option == triFalse)
         overwrite = false;
 
       if (overwrite) {
@@ -638,7 +646,7 @@ void Archive::set_dir_attr(const FileIndexRange& index_range, const wstring& par
 
 void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log) {
   bool ignore_errors = options.ignore_errors;
-  OverwriteOption overwrite_option = options.overwrite;
+  TriState overwrite_option = options.overwrite;
 
   prepare_dst_dir(options.dst_dir);
 

@@ -51,7 +51,12 @@ int message(const wstring& msg, int button_cnt, DWORD flags) {
   return g_far.Message(g_far.ModuleNumber, flags | FMSG_ALLINONE, NULL, reinterpret_cast<const wchar_t* const*>(msg.c_str()), 0, button_cnt);
 }
 
-int menu(const wstring& title, const vector<wstring>& items, const wchar_t* help) {
+unsigned MenuItems::add(const wstring& item) {
+  push_back(item);
+  return size() - 1;
+}
+
+int menu(const wstring& title, const MenuItems& items, const wchar_t* help) {
   vector<FarMenuItem> menu_items;
   menu_items.reserve(items.size());
   FarMenuItem mi;
@@ -121,8 +126,12 @@ void flush_screen() {
   g_far.AdvControl(g_far.ModuleNumber, ACTL_REDRAWALL, 0);
 }
 
-int viewer(const wstring& file_name, const wstring& title) {
-  return g_far.Viewer(file_name.c_str(), title.c_str(), 0, 0, -1, -1, VF_DISABLEHISTORY | VF_ENABLE_F6, CP_UNICODE);
+int viewer(const wstring& file_name, const wstring& title, DWORD flags) {
+  return g_far.Viewer(file_name.c_str(), title.c_str(), 0, 0, -1, -1, flags, CP_AUTODETECT);
+}
+
+int editor(const wstring& file_name, const wstring& title, DWORD flags) {
+  return g_far.Editor(file_name.c_str(), title.c_str(), 0, 0, -1, -1, flags, 1, 1, CP_AUTODETECT);
 }
 
 void update_panel(HANDLE h_panel, bool keep_selection) {
@@ -573,10 +582,6 @@ void Dialog::set_text(unsigned ctrl_id, const wstring& text) {
 
 bool Dialog::get_check(unsigned ctrl_id) const {
   return DlgItem_GetCheck(g_far, h_dlg, ctrl_id) == BSTATE_CHECKED;
-}
-
-bool Dialog::is_check_defined(unsigned ctrl_id) const {
-  return DlgItem_GetCheck(g_far, h_dlg, ctrl_id) != BSTATE_3STATE;
 }
 
 void Dialog::set_check(unsigned ctrl_id, bool check) {

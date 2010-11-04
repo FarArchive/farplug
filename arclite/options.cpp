@@ -40,6 +40,14 @@ public:
       return def_value;
   }
 
+  TriState get_tri_state(const wchar_t* name, TriState def_value) {
+    unsigned value;
+    if (query_int_nt(value, name))
+      return static_cast<TriState>(value);
+    else
+      return def_value;
+  }
+
   void set_int(const wchar_t* name, unsigned value, unsigned def_value) {
     if (value == def_value)
       delete_value_nt(name);
@@ -66,6 +74,13 @@ public:
       delete_value_nt(name);
     else
       set_binary_nt(name, value.data(), static_cast<unsigned>(value.size()));
+  }
+
+  void set_tri_state(const wchar_t* name, TriState value, TriState def_value) {
+    if (value == def_value)
+      delete_value_nt(name);
+    else
+      set_int_nt(name, static_cast<unsigned>(value));
   }
 };
 
@@ -100,7 +115,7 @@ const wchar_t* c_param_update_method = L"update_method";
 const wchar_t* c_param_update_solid = L"update_solid";
 const wchar_t* c_param_update_show_password = L"update_show_password";
 const wchar_t* c_param_update_encrypt_header = L"update_encrypt_header";
-const wchar_t* c_param_update_sfx_module_idx = L"update_sfx_module_idx";
+const wchar_t* c_param_update_sfx_module = L"update_sfx_module";
 const wchar_t* c_param_update_volume_size = L"update_volume_size";
 const wchar_t* c_param_update_ignore_errors = L"update_ignore_errors";
 const wchar_t* c_param_panel_view_mode = L"panel_view_mode";
@@ -116,15 +131,15 @@ const bool c_def_handle_commands = true;
 const wchar_t* c_def_plugin_prefix = L"arc";
 const unsigned c_def_max_check_size = 1 << 20;
 const bool c_def_extract_ignore_errors = false;
-const unsigned c_def_extract_overwrite = 0;
-const unsigned c_def_extract_separate_dir = 2;
+const TriState c_def_extract_overwrite = triUndef;
+const TriState c_def_extract_separate_dir = triUndef;
 const wchar_t* c_def_update_arc_format_name = L"7z";
 const unsigned c_def_update_level = 5;
 const wchar_t* c_def_update_method = L"LZMA";
 const bool c_def_update_solid = true;
 const bool c_def_update_show_password = false;
-const bool c_def_update_encrypt_header = true;
-const unsigned c_def_update_sfx_module_idx = 0;
+const TriState c_def_update_encrypt_header = triUndef;
+const wchar_t* c_def_update_sfx_module = L"";
 const wchar_t* c_def_update_volume_size = L"";
 const bool c_def_update_ignore_errors = false;
 const unsigned c_def_panel_view_mode = 2;
@@ -143,15 +158,15 @@ void Options::load() {
   plugin_prefix = key.get_str(c_param_plugin_prefix, c_def_plugin_prefix);
   max_check_size = key.get_int(c_param_max_check_size, c_def_max_check_size);
   extract_ignore_errors = key.get_bool(c_param_extract_ignore_errors, c_def_extract_ignore_errors);
-  extract_overwrite = key.get_int(c_param_extract_overwrite, c_def_extract_overwrite);
-  extract_separate_dir = key.get_int(c_param_extract_separate_dir, c_def_extract_separate_dir);
+  extract_overwrite = key.get_tri_state(c_param_extract_overwrite, c_def_extract_overwrite);
+  extract_separate_dir = key.get_tri_state(c_param_extract_separate_dir, c_def_extract_separate_dir);
   update_arc_format_name = key.get_str(c_param_update_arc_format_name, c_def_update_arc_format_name);
   update_level = key.get_int(c_param_update_level, c_def_update_level);
   update_method = key.get_str(c_param_update_method, c_def_update_method);
   update_solid = key.get_bool(c_param_update_solid, c_def_update_solid);
   update_show_password = key.get_bool(c_param_update_show_password, c_def_update_show_password);
-  update_encrypt_header = key.get_bool(c_param_update_encrypt_header, c_def_update_encrypt_header);
-  update_sfx_module_idx = key.get_int(c_param_update_sfx_module_idx, c_def_update_sfx_module_idx);
+  update_encrypt_header = key.get_tri_state(c_param_update_encrypt_header, c_def_update_encrypt_header);
+  update_sfx_module = key.get_str(c_param_update_sfx_module, c_def_update_sfx_module);
   update_volume_size = key.get_str(c_param_update_volume_size, c_def_update_volume_size);
   update_ignore_errors = key.get_bool(c_param_update_ignore_errors, c_def_update_ignore_errors);
   panel_view_mode = key.get_int(c_param_panel_view_mode, c_def_panel_view_mode);
@@ -171,15 +186,15 @@ void Options::save() const {
   key.set_str(c_param_plugin_prefix, plugin_prefix, c_def_plugin_prefix);
   key.set_int(c_param_max_check_size, max_check_size, c_def_max_check_size);
   key.set_bool(c_param_extract_ignore_errors, extract_ignore_errors, c_def_extract_ignore_errors);
-  key.set_int(c_param_extract_overwrite, extract_overwrite, c_def_extract_overwrite);
-  key.set_int(c_param_extract_separate_dir, extract_separate_dir, c_def_extract_separate_dir);
+  key.set_tri_state(c_param_extract_overwrite, extract_overwrite, c_def_extract_overwrite);
+  key.set_tri_state(c_param_extract_separate_dir, extract_separate_dir, c_def_extract_separate_dir);
   key.set_str(c_param_update_arc_format_name, update_arc_format_name, c_def_update_arc_format_name);
   key.set_int(c_param_update_level, update_level, c_def_update_level);
   key.set_str(c_param_update_method, update_method, c_def_update_method);
   key.set_bool(c_param_update_solid, update_solid, c_def_update_solid);
   key.set_bool(c_param_update_show_password, update_show_password, c_def_update_show_password);
-  key.set_bool(c_param_update_encrypt_header, update_encrypt_header, c_def_update_encrypt_header);
-  key.set_int(c_param_update_sfx_module_idx, update_sfx_module_idx, c_def_update_sfx_module_idx);
+  key.set_tri_state(c_param_update_encrypt_header, update_encrypt_header, c_def_update_encrypt_header);
+  key.set_str(c_param_update_sfx_module, update_sfx_module, c_def_update_sfx_module);
   key.set_str(c_param_update_volume_size, update_volume_size, c_def_update_volume_size);
   key.set_bool(c_param_update_ignore_errors, update_ignore_errors, c_def_update_ignore_errors);
   key.set_int(c_param_panel_view_mode, panel_view_mode, c_def_panel_view_mode);
@@ -202,7 +217,7 @@ const wchar_t* c_param_profile_encrypt = L"encrypt";
 const wchar_t* c_param_profile_encrypt_header = L"encrypt_header";
 const wchar_t* c_param_profile_encrypt_header_defined = L"encrypt_header_defined";
 const wchar_t* c_param_profile_create_sfx = L"create_sfx";
-const wchar_t* c_param_profile_sfx_module_idx = L"sfx_module_idx";
+const wchar_t* c_param_profile_sfx_module = L"sfx_module";
 const wchar_t* c_param_profile_enable_volumes = L"enable_volumes";
 const wchar_t* c_param_profile_volume_size = L"volume_size";
 const wchar_t* c_param_profile_move_files = L"move_files";
@@ -217,10 +232,9 @@ const bool c_def_profile_solid = true;
 const wchar_t* c_def_profile_password = L"";
 const bool c_def_profile_show_password = false;
 const bool c_def_profile_encrypt = false;
-const bool c_def_profile_encrypt_header = false;
-const bool c_def_profile_encrypt_header_defined = false;
+const TriState c_def_profile_encrypt_header = triUndef;
 const bool c_def_profile_create_sfx = false;
-const unsigned c_def_profile_sfx_module_idx = 0;
+const wchar_t* c_def_profile_sfx_module = L"";
 const bool c_def_profile_enable_volumes = false;
 const wchar_t* c_def_profile_volume_size = L"";
 const bool c_def_profile_move_files = false;
@@ -237,9 +251,8 @@ UpdateOptions::UpdateOptions():
   show_password(c_def_profile_show_password),
   encrypt(c_def_profile_encrypt),
   encrypt_header(c_def_profile_encrypt_header),
-  encrypt_header_defined(c_def_profile_encrypt_header_defined),
   create_sfx(c_def_profile_create_sfx),
-  sfx_module_idx(c_def_profile_sfx_module_idx),
+  sfx_module(c_def_profile_sfx_module),
   enable_volumes(c_def_profile_enable_volumes),
   volume_size(c_def_profile_volume_size),
   move_files(c_def_profile_move_files),
@@ -265,10 +278,9 @@ void UpdateProfiles::load() {
       GET_VALUE(password, str);
       GET_VALUE(show_password, bool);
       GET_VALUE(encrypt, bool);
-      GET_VALUE(encrypt_header, bool);
-      GET_VALUE(encrypt_header_defined, bool);
+      GET_VALUE(encrypt_header, tri_state);
       GET_VALUE(create_sfx, bool);
-      GET_VALUE(sfx_module_idx, int);
+      GET_VALUE(sfx_module, str);
       GET_VALUE(enable_volumes, bool);
       GET_VALUE(volume_size, str);
       GET_VALUE(move_files, bool);
@@ -299,10 +311,9 @@ void UpdateProfiles::save() const {
     SET_VALUE(password, str);
     SET_VALUE(show_password, bool);
     SET_VALUE(encrypt, bool);
-    SET_VALUE(encrypt_header, bool);
-    SET_VALUE(encrypt_header_defined, bool);
+    SET_VALUE(encrypt_header, tri_state);
     SET_VALUE(create_sfx, bool);
-    SET_VALUE(sfx_module_idx, int);
+    SET_VALUE(sfx_module, str);
     SET_VALUE(enable_volumes, bool);
     SET_VALUE(volume_size, str);
     SET_VALUE(move_files, bool);
