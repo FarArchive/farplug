@@ -209,7 +209,7 @@ public:
         archive.delete_archive();
         Far::close_plugin(this, archive.arc_dir());
       }
-      else if (options.move_files)
+      else if (options.move_files == triTrue)
         archive.delete_files(indices);
       Far::progress_notify();
     }
