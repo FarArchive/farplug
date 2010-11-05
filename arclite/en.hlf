@@ -24,9 +24,14 @@ that is a part of ~7-Zip~@http://7-zip.org@ project.
 $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #Extract archive#
 
-	Extract entire archive by selecting it and pressing #Shift-F2#.
+	Extract single archive by selecting it and pressing #Shift-F2#.
 	Extract individual files by opening archive using Ctrl+PgDn key,
 selecting files and pressing #F5#.
+	Extract multiple archives by selecting them and executing #Extract archive(s)#
+from plugin menu (#F11#).
+
+	Extraction process can be interrupted by pressing #Escape#, set to low priority by
+pressing #B# and paused by pressing #P#.
 
 	"Extract files" dialog allows you to specify extract path and parameters.
 
@@ -52,11 +57,15 @@ after successful extraction.
 $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #Create and update archive#
 
-	In order to create an archive select files and press #Shift-F1#.
+	In order to create an archive select files and press #Shift-F1# or select #Create archive#
+from plugin menu (#F11#).
 	In order to add files to existing archive open it using #Ctrl-PgDn#,
 selected needed files on disk and press #F5#.
 
-	"Create archive" allows you to specify archive path and various archival parameters.
+	Archival process can be interrupted by pressing #Escape#, set to low priority by
+pressing #B# and paused by pressing #P#.
+
+	"Create archive" dialog allows you to specify archive path and various archival parameters.
 Reduced version of this dialog is used when updating existing archives.
 
 	#Profile# - Select named collection of archival settings. #Create# button creates new profile using current settings.

@@ -93,10 +93,8 @@ private:
 
   virtual void do_update_ui() {
     const unsigned c_width = 60;
-    wostringstream st;
-    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
 
-    unsigned extract_percent = calc_percent(extract_completed, extract_total);
+    percent_done = calc_percent(extract_completed, extract_total);
 
     unsigned __int64 extract_speed;
     if (time_elapsed() == 0)
@@ -110,26 +108,19 @@ private:
     unsigned cache_stored_percent = calc_percent(cache_stored, cache_total);
     unsigned cache_written_percent = calc_percent(cache_written, cache_total);
 
-    st << Far::get_msg(MSG_PROGRESS_EXTRACT) << L'\n';
+    wostringstream st;
     st << fit_str(extract_file_path, c_width) << L'\n';
     st << setw(7) << format_data_size(extract_completed, get_size_suffixes()) << L" / " << format_data_size(extract_total, get_size_suffixes()) << L" @ " << setw(9) << format_data_size(extract_speed, get_speed_suffixes()) << L'\n';
-    st << Far::get_progress_bar_str(c_width, extract_percent, 100) << L'\n';
+    st << Far::get_progress_bar_str(c_width, percent_done, 100) << L'\n';
     st << L"\x1\n";
-
     st << fit_str(cache_file_path, c_width) << L'\n';
     st << L"(" << format_data_size(cache_stored, get_size_suffixes()) << L" - " << format_data_size(cache_written, get_size_suffixes()) << L") / " << format_data_size(cache_total, get_size_suffixes()) << L'\n';
     st << get_progress_bar_str(c_width, cache_written_percent, cache_stored_percent) << L'\n';
-
-    Far::message(st.str(), 0, FMSG_LEFTALIGN);
-
-    Far::set_progress_state(TBPF_NORMAL);
-    Far::set_progress_value(extract_percent, 100);
-
-    SetConsoleTitleW((L"{" + int_to_str(extract_percent) + L"%} " + Far::get_msg(MSG_PROGRESS_EXTRACT)).c_str());
+    progress_text = st.str();
   }
 
 public:
-  ExtractProgress(): ProgressMonitor(true), extract_completed(0), extract_total(0), cache_stored(0), cache_written(0), cache_total(0) {
+  ExtractProgress(): ProgressMonitor(Far::get_msg(MSG_PROGRESS_EXTRACT)), extract_completed(0), extract_total(0), cache_stored(0), cache_written(0), cache_total(0) {
   }
 
   void update_extract_file(const wstring& file_path) {
@@ -541,20 +532,12 @@ private:
   virtual void do_update_ui() {
     const unsigned c_width = 60;
     wostringstream st;
-    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-
-    st << Far::get_msg(MSG_PROGRESS_CREATE_DIRS) << L'\n';
     st << left << setw(c_width) << fit_str(*file_path, c_width) << L'\n';
-
-    Far::message(st.str(), 0, FMSG_LEFTALIGN);
-
-    Far::set_progress_state(TBPF_INDETERMINATE);
-
-    SetConsoleTitleW(Far::get_msg(MSG_PROGRESS_CREATE_DIRS).c_str());
+    progress_text = st.str();
   }
 
 public:
-  PrepareExtractProgress(): ProgressMonitor(true) {
+  PrepareExtractProgress(): ProgressMonitor(Far::get_msg(MSG_PROGRESS_CREATE_DIRS), false) {
   }
   void update(const wstring& file_path) {
     this->file_path = &file_path;
@@ -599,19 +582,12 @@ private:
   virtual void do_update_ui() {
     const unsigned c_width = 60;
     wostringstream st;
-    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-
-    st << Far::get_msg(MSG_PROGRESS_SET_ATTR) << L'\n';
     st << left << setw(c_width) << fit_str(*file_path, c_width) << L'\n';
-    Far::message(st.str(), 0, FMSG_LEFTALIGN);
-
-    Far::set_progress_state(TBPF_INDETERMINATE);
-
-    SetConsoleTitleW(Far::get_msg(MSG_PROGRESS_SET_ATTR).c_str());
+    progress_text = st.str();
   }
 
 public:
-  SetDirAttrProgress(): ProgressMonitor(true) {
+  SetDirAttrProgress(): ProgressMonitor(Far::get_msg(MSG_PROGRESS_SET_ATTR), false) {
   }
   void update(const wstring& file_path) {
     this->file_path = &file_path;

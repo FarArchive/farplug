@@ -10,18 +10,24 @@ private:
   unsigned __int64 time_freq;
   unsigned __int64 time_total;
   unsigned __int64 time_update;
+  bool paused;
+  bool low_priority;
+  DWORD initial_priority;
   bool confirm_esc;
   void update_time();
   void discard_time();
+  void display();
 protected:
+  wstring progress_title;
+  wstring progress_text;
+  bool progress_known;
+  unsigned percent_done;
   virtual void do_update_ui() = 0;
-  virtual void do_process_key(const KEY_EVENT_RECORD& ket_event) {
-  }
 protected:
   bool is_single_key(const KEY_EVENT_RECORD& key_event);
   void handle_esc();
 public:
-  ProgressMonitor(bool lazy = true);
+  ProgressMonitor(const wstring& progress_title, bool progress_known = true, bool lazy = true);
   virtual ~ProgressMonitor();
   void update_ui(bool force = false);
   void clean();

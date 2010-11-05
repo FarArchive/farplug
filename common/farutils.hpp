@@ -44,7 +44,7 @@ const wchar_t* msg_ptr(int id);
 wstring get_msg(int id);
 
 unsigned get_optimal_msg_width();
-int message(const wstring& msg, int button_cnt, DWORD flags = 0);
+int message(const wstring& msg, int button_cnt = 0, DWORD flags = 0);
 
 class MenuItems: public vector<wstring> {
 public:

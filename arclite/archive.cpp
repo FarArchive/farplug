@@ -317,20 +317,13 @@ void Archive::make_index() {
     UInt32 total;
     virtual void do_update_ui() {
       wostringstream st;
-      st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
       st << completed << L" / " << total << L'\n';
       st << Far::get_progress_bar_str(60, completed, total) << L'\n';
-      Far::message(st.str(), 0, FMSG_LEFTALIGN);
-
-      unsigned percent = calc_percent(completed, total);
-
-      Far::set_progress_state(TBPF_NORMAL);
-      Far::set_progress_value(percent, 100);
-
-      SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(MSG_PROGRESS_OPEN)).c_str());
+      progress_text = st.str();
+      percent_done = calc_percent(completed, total);
     }
   public:
-    Progress(): completed(0), total(0) {
+    Progress(): ProgressMonitor(Far::get_msg(MSG_PROGRESS_OPEN)), completed(0), total(0) {
     }
     void update(UInt32 completed, UInt32 total) {
       this->completed = completed;

@@ -17,10 +17,8 @@ private:
   unsigned __int64 total;
   virtual void do_update_ui() {
     const unsigned c_width = 60;
-    wostringstream st;
-    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
 
-    unsigned percent = calc_percent(completed, total);
+    percent_done = calc_percent(completed, total);
 
     unsigned __int64 speed;
     if (time_elapsed() == 0)
@@ -28,21 +26,15 @@ private:
     else
       speed = round(static_cast<double>(completed) / time_elapsed() * ticks_per_sec());
 
-    st << Far::get_msg(MSG_PROGRESS_TEST) << L'\n';
+    wostringstream st;
     st << fit_str(file_path, c_width) << L'\n';
     st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L" @ " << setw(9) << format_data_size(speed, get_speed_suffixes()) << L'\n';
-    st << Far::get_progress_bar_str(c_width, percent, 100) << L'\n';
-
-    Far::message(st.str(), 0, FMSG_LEFTALIGN);
-
-    Far::set_progress_state(TBPF_NORMAL);
-    Far::set_progress_value(percent, 100);
-
-    SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(MSG_PROGRESS_TEST)).c_str());
+    st << Far::get_progress_bar_str(c_width, percent_done, 100) << L'\n';
+    progress_text = st.str();
   }
 
 public:
-  ArchiveTester(UInt32 src_dir_index, const FileList& file_list, wstring& password): ProgressMonitor(true), src_dir_index(src_dir_index), file_list(file_list), password(password), completed(0), total(0) {
+  ArchiveTester(UInt32 src_dir_index, const FileList& file_list, wstring& password): ProgressMonitor(Far::get_msg(MSG_PROGRESS_TEST)), src_dir_index(src_dir_index), file_list(file_list), password(password), completed(0), total(0) {
   }
 
   UNKNOWN_IMPL_BEGIN

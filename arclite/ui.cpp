@@ -11,7 +11,7 @@ wstring get_error_dlg_title() {
   return Far::get_msg(MSG_PLUGIN_NAME);
 }
 
-ProgressMonitor::ProgressMonitor(bool lazy): h_scr(nullptr) {
+ProgressMonitor::ProgressMonitor(const wstring& progress_title, bool progress_known, bool lazy): progress_title(progress_title), progress_known(progress_known), h_scr(nullptr), percent_done(0), paused(false), low_priority(false) {
   QueryPerformanceCounter(reinterpret_cast<PLARGE_INTEGER>(&time_cnt));
   QueryPerformanceFrequency(reinterpret_cast<PLARGE_INTEGER>(&time_freq));
   time_total = 0;
@@ -20,10 +20,35 @@ ProgressMonitor::ProgressMonitor(bool lazy): h_scr(nullptr) {
   else
     time_update = time_total;
   confirm_esc = (Far::adv_control(ACTL_GETCONFIRMATIONS) & FCS_INTERRUPTOPERATION) != 0;
+  initial_priority = GetPriorityClass(GetCurrentProcess());
 }
 
 ProgressMonitor::~ProgressMonitor() {
   clean();
+}
+
+void ProgressMonitor::display() {
+  do_update_ui();
+  wstring title;
+  if (progress_known) {
+    title += L"{" + int_to_str(percent_done) + L"%} ";
+  }
+  if (paused) {
+    title += L"[" + Far::get_msg(MSG_PROGRESS_PAUSED) + L"] ";
+  }
+  else if (low_priority) {
+    title += L"[" + Far::get_msg(MSG_PROGRESS_LOW_PRIORITY) + L"] ";
+  }
+  title += progress_title;
+  if (progress_known) {
+    Far::set_progress_state(TBPF_NORMAL);
+    Far::set_progress_value(percent_done, 100);
+  }
+  else {
+    Far::set_progress_state(TBPF_INDETERMINATE);
+  }
+  Far::message(title + L'\n' + progress_text, 0, FMSG_LEFTALIGN);
+  SetConsoleTitleW(title.c_str());
 }
 
 void ProgressMonitor::update_ui(bool force) {
@@ -34,24 +59,39 @@ void ProgressMonitor::update_ui(bool force) {
       h_scr = Far::save_screen();
       con_title = get_console_title();
     }
+
     HANDLE h_con = GetStdHandle(STD_INPUT_HANDLE);
     INPUT_RECORD rec;
     DWORD read_cnt;
     while (true) {
-      PeekConsoleInputW(h_con, &rec, 1, &read_cnt);
-      if (read_cnt == 0) break;
+      if (!paused) {
+        PeekConsoleInputW(h_con, &rec, 1, &read_cnt);
+        if (read_cnt == 0) break;
+      }
       ReadConsoleInputW(h_con, &rec, 1, &read_cnt);
       if (rec.EventType == KEY_EVENT) {
         const KEY_EVENT_RECORD& key_event = rec.Event.KeyEvent;
-        if (is_single_key(key_event) && key_event.wVirtualKeyCode == VK_ESCAPE) {
-          handle_esc();
-        }
-        else {
-          do_process_key(key_event);
+        const WORD c_vk_b = 0x42;
+        const WORD c_vk_p = 0x50;
+        if (is_single_key(key_event)) {
+          if (key_event.wVirtualKeyCode == VK_ESCAPE) {
+            handle_esc();
+          }
+          else if (key_event.wVirtualKeyCode == c_vk_b) {
+            low_priority = !low_priority;
+            SetPriorityClass(GetCurrentProcess(), low_priority ? IDLE_PRIORITY_CLASS : initial_priority);
+            if (paused)
+              display();
+          }
+          else if (key_event.wVirtualKeyCode == c_vk_p) {
+            paused = !paused;
+            if (paused)
+              display();
+          }
         }
       }
     }
-    do_update_ui();
+    display();
   }
 }
 
@@ -74,6 +114,7 @@ void ProgressMonitor::clean() {
     Far::set_progress_state(TBPF_NOPROGRESS);
     h_scr = nullptr;
   }
+  SetPriorityClass(GetCurrentProcess(), initial_priority);
 }
 
 void ProgressMonitor::update_time() {

@@ -14,25 +14,17 @@ private:
 
   virtual void do_update_ui() {
     const unsigned c_width = 60;
+
+    percent_done = calc_percent(completed, total);
+
     wostringstream st;
-    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-
-    unsigned percent = calc_percent(completed, total);
-
-    st << Far::get_msg(MSG_PROGRESS_SFX_CONVERT) << L'\n';
     st << fit_str(file_path, c_width) << L'\n';
-    st << Far::get_progress_bar_str(c_width, percent, 100) << L'\n';
-
-    Far::message(st.str(), 0, FMSG_LEFTALIGN);
-
-    Far::set_progress_state(TBPF_NORMAL);
-    Far::set_progress_value(percent, 100);
-
-    SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(MSG_PROGRESS_SFX_CONVERT)).c_str());
+    st << Far::get_progress_bar_str(c_width, percent_done, 100) << L'\n';
+    progress_text = st.str();
   }
 
 public:
-  AttachSfxModuleProgress(const wstring& file_path): ProgressMonitor(true), file_path(file_path), completed(0), total(0) {
+  AttachSfxModuleProgress(const wstring& file_path): ProgressMonitor(Far::get_msg(MSG_PROGRESS_SFX_CONVERT)), file_path(file_path), completed(0), total(0) {
   }
 
   void set_total(unsigned __int64 size) {

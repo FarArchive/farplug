@@ -73,31 +73,24 @@ private:
   UInt64 completed_bytes;
 
   virtual void do_update_ui() {
+    const unsigned c_width = 60;
     wostringstream st;
-    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
     st << volume_file_info.name << L'\n';
     st << completed_files << L" / " << total_files << L'\n';
-    st << Far::get_progress_bar_str(60, completed_files, total_files) << L'\n';
+    st << Far::get_progress_bar_str(c_width, completed_files, total_files) << L'\n';
     st << L"\x01\n";
     st << format_data_size(completed_bytes, get_size_suffixes()) << L" / " << format_data_size(total_bytes, get_size_suffixes()) << L'\n';
-    st << Far::get_progress_bar_str(60, completed_bytes, total_bytes) << L'\n';
+    st << Far::get_progress_bar_str(c_width, completed_bytes, total_bytes) << L'\n';
+    progress_text = st.str();
 
-    Far::message(st.str(), 0, FMSG_LEFTALIGN);
-
-    unsigned percent;
     if (total_files)
-      percent = calc_percent(completed_files, total_files);
+      percent_done = calc_percent(completed_files, total_files);
     else
-      percent = calc_percent(completed_bytes, total_bytes);
-
-    Far::set_progress_state(TBPF_NORMAL);
-    Far::set_progress_value(percent, 100);
-
-    SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(MSG_PROGRESS_OPEN)).c_str());
+      percent_done = calc_percent(completed_bytes, total_bytes);
   }
 
 public:
-  ArchiveOpener(Archive& archive): archive(archive), volume_file_info(archive.arc_info), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
+  ArchiveOpener(Archive& archive): ProgressMonitor(Far::get_msg(MSG_PROGRESS_OPEN)), archive(archive), volume_file_info(archive.arc_info), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
   }
 
   UNKNOWN_IMPL_BEGIN

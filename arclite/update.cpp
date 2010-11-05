@@ -24,17 +24,11 @@ private:
   UInt64 file_total;
   UInt64 file_completed;
 
-  bool paused;
-  bool low_priority;
-  DWORD initial_priority;
-
   virtual void do_update_ui() {
     const unsigned c_width = 60;
-    wostringstream st;
-    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
 
     unsigned file_percent = calc_percent(file_completed, file_total);
-    unsigned percent = calc_percent(completed, total);
+    percent_done = calc_percent(completed, total);
 
     unsigned __int64 time = time_elapsed();
     unsigned __int64 speed;
@@ -51,72 +45,18 @@ private:
     if (total_time < time)
       total_time = time;
 
-    st << Far::get_msg(new_arc ? MSG_PROGRESS_CREATE : MSG_PROGRESS_UPDATE) << L'\n';
+    wostringstream st;
     st << fit_str(file_path, c_width) << L'\n';
     st << setw(7) << format_data_size(file_completed, get_size_suffixes()) << L" / " << format_data_size(file_total, get_size_suffixes()) << L'\n';
     st << Far::get_progress_bar_str(c_width, file_percent, 100) << L'\n';
     st << L"\x1\n";
-
-    st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L" [" << setw(2) << percent << L"%] @ " << setw(9) << format_data_size(speed, get_speed_suffixes()) << L" -" << format_time((total_time - time) / ticks_per_sec()) << L'\n';
-    st << Far::get_progress_bar_str(c_width, percent, 100) << L'\n';
-    st << L"\x1\n";
-
-    wstring cmd_str;
-    cmd_str += Far::get_msg(paused ? MSG_PROGRESS_UNPAUSE : MSG_PROGRESS_PAUSE);
-    cmd_str += L", ";
-    cmd_str += Far::get_msg(low_priority ? MSG_PROGRESS_NORMAL_PRIORITY : MSG_PROGRESS_LOW_PRIORITY);
-    st << center(cmd_str, c_width) << L'\n';
-
-    Far::message(st.str(), 0, FMSG_LEFTALIGN);
-
-    Far::set_progress_state(TBPF_NORMAL);
-    Far::set_progress_value(percent, 100);
-
-    SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(paused ? MSG_PROGRESS_PAUSED : new_arc ? MSG_PROGRESS_CREATE : MSG_PROGRESS_UPDATE)).c_str());
-  }
-
-  virtual void do_process_key(const KEY_EVENT_RECORD& key_event) {
-    const WORD c_vk_b = 0x42;
-    const WORD c_vk_p = 0x50;
-    if (is_single_key(key_event)) {
-      if (key_event.wVirtualKeyCode == c_vk_b) {
-        low_priority = !low_priority;
-        SetPriorityClass(GetCurrentProcess(), low_priority ? IDLE_PRIORITY_CLASS : initial_priority);
-        do_update_ui();
-      }
-      else if (key_event.wVirtualKeyCode == c_vk_p) {
-        paused = !paused;
-        do_update_ui();
-        if (paused) {
-          HANDLE h_con = GetStdHandle(STD_INPUT_HANDLE);
-          INPUT_RECORD rec;
-          DWORD read_cnt;
-          while (paused) {
-            ReadConsoleInputW(h_con, &rec, 1, &read_cnt);
-            if (rec.EventType == KEY_EVENT) {
-              const KEY_EVENT_RECORD& ke = rec.Event.KeyEvent;
-              if (is_single_key(ke)) {
-                if (ke.wVirtualKeyCode == VK_ESCAPE) {
-                  handle_esc();
-                }
-                else if (ke.wVirtualKeyCode == c_vk_p) {
-                  paused = false;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L" [" << setw(2) << percent_done << L"%] @ " << setw(9) << format_data_size(speed, get_speed_suffixes()) << L" -" << format_time((total_time - time) / ticks_per_sec()) << L'\n';
+    st << Far::get_progress_bar_str(c_width, percent_done, 100) << L'\n';
+    progress_text = st.str();
   }
 
 public:
-  ArchiveUpdateProgress(bool new_arc): ProgressMonitor(true), new_arc(new_arc), completed(0), total(0), file_completed(0), file_total(0), paused(false), low_priority(false) {
-    initial_priority = GetPriorityClass(GetCurrentProcess());
-    CHECK_SYS(initial_priority);
-  }
-  ~ArchiveUpdateProgress() {
-    SetPriorityClass(GetCurrentProcess(), initial_priority);
+  ArchiveUpdateProgress(bool new_arc): ProgressMonitor(Far::get_msg(new_arc ? MSG_PROGRESS_CREATE : MSG_PROGRESS_UPDATE)), new_arc(new_arc), completed(0), total(0), file_completed(0), file_total(0) {
   }
 
   void on_open_file(const wstring& file_path, unsigned __int64 size) {
@@ -498,16 +438,8 @@ private:
   virtual void do_update_ui() {
     const unsigned c_width = 60;
     wostringstream st;
-    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-
-    st << Far::get_msg(MSG_PROGRESS_SCAN_DIRS) << L'\n';
     st << left << setw(c_width) << fit_str(*file_path, c_width) << L'\n';
-
-    Far::message(st.str(), 0, FMSG_LEFTALIGN);
-
-    Far::set_progress_state(TBPF_INDETERMINATE);
-
-    SetConsoleTitleW(Far::get_msg(MSG_PROGRESS_SCAN_DIRS).c_str());
+    progress_text = st.str();
   }
 
   void update_progress(const wstring& file_path) {
@@ -570,7 +502,7 @@ private:
   }
 
 public:
-  FileIndexMap(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, const Archive& archive, UInt32& new_index, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(true), archive(archive), new_index(new_index), ignore_errors(ignore_errors), error_log(error_log) {
+  FileIndexMap(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, const Archive& archive, UInt32& new_index, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(Far::get_msg(MSG_PROGRESS_SCAN_DIRS), false), archive(archive), new_index(new_index), ignore_errors(ignore_errors), error_log(error_log) {
     for (unsigned i = 0; i < file_names.size(); i++) {
       FindData find_data = get_find_data(add_trailing_slash(src_dir) + file_names[i]);
       UInt32 file_index = scan_file(wstring(), find_data, dst_dir_index);
@@ -775,15 +707,8 @@ private:
   virtual void do_update_ui() {
     const unsigned c_width = 60;
     wostringstream st;
-    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-
-    st << Far::get_msg(MSG_PROGRESS_DELETE_FILES) << L'\n';
     st << left << setw(c_width) << fit_str(*file_path, c_width) << L'\n';
-    Far::message(st.str(), 0, FMSG_LEFTALIGN);
-
-    Far::set_progress_state(TBPF_INDETERMINATE);
-
-    SetConsoleTitleW(Far::get_msg(MSG_PROGRESS_DELETE_FILES).c_str());
+    progress_text = st.str();
   }
 
   void update_progress(const wstring& file_path) {
@@ -838,7 +763,7 @@ private:
   }
 
 public:
-  DeleteSrcFiles(const wstring& src_dir, const vector<wstring>& file_names, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(true), ignore_errors(ignore_errors), error_log(error_log) {
+  DeleteSrcFiles(const wstring& src_dir, const vector<wstring>& file_names, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(Far::get_msg(MSG_PROGRESS_DELETE_FILES), false), ignore_errors(ignore_errors), error_log(error_log) {
     for (unsigned i = 0; i < file_names.size(); i++) {
       wstring file_path = add_trailing_slash(src_dir) + file_names[i];
       FindData find_data = get_find_data(file_path);

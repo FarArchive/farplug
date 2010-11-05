@@ -15,15 +15,13 @@ private:
 
   virtual void do_update_ui() {
     const unsigned c_width = 60;
-    wostringstream st;
 
-    unsigned percent;
     if (total == 0)
-      percent = 0;
+      percent_done = 0;
     else
-      percent = round(static_cast<double>(completed) * 100 / total);
-    if (percent > 100)
-      percent = 100;
+      percent_done = round(static_cast<double>(completed) * 100 / total);
+    if (percent_done > 100)
+      percent_done = 100;
 
     unsigned __int64 speed;
     if (time_elapsed() == 0)
@@ -31,20 +29,14 @@ private:
     else
       speed = round(static_cast<double>(completed) / time_elapsed() * ticks_per_sec());
 
-    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-    st << Far::get_msg(MSG_PROGRESS_UPDATE) << L'\n';
+    wostringstream st;
     st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L" @ " << setw(9) << format_data_size(speed, get_speed_suffixes()) << L'\n';
-    st << Far::get_progress_bar_str(c_width, percent, 100) << L'\n';
-    Far::message(st.str(), 0, FMSG_LEFTALIGN);
-
-    Far::set_progress_state(TBPF_NORMAL);
-    Far::set_progress_value(percent, 100);
-
-    SetConsoleTitleW((L"{" + int_to_str(percent) + L"%} " + Far::get_msg(MSG_PROGRESS_UPDATE)).c_str());
+    st << Far::get_progress_bar_str(c_width, percent_done, 100) << L'\n';
+    progress_text = st.str();
   }
 
 public:
-  ArchiveFileDeleter(const vector<UInt32>& new_indices): new_indices(new_indices), completed(0), total(0) {
+  ArchiveFileDeleter(const vector<UInt32>& new_indices): ProgressMonitor(Far::get_msg(MSG_PROGRESS_UPDATE)), new_indices(new_indices), completed(0), total(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
