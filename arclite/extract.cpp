@@ -525,8 +525,12 @@ void Archive::prepare_dst_dir(const wstring& path) {
   }
 }
 
-class PrepareExtractProgress: public ProgressMonitor {
+class PrepareExtract: public ProgressMonitor {
 private:
+  Archive& archive;
+  list<UInt32>& indices;
+  bool& ignore_errors;
+  ErrorLog& error_log;
   const wstring* file_path;
 
   virtual void do_update_ui() {
@@ -536,47 +540,53 @@ private:
     progress_text = st.str();
   }
 
-public:
-  PrepareExtractProgress(): ProgressMonitor(Far::get_msg(MSG_PROGRESS_CREATE_DIRS), false) {
-  }
-  void update(const wstring& file_path) {
+  void update_progress(const wstring& file_path) {
     this->file_path = &file_path;
     update_ui();
   }
-};
 
-void Archive::prepare_extract(UInt32 file_index, const wstring& parent_dir, list<UInt32>& indices, bool& ignore_errors, ErrorLog& error_log, PrepareExtractProgress& progress) {
-  const ArcFileInfo& file_info = file_list[file_index];
-  if (file_info.is_dir()) {
-    wstring dir_path = add_trailing_slash(parent_dir) + file_info.name;
-    progress.update(dir_path);
+  void prepare_extract(const FileIndexRange& index_range, const wstring& parent_dir) {
+    for_each(index_range.first, index_range.second, [&] (UInt32 file_index) {
+      const ArcFileInfo& file_info = archive.file_list[file_index];
+      if (file_info.is_dir()) {
+        wstring dir_path = add_trailing_slash(parent_dir) + file_info.name;
+        update_progress(dir_path);
 
-    while (true) {
-      try {
-        BOOL res = CreateDirectoryW(long_path(dir_path).c_str(), nullptr);
-        if (!res) {
-          CHECK_SYS(GetLastError() == ERROR_ALREADY_EXISTS);
+        while (true) {
+          try {
+            BOOL res = CreateDirectoryW(long_path(dir_path).c_str(), nullptr);
+            if (!res) {
+              CHECK_SYS(GetLastError() == ERROR_ALREADY_EXISTS);
+            }
+            break;
+          }
+          catch (const Error& e) {
+            if (retry_or_ignore_error(dir_path, e, ignore_errors, error_log, *this))
+              break;
+          }
         }
-        break;
-      }
-      catch (const Error& e) {
-        if (retry_or_ignore_error(dir_path, e, ignore_errors, error_log, progress))
-          break;
-      }
-    }
 
-    FileIndexRange dir_list = get_dir_list(file_index);
-    for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
-      prepare_extract(file_index, dir_path, indices, ignore_errors, error_log, progress);
+        FileIndexRange dir_list = archive.get_dir_list(file_index);
+        prepare_extract(dir_list, dir_path);
+      }
+      else {
+        indices.push_back(file_index);
+      }
     });
   }
-  else {
-    indices.push_back(file_index);
-  }
-}
 
-class SetDirAttrProgress: public ProgressMonitor {
+public:
+  PrepareExtract(const FileIndexRange& index_range, const wstring& parent_dir, Archive& archive, list<UInt32>& indices, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(Far::get_msg(MSG_PROGRESS_CREATE_DIRS), false), archive(archive), indices(indices), ignore_errors(ignore_errors), error_log(error_log) {
+    prepare_extract(index_range, parent_dir);
+  }
+};
+
+
+class SetDirAttr: public ProgressMonitor {
 private:
+  Archive& archive;
+  bool& ignore_errors;
+  ErrorLog& error_log;
   const wstring* file_path;
 
   virtual void do_update_ui() {
@@ -586,39 +596,42 @@ private:
     progress_text = st.str();
   }
 
-public:
-  SetDirAttrProgress(): ProgressMonitor(Far::get_msg(MSG_PROGRESS_SET_ATTR), false) {
-  }
-  void update(const wstring& file_path) {
+  void update_progress(const wstring& file_path) {
     this->file_path = &file_path;
     update_ui();
   }
-};
 
-void Archive::set_dir_attr(const FileIndexRange& index_range, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log, SetDirAttrProgress& progress) {
-  for_each (index_range.first, index_range.second, [&] (UInt32 file_index) {
-    const ArcFileInfo& file_info = file_list[file_index];
-    wstring file_path = add_trailing_slash(parent_dir) + file_info.name;
-    progress.update(file_path);
-    if (file_info.is_dir()) {
-      FileIndexRange dir_list = get_dir_list(file_index);
-      set_dir_attr(dir_list, file_path, ignore_errors, error_log, progress);
-      while (true) {
-        try {
-          CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL));
-          File file(file_path, FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS);
-          CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), file_info.attr));
-          file.set_time(file_info.ctime, file_info.atime, file_info.mtime);
-          break;
-        }
-        catch (const Error& e) {
-          if (retry_or_ignore_error(file_path, e, ignore_errors, error_log, progress))
+  void set_dir_attr(const FileIndexRange& index_range, const wstring& parent_dir) {
+    for_each (index_range.first, index_range.second, [&] (UInt32 file_index) {
+      const ArcFileInfo& file_info = archive.file_list[file_index];
+      wstring file_path = add_trailing_slash(parent_dir) + file_info.name;
+      update_progress(file_path);
+      if (file_info.is_dir()) {
+        FileIndexRange dir_list = archive.get_dir_list(file_index);
+        set_dir_attr(dir_list, file_path);
+        while (true) {
+          try {
+            CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL));
+            File file(file_path, FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS);
+            CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), file_info.attr));
+            file.set_time(file_info.ctime, file_info.atime, file_info.mtime);
             break;
+          }
+          catch (const Error& e) {
+            if (retry_or_ignore_error(file_path, e, ignore_errors, error_log, *this))
+              break;
+          }
         }
       }
-    }
-  });
-}
+    });
+  }
+
+public:
+  SetDirAttr(const FileIndexRange& index_range, const wstring& parent_dir, Archive& archive, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(Far::get_msg(MSG_PROGRESS_SET_ATTR), false), archive(archive), ignore_errors(ignore_errors), error_log(error_log) {
+    set_dir_attr(index_range, parent_dir);
+  }
+};
+
 
 void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log) {
   bool ignore_errors = options.ignore_errors;
@@ -626,12 +639,8 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
 
   prepare_dst_dir(options.dst_dir);
 
-  PrepareExtractProgress prepare_extract_progress;
   list<UInt32> file_indices;
-  for (unsigned i = 0; i < src_indices.size(); i++) {
-    prepare_extract(src_indices[i], options.dst_dir, file_indices, ignore_errors, error_log, prepare_extract_progress);
-  }
-  prepare_extract_progress.clean();
+  PrepareExtract(FileIndexRange(src_indices.begin(), src_indices.end()), options.dst_dir, *this, file_indices, ignore_errors, error_log);
 
   vector<UInt32> indices;
   indices.reserve(file_indices.size());
@@ -645,10 +654,7 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
   cache.finalize();
   progress.clean();
 
-  SetDirAttrProgress set_dir_attr_progress;
-  FileIndexRange index_range(src_indices.begin(), src_indices.end());
-  set_dir_attr(index_range, options.dst_dir, ignore_errors, error_log, set_dir_attr_progress);
-  set_dir_attr_progress.clean();
+  SetDirAttr(FileIndexRange(src_indices.begin(), src_indices.end()), options.dst_dir, *this, ignore_errors, error_log);
 }
 
 void Archive::delete_archive() {

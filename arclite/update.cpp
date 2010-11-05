@@ -425,10 +425,12 @@ struct FileIndexInfo {
   wstring rel_path;
   FindData find_data;
 };
+typedef map<UInt32, FileIndexInfo> FileIndexMap;
 
-class FileIndexMap: public map<UInt32, FileIndexInfo>, private ProgressMonitor {
+class PrepareUpdate: private ProgressMonitor {
 private:
   const Archive& archive;
+  FileIndexMap& file_index_map;
   UInt32& new_index;
   bool& ignore_errors;
   ErrorLog& error_log;
@@ -474,7 +476,7 @@ private:
     FileIndexInfo file_index_info;
     file_index_info.rel_path = sub_dir;
     file_index_info.find_data = src_find_data;
-    insert(pair<UInt32, FileIndexInfo>(file_index, file_index_info));
+    file_index_map[file_index] = file_index_info;
     return file_index;
   }
 
@@ -502,7 +504,7 @@ private:
   }
 
 public:
-  FileIndexMap(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, const Archive& archive, UInt32& new_index, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(Far::get_msg(MSG_PROGRESS_SCAN_DIRS), false), archive(archive), new_index(new_index), ignore_errors(ignore_errors), error_log(error_log) {
+  PrepareUpdate(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, const Archive& archive, FileIndexMap& file_index_map, UInt32& new_index, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(Far::get_msg(MSG_PROGRESS_SCAN_DIRS), false), archive(archive), file_index_map(file_index_map), new_index(new_index), ignore_errors(ignore_errors), error_log(error_log) {
     for (unsigned i = 0; i < file_names.size(); i++) {
       FindData find_data = get_find_data(add_trailing_slash(src_dir) + file_names[i]);
       UInt32 file_index = scan_file(wstring(), find_data, dst_dir_index);
@@ -780,7 +782,8 @@ void Archive::create(const wstring& src_dir, const vector<wstring>& file_names, 
   bool ignore_errors = options.ignore_errors;
   UInt32 new_index = 0;
 
-  FileIndexMap file_index_map(src_dir, file_names, c_root_index, *this, new_index, ignore_errors, error_log);
+  FileIndexMap file_index_map;
+  PrepareUpdate(src_dir, file_names, c_root_index, *this, file_index_map, new_index, ignore_errors, error_log);
 
   ComObject<IOutArchive> out_arc;
   ArcAPI::create_out_archive(options.arc_type, &out_arc);
@@ -806,14 +809,15 @@ void Archive::create(const wstring& src_dir, const vector<wstring>& file_names, 
   }
 
   if (options.move_files && error_log.empty())
-    DeleteSrcFiles delete_src_files(src_dir, file_names, ignore_errors, error_log);
+    DeleteSrcFiles(src_dir, file_names, ignore_errors, error_log);
 }
 
 void Archive::update(const wstring& src_dir, const vector<wstring>& file_names, const wstring& dst_dir, const UpdateOptions& options, ErrorLog& error_log) {
   bool ignore_errors = options.ignore_errors;
   UInt32 new_index = num_indices; // starting index for new files
 
-  FileIndexMap file_index_map(src_dir, file_names, find_dir(dst_dir), *this, new_index, ignore_errors, error_log);
+  FileIndexMap file_index_map;
+  PrepareUpdate(src_dir, file_names, find_dir(dst_dir), *this, file_index_map, new_index, ignore_errors, error_log);
 
   wstring temp_arc_name = get_temp_file_name();
   try {
@@ -838,5 +842,5 @@ void Archive::update(const wstring& src_dir, const vector<wstring>& file_names, 
   reopen();
 
   if (options.move_files && error_log.empty())
-    DeleteSrcFiles delete_src_files(src_dir, file_names, ignore_errors, error_log);
+    DeleteSrcFiles(src_dir, file_names, ignore_errors, error_log);
 }

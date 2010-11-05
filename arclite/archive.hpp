@@ -130,10 +130,6 @@ public:
   wstring to_string() const;
 };
 
-// forwards
-class SetDirAttrProgress;
-class PrepareExtractProgress;
-
 class Archive {
   // open
 private:
@@ -171,16 +167,11 @@ public:
   void make_index();
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);
-  const ArcFileInfo& get_file_info(UInt32 file_index) const {
-    return file_list[file_index];
-  }
 
   // extract
 private:
   wstring get_default_name() const;
   void prepare_dst_dir(const wstring& path);
-  void prepare_extract(UInt32 file_index, const wstring& parent_dir, list<UInt32>& indices, bool& ignore_errors, ErrorLog& error_log, PrepareExtractProgress& progress);
-  void set_dir_attr(const FileIndexRange& index_list, const wstring& parent_dir, bool& ignore_errors, ErrorLog& error_log, SetDirAttrProgress& progress);
   void prepare_test(UInt32 file_index, list<UInt32>& indices);
 public:
   void extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log);

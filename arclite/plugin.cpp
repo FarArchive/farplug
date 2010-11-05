@@ -112,7 +112,7 @@ public:
     try {
       unsigned idx = 0;
       for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
-        const ArcFileInfo& file_info = archive.get_file_info(file_index);
+        const ArcFileInfo& file_info = archive.file_list[file_index];
         FAR_FIND_DATA& fdata = items[idx].FindData;
         const DWORD c_valid_attributes = FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM;
         fdata.dwFileAttributes = file_info.attr & c_valid_attributes;
