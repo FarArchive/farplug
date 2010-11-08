@@ -490,7 +490,14 @@ void Archive::make_index() {
   arc_attr.push_back(attr);
   if (total_size_defined) {
     attr.name = Far::get_msg(MSG_PROPERTY_COMPRESSION_RATIO);
-    unsigned ratio = total_size ? round(static_cast<double>(arc_info.size) / total_size * 100) : 100;
+    unsigned __int64 arc_size = arc_info.size;
+    for_each(volume_names.begin(), volume_names.end(), [&] (const wstring& volume_name) {
+      wstring volume_path = add_trailing_slash(arc_dir()) + volume_name;
+      FindData find_data;
+      if (get_find_data_nt(volume_path, find_data))
+        arc_size += find_data.size();
+    });
+    unsigned ratio = total_size ? round(static_cast<double>(arc_size) / total_size * 100) : 100;
     if (ratio > 100)
       ratio = 100;
     attr.value = int_to_str(ratio) + L'%';
