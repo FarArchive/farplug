@@ -357,6 +357,7 @@ public:
         else {
           volume.open(get_volume_path(volume_idx), GENERIC_WRITE, FILE_SHARE_READ, OPEN_EXISTING, 0);
         }
+        next_volume = false;
       }
 
       unsigned __int64 volume_upper_bound = (volume_idx + 1) * volume_size;
