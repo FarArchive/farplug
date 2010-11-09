@@ -431,14 +431,18 @@ public:
       return S_OK;
 
     FindData dst_file_info;
-    HANDLE h_find = FindFirstFileW(long_path(file_path).c_str(), &dst_file_info);
-    if (h_find != INVALID_HANDLE_VALUE) {
-      FindClose(h_find);
+    if (get_find_data_nt(file_path, dst_file_info)) {
       bool overwrite;
       if (overwrite_option == triUndef) {
-        FindData src_file_info = file_info.convert();
+        OverwriteFileInfo src_ov_info, dst_ov_info;
+        src_ov_info.is_dir = file_info.is_dir();
+        src_ov_info.size = file_info.size;
+        src_ov_info.mtime = file_info.mtime;
+        dst_ov_info.is_dir = dst_file_info.is_dir();
+        dst_ov_info.size = dst_file_info.size();
+        dst_ov_info.mtime = dst_file_info.ftLastWriteTime;
         ProgressSuspend ps(progress);
-        OverwriteAction oa = overwrite_dialog(file_path, src_file_info, dst_file_info);
+        OverwriteAction oa = overwrite_dialog(file_path, src_ov_info, dst_ov_info);
         if (oa == oaYes)
           overwrite = true;
         else if (oa == oaYesAll) {

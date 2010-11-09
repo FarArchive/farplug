@@ -54,7 +54,12 @@ const wchar_t** get_speed_suffixes();
 bool password_dialog(wstring& password);
 
 enum OverwriteAction { oaYes, oaYesAll, oaNo, oaNoAll, oaCancel };
-OverwriteAction overwrite_dialog(const wstring& file_path, const FindData& src_file_info, const FindData& dst_file_info);
+struct OverwriteFileInfo {
+  bool is_dir;
+  unsigned __int64 size;
+  FILETIME mtime;
+};
+OverwriteAction overwrite_dialog(const wstring& file_path, const OverwriteFileInfo& src_file_info, const OverwriteFileInfo& dst_file_info);
 
 bool extract_dialog(ExtractOptions& options);
 

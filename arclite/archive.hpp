@@ -102,7 +102,6 @@ struct FileInfo {
   bool is_dir() const {
     return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
   }
-  FindData convert() const;
   void convert(const FindData& file_info);
 };
 

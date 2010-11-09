@@ -276,19 +276,6 @@ wstring Archive::get_temp_file_name() const {
 }
 
 
-FindData FileInfo::convert() const {
-  FindData find_data;
-  memset(&find_data, 0, sizeof(find_data));
-  find_data.dwFileAttributes = attr;
-  find_data.ftCreationTime = ctime;
-  find_data.ftLastAccessTime = atime;
-  find_data.ftLastWriteTime = mtime;
-  find_data.nFileSizeHigh = size >> 32;
-  find_data.nFileSizeLow = size & 0xFFFFFFFF;
-  wcscpy(find_data.cFileName, name.c_str());
-  return find_data;
-}
-
 void FileInfo::convert(const FindData& find_data) {
   attr = find_data.dwFileAttributes;
   ctime = find_data.ftCreationTime;

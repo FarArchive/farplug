@@ -235,7 +235,7 @@ public:
   OverwriteDialog(): Far::Dialog(Far::get_msg(MSG_OVERWRITE_DLG_TITLE), &c_overwrite_dialog_guid, c_client_xs) {
   }
 
-  OverwriteAction show(const wstring& file_path, const FindData& src_file_info, const FindData& dst_file_info) {
+  OverwriteAction show(const wstring& file_path, const OverwriteFileInfo& src_file_info, const OverwriteFileInfo& dst_file_info) {
     label(fit_str(file_path, c_client_xs));
     new_line();
     label(Far::get_msg(MSG_OVERWRITE_DLG_QUESTION));
@@ -245,12 +245,12 @@ public:
 
     label(Far::get_msg(MSG_OVERWRITE_DLG_SOURCE));
     pad(15);
-    if (!src_file_info.is_dir()) {
-      label(format_data_size(src_file_info.size(), get_size_suffixes()));
+    if (!src_file_info.is_dir) {
+      label(format_data_size(src_file_info.size, get_size_suffixes()));
       pad(25);
     }
-    label(format_file_time(src_file_info.ftLastWriteTime));
-    if (CompareFileTime(&src_file_info.ftLastWriteTime, &dst_file_info.ftLastWriteTime) > 0) {
+    label(format_file_time(src_file_info.mtime));
+    if (CompareFileTime(&src_file_info.mtime, &dst_file_info.mtime) > 0) {
       spacer(1);
       label(Far::get_msg(MSG_OVERWRITE_DLG_NEWER));
     }
@@ -258,12 +258,12 @@ public:
 
     label(Far::get_msg(MSG_OVERWRITE_DLG_DESTINATION));
     pad(15);
-    if (!dst_file_info.is_dir()) {
-      label(format_data_size(dst_file_info.size(), get_size_suffixes()));
+    if (!dst_file_info.is_dir) {
+      label(format_data_size(dst_file_info.size, get_size_suffixes()));
       pad(25);
     }
-    label(format_file_time(dst_file_info.ftLastWriteTime));
-    if (CompareFileTime(&src_file_info.ftLastWriteTime, &dst_file_info.ftLastWriteTime) < 0) {
+    label(format_file_time(dst_file_info.mtime));
+    if (CompareFileTime(&src_file_info.mtime, &dst_file_info.mtime) < 0) {
       spacer(1);
       label(Far::get_msg(MSG_OVERWRITE_DLG_NEWER));
     }
@@ -288,7 +288,7 @@ public:
   }
 };
 
-OverwriteAction overwrite_dialog(const wstring& file_path, const FindData& src_file_info, const FindData& dst_file_info) {
+OverwriteAction overwrite_dialog(const wstring& file_path, const OverwriteFileInfo& src_file_info, const OverwriteFileInfo& dst_file_info) {
   return OverwriteDialog().show(file_path, src_file_info, dst_file_info);
 }
 
