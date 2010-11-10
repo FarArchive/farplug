@@ -245,7 +245,6 @@ void Archive::detect(const wstring& arc_path, bool all, vector<Archive>& archive
 
   ComObject<IInStream> stream;
   FileInfo arc_info;
-  memset(&arc_info, 0, sizeof(arc_info));
   if (parent_idx == -1) {
     ArchiveOpenStream* stream_impl = new ArchiveOpenStream(arc_path);
     stream = stream_impl;
