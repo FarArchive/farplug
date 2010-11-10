@@ -4,6 +4,7 @@
 #include <msi.h>
 #include <winhttp.h>
 #include <shobjidl.h>
+#include <winioctl.h>
 #undef max
 
 #include <assert.h>

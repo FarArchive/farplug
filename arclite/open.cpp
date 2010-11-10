@@ -11,9 +11,35 @@ class ArchiveOpenStream: public IInStream, private ComBase, private File {
 private:
   wstring file_path;
 
+  bool device_file;
+  unsigned __int64 device_pos;
+  unsigned __int64 device_size;
+
+  void check_device_file() {
+    device_pos = 0;
+    device_file = false;
+    if (size_nt(device_size))
+      return;
+    DWORD bytes_ret;
+    PARTITION_INFORMATION part_info;
+    BOOL res = DeviceIoControl(handle(), IOCTL_DISK_GET_PARTITION_INFO, nullptr, 0, &part_info, sizeof(PARTITION_INFORMATION), &bytes_ret, nullptr);
+    if (res) {
+      device_size = part_info.PartitionLength.QuadPart;
+      device_file = true;
+      return;
+    }
+    DISK_GEOMETRY disk_geometry;
+    res = DeviceIoControl(handle(), IOCTL_DISK_GET_DRIVE_GEOMETRY, nullptr, 0, &disk_geometry, sizeof(DISK_GEOMETRY), &bytes_ret, nullptr);
+    if (res) {
+      device_size = disk_geometry.Cylinders.QuadPart * disk_geometry.TracksPerCylinder * disk_geometry.SectorsPerTrack * disk_geometry.BytesPerSector;
+      device_file = true;
+      return;
+    }
+  }
 public:
   ArchiveOpenStream(const wstring& file_path): file_path(file_path) {
-    open(file_path, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
+    open(file_path, FILE_READ_DATA | FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
+    check_device_file();
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -23,16 +49,34 @@ public:
 
   STDMETHODIMP Read(void *data, UInt32 size, UInt32 *processedSize) {
     COM_ERROR_HANDLER_BEGIN
-    unsigned bytes_read = read(data, size);
+    unsigned size_read = read(data, size);
+    if (device_file)
+      device_pos += size_read;
     if (processedSize)
-      *processedSize = bytes_read;
+      *processedSize = size_read;
     return S_OK;
     COM_ERROR_HANDLER_END
   }
 
   STDMETHODIMP Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
     COM_ERROR_HANDLER_BEGIN
-    unsigned __int64 new_position = set_pos(offset, translate_seek_method(seekOrigin));
+    unsigned __int64 new_position;
+    if (device_file) {
+      switch (seekOrigin) {
+      case STREAM_SEEK_SET:
+        device_pos = offset; break;
+      case STREAM_SEEK_CUR:
+        device_pos += offset; break;
+      case STREAM_SEEK_END:
+        device_pos = device_size + offset; break;
+      default:
+        FAIL(E_INVALIDARG);
+      }
+      new_position = set_pos(device_pos, FILE_BEGIN);
+    }
+    else {
+      new_position = set_pos(offset, translate_seek_method(seekOrigin));
+    }
     if (newPosition)
       *newPosition = new_position;
     return S_OK;
