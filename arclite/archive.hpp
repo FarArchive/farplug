@@ -92,22 +92,18 @@ public:
   static void free();
 };
 
-struct FileInfo {
+struct ArcFileInfo {
+  UInt32 parent;
   wstring name;
   DWORD attr;
   unsigned __int64 size;
+  unsigned __int64 psize;
   FILETIME ctime;
   FILETIME mtime;
   FILETIME atime;
   bool is_dir() const {
     return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
   }
-  void convert(const FindData& file_info);
-};
-
-struct ArcFileInfo: public FileInfo {
-  UInt32 parent;
-  unsigned __int64 psize;
   bool operator<(const ArcFileInfo& file_info) const;
 };
 typedef vector<ArcFileInfo> FileList;
@@ -133,13 +129,13 @@ class Archive {
   // open
 private:
   ComObject<IInArchive> in_arc;
-  bool open_sub_stream(IInStream** sub_stream, FileInfo& sub_arc_info);
+  bool open_sub_stream(IInStream** sub_stream, FindData& sub_arc_info);
   bool open(IInStream* in_stream);
   static void detect(const wstring& file_path, bool all, vector<Archive>& archives);
 public:
   static unsigned max_check_size;
   wstring arc_path;
-  FileInfo arc_info;
+  FindData arc_info;
   set<wstring> volume_names;
   ArcChain arc_chain;
   wstring arc_dir() const {

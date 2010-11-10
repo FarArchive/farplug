@@ -259,7 +259,7 @@ void ArcAPI::free() {
 
 
 wstring Archive::get_default_name() const {
-  wstring name = arc_info.name;
+  wstring name = extract_file_name(arc_path);
   size_t pos = name.find_last_of(L'.');
   if (pos == wstring::npos)
     return name;
@@ -273,16 +273,6 @@ wstring Archive::get_temp_file_name() const {
   wchar_t guid_str[50];
   CHECK(StringFromGUID2(guid, guid_str, ARRAYSIZE(guid_str)));
   return add_trailing_slash(arc_dir()) + guid_str + L".tmp";
-}
-
-
-void FileInfo::convert(const FindData& find_data) {
-  attr = find_data.dwFileAttributes;
-  ctime = find_data.ftCreationTime;
-  atime = find_data.ftLastAccessTime;
-  mtime = find_data.ftLastWriteTime;
-  size = find_data.size();
-  name = find_data.cFileName;
 }
 
 
@@ -387,15 +377,15 @@ void Archive::make_index() {
     if (s_ok(in_arc->GetProperty(i, kpidCTime, prop.ref())) && prop.is_filetime())
       file_info.ctime = prop.get_filetime();
     else
-      file_info.ctime = arc_info.ctime;
+      file_info.ctime = arc_info.ftCreationTime;
     if (s_ok(in_arc->GetProperty(i, kpidMTime, prop.ref())) && prop.is_filetime())
       file_info.mtime = prop.get_filetime();
     else
-      file_info.mtime = arc_info.mtime;
+      file_info.mtime = arc_info.ftLastWriteTime;
     if (s_ok(in_arc->GetProperty(i, kpidATime, prop.ref())) && prop.is_filetime())
       file_info.atime = prop.get_filetime();
     else
-      file_info.atime = arc_info.atime;
+      file_info.atime = arc_info.ftLastAccessTime;
 
     // file name
     size_t name_end_pos = path.size();
@@ -445,9 +435,9 @@ void Archive::make_index() {
       file_info.name = dir_info.name;
       file_info.attr = FILE_ATTRIBUTE_DIRECTORY;
       file_info.size = file_info.psize = 0;
-      file_info.ctime = arc_info.ctime;
-      file_info.mtime = arc_info.mtime;
-      file_info.atime = arc_info.atime;
+      file_info.ctime = arc_info.ftCreationTime;
+      file_info.mtime = arc_info.ftLastWriteTime;
+      file_info.atime = arc_info.ftLastAccessTime;
       dir_index++;
       file_list.push_back(file_info);
     }
@@ -477,7 +467,7 @@ void Archive::make_index() {
   arc_attr.push_back(attr);
   if (total_size_defined) {
     attr.name = Far::get_msg(MSG_PROPERTY_COMPRESSION_RATIO);
-    unsigned __int64 arc_size = arc_info.size;
+    unsigned __int64 arc_size = arc_info.size();
     for_each(volume_names.begin(), volume_names.end(), [&] (const wstring& volume_name) {
       wstring volume_path = add_trailing_slash(arc_dir()) + volume_name;
       FindData find_data;

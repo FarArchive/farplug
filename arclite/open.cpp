@@ -39,23 +39,18 @@ public:
     COM_ERROR_HANDLER_END
   }
 
-  FileInfo get_info() {
-    FileInfo file_info;
-    file_info.name = extract_file_name(file_path);
+  FindData get_info() {
+    FindData file_info;
+    memset(&file_info, 0, sizeof(file_info));
+    wcscpy(file_info.cFileName, extract_file_name(file_path).c_str());
     BY_HANDLE_FILE_INFORMATION fi;
     if (get_info_nt(fi)) {
-      file_info.attr = fi.dwFileAttributes;
-      file_info.ctime = fi.ftCreationTime;
-      file_info.atime = fi.ftLastAccessTime;
-      file_info.mtime = fi.ftLastWriteTime;
-      file_info.size = (static_cast<unsigned __int64>(fi.nFileSizeHigh) << 32) | fi.nFileSizeLow;
-    }
-    else {
-      file_info.attr = 0;
-      memset(&file_info.ctime, 0, sizeof(FILETIME));
-      memset(&file_info.atime, 0, sizeof(FILETIME));
-      memset(&file_info.mtime, 0, sizeof(FILETIME));
-      file_info.size = 0;
+      file_info.dwFileAttributes = fi.dwFileAttributes;
+      file_info.ftCreationTime = fi.ftCreationTime;
+      file_info.ftLastAccessTime = fi.ftLastAccessTime;
+      file_info.ftLastWriteTime = fi.ftLastWriteTime;
+      file_info.nFileSizeLow = fi.nFileSizeLow;
+      file_info.nFileSizeHigh = fi.nFileSizeHigh;
     }
     return file_info;
   }
@@ -65,7 +60,7 @@ public:
 class ArchiveOpener: public IArchiveOpenCallback, public IArchiveOpenVolumeCallback, public ICryptoGetTextPassword, public ComBase, public ProgressMonitor {
 private:
   Archive& archive;
-  FileInfo volume_file_info;
+  FindData volume_file_info;
 
   UInt64 total_files;
   UInt64 total_bytes;
@@ -75,7 +70,7 @@ private:
   virtual void do_update_ui() {
     const unsigned c_width = 60;
     wostringstream st;
-    st << volume_file_info.name << L'\n';
+    st << volume_file_info.cFileName << L'\n';
     st << completed_files << L" / " << total_files << L'\n';
     st << Far::get_progress_bar_str(c_width, completed_files, total_files) << L'\n';
     st << L"\x01\n";
@@ -121,19 +116,19 @@ public:
     PropVariant prop;
     switch (propID) {
     case kpidName:
-      prop = volume_file_info.name; break;
+      prop = volume_file_info.cFileName; break;
     case kpidIsDir:
       prop = volume_file_info.is_dir(); break;
     case kpidSize:
-      prop = volume_file_info.size; break;
+      prop = volume_file_info.size(); break;
     case kpidAttrib:
-      prop = static_cast<UInt32>(volume_file_info.attr); break;
+      prop = static_cast<UInt32>(volume_file_info.dwFileAttributes); break;
     case kpidCTime:
-      prop = volume_file_info.ctime; break;
+      prop = volume_file_info.ftCreationTime; break;
     case kpidATime:
-      prop = volume_file_info.atime; break;
+      prop = volume_file_info.ftLastAccessTime; break;
     case kpidMTime:
-      prop = volume_file_info.mtime; break;
+      prop = volume_file_info.ftLastWriteTime; break;
     }
     prop.detach(value);
     return S_OK;
@@ -149,7 +144,7 @@ public:
     if (find_data.is_dir())
       return S_FALSE;
     archive.volume_names.insert(name);
-    volume_file_info.convert(find_data);
+    volume_file_info = find_data;
     ComObject<IInStream> file_stream(new ArchiveOpenStream(file_path));
     file_stream.detach(inStream);
     update_ui();
@@ -171,7 +166,7 @@ public:
 };
 
 
-bool Archive::open_sub_stream(IInStream** sub_stream, FileInfo& sub_arc_info) {
+bool Archive::open_sub_stream(IInStream** sub_stream, FindData& sub_arc_info) {
   UInt32 main_subfile;
   PropVariant prop;
   if (in_arc->GetArchiveProperty(kpidMainSubfile, prop.ref()) != S_OK || prop.vt != VT_UI4)
@@ -194,30 +189,30 @@ bool Archive::open_sub_stream(IInStream** sub_stream, FileInfo& sub_arc_info) {
     return false;
 
   if (in_arc->GetProperty(main_subfile, kpidPath, prop.ref()) == S_OK && prop.vt == VT_BSTR)
-    sub_arc_info.name = extract_file_name(prop.bstrVal);
+    wcscpy(sub_arc_info.cFileName, extract_file_name(prop.bstrVal).c_str());
 
   if (in_arc->GetProperty(main_subfile, kpidAttrib, prop.ref()) == S_OK && prop.is_uint())
-    sub_arc_info.attr = static_cast<DWORD>(prop.get_uint());
+    sub_arc_info.dwFileAttributes = static_cast<DWORD>(prop.get_uint());
   else
-    sub_arc_info.attr = 0;
+    sub_arc_info.dwFileAttributes = 0;
 
   if (in_arc->GetProperty(main_subfile, kpidSize, prop.ref()) == S_OK && prop.is_uint())
-    sub_arc_info.size = prop.get_uint();
+    sub_arc_info.set_size(prop.get_uint());
   else
-    sub_arc_info.size = 0;
+    sub_arc_info.set_size(0);
 
   if (in_arc->GetProperty(main_subfile, kpidCTime, prop.ref()) == S_OK && prop.is_filetime())
-    sub_arc_info.ctime = prop.get_filetime();
+    sub_arc_info.ftCreationTime = prop.get_filetime();
   else
-    sub_arc_info.ctime = arc_info.ctime;
+    sub_arc_info.ftCreationTime = arc_info.ftCreationTime;
   if (in_arc->GetProperty(main_subfile, kpidMTime, prop.ref()) == S_OK && prop.is_filetime())
-    sub_arc_info.mtime = prop.get_filetime();
+    sub_arc_info.ftLastWriteTime = prop.get_filetime();
   else
-    sub_arc_info.mtime = arc_info.mtime;
+    sub_arc_info.ftLastWriteTime = arc_info.ftLastWriteTime;
   if (in_arc->GetProperty(main_subfile, kpidATime, prop.ref()) == S_OK && prop.is_filetime())
-    sub_arc_info.atime = prop.get_filetime();
+    sub_arc_info.ftLastAccessTime = prop.get_filetime();
   else
-    sub_arc_info.atime = arc_info.atime;
+    sub_arc_info.ftLastAccessTime = arc_info.ftLastAccessTime;
 
   return true;
 }
@@ -237,7 +232,7 @@ void Archive::detect(const wstring& arc_path, bool all, vector<Archive>& archive
     parent_idx = archives.size() - 1;
 
   ComObject<IInStream> stream;
-  FileInfo arc_info;
+  FindData arc_info;
   memset(&arc_info, 0, sizeof(arc_info));
   if (parent_idx == -1) {
     ArchiveOpenStream* stream_impl = new ArchiveOpenStream(arc_path);
@@ -277,7 +272,7 @@ void Archive::detect(const wstring& arc_path, bool all, vector<Archive>& archive
   });
 
   // 2. find formats by file extension
-  ArcTypes types_by_ext = arc_formats.find_by_ext(extract_file_ext(arc_info.name));
+  ArcTypes types_by_ext = arc_formats.find_by_ext(extract_file_ext(arc_info.cFileName));
   for_each(types_by_ext.begin(), types_by_ext.end(), [&] (const ArcType& arc_type) {
     if (found_types.count(arc_type) == 0) {
       found_types.insert(arc_type);

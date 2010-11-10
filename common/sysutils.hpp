@@ -111,6 +111,10 @@ struct FindData: public WIN32_FIND_DATAW {
   unsigned __int64 size() const {
     return (static_cast<unsigned __int64>(nFileSizeHigh) << 32) | nFileSizeLow;
   }
+  void set_size(unsigned __int64 size) {
+    nFileSizeLow = static_cast<DWORD>(size & 0xFFFFFFFF);
+    nFileSizeHigh = static_cast<DWORD>(size >> 32);
+  }
 };
 
 class FileEnum: private NonCopyable {
