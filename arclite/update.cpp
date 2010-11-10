@@ -452,7 +452,7 @@ private:
 
   UInt32 scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index) {
     ArcFileInfo file_info;
-    file_info.attr = src_find_data.is_dir() ? FILE_ATTRIBUTE_DIRECTORY : 0;
+    file_info.is_dir = src_find_data.is_dir();
     file_info.parent = dst_dir_index;
     file_info.name = src_find_data.cFileName;
     FileIndexRange fi_range = std::equal_range(archive.file_list_index.begin(), archive.file_list_index.end(), -1, [&] (UInt32 left, UInt32 right) -> bool {

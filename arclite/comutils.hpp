@@ -4,12 +4,6 @@
 
 extern Error g_com_error;
 
-inline bool s_ok(HRESULT hr) {
-  if (FAILED(hr))
-    FAIL(hr);
-  return hr == S_OK;
-}
-
 #define COM_ERROR_HANDLER_BEGIN \
   try { \
     try {

@@ -278,38 +278,16 @@ wstring Archive::get_temp_file_name() const {
 
 bool ArcFileInfo::operator<(const ArcFileInfo& file_info) const {
   if (parent == file_info.parent)
-    if (is_dir() == file_info.is_dir())
+    if (is_dir == file_info.is_dir)
       return lstrcmpiW(name.c_str(), file_info.name.c_str()) < 0;
     else
-      return is_dir();
+      return is_dir;
   else
     return parent < file_info.parent;
 }
 
 
 void Archive::make_index() {
-  class Progress: public ProgressMonitor {
-  private:
-    UInt32 completed;
-    UInt32 total;
-    virtual void do_update_ui() {
-      wostringstream st;
-      st << completed << L" / " << total << L'\n';
-      st << Far::get_progress_bar_str(60, completed, total) << L'\n';
-      progress_text = st.str();
-      percent_done = calc_percent(completed, total);
-    }
-  public:
-    Progress(): ProgressMonitor(Far::get_msg(MSG_PROGRESS_OPEN)), completed(0), total(0) {
-    }
-    void update(UInt32 completed, UInt32 total) {
-      this->completed = completed;
-      this->total = total;
-      update_ui();
-    }
-  };
-  Progress progress;
-
   num_indices = 0;
   CHECK_COM(in_arc->GetNumberOfItems(&num_indices));
   file_list.clear();
@@ -330,64 +308,20 @@ void Archive::make_index() {
   map<UInt32, unsigned> dir_index_map;
   DirList dir_list;
 
-  bool total_size_defined = true;
-  unsigned __int64 total_size = 0;
-
   DirInfo dir_info;
   UInt32 dir_index = 0;
   ArcFileInfo file_info;
   wstring path;
   PropVariant prop;
   for (UInt32 i = 0; i < num_indices; i++) {
-    progress.update(i, num_indices);
+    // is directory?
+    file_info.is_dir = in_arc->GetProperty(i, kpidIsDir, prop.ref()) == S_OK && prop.is_bool() && prop.get_bool();
 
-    if (s_ok(in_arc->GetProperty(i, kpidPath, prop.ref())) && prop.is_str())
+    // file name
+    if (in_arc->GetProperty(i, kpidPath, prop.ref()) == S_OK && prop.is_str())
       path.assign(prop.get_str());
     else
       path.assign(get_default_name());
-
-    // attributes
-    bool is_dir = s_ok(in_arc->GetProperty(i, kpidIsDir, prop.ref())) && prop.is_bool() && prop.get_bool();
-    if (s_ok(in_arc->GetProperty(i, kpidAttrib, prop.ref())) && prop.is_uint())
-      file_info.attr = static_cast<DWORD>(prop.get_uint());
-    else
-      file_info.attr = 0;
-    if (is_dir)
-      file_info.attr |= FILE_ATTRIBUTE_DIRECTORY;
-    else
-      is_dir = file_info.is_dir();
-
-    // size
-    if (!is_dir && s_ok(in_arc->GetProperty(i, kpidSize, prop.ref())) && prop.is_uint()) {
-      file_info.size = prop.get_uint();
-      if (total_size_defined)
-        total_size += file_info.size;
-    }
-    else {
-      file_info.size = 0;
-      if (!is_dir)
-        total_size_defined = false;
-    }
-    if (!is_dir && s_ok(in_arc->GetProperty(i, kpidPackSize, prop.ref())) && prop.is_uint())
-      file_info.psize = prop.get_uint();
-    else
-      file_info.psize = 0;
-
-    // date & time
-    if (s_ok(in_arc->GetProperty(i, kpidCTime, prop.ref())) && prop.is_filetime())
-      file_info.ctime = prop.get_filetime();
-    else
-      file_info.ctime = arc_info.ftCreationTime;
-    if (s_ok(in_arc->GetProperty(i, kpidMTime, prop.ref())) && prop.is_filetime())
-      file_info.mtime = prop.get_filetime();
-    else
-      file_info.mtime = arc_info.ftLastWriteTime;
-    if (s_ok(in_arc->GetProperty(i, kpidATime, prop.ref())) && prop.is_filetime())
-      file_info.atime = prop.get_filetime();
-    else
-      file_info.atime = arc_info.ftLastAccessTime;
-
-    // file name
     size_t name_end_pos = path.size();
     while (name_end_pos && is_slash(path[name_end_pos - 1])) name_end_pos--;
     size_t name_pos = name_end_pos;
@@ -412,7 +346,7 @@ void Archive::make_index() {
     }
     file_info.parent = dir_info.parent;
 
-    if (is_dir) {
+    if (file_info.is_dir) {
       dir_info.index = dir_index;
       dir_info.parent = file_info.parent;
       dir_info.name = file_info.name;
@@ -433,11 +367,7 @@ void Archive::make_index() {
       dir_index_map[dir_info.index] = dir_index;
       file_info.parent = dir_info.parent;
       file_info.name = dir_info.name;
-      file_info.attr = FILE_ATTRIBUTE_DIRECTORY;
-      file_info.size = file_info.psize = 0;
-      file_info.ctime = arc_info.ftCreationTime;
-      file_info.mtime = arc_info.ftLastWriteTime;
-      file_info.atime = arc_info.ftLastAccessTime;
+      file_info.is_dir = true;
       dir_index++;
       file_list.push_back(file_info);
     }
@@ -459,27 +389,6 @@ void Archive::make_index() {
     return file_list[left] < file_list[right];
   });
 
-  // archive properties
-  arc_attr.clear();
-  Attr attr;
-  attr.name = Far::get_msg(MSG_KPID_PATH);
-  attr.value = arc_path;
-  arc_attr.push_back(attr);
-  if (total_size_defined) {
-    attr.name = Far::get_msg(MSG_PROPERTY_COMPRESSION_RATIO);
-    unsigned __int64 arc_size = arc_info.size();
-    for_each(volume_names.begin(), volume_names.end(), [&] (const wstring& volume_name) {
-      wstring volume_path = add_trailing_slash(arc_dir()) + volume_name;
-      FindData find_data;
-      if (get_find_data_nt(volume_path, find_data))
-        arc_size += find_data.size();
-    });
-    unsigned ratio = total_size ? round(static_cast<double>(arc_size) / total_size * 100) : 100;
-    if (ratio > 100)
-      ratio = 100;
-    attr.value = int_to_str(ratio) + L'%';
-    arc_attr.push_back(attr);
-  }
   load_arc_attr();
 }
 
@@ -488,7 +397,7 @@ UInt32 Archive::find_dir(const wstring& path) {
     make_index();
 
   ArcFileInfo dir_info;
-  dir_info.attr = FILE_ATTRIBUTE_DIRECTORY;
+  dir_info.is_dir = true;
   dir_info.parent = c_root_index;
   size_t begin_pos = 0;
   while (begin_pos < path.size()) {
@@ -523,4 +432,52 @@ FileIndexRange Archive::get_dir_list(UInt32 dir_index) {
   });
 
   return index_range;
+}
+
+DWORD Archive::get_attr(UInt32 index) const {
+  PropVariant prop;
+  if (in_arc->GetProperty(index, kpidAttrib, prop.ref()) == S_OK && prop.is_uint())
+    return static_cast<DWORD>(prop.get_uint());
+  else
+    return 0;
+}
+
+unsigned __int64 Archive::get_size(UInt32 index) const {
+  PropVariant prop;
+  if (!file_list[index].is_dir && in_arc->GetProperty(index, kpidSize, prop.ref()) == S_OK && prop.is_uint())
+    return prop.get_uint();
+  else
+    return 0;
+}
+
+unsigned __int64 Archive::get_psize(UInt32 index) const {
+  PropVariant prop;
+  if (!file_list[index].is_dir && in_arc->GetProperty(index, kpidPackSize, prop.ref()) == S_OK && prop.is_uint())
+    return prop.get_uint();
+  else
+    return 0;
+}
+
+FILETIME Archive::get_ctime(UInt32 index) const {
+  PropVariant prop;
+  if (in_arc->GetProperty(index, kpidCTime, prop.ref()) == S_OK && prop.is_filetime())
+    return prop.get_filetime();
+  else
+    return arc_info.ftCreationTime;
+}
+
+FILETIME Archive::get_mtime(UInt32 index) const {
+  PropVariant prop;
+  if (in_arc->GetProperty(index, kpidMTime, prop.ref()) == S_OK && prop.is_filetime())
+    return prop.get_filetime();
+  else
+    return arc_info.ftLastWriteTime;
+}
+
+FILETIME Archive::get_atime(UInt32 index) const {
+  PropVariant prop;
+  if (in_arc->GetProperty(index, kpidATime, prop.ref()) == S_OK && prop.is_filetime())
+    return prop.get_filetime();
+  else
+    return arc_info.ftLastAccessTime;
 }

@@ -163,11 +163,12 @@ private:
 
   struct CacheRecord {
     wstring file_path;
-    ArcFileInfo file_info;
+    UInt32 file_id;
     size_t buffer_pos;
     size_t buffer_size;
   };
 
+  Archive& archive;
   unsigned char* buffer;
   size_t buffer_size;
   size_t commit_size;
@@ -211,11 +212,11 @@ private:
   // allocate file
   void allocate_file() {
     if (error_state) return;
-    if (current_rec.file_info.size == 0) return;
+    if (archive.get_size(current_rec.file_id) == 0) return;
     while (true) {
       try {
         LARGE_INTEGER file_pos;
-        file_pos.QuadPart = current_rec.file_info.size;
+        file_pos.QuadPart = archive.get_size(current_rec.file_id);
         CHECK_SYS(SetFilePointerEx(h_file, file_pos, nullptr, FILE_BEGIN));
         CHECK_SYS(SetEndOfFile(h_file));
         file_pos.QuadPart = 0;
@@ -258,8 +259,8 @@ private:
       if (!error_state) {
         try {
           CHECK_SYS(SetEndOfFile(h_file)); // ensure end of file is set correctly
-          CHECK_SYS(SetFileAttributesW(long_path(current_rec.file_path).c_str(), current_rec.file_info.attr));
-          CHECK_SYS(SetFileTime(h_file, &current_rec.file_info.ctime, &current_rec.file_info.atime, &current_rec.file_info.mtime));
+          CHECK_SYS(SetFileAttributesW(long_path(current_rec.file_path).c_str(), archive.get_attr(current_rec.file_id)));
+          CHECK_SYS(SetFileTime(h_file, &archive.get_ctime(current_rec.file_id), &archive.get_atime(current_rec.file_id), &archive.get_mtime(current_rec.file_id)));
         }
         catch (const Error& e) {
           ignore_error(current_rec.file_path, e, ignore_errors, error_log, progress);
@@ -316,7 +317,7 @@ private:
     progress.update_cache_stored(size);
   }
 public:
-  FileWriteCache(bool& ignore_errors, ErrorLog& error_log, ExtractProgress& progress): buffer_size(get_max_cache_size()), commit_size(0), buffer_pos(0), h_file(INVALID_HANDLE_VALUE), continue_file(false), error_state(false), ignore_errors(ignore_errors), error_log(error_log), progress(progress) {
+  FileWriteCache(Archive& archive, bool& ignore_errors, ErrorLog& error_log, ExtractProgress& progress): archive(archive), buffer_size(get_max_cache_size()), commit_size(0), buffer_pos(0), h_file(INVALID_HANDLE_VALUE), continue_file(false), error_state(false), ignore_errors(ignore_errors), error_log(error_log), progress(progress) {
     progress.set_cache_total(buffer_size);
     buffer = reinterpret_cast<unsigned char*>(VirtualAlloc(nullptr, buffer_size, MEM_RESERVE, PAGE_NOACCESS));
     CHECK_SYS(buffer);
@@ -328,10 +329,10 @@ public:
       DeleteFileW(long_path(current_rec.file_path).c_str());
     }
   }
-  void store_file(const wstring& file_path, const ArcFileInfo& file_info) {
+  void store_file(const wstring& file_path, UInt32 file_id) {
     CacheRecord rec;
     rec.file_path = file_path;
-    rec.file_info = file_info;
+    rec.file_id = file_id;
     rec.buffer_pos = buffer_pos;
     rec.buffer_size = 0;
     cache_records.push_back(rec);
@@ -379,8 +380,7 @@ private:
   ArcFileInfo file_info;
   UInt32 src_dir_index;
   wstring dst_dir;
-  const FileList& file_list;
-  wstring& password;
+  Archive& archive;
   TriState& overwrite_option;
   bool& ignore_errors;
   ErrorLog& error_log;
@@ -388,7 +388,7 @@ private:
   ExtractProgress& progress;
 
 public:
-  ArchiveExtractor(UInt32 src_dir_index, const wstring& dst_dir, const FileList& file_list, wstring& password, TriState& overwrite_option, bool& ignore_errors, ErrorLog& error_log, FileWriteCache& cache, ExtractProgress& progress): src_dir_index(src_dir_index), dst_dir(dst_dir), file_list(file_list), password(password), overwrite_option(overwrite_option), ignore_errors(ignore_errors), error_log(error_log), cache(cache), progress(progress) {
+  ArchiveExtractor(UInt32 src_dir_index, const wstring& dst_dir, Archive& archive, TriState& overwrite_option, bool& ignore_errors, ErrorLog& error_log, FileWriteCache& cache, ExtractProgress& progress): src_dir_index(src_dir_index), dst_dir(dst_dir), archive(archive), overwrite_option(overwrite_option), ignore_errors(ignore_errors), error_log(error_log), cache(cache), progress(progress) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -414,14 +414,14 @@ public:
   STDMETHODIMP GetStream(UInt32 index, ISequentialOutStream **outStream,  Int32 askExtractMode) {
     COM_ERROR_HANDLER_BEGIN
     *outStream = nullptr;
-    file_info = file_list[index];
-    if (file_info.is_dir())
+    file_info = archive.file_list[index];
+    if (file_info.is_dir)
       return S_OK;
 
     file_path = file_info.name;
     UInt32 parent_index = file_info.parent;
     while (parent_index != src_dir_index && parent_index != c_root_index) {
-      const ArcFileInfo& file_info = file_list[parent_index];
+      const ArcFileInfo& file_info = archive.file_list[parent_index];
       file_path.insert(0, 1, L'\\').insert(0, file_info.name);
       parent_index = file_info.parent;
     }
@@ -435,9 +435,9 @@ public:
       bool overwrite;
       if (overwrite_option == triUndef) {
         OverwriteFileInfo src_ov_info, dst_ov_info;
-        src_ov_info.is_dir = file_info.is_dir();
-        src_ov_info.size = file_info.size;
-        src_ov_info.mtime = file_info.mtime;
+        src_ov_info.is_dir = file_info.is_dir;
+        src_ov_info.size = archive.get_size(index);
+        src_ov_info.mtime = archive.get_mtime(index);
         dst_ov_info.is_dir = dst_file_info.is_dir();
         dst_ov_info.size = dst_file_info.size();
         dst_ov_info.mtime = dst_file_info.ftLastWriteTime;
@@ -467,13 +467,12 @@ public:
         SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL);
       }
       else {
-        *outStream = nullptr;
         return S_OK;
       }
     }
 
     progress.update_extract_file(file_path);
-    cache.store_file(file_path, file_info);
+    cache.store_file(file_path, index);
     ComObject<ISequentialOutStream> out_stream(new CachedFileExtractStream(cache));
     out_stream.detach(outStream);
 
@@ -488,16 +487,16 @@ public:
   STDMETHODIMP SetOperationResult(Int32 resultEOperationResult) {
     COM_ERROR_HANDLER_BEGIN
     try {
-      bool encrypted = !password.empty();
+      bool encrypted = !archive.password.empty();
       if (resultEOperationResult == NArchive::NExtract::NOperationResult::kUnSupportedMethod) {
         FAIL_MSG(Far::get_msg(MSG_ERROR_EXTRACT_UNSUPPORTED_METHOD));
       }
       else if (resultEOperationResult == NArchive::NExtract::NOperationResult::kDataError) {
-        password.clear();
+        archive.password.clear();
         FAIL_MSG(Far::get_msg(encrypted ? MSG_ERROR_EXTRACT_DATA_ERROR_ENCRYPTED : MSG_ERROR_EXTRACT_DATA_ERROR));
       }
       else if (resultEOperationResult == NArchive::NExtract::NOperationResult::kCRCError) {
-        password.clear();
+        archive.password.clear();
         FAIL_MSG(Far::get_msg(encrypted ? MSG_ERROR_EXTRACT_CRC_ERROR_ENCRYPTED : MSG_ERROR_EXTRACT_CRC_ERROR));
       }
       else
@@ -509,14 +508,14 @@ public:
     COM_ERROR_HANDLER_END
   }
 
-  STDMETHODIMP CryptoGetTextPassword(BSTR *pwd) {
+  STDMETHODIMP CryptoGetTextPassword(BSTR *password) {
     COM_ERROR_HANDLER_BEGIN
-    if (password.empty()) {
+    if (archive.password.empty()) {
       ProgressSuspend ps(progress);
-      if (!password_dialog(password))
+      if (!password_dialog(archive.password))
         FAIL(E_ABORT);
     }
-    BStr(password).detach(pwd);
+    BStr(archive.password).detach(password);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
@@ -552,7 +551,7 @@ private:
   void prepare_extract(const FileIndexRange& index_range, const wstring& parent_dir) {
     for_each(index_range.first, index_range.second, [&] (UInt32 file_index) {
       const ArcFileInfo& file_info = archive.file_list[file_index];
-      if (file_info.is_dir()) {
+      if (file_info.is_dir) {
         wstring dir_path = add_trailing_slash(parent_dir) + file_info.name;
         update_progress(dir_path);
 
@@ -610,15 +609,15 @@ private:
       const ArcFileInfo& file_info = archive.file_list[file_index];
       wstring file_path = add_trailing_slash(parent_dir) + file_info.name;
       update_progress(file_path);
-      if (file_info.is_dir()) {
+      if (file_info.is_dir) {
         FileIndexRange dir_list = archive.get_dir_list(file_index);
         set_dir_attr(dir_list, file_path);
         while (true) {
           try {
             CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), FILE_ATTRIBUTE_NORMAL));
             File file(file_path, FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS);
-            CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), file_info.attr));
-            file.set_time(file_info.ctime, file_info.atime, file_info.mtime);
+            CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), archive.get_attr(file_index)));
+            file.set_time(archive.get_ctime(file_index), archive.get_atime(file_index), archive.get_mtime(file_index));
             break;
           }
           catch (const Error& e) {
@@ -652,8 +651,8 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
   sort(indices.begin(), indices.end());
 
   ExtractProgress progress;
-  FileWriteCache cache(ignore_errors, error_log, progress);
-  ComObject<IArchiveExtractCallback> extractor(new ArchiveExtractor(src_dir_index, options.dst_dir, file_list, password, overwrite_option, ignore_errors, error_log, cache, progress));
+  FileWriteCache cache(*this, ignore_errors, error_log, progress);
+  ComObject<IArchiveExtractCallback> extractor(new ArchiveExtractor(src_dir_index, options.dst_dir, *this, overwrite_option, ignore_errors, error_log, cache, progress));
   COM_ERROR_CHECK(in_arc->Extract(indices.data(), static_cast<UInt32>(indices.size()), 0, extractor));
   cache.finalize();
   progress.clean();

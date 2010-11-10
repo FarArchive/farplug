@@ -246,6 +246,13 @@ AttrList Archive::get_attr_list(UInt32 item_index) {
 }
 
 void Archive::load_arc_attr() {
+  arc_attr.clear();
+
+  Attr attr;
+  attr.name = Far::get_msg(MSG_KPID_PATH);
+  attr.value = arc_path;
+  arc_attr.push_back(attr);
+
   UInt32 num_props;
   CHECK_COM(in_arc->GetNumberOfArchiveProperties(&num_props));
   for (unsigned i = 0; i < num_props; i++) {
@@ -284,6 +291,36 @@ void Archive::load_arc_attr() {
     if (!attr.value.empty())
       arc_attr.push_back(attr);
   }
+
+  // compression ratio
+  bool total_size_defined = true;
+  unsigned __int64 total_size = 0;
+  PropVariant prop;
+  for (UInt32 file_id = 0; file_id < num_indices; file_id++) {
+    if (total_size_defined && !file_list[file_id].is_dir) {
+      if (in_arc->GetProperty(file_id, kpidSize, prop.ref()) == S_OK && prop.is_uint())
+        total_size += prop.get_uint();
+      else
+        total_size_defined = false;
+    }
+  }
+  if (total_size_defined) {
+    attr.name = Far::get_msg(MSG_PROPERTY_COMPRESSION_RATIO);
+    unsigned __int64 arc_size = arc_info.size();
+    for_each(volume_names.begin(), volume_names.end(), [&] (const wstring& volume_name) {
+      wstring volume_path = add_trailing_slash(arc_dir()) + volume_name;
+      FindData find_data;
+      if (get_find_data_nt(volume_path, find_data))
+        arc_size += find_data.size();
+    });
+    unsigned ratio = total_size ? round(static_cast<double>(arc_size) / total_size * 100) : 100;
+    if (ratio > 100)
+      ratio = 100;
+    attr.value = int_to_str(ratio) + L'%';
+    arc_attr.push_back(attr);
+  }
+
+
 }
 
 void Archive::load_update_props() {

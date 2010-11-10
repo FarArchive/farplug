@@ -95,15 +95,7 @@ public:
 struct ArcFileInfo {
   UInt32 parent;
   wstring name;
-  DWORD attr;
-  unsigned __int64 size;
-  unsigned __int64 psize;
-  FILETIME ctime;
-  FILETIME mtime;
-  FILETIME atime;
-  bool is_dir() const {
-    return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
-  }
+  bool is_dir;
   bool operator<(const ArcFileInfo& file_info) const;
 };
 typedef vector<ArcFileInfo> FileList;
@@ -162,6 +154,12 @@ public:
   void make_index();
   UInt32 find_dir(const wstring& dir);
   FileIndexRange get_dir_list(UInt32 dir_index);
+  DWORD get_attr(UInt32 index) const;
+  unsigned __int64 get_size(UInt32 index) const;
+  unsigned __int64 get_psize(UInt32 index) const;
+  FILETIME get_ctime(UInt32 index) const;
+  FILETIME get_mtime(UInt32 index) const;
+  FILETIME get_atime(UInt32 index) const;
 
   // extract
 private:

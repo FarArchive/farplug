@@ -108,7 +108,7 @@ public:
 
 void Archive::prepare_test(UInt32 file_index, list<UInt32>& indices) {
   const ArcFileInfo& file_info = file_list[file_index];
-  if (file_info.is_dir()) {
+  if (file_info.is_dir) {
     FileIndexRange dir_list = get_dir_list(file_index);
     for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
       prepare_test(file_index, indices);

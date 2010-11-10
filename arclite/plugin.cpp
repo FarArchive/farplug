@@ -115,12 +115,12 @@ public:
         const ArcFileInfo& file_info = archive.file_list[file_index];
         FAR_FIND_DATA& fdata = items[idx].FindData;
         const DWORD c_valid_attributes = FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM;
-        fdata.dwFileAttributes = file_info.attr & c_valid_attributes;
-        fdata.ftCreationTime = file_info.ctime;
-        fdata.ftLastAccessTime = file_info.atime;
-        fdata.ftLastWriteTime = file_info.mtime;
-        fdata.nFileSize = file_info.size;
-        fdata.nPackSize = file_info.psize;
+        fdata.dwFileAttributes = archive.get_attr(file_index) & c_valid_attributes;
+        fdata.ftCreationTime = archive.get_ctime(file_index);
+        fdata.ftLastAccessTime = archive.get_atime(file_index);
+        fdata.ftLastWriteTime = archive.get_mtime(file_index);
+        fdata.nFileSize = archive.get_size(file_index);
+        fdata.nPackSize = archive.get_psize(file_index);
         fdata.lpwszFileName = file_info.name.c_str();
         items[idx].UserData = file_index;
         idx++;
