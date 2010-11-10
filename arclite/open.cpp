@@ -156,7 +156,7 @@ public:
     COM_ERROR_HANDLER_BEGIN
     if (archive.password.empty()) {
       ProgressSuspend ps(*this);
-      if (!password_dialog(archive.password))
+      if (!password_dialog(archive.password, archive.arc_path))
         FAIL(E_ABORT);
     }
     BStr(archive.password).detach(password);

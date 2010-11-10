@@ -9,8 +9,7 @@
 class ArchiveTester: public IArchiveExtractCallback, public ICryptoGetTextPassword, public ComBase, public ProgressMonitor {
 private:
   UInt32 src_dir_index;
-  const FileList& file_list;
-  wstring& password;
+  Archive& archive;
 
   wstring file_path;
   unsigned __int64 completed;
@@ -34,7 +33,7 @@ private:
   }
 
 public:
-  ArchiveTester(UInt32 src_dir_index, const FileList& file_list, wstring& password): ProgressMonitor(Far::get_msg(MSG_PROGRESS_TEST)), src_dir_index(src_dir_index), file_list(file_list), password(password), completed(0), total(0) {
+  ArchiveTester(UInt32 src_dir_index, Archive& archive): ProgressMonitor(Far::get_msg(MSG_PROGRESS_TEST)), src_dir_index(src_dir_index), archive(archive), completed(0), total(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -62,11 +61,11 @@ public:
 
   STDMETHODIMP GetStream(UInt32 index, ISequentialOutStream **outStream,  Int32 askExtractMode) {
     COM_ERROR_HANDLER_BEGIN
-    const ArcFileInfo& file_info = file_list[index];
+    const ArcFileInfo& file_info = archive.file_list[index];
     file_path = file_info.name;
     UInt32 parent_index = file_info.parent;
     while (parent_index != src_dir_index) {
-      const ArcFileInfo& file_info = file_list[parent_index];
+      const ArcFileInfo& file_info = archive.file_list[parent_index];
       file_path.insert(0, 1, L'\\').insert(0, file_info.name);
       parent_index = file_info.parent;
     }
@@ -93,14 +92,14 @@ public:
     COM_ERROR_HANDLER_END
   }
 
-  STDMETHODIMP CryptoGetTextPassword(BSTR *pwd) {
+  STDMETHODIMP CryptoGetTextPassword(BSTR *password) {
     COM_ERROR_HANDLER_BEGIN
-    if (password.empty()) {
+    if (archive.password.empty()) {
       ProgressSuspend ps(*this);
-      if (!password_dialog(password))
+      if (!password_dialog(archive.password, archive.arc_path))
         FAIL(E_ABORT);
     }
-    BStr(password).detach(pwd);
+    BStr(archive.password).detach(password);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
@@ -130,6 +129,6 @@ void Archive::test(UInt32 src_dir_index, const vector<UInt32>& src_indices) {
   copy(file_indices.begin(), file_indices.end(), back_insert_iterator<vector<UInt32>>(indices));
   sort(indices.begin(), indices.end());
 
-  ComObject<IArchiveExtractCallback> tester(new ArchiveTester(src_dir_index, file_list, password));
+  ComObject<IArchiveExtractCallback> tester(new ArchiveTester(src_dir_index, *this));
   COM_ERROR_CHECK(in_arc->Extract(indices.data(), static_cast<UInt32>(indices.size()), 1, tester));
 }

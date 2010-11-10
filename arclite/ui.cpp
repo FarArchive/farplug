@@ -170,9 +170,10 @@ const GUID c_password_dialog_guid = { /* 761F3B4C-FC45-4A9D-A383-3F75D505A43B */
 class PasswordDialog: public Far::Dialog {
 private:
   enum {
-    c_client_xs = 40
+    c_client_xs = 60
   };
 
+  wstring arc_path;
   wstring& password;
 
   int password_ctrl_id;
@@ -187,10 +188,12 @@ private:
   }
 
 public:
-  PasswordDialog(wstring& password): Far::Dialog(Far::get_msg(MSG_PASSWORD_TITLE), &c_password_dialog_guid, c_client_xs), password(password) {
+  PasswordDialog(wstring& password, const wstring& arc_path): Far::Dialog(Far::get_msg(MSG_PASSWORD_TITLE), &c_password_dialog_guid, c_client_xs), password(password), arc_path(arc_path) {
   }
 
   bool show() {
+    label(fit_str(arc_path, c_client_xs));
+    new_line();
     label(Far::get_msg(MSG_PASSWORD_PASSWORD));
     password_ctrl_id = pwd_edit_box(password);
     new_line();
@@ -207,8 +210,8 @@ public:
   }
 };
 
-bool password_dialog(wstring& password) {
-  return PasswordDialog(password).show();
+bool password_dialog(wstring& password, const wstring& arc_path) {
+  return PasswordDialog(password, arc_path).show();
 }
 
 

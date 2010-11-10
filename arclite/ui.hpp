@@ -51,7 +51,7 @@ public:
 const wchar_t** get_size_suffixes();
 const wchar_t** get_speed_suffixes();
 
-bool password_dialog(wstring& password);
+bool password_dialog(wstring& password, const wstring& arc_path);
 
 enum OverwriteAction { oaYes, oaYesAll, oaNo, oaNoAll, oaCancel };
 struct OverwriteFileInfo {
