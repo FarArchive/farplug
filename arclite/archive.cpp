@@ -495,3 +495,13 @@ FILETIME Archive::get_atime(UInt32 index) const {
   else
     return arc_info.ftLastAccessTime;
 }
+
+unsigned Archive::get_crc(UInt32 index) const {
+  PropVariant prop;
+  if (index >= num_indices)
+    return 0;
+  else if (in_arc->GetProperty(index, kpidCRC, prop.ref()) == S_OK && prop.is_uint())
+    return static_cast<DWORD>(prop.get_uint());
+  else
+    return 0;
+}

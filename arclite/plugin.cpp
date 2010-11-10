@@ -123,6 +123,7 @@ public:
         fdata.nPackSize = archive.get_psize(file_index);
         fdata.lpwszFileName = file_info.name.c_str();
         items[idx].UserData = file_index;
+        items[idx].CRC32 = archive.get_crc(file_index);
         idx++;
       });
     }
