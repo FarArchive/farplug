@@ -436,15 +436,21 @@ FileIndexRange Archive::get_dir_list(UInt32 dir_index) {
 
 DWORD Archive::get_attr(UInt32 index) const {
   PropVariant prop;
-  if (in_arc->GetProperty(index, kpidAttrib, prop.ref()) == S_OK && prop.is_uint())
+  if (index >= num_indices)
+    return FILE_ATTRIBUTE_DIRECTORY;
+  else if (in_arc->GetProperty(index, kpidAttrib, prop.ref()) == S_OK && prop.is_uint())
     return static_cast<DWORD>(prop.get_uint());
+  else if (file_list[index].is_dir)
+    return FILE_ATTRIBUTE_DIRECTORY;
   else
     return 0;
 }
 
 unsigned __int64 Archive::get_size(UInt32 index) const {
   PropVariant prop;
-  if (!file_list[index].is_dir && in_arc->GetProperty(index, kpidSize, prop.ref()) == S_OK && prop.is_uint())
+  if (index >= num_indices)
+    return 0;
+  else if (!file_list[index].is_dir && in_arc->GetProperty(index, kpidSize, prop.ref()) == S_OK && prop.is_uint())
     return prop.get_uint();
   else
     return 0;
@@ -452,7 +458,9 @@ unsigned __int64 Archive::get_size(UInt32 index) const {
 
 unsigned __int64 Archive::get_psize(UInt32 index) const {
   PropVariant prop;
-  if (!file_list[index].is_dir && in_arc->GetProperty(index, kpidPackSize, prop.ref()) == S_OK && prop.is_uint())
+  if (index >= num_indices)
+    return 0;
+  else if (!file_list[index].is_dir && in_arc->GetProperty(index, kpidPackSize, prop.ref()) == S_OK && prop.is_uint())
     return prop.get_uint();
   else
     return 0;
@@ -460,7 +468,9 @@ unsigned __int64 Archive::get_psize(UInt32 index) const {
 
 FILETIME Archive::get_ctime(UInt32 index) const {
   PropVariant prop;
-  if (in_arc->GetProperty(index, kpidCTime, prop.ref()) == S_OK && prop.is_filetime())
+  if (index >= num_indices)
+    return arc_info.ftCreationTime;
+  else if (in_arc->GetProperty(index, kpidCTime, prop.ref()) == S_OK && prop.is_filetime())
     return prop.get_filetime();
   else
     return arc_info.ftCreationTime;
@@ -468,7 +478,9 @@ FILETIME Archive::get_ctime(UInt32 index) const {
 
 FILETIME Archive::get_mtime(UInt32 index) const {
   PropVariant prop;
-  if (in_arc->GetProperty(index, kpidMTime, prop.ref()) == S_OK && prop.is_filetime())
+  if (index >= num_indices)
+    return arc_info.ftLastWriteTime;
+  else if (in_arc->GetProperty(index, kpidMTime, prop.ref()) == S_OK && prop.is_filetime())
     return prop.get_filetime();
   else
     return arc_info.ftLastWriteTime;
@@ -476,7 +488,9 @@ FILETIME Archive::get_mtime(UInt32 index) const {
 
 FILETIME Archive::get_atime(UInt32 index) const {
   PropVariant prop;
-  if (in_arc->GetProperty(index, kpidATime, prop.ref()) == S_OK && prop.is_filetime())
+  if (index >= num_indices)
+    return arc_info.ftLastAccessTime;
+  else if (in_arc->GetProperty(index, kpidATime, prop.ref()) == S_OK && prop.is_filetime())
     return prop.get_filetime();
   else
     return arc_info.ftLastAccessTime;
