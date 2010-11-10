@@ -14,24 +14,30 @@ private:
   bool device_file;
   unsigned __int64 device_pos;
   unsigned __int64 device_size;
+  unsigned device_sector_size;
 
   void check_device_file() {
     device_pos = 0;
     device_file = false;
     if (size_nt(device_size))
       return;
-    DWORD bytes_ret;
+
     PARTITION_INFORMATION part_info;
-    BOOL res = DeviceIoControl(handle(), IOCTL_DISK_GET_PARTITION_INFO, nullptr, 0, &part_info, sizeof(PARTITION_INFORMATION), &bytes_ret, nullptr);
-    if (res) {
+    if (io_control_out(IOCTL_DISK_GET_PARTITION_INFO, part_info)) {
       device_size = part_info.PartitionLength.QuadPart;
+      DWORD sectors_per_cluster, bytes_per_sector, number_of_free_clusters, total_number_of_clusters;
+      if (GetDiskFreeSpaceW(add_trailing_slash(file_path).c_str(), &sectors_per_cluster, &bytes_per_sector, &number_of_free_clusters, &total_number_of_clusters))
+        device_sector_size = bytes_per_sector;
+      else
+        device_sector_size = 4096;
       device_file = true;
       return;
     }
+
     DISK_GEOMETRY disk_geometry;
-    res = DeviceIoControl(handle(), IOCTL_DISK_GET_DRIVE_GEOMETRY, nullptr, 0, &disk_geometry, sizeof(DISK_GEOMETRY), &bytes_ret, nullptr);
-    if (res) {
+    if (io_control_out(IOCTL_DISK_GET_DRIVE_GEOMETRY, disk_geometry)) {
       device_size = disk_geometry.Cylinders.QuadPart * disk_geometry.TracksPerCylinder * disk_geometry.SectorsPerTrack * disk_geometry.BytesPerSector;
+      device_sector_size = disk_geometry.BytesPerSector;
       device_file = true;
       return;
     }
@@ -49,9 +55,29 @@ public:
 
   STDMETHODIMP Read(void *data, UInt32 size, UInt32 *processedSize) {
     COM_ERROR_HANDLER_BEGIN
-    unsigned size_read = read(data, size);
-    if (device_file)
+    unsigned size_read;
+    if (device_file) {
+      unsigned __int64 aligned_pos = device_pos / device_sector_size * device_sector_size;
+      unsigned aligned_offset = static_cast<unsigned>(device_pos - aligned_pos);
+      unsigned aligned_size = aligned_offset + size;
+      aligned_size = (aligned_size / device_sector_size + (aligned_size % device_sector_size ? 1 : 0)) * device_sector_size;
+      Buffer<unsigned char> buffer(aligned_size + device_sector_size);
+      ptrdiff_t buffer_addr = buffer.data() - static_cast<unsigned char*>(0);
+      unsigned char* alligned_buffer = reinterpret_cast<unsigned char*>(buffer_addr % device_sector_size ? (buffer_addr / device_sector_size + 1) * device_sector_size : buffer_addr);
+      set_pos(aligned_pos, FILE_BEGIN);
+      size_read = read(alligned_buffer, aligned_size);
+      if (size_read < aligned_offset)
+        size_read = 0;
+      else
+        size_read -= aligned_offset;
+      if (size_read > size)
+        size_read = size;
       device_pos += size_read;
+      memcpy(data, alligned_buffer + aligned_offset, size_read);
+    }
+    else {
+      size_read = read(data, size);
+    }
     if (processedSize)
       *processedSize = size_read;
     return S_OK;
@@ -72,7 +98,7 @@ public:
       default:
         FAIL(E_INVALIDARG);
       }
-      new_position = set_pos(device_pos, FILE_BEGIN);
+      new_position = device_pos;
     }
     else {
       new_position = set_pos(offset, translate_seek_method(seekOrigin));
@@ -86,7 +112,10 @@ public:
   FindData get_info() {
     FindData file_info;
     memset(&file_info, 0, sizeof(file_info));
-    wcscpy(file_info.cFileName, extract_file_name(file_path).c_str());
+    wstring file_name = extract_file_name(file_path);
+    if (file_name.empty())
+      file_name = file_path;
+    wcscpy(file_info.cFileName, file_name.c_str());
     BY_HANDLE_FILE_INFORMATION fi;
     if (get_info_nt(fi)) {
       file_info.dwFileAttributes = fi.dwFileAttributes;

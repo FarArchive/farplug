@@ -133,6 +133,10 @@ public:
   wstring arc_dir() const {
     return extract_file_path(arc_path);
   }
+  wstring arc_name() const {
+    wstring name = extract_file_name(arc_path);
+    return name.empty() ? arc_path : name;
+  }
   static vector<Archive> detect(const wstring& file_path, bool all);
   void close();
   void reopen();

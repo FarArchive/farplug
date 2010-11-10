@@ -259,7 +259,7 @@ void ArcAPI::free() {
 
 
 wstring Archive::get_default_name() const {
-  wstring name = extract_file_name(arc_path);
+  wstring name = arc_name();
   size_t pos = name.find_last_of(L'.');
   if (pos == wstring::npos)
     return name;

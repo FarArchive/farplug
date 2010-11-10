@@ -54,8 +54,8 @@ public:
     opi->CurDir = current_dir.c_str();
     panel_title = Far::get_msg(MSG_PLUGIN_NAME);
     if (archive.is_open()) {
-      panel_title += L":" + archive.arc_chain.to_string() + L":" + extract_file_name(archive.arc_path);
-      host_file = extract_file_name(archive.arc_path);
+      panel_title += L":" + archive.arc_chain.to_string() + L":" + archive.arc_name();
+      host_file = archive.arc_name();
     }
     opi->HostFile = host_file.c_str();
     opi->Format = g_plugin_prefix.c_str();
@@ -135,8 +135,8 @@ public:
     *items_number = static_cast<int>(size);
   }
 
-  static wstring get_separate_dir_path(const wstring& dst_dir, const wstring& arc_path) {
-    wstring final_dir = add_trailing_slash(dst_dir) + extract_file_name(arc_path);
+  static wstring get_separate_dir_path(const wstring& dst_dir, const wstring& arc_name) {
+    wstring final_dir = add_trailing_slash(dst_dir) + arc_name;
     wstring ext = extract_file_ext(final_dir);
     final_dir.erase(final_dir.size() - ext.size(), ext.size());
     if (GetFileAttributesW(long_path(final_dir).c_str()) != INVALID_FILE_ATTRIBUTES) {
@@ -180,7 +180,7 @@ public:
         *dest_path = extract_dir.c_str();
       }
       if (options.separate_dir == triTrue || (options.separate_dir == triUndef && items_number > 1 && (op_mode & OPM_TOPLEVEL))) {
-        options.dst_dir = get_separate_dir_path(options.dst_dir, archive.arc_path);
+        options.dst_dir = get_separate_dir_path(options.dst_dir, archive.arc_name());
       }
       if (!options.password.empty())
         archive.password = options.password;
@@ -267,7 +267,7 @@ public:
       });
 
       if (options.separate_dir == triTrue || (options.separate_dir == triUndef && indices.size() > 1))
-        options.dst_dir = get_separate_dir_path(dst_dir, archive.arc_path);
+        options.dst_dir = get_separate_dir_path(dst_dir, archive.arc_name());
       else
         options.dst_dir = dst_dir;
 

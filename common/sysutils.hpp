@@ -67,6 +67,10 @@ public:
   bool set_end_nt();
   BY_HANDLE_FILE_INFORMATION get_info();
   bool get_info_nt(BY_HANDLE_FILE_INFORMATION& info) throw();
+  template<typename Type> bool io_control_out(DWORD code, Type& data) {
+    DWORD size_ret;
+    return DeviceIoControl(h_file, code, nullptr, 0, &data, sizeof(Type), &size_ret, nullptr) != 0;
+  }
 };
 
 class Key: private NonCopyable {
