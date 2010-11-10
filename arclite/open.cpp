@@ -265,8 +265,8 @@ bool Archive::open(IInStream* in_stream) {
   CHECK_COM(in_stream->Seek(0, STREAM_SEEK_SET, nullptr));
   ComObject<IArchiveOpenCallback> opener(new ArchiveOpener(*this));
   const UInt64 max_check_start_position = max_check_size;
-  HRESULT res = in_arc->Open(in_stream, &max_check_start_position, opener);
-  COM_ERROR_CHECK(res);
+  HRESULT res;
+  COM_ERROR_CHECK(res = in_arc->Open(in_stream, &max_check_start_position, opener));
   return res == S_OK;
 }
 
