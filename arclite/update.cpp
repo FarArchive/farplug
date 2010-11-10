@@ -20,6 +20,7 @@ private:
   bool new_arc;
   UInt64 total;
   UInt64 completed;
+  wstring arc_path;
   wstring file_path;
   UInt64 file_total;
   UInt64 file_completed;
@@ -46,6 +47,8 @@ private:
       total_time = time;
 
     wostringstream st;
+    st << fit_str(arc_path, c_width) << L'\n';
+    st << L"\x1\n";
     st << fit_str(file_path, c_width) << L'\n';
     st << setw(7) << format_data_size(file_completed, get_size_suffixes()) << L" / " << format_data_size(file_total, get_size_suffixes()) << L'\n';
     st << Far::get_progress_bar_str(c_width, file_percent, 100) << L'\n';
@@ -56,7 +59,7 @@ private:
   }
 
 public:
-  ArchiveUpdateProgress(bool new_arc): ProgressMonitor(Far::get_msg(new_arc ? MSG_PROGRESS_CREATE : MSG_PROGRESS_UPDATE)), new_arc(new_arc), completed(0), total(0), file_completed(0), file_total(0) {
+  ArchiveUpdateProgress(bool new_arc, const wstring& arc_path): ProgressMonitor(Far::get_msg(new_arc ? MSG_PROGRESS_CREATE : MSG_PROGRESS_UPDATE)), new_arc(new_arc), arc_path(arc_path), completed(0), total(0), file_completed(0), file_total(0) {
   }
 
   void on_open_file(const wstring& file_path, unsigned __int64 size) {
@@ -523,14 +526,13 @@ private:
   wstring dst_dir;
   UInt32 num_indices;
   const FileIndexMap& file_index_map;
-  const wstring& password;
-  bool open_shared;
+  const UpdateOptions& options;
   bool& ignore_errors;
   ErrorLog& error_log;
   ArchiveUpdateProgress progress;
 
 public:
-  ArchiveUpdater(const wstring& src_dir, const wstring& dst_dir, UInt32 num_indices, const FileIndexMap& file_index_map, const wstring& password, bool open_shared, bool& ignore_errors, ErrorLog& error_log): src_dir(src_dir), dst_dir(dst_dir), num_indices(num_indices), file_index_map(file_index_map), password(password), open_shared(open_shared), progress(num_indices == 0), ignore_errors(ignore_errors), error_log(error_log) {
+  ArchiveUpdater(const wstring& src_dir, const wstring& dst_dir, UInt32 num_indices, const FileIndexMap& file_index_map, const UpdateOptions& options, bool& ignore_errors, ErrorLog& error_log): src_dir(src_dir), dst_dir(dst_dir), num_indices(num_indices), file_index_map(file_index_map), options(options), progress(num_indices == 0, options.arc_path), ignore_errors(ignore_errors), error_log(error_log) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -609,7 +611,7 @@ public:
     FileReadStream* file_read_stream = nullptr;
     while (true) {
       try {
-        file_read_stream = new FileReadStream(file_path, open_shared, progress);
+        file_read_stream = new FileReadStream(file_path, options.open_shared, progress);
         break;
       }
       catch (const Error& e) {
@@ -637,10 +639,10 @@ public:
     COM_ERROR_HANDLER_END
   }
 
-  STDMETHODIMP CryptoGetTextPassword2(Int32 *passwordIsDefined, BSTR *pwd) {
+  STDMETHODIMP CryptoGetTextPassword2(Int32 *passwordIsDefined, BSTR *password) {
     COM_ERROR_HANDLER_BEGIN
-    *passwordIsDefined = !password.empty();
-    BStr(password).detach(pwd);
+    *passwordIsDefined = !options.password.empty();
+    BStr(options.password).detach(password);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
@@ -791,7 +793,7 @@ void Archive::create(const wstring& src_dir, const vector<wstring>& file_names, 
 
   set_properties(out_arc, options);
 
-  ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options.password, options.open_shared, ignore_errors, error_log));
+  ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, wstring(), 0, file_index_map, options, ignore_errors, error_log));
   UpdateStream* stream_impl;
   if (options.enable_volumes)
     stream_impl = new MultiVolumeUpdateStream(options.arc_path, parse_size_string(options.volume_size));
@@ -827,7 +829,7 @@ void Archive::update(const wstring& src_dir, const vector<wstring>& file_names, 
 
     set_properties(out_arc, options);
 
-    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, options.password, options.open_shared, ignore_errors, error_log));
+    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, options, ignore_errors, error_log));
     ComObject<IOutStream> update_stream(new SimpleUpdateStream(temp_arc_name));
 
     COM_ERROR_CHECK(out_arc->UpdateItems(update_stream, new_index, updater));
