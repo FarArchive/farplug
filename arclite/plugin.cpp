@@ -7,6 +7,7 @@
 #include "ui.hpp"
 #include "archive.hpp"
 #include "options.hpp"
+#include "cmdline.hpp"
 
 wstring g_plugin_prefix;
 
@@ -686,10 +687,27 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
     }
   }
   else if (OpenFrom == OPEN_COMMANDLINE) {
-    wstring path = unquote(strip(reinterpret_cast<const wchar_t*>(Item)));
-    if (!is_absolute_path(path))
-      path = Far::get_absolute_path(path);
-    return new Plugin(path, true);
+    CommandArgs cmd_args = parse_command(reinterpret_cast<const wchar_t*>(Item));
+    switch (cmd_args.cmd) {
+    case cmdOpen: {
+      OpenCommand cmd = parse_open_command(cmd_args.args);
+      return new Plugin(Far::get_absolute_path(cmd.arc_path), !cmd.detect);
+      break;
+    }
+    case cmdCreate:
+      break;
+    case cmdExtract:
+      break;
+    case cmdTest:
+      TestCommand cmd = parse_test_command(cmd_args.args);
+      vector<wstring> file_list;
+      file_list.reserve(cmd.arc_list.size());
+      for_each(cmd.arc_list.begin(), cmd.arc_list.end(), [&] (const wstring& arc_name) {
+        file_list.push_back(Far::get_absolute_path(arc_name));
+      });
+      Plugin::bulk_test(file_list);
+      break;
+    }
   }
   return INVALID_HANDLE_VALUE;
   FAR_ERROR_HANDLER_END(return INVALID_HANDLE_VALUE, return INVALID_HANDLE_VALUE, false);
