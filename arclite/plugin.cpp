@@ -217,41 +217,20 @@ public:
     }
   }
 
-  static void bulk_extract(const vector<wstring>& file_list) {
-    ExtractOptions options;
-    wstring dst_dir;
-    options.dst_dir = Far::get_panel_dir(PANEL_PASSIVE);
-    options.move_files = triUndef;
-    options.delete_archive = false;
-    options.ignore_errors = g_options.extract_ignore_errors;
-    options.overwrite = g_options.extract_overwrite;
-    options.separate_dir = g_options.extract_separate_dir;
-
-    if (!extract_dialog(options))
-      FAIL(E_ABORT);
-    dst_dir = options.dst_dir;
-    if (dst_dir.empty())
-      dst_dir = L".";
-    if (!is_absolute_path(dst_dir))
-      dst_dir = Far::get_absolute_path(options.dst_dir);
-
-    g_options.extract_ignore_errors = options.ignore_errors;
-    g_options.extract_overwrite = options.overwrite;
-    g_options.extract_separate_dir = options.separate_dir;
-    g_options.save();
-
+  static void extract(const vector<wstring>& arc_list, ExtractOptions options) {
+    wstring dst_dir = options.dst_dir;
     ErrorLog error_log;
-    for (unsigned i = 0; i < file_list.size(); i++) {
+    for (unsigned i = 0; i < arc_list.size(); i++) {
       vector<Archive> archives;
       try {
-        archives = Archive::detect(file_list[i], false);
+        archives = Archive::detect(arc_list[i], false);
         if (archives.empty())
           FAIL(Far::get_msg(MSG_ERROR_NOT_ARCHIVE));
       }
       catch (const Error& error) {
         if (error.code == E_ABORT)
           throw;
-        error_log.add(file_list[i], error);
+        error_log.add(arc_list[i], error);
         continue;
       }
 
@@ -290,6 +269,42 @@ public:
     }
   }
 
+  static void bulk_extract(const vector<wstring>& arc_list) {
+    ExtractOptions options;
+    wstring dst_dir;
+    options.dst_dir = Far::get_panel_dir(PANEL_PASSIVE);
+    options.move_files = triUndef;
+    options.delete_archive = false;
+    options.ignore_errors = g_options.extract_ignore_errors;
+    options.overwrite = g_options.extract_overwrite;
+    options.separate_dir = g_options.extract_separate_dir;
+
+    if (!extract_dialog(options))
+      FAIL(E_ABORT);
+    if (options.dst_dir.empty())
+      options.dst_dir = L".";
+    if (!is_absolute_path(options.dst_dir))
+      options.dst_dir = Far::get_absolute_path(options.dst_dir);
+
+    g_options.extract_ignore_errors = options.ignore_errors;
+    g_options.extract_overwrite = options.overwrite;
+    g_options.extract_separate_dir = options.separate_dir;
+    g_options.save();
+
+    extract(arc_list, options);
+  }
+
+  static void cmdline_extract(const ExtractCommand& cmd) {
+    vector<wstring> arc_list;
+    arc_list.reserve(cmd.arc_list.size());
+    for_each(cmd.arc_list.begin(), cmd.arc_list.end(), [&] (const wstring& arc_name) {
+      arc_list.push_back(Far::get_absolute_path(arc_name));
+    });
+    ExtractOptions options = cmd.options;
+    options.dst_dir = Far::get_absolute_path(cmd.options.dst_dir);
+    extract(arc_list, options);
+  }
+
   void test_files(struct PluginPanelItem* panel_items, int items_number, int op_mode) {
     UInt32 src_dir_index = archive.find_dir(current_dir);
     vector<UInt32> indices;
@@ -301,19 +316,19 @@ public:
     Far::info_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_TEST_OK));
   }
 
-  static void bulk_test(const vector<wstring>& file_list) {
+  static void bulk_test(const vector<wstring>& arc_list) {
     ErrorLog error_log;
-    for (unsigned i = 0; i < file_list.size(); i++) {
+    for (unsigned i = 0; i < arc_list.size(); i++) {
       vector<Archive> archives;
       try {
-        archives = Archive::detect(file_list[i], false);
+        archives = Archive::detect(arc_list[i], false);
         if (archives.empty())
           FAIL(Far::get_msg(MSG_ERROR_NOT_ARCHIVE));
       }
       catch (const Error& error) {
         if (error.code == E_ABORT)
           throw;
-        error_log.add(file_list[i], error);
+        error_log.add(arc_list[i], error);
         continue;
       }
 
@@ -333,7 +348,7 @@ public:
       catch (const Error& error) {
         if (error.code == E_ABORT)
           throw;
-        error_log.add(file_list[i], error);
+        error_log.add(arc_list[i], error);
       }
     }
 
@@ -344,6 +359,15 @@ public:
       Far::update_panel(PANEL_ACTIVE, false);
       Far::info_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_TEST_OK));
     }
+  }
+
+  static void cmdline_test(const TestCommand& cmd) {
+    vector<wstring> arc_list;
+    arc_list.reserve(cmd.arc_list.size());
+    for_each(cmd.arc_list.begin(), cmd.arc_list.end(), [&] (const wstring& arc_name) {
+      arc_list.push_back(Far::get_absolute_path(arc_name));
+    });
+    Plugin::bulk_test(arc_list);
   }
 
   void put_files(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t* src_path, int op_mode) {
@@ -692,20 +716,14 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
     case cmdOpen: {
       OpenCommand cmd = parse_open_command(cmd_args.args);
       return new Plugin(Far::get_absolute_path(cmd.arc_path), !cmd.detect);
-      break;
     }
     case cmdCreate:
       break;
     case cmdExtract:
+      Plugin::cmdline_extract(parse_extract_command(cmd_args.args));
       break;
     case cmdTest:
-      TestCommand cmd = parse_test_command(cmd_args.args);
-      vector<wstring> file_list;
-      file_list.reserve(cmd.arc_list.size());
-      for_each(cmd.arc_list.begin(), cmd.arc_list.end(), [&] (const wstring& arc_name) {
-        file_list.push_back(Far::get_absolute_path(arc_name));
-      });
-      Plugin::bulk_test(file_list);
+      Plugin::cmdline_test(parse_test_command(cmd_args.args));
       break;
     }
   }

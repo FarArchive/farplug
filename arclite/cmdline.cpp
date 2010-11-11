@@ -60,9 +60,9 @@ Param parse_param(const wstring& param_str) {
   return param;
 }
 
-bool parse_bool_value(const wstring& value, bool def_value) {
+bool parse_bool_value(const wstring& value) {
   if (value.empty())
-    return def_value;
+    return true;
   wstring lcvalue = lc(value);
   if (lcvalue == L"y")
     return true;
@@ -72,9 +72,9 @@ bool parse_bool_value(const wstring& value, bool def_value) {
     CHECK_FMT(false);
 }
 
-TriState parse_tri_state_value(const wstring& value, TriState def_value) {
+TriState parse_tri_state_value(const wstring& value) {
   if (value.empty())
-    return def_value;
+    return triTrue;
   wstring lcvalue = lc(value);
   if (lcvalue == L"y")
     return triTrue;
@@ -133,7 +133,7 @@ CreateCommand parse_create_command(const vector<wstring>& args) {
       CHECK_FMT(find(c_methods, c_methods + ARRAYSIZE(c_methods), command.options.method) != c_methods + ARRAYSIZE(c_methods));
     }
     else if (param.name == L"s") {
-      command.options.solid = parse_bool_value(param.value, command.options.solid);
+      command.options.solid = parse_bool_value(param.value);
     }
     else if (param.name == L"p") {
       CHECK_FMT(!param.value.empty());
@@ -141,7 +141,7 @@ CreateCommand parse_create_command(const vector<wstring>& args) {
       command.options.encrypt = true;
     }
     else if (param.name == L"eh")
-      command.options.encrypt_header = parse_tri_state_value(param.value, command.options.encrypt_header);
+      command.options.encrypt_header = parse_tri_state_value(param.value);
     else if (param.name == L"sfx") {
       CHECK_FMT(!param.value.empty());
       command.options.create_sfx = true;
@@ -153,9 +153,9 @@ CreateCommand parse_create_command(const vector<wstring>& args) {
       command.options.volume_size = param.value;
     }
     else if (param.name == L"mf")
-      command.options.move_files = parse_bool_value(param.value, command.options.move_files);
+      command.options.move_files = parse_bool_value(param.value);
     else if (param.name == L"ie")
-      command.options.ignore_errors = parse_bool_value(param.value, command.options.ignore_errors);
+      command.options.ignore_errors = parse_bool_value(param.value);
     else if (param.name == L"adv") {
       CHECK_FMT(!param.value.empty());
       command.options.advanced = param.value;
@@ -186,19 +186,19 @@ ExtractCommand parse_extract_command(const vector<wstring>& args) {
   for (; i < args.size() && is_param(args[i]); i++) {
     Param param = parse_param(args[i]);
     if (param.name == L"ie")
-      command.options.ignore_errors = parse_bool_value(param.value, command.options.ignore_errors);
+      command.options.ignore_errors = parse_bool_value(param.value);
     else if (param.name == L"o")
-      command.options.overwrite = parse_tri_state_value(param.value, command.options.overwrite);
+      command.options.overwrite = parse_tri_state_value(param.value);
     else if (param.name == L"mf")
-      command.options.move_files = parse_tri_state_value(param.value, command.options.move_files);
+      command.options.move_files = parse_tri_state_value(param.value);
     else if (param.name == L"p") {
       CHECK_FMT(!param.value.empty());
       command.options.password = param.value;
     }
     else if (param.name == L"sd")
-      command.options.separate_dir = parse_tri_state_value(param.value, command.options.separate_dir);
+      command.options.separate_dir = parse_tri_state_value(param.value);
     else if (param.name == L"da")
-      command.options.delete_archive = parse_bool_value(param.value, command.options.delete_archive);
+      command.options.delete_archive = parse_bool_value(param.value);
     else
       CHECK_FMT(false);
   }
