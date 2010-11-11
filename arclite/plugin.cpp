@@ -216,7 +216,7 @@ public:
     }
   }
 
-  static void bulk_extract(const vector<wstring> file_list) {
+  static void bulk_extract(const vector<wstring>& file_list) {
     ExtractOptions options;
     wstring dst_dir;
     options.dst_dir = Far::get_panel_dir(PANEL_PASSIVE);
@@ -303,7 +303,7 @@ public:
     Far::info_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_TEST_OK));
   }
 
-  static void bulk_test(const vector<wstring> file_list) {
+  static void bulk_test(const vector<wstring>& file_list) {
     ErrorLog error_log;
     for (unsigned i = 0; i < file_list.size(); i++) {
       vector<Archive> archives;
