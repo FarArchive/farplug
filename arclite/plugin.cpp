@@ -248,7 +248,7 @@ public:
       try {
         archives = Archive::detect(file_list[i], false);
         if (archives.empty())
-          FAIL(Far::get_msg(MSG_ERROR_NOT_ARCHIVE));
+          FAIL_MSG(Far::get_msg(MSG_ERROR_NOT_ARCHIVE));
       }
       catch (const Error& error) {
         if (error.code == E_ABORT)
@@ -310,7 +310,7 @@ public:
       try {
         archives = Archive::detect(file_list[i], false);
         if (archives.empty())
-          FAIL(Far::get_msg(MSG_ERROR_NOT_ARCHIVE));
+          FAIL_MSG(Far::get_msg(MSG_ERROR_NOT_ARCHIVE));
       }
       catch (const Error& error) {
         if (error.code == E_ABORT)

@@ -529,7 +529,7 @@ UInt32 Archive::find_dir(const wstring& path) {
         return fi_left < fi_right;
       });
       if (fi_range.first == fi_range.second)
-        FAIL(ERROR_PATH_NOT_FOUND);
+        FAIL(HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND));
       dir_info.parent = *fi_range.first;
     }
     begin_pos = end_pos + 1;
