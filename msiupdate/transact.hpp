@@ -20,4 +20,4 @@ public:
   TransactedKey(HKEY h_parent, LPCWSTR sub_key, REGSAM sam_desired, bool create, HANDLE h_transaction);
 };
 
-BOOL delete_file_transacted(LPCWSTR lpFileName, HANDLE hTransaction);
+void delete_file_transacted(const wstring& file_path, HANDLE h_transaction);

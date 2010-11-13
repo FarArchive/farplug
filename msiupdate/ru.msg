@@ -7,6 +7,7 @@ config.title = Настройки
 config.use_full_install_ui = &Ручная установка
 config.update_stable_builds = Обновлять &стабильные сборки
 config.logged_install = Запись &лога при установке
+config.open_changelog = &Вывод списка изменений во время обновления
 config.install_properties = &Дополнительные параметры:
 config.use_proxy = Использовать собственные настройки &прокси
 config.proxy_server = &Имя сервера:

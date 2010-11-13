@@ -26,9 +26,10 @@ const char* c_upgrade_code = "{83140F3F-1457-42EB-8053-233293664714}";
 const char* c_platform = "x64";
 const wchar_t* c_update_script = L"update2.php?p=64";
 #endif
-const wchar_t* changelog_url = L"http://farmanager.com/svn/trunk/unicode_far/changelog";
+const wchar_t* c_changelog_url = L"http://farmanager.com/svn/trunk/unicode_far/changelog";
 const unsigned c_exit_wait = 6;
 const unsigned c_update_period = 12 * 60 * 60;
+const wchar_t* c_param_changelog_path = L"changelog_path";
 
 unsigned current_version;
 
@@ -64,32 +65,49 @@ wstring get_update_url() {
   return update_url;
 }
 
-void show_changelog(unsigned build1, unsigned build2) {
-  wstring text = ansi_to_unicode(load_url(changelog_url, g_options.http), 1251);
-  const wchar_t* c_expr_prefix = L"[^\\s]+\\s+\\d+\\.\\d+\\.\\d+\\s+\\d+:\\d+:\\d+\\s+[+-]?\\d+\\s+-\\s+build\\s+";
-  const wchar_t* c_expr_suffix = L"\\s*";
-  Far::Regex regex;
-  size_t pos1 = regex.search(c_expr_prefix + int_to_str(build1) + c_expr_suffix, text);
-  if (pos1 == -1)
-    pos1 = text.size();
-  size_t pos2 = regex.search(c_expr_prefix + int_to_str(build2) + c_expr_suffix, text);
-  if (pos2 == -1)
-    pos2 = 0;
-  CHECK(pos1 > pos2);
-
-  TempFile temp_file;
+wstring save_changelog(unsigned build1, unsigned build2) {
+  wstring file_path;
+  Transaction transaction;
   {
-    File file(temp_file.get_path(), GENERIC_WRITE, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL);
+    TransactedKey plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, true, transaction.handle());
+    if (!plugin_key.query_str_nt(file_path, c_param_changelog_path))
+      file_path = add_trailing_slash(get_temp_path()) + create_guid() + L".txt";
 
+    wstring text = ansi_to_unicode(load_url(c_changelog_url, g_options.http), 1251);
+    const wchar_t* c_expr_prefix = L"[^\\s]+\\s+\\d+\\.\\d+\\.\\d+\\s+\\d+:\\d+:\\d+\\s+[+-]?\\d+\\s+-\\s+build\\s+";
+    const wchar_t* c_expr_suffix = L"\\s*";
+    Far::Regex regex;
+    size_t pos1 = regex.search(c_expr_prefix + int_to_str(build1) + c_expr_suffix, text);
+    if (pos1 == -1)
+      pos1 = text.size();
+    size_t pos2 = regex.search(c_expr_prefix + int_to_str(build2) + c_expr_suffix, text);
+    if (pos2 == -1)
+      pos2 = 0;
+    CHECK(pos1 > pos2);
+
+    TransactedFile file(file_path, FILE_WRITE_DATA, FILE_SHARE_READ, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, transaction.handle());
     const wchar_t sig = 0xFEFF;
     file.write(&sig, sizeof(sig));
     file.write(text.data() + pos2, static_cast<unsigned>((pos1 - pos2) * sizeof(wchar_t)));
-  }
 
-  Far::viewer(temp_file.get_path(), L"Changelog", VF_DISABLEHISTORY | VF_ENABLE_F6);
-  Far::flush_screen();
+    plugin_key.set_str(c_param_changelog_path, file_path);
+  }
+  transaction.commit();
+  return file_path;
 }
 
+void delete_changelog() {
+  Transaction transaction;
+  {
+    wstring file_path;
+    TransactedKey plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, true, transaction.handle());
+    if (plugin_key.query_str_nt(file_path, c_param_changelog_path)) {
+      delete_file_transacted(file_path, transaction.handle());
+      plugin_key.delete_value(c_param_changelog_path);
+    }
+  }
+  transaction.commit();
+}
 
 const GUID c_update_dialog_guid = { /* BBE496E8-B5A8-48AC-B0D1-2141951B2C80 */
   0xBBE496E8,
@@ -123,7 +141,9 @@ private:
       return TRUE;
     }
     else if ((msg == DN_BTNCLICK) && (param1 == changelog_ctrl_id)) {
-      show_changelog(VER_BUILD(current_version), VER_BUILD(update_info.version));
+      wstring changelog_path = save_changelog(VER_BUILD(current_version), VER_BUILD(update_info.version));
+      Far::viewer(changelog_path, L"Changelog", VF_DISABLEHISTORY | VF_ENABLE_F6 | VF_DELETEONLYFILEONCLOSE);
+      Far::flush_screen();
     }
     return default_dialog_proc(msg, param1, param2);
   }
@@ -169,12 +189,12 @@ void save_to_cache(const string& package, const wstring& cache_dir, const wstrin
   Transaction transaction;
   {
     const wchar_t* c_param_cache_index = L"cache_index";
-    TransactedKey plugin_key(HKEY_CURRENT_USER, (add_trailing_slash(Far::get_root_key_name()) + c_plugin_key_name).c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, true, transaction.handle());
+    TransactedKey plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, true, transaction.handle());
 
     list<wstring> cache_index = split(plugin_key.query_str(c_param_cache_index), L'\n');
 
     while (cache_index.size() && cache_index.size() >= g_options.cache_max_size) {
-      delete_file_transacted((add_trailing_slash(cache_dir) + cache_index.front()).c_str(), transaction.handle());
+      delete_file_transacted(add_trailing_slash(cache_dir) + cache_index.front(), transaction.handle());
       cache_index.erase(cache_index.begin());
     }
 
@@ -197,6 +217,16 @@ void execute(bool ask) {
   }
   UpdateDialogResult res = ask ? UpdateDialog(update_info).show() : udrYes;
   if (res == udrYes) {
+    if (!ask && g_options.open_changelog) {
+      wstring changelog_path;
+      IGNORE_ERRORS(changelog_path = save_changelog(VER_BUILD(current_version), VER_BUILD(update_info.version)))
+      SHELLEXECUTEINFOW sei = { sizeof(SHELLEXECUTEINFO) };
+      sei.fMask = SEE_MASK_FLAG_NO_UI | SEE_MASK_NO_CONSOLE | SEE_MASK_ASYNCOK;
+      sei.lpFile = changelog_path.c_str();
+      sei.nShow = SW_SHOWDEFAULT;
+      ShellExecuteExW(&sei);
+    }
+
     wstring cache_dir;
     if (g_options.cache_enabled) {
       cache_dir = expand_env_vars(g_options.cache_dir);
@@ -275,6 +305,8 @@ AutoUpdate* g_auto_update = NULL;
 
 void init() {
   current_version = Far::get_version();
+
+  IGNORE_ERRORS(delete_changelog());
 
   check_product_installed();
 

@@ -85,12 +85,12 @@ TransactedFile::TransactedFile(const wstring& file_path, DWORD desired_access, D
   }
 }
 
-BOOL delete_file_transacted(LPCWSTR lpFileName, HANDLE hTransaction) {
+void delete_file_transacted(const wstring& file_path, HANDLE h_transaction) {
   if (fDeleteFileTransactedW) {
-    return fDeleteFileTransactedW(lpFileName, hTransaction);
+    CHECK_SYS(fDeleteFileTransactedW(file_path.c_str(), h_transaction));
   }
   else {
-    return DeleteFileW(lpFileName);
+    CHECK_SYS(DeleteFileW(file_path.c_str()));
   }
 }
 

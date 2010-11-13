@@ -139,6 +139,8 @@ public:
 FindData get_find_data(const wstring& path);
 bool get_find_data_nt(const wstring& path, FindData& find_data);
 
+wstring get_temp_path();
+
 class TempFile: private NonCopyable {
 private:
   wstring path;
@@ -210,3 +212,4 @@ public:
 
 wstring format_file_time(const FILETIME& file_time);
 wstring upcase(const wstring& str);
+wstring create_guid();

@@ -1,6 +1,6 @@
 #pragma once
 
-extern const wchar_t* c_plugin_key_name;
+wstring get_plugin_key_name();
 
 struct HttpOptions {
   bool use_proxy;
@@ -27,6 +27,7 @@ public:
   bool cache_enabled;
   unsigned cache_max_size;
   wstring cache_dir;
+  bool open_changelog;
   void load();
   void save();
 };

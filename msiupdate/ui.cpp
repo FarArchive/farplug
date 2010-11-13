@@ -69,6 +69,7 @@ private:
   int use_full_install_ui_ctrl_id;
   int update_stable_builds_ctrl_id;
   int logged_install_ctrl_id;
+  int open_changelog_ctrl_id;
   int install_properties_ctrl_id;
   int use_proxy_ctrl_id;
   int proxy_server_ctrl_id;
@@ -87,6 +88,7 @@ private:
       options.use_full_install_ui = get_check(use_full_install_ui_ctrl_id);
       options.update_stable_builds = get_check(update_stable_builds_ctrl_id);
       options.logged_install = get_check(logged_install_ctrl_id);
+      options.open_changelog = get_check(open_changelog_ctrl_id);
       options.install_properties = get_text(install_properties_ctrl_id);
       options.http.use_proxy = get_check(use_proxy_ctrl_id);
       options.http.proxy_server = get_text(proxy_server_ctrl_id);
@@ -130,6 +132,8 @@ public:
     update_stable_builds_ctrl_id = check_box(Far::get_msg(MSG_CONFIG_UPDATE_STABLE_BUILDS), options.update_stable_builds);
     new_line();
     logged_install_ctrl_id = check_box(Far::get_msg(MSG_CONFIG_LOGGED_INSTALL), options.logged_install);
+    new_line();
+    open_changelog_ctrl_id = check_box(Far::get_msg(MSG_CONFIG_OPEN_CHANGELOG), options.open_changelog);
     new_line();
     label(Far::get_msg(MSG_CONFIG_INSTALL_PROPERTIES));
     install_properties_ctrl_id = edit_box(options.install_properties, 30);

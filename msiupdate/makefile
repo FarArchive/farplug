@@ -39,7 +39,7 @@ RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
 
 OBJS = $(OUTDIR)\farutils.obj $(OUTDIR)\inet.obj $(OUTDIR)\iniparse.obj $(OUTDIR)\options.obj $(OUTDIR)\pathutils.obj $(OUTDIR)\plugin.obj $(OUTDIR)\strutils.obj $(OUTDIR)\sysutils.obj $(OUTDIR)\transact.obj $(OUTDIR)\trayicon.obj $(OUTDIR)\ui.obj $(OUTDIR)\update.obj
 
-LIBS = user32.lib advapi32.lib shell32.lib winhttp.lib msi.lib
+LIBS = user32.lib advapi32.lib shell32.lib winhttp.lib msi.lib ole32.lib
 
 project: depfile $(OUTDIR)\far.ini
   $(MAKE) -nologo -$(MAKEFLAGS) build_project BUILD=1

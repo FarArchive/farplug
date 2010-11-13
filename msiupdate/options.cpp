@@ -20,9 +20,11 @@ const wchar_t* c_param_proxy_password = L"proxy_password";
 const wchar_t* c_param_cache_enabled = L"cache_enabled";
 const wchar_t* c_param_cache_max_size = L"cache_max_size";
 const wchar_t* c_param_cache_dir = L"cache_dir";
+const wchar_t* c_param_open_changelog = L"open_changelog";
 
 const unsigned c_def_cache_max_size = 2;
 const wchar_t* c_def_cache_dir = L"%TEMP%";
+const unsigned c_def_open_changelog = true;
 
 wstring get_plugin_key_name() {
   return add_trailing_slash(Far::get_root_key_name()) + c_plugin_key_name;
@@ -105,6 +107,7 @@ void Options::load() {
   cache_enabled = get_bool(c_param_cache_enabled);
   cache_max_size = get_int(c_param_cache_max_size, c_def_cache_max_size);
   cache_dir = get_str(c_param_cache_dir, c_def_cache_dir);
+  open_changelog = get_bool(c_param_open_changelog, c_def_open_changelog);
 };
 
 void Options::save() {
@@ -121,4 +124,5 @@ void Options::save() {
   set_bool(c_param_cache_enabled, cache_enabled);
   set_int(c_param_cache_max_size, cache_max_size, c_def_cache_max_size);
   set_str(c_param_cache_dir, cache_dir, c_def_cache_dir);
+  set_bool(c_param_open_changelog, open_changelog, c_def_open_changelog);
 }

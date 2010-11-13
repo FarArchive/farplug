@@ -7,6 +7,7 @@ config.title = Configuration
 config.use_full_install_ui = Use &full install UI
 config.update_stable_builds = Update &stable builds
 config.logged_install = &Log installation process
+config.open_changelog = Show c&hangelog while updating
 config.install_properties = A&dditional parameters:
 config.use_proxy = Use own &proxy settings
 config.proxy_server = Proxy s&erver:

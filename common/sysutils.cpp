@@ -530,12 +530,17 @@ bool get_find_data_nt(const wstring& path, FindData& find_data) {
     return false;
 }
 
-TempFile::TempFile() {
+wstring get_temp_path() {
   Buffer<wchar_t> buf(MAX_PATH);
   DWORD len = GetTempPathW(static_cast<DWORD>(buf.size()), buf.data());
   CHECK(len <= buf.size());
   CHECK_SYS(len);
-  wstring temp_path = wstring(buf.data(), len);
+  return wstring(buf.data(), len);
+}
+
+TempFile::TempFile() {
+  Buffer<wchar_t> buf(MAX_PATH);
+  wstring temp_path = get_temp_path();
   CHECK_SYS(GetTempFileNameW(temp_path.c_str(), L"", 0, buf.data()));
   path.assign(buf.data());
 }
@@ -687,4 +692,12 @@ wstring upcase(const wstring& str) {
   wmemcpy(up_str.data(), str.data(), str.size());
   CharUpperBuffW(up_str.data(), static_cast<DWORD>(up_str.size()));
   return wstring(up_str.data(), up_str.size());
+}
+
+wstring create_guid() {
+  GUID guid;
+  CHECK_COM(CoCreateGuid(&guid));
+  wchar_t guid_str[50];
+  CHECK(StringFromGUID2(guid, guid_str, ARRAYSIZE(guid_str)));
+  return guid_str;
 }
