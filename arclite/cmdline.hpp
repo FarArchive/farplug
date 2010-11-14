@@ -16,6 +16,8 @@ struct CommandArgs {
 
 CommandArgs parse_command(const wstring& cmd_text);
 
+list<wstring> parse_listfile(const wstring& str);
+
 struct OpenCommand {
   wstring arc_path;
   bool detect;

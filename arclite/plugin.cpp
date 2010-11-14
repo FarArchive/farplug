@@ -565,31 +565,48 @@ public:
     options.arc_path = Far::get_absolute_path(options.arc_path);
     options.sfx_module = Far::get_absolute_path(options.sfx_module);
 
+    vector<wstring> files;
+    files.reserve(cmd.files.size());
+    for_each(cmd.files.begin(), cmd.files.end(), [&] (const wstring& file) {
+      files.push_back(Far::get_absolute_path(file));
+    });
+
+    // load listfiles
+    for_each(cmd.listfiles.begin(), cmd.listfiles.end(), [&] (const wstring& listfile) {
+      wstring str = load_file(Far::get_absolute_path(listfile));
+      std::list<wstring> fl = parse_listfile(str);
+      files.reserve(files.size() + fl.size());
+      for_each(fl.begin(), fl.end(), [&] (const wstring& file) {
+        files.push_back(Far::get_absolute_path(file));
+      });
+    });
+
+    if (files.empty())
+      FAIL(E_ABORT);
+
     // common source directory
-    wstring src_path = extract_file_path(Far::get_absolute_path(cmd.files.front()));
+    wstring src_path = extract_file_path(Far::get_absolute_path(files.front()));
     wstring src_path_upcase = upcase(src_path);
     wstring full_path; 
-    for (unsigned i = 0; i < cmd.files.size(); i++) {
-      full_path = Far::get_absolute_path(cmd.files[i]);
-      while (!substr_match(upcase(full_path), 0, src_path_upcase.c_str())) {
+    for_each(files.begin(), files.end(), [&] (const wstring& file) {
+      while (!substr_match(upcase(file), 0, src_path_upcase.c_str())) {
         if (is_root_path(src_path))
           src_path.clear();
         else
           src_path = extract_file_path(src_path);
         src_path_upcase = upcase(src_path);
       }
-    }
+    });
 
     // relative paths
-    vector<wstring> rel_paths;
-    rel_paths.reserve(cmd.files.size());
-    for (unsigned i = 0; i < cmd.files.size(); i++) {
-      full_path = Far::get_absolute_path(cmd.files[i]);
-      rel_paths.push_back(full_path.substr(src_path.size() + 1));
+    if (!src_path.empty()) {
+      for_each(files.begin(), files.end(), [&] (wstring& file) {
+        file.erase(0, src_path.size() + 1);
+      });
     }
 
     ErrorLog error_log;
-    Archive().create(src_path, rel_paths, options, error_log);
+    Archive().create(src_path, files, options, error_log);
   }
 
   void delete_files(const PluginPanelItem* panel_items, int items_number, int op_mode) {

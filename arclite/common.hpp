@@ -137,7 +137,6 @@ unsigned calc_percent(unsigned __int64 completed, unsigned __int64 total);
 unsigned __int64 get_module_version(const wstring& file_path);
 unsigned __int64 parse_size_string(const wstring& str);
 DWORD translate_seek_method(UInt32 seek_origin);
-
 wstring expand_macros(const wstring& text);
-
 void attach_sfx_module(const wstring& file_path, const wstring& sfx_module);
+wstring load_file(const wstring& file_name, unsigned* code_page = nullptr);

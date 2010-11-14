@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include "sysutils.hpp"
 #include "error.hpp"
 #include "common.hpp"
 #include "farutils.hpp"
@@ -84,4 +85,26 @@ wstring expand_macros(const wstring& text) {
   }
   result.append(text.data() + pos, text.size() - pos);
   return result;
+}
+
+#define CP_UTF16 1200
+wstring load_file(const wstring& file_path, unsigned* code_page) {
+  File file(file_path, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
+  Buffer<char> buffer(static_cast<size_t>(file.size()));
+  unsigned size = file.read(buffer.data(), buffer.size());
+  if (size >= 2 && buffer.data()[0] == '\xFF' && buffer.data()[1] == '\xFE') {
+    if (code_page)
+      *code_page = CP_UTF16;
+    return wstring(reinterpret_cast<wchar_t*>(buffer.data() + 2), (buffer.size() - 2) / 2);
+  }
+  else if (size >= 3 && buffer.data()[0] == '\xEF' && buffer.data()[1] == '\xBB' && buffer.data()[2] == '\xBF') {
+    if (code_page)
+      *code_page = CP_UTF8;
+    return ansi_to_unicode(string(buffer.data() + 3, size - 3), CP_UTF8);
+  }
+  else {
+    if (code_page)
+      *code_page = CP_ACP;
+    return ansi_to_unicode(string(buffer.data(), size), CP_ACP);
+  }
 }

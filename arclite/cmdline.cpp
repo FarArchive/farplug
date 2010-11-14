@@ -108,6 +108,22 @@ TriState parse_tri_state_value(const wstring& value) {
     CHECK_FMT(false);
 }
 
+list<wstring> parse_listfile(const wstring& str) {
+  list<wstring> files;
+  bool is_line = true;
+  unsigned pos = 0;
+  for (unsigned i = 0; i < str.size(); i++) {
+    if (str[i] == L'\r' || str[i] == L'\n') {
+      if (pos != i)
+        files.push_back(str.substr(pos, i - pos));
+      pos = i + 1;
+    }
+  }
+  if (pos != str.size())
+    files.push_back(str.substr(pos, str.size() - pos));
+  return files;
+}
+
 
 // arc:[-d] <archive>
 
