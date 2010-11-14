@@ -6,12 +6,12 @@
 #include "ui.hpp"
 #include "archive.hpp"
 
-class ArchiveFileDeleter: public IArchiveUpdateCallback, public ProgressMonitor, public ComBase {
-private:
-  vector<UInt32> new_indices;
+IOutStream* get_simple_update_stream(const wstring& arc_path, ProgressMonitor& progress);
 
-  UInt64 total;
-  UInt64 completed;
+class ArchiveFileDeleterProgress: public ProgressMonitor {
+private:
+  unsigned __int64 total;
+  unsigned __int64 completed;
 
   virtual void do_update_ui() {
     const unsigned c_width = 60;
@@ -36,7 +36,27 @@ private:
   }
 
 public:
-  ArchiveFileDeleter(const vector<UInt32>& new_indices): ProgressMonitor(Far::get_msg(MSG_PROGRESS_UPDATE)), new_indices(new_indices), completed(0), total(0) {
+  ArchiveFileDeleterProgress(): ProgressMonitor(Far::get_msg(MSG_PROGRESS_UPDATE)), completed(0), total(0) {
+  }
+
+  void update_total(unsigned __int64 total) {
+    this->total = total;
+    update_ui();
+  }
+
+  void update_completed(unsigned __int64 completed) {
+    this->completed = completed;
+    update_ui();
+  }
+};
+
+class ArchiveFileDeleter: public IArchiveUpdateCallback, public ComBase {
+private:
+  vector<UInt32> new_indices;
+  ArchiveFileDeleterProgress& progress;
+
+public:
+  ArchiveFileDeleter(const vector<UInt32>& new_indices, ArchiveFileDeleterProgress& progress): new_indices(new_indices), progress(progress) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -46,15 +66,14 @@ public:
 
   STDMETHODIMP SetTotal(UInt64 total) {
     COM_ERROR_HANDLER_BEGIN
-    this->total = total;
-    update_ui();
+    progress.update_total(total);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
   STDMETHODIMP SetCompleted(const UInt64 *completeValue) {
     COM_ERROR_HANDLER_BEGIN
-    if (completeValue) completed = *completeValue;
-    update_ui();
+    if (completeValue)
+      progress.update_completed(*completeValue);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
@@ -121,16 +140,17 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
     ComObject<IOutArchive> out_arc;
     CHECK_COM(in_arc->QueryInterface(IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
 
-    ComObject<IArchiveUpdateCallback> deleter(new ArchiveFileDeleter(new_indices));
-    ComObject<IOutStream> update_stream(get_simple_update_stream(temp_arc_name));
+    ArchiveFileDeleterProgress progress;
+    ComObject<IArchiveUpdateCallback> deleter(new ArchiveFileDeleter(new_indices, progress));
+    ComObject<IOutStream> update_stream(get_simple_update_stream(temp_arc_name, progress));
 
     COM_ERROR_CHECK(out_arc->UpdateItems(update_stream, static_cast<UInt32>(new_indices.size()), deleter));
     close();
     update_stream.Release();
-    CHECK_SYS(MoveFileExW(long_path(temp_arc_name).c_str(), long_path(arc_path).c_str(), MOVEFILE_REPLACE_EXISTING));
+    File::move_file(temp_arc_name, arc_path, MOVEFILE_REPLACE_EXISTING);
   }
   catch (...) {
-    DeleteFileW(long_path(temp_arc_name).c_str());
+    File::delete_file_nt(temp_arc_name);
     throw;
   }
 

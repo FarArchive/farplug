@@ -40,6 +40,19 @@ public:
   }
 };
 
+struct FindData: public WIN32_FIND_DATAW {
+  bool is_dir() const {
+    return (dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+  }
+  unsigned __int64 size() const {
+    return (static_cast<unsigned __int64>(nFileSizeHigh) << 32) | nFileSizeLow;
+  }
+  void set_size(unsigned __int64 size) {
+    nFileSizeLow = static_cast<DWORD>(size & 0xFFFFFFFF);
+    nFileSizeHigh = static_cast<DWORD>(size >> 32);
+  }
+};
+
 class File: private NonCopyable {
 protected:
   HANDLE h_file;
@@ -51,8 +64,15 @@ public:
   void open(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD flags_and_attributes);
   bool open_nt(const wstring& file_path, DWORD desired_access, DWORD share_mode, DWORD creation_disposition, DWORD flags_and_attributes) throw();
   void close() throw();
-  HANDLE handle() const throw();
-  const wstring& path() const throw();
+  bool is_open() const throw() {
+    return h_file != INVALID_HANDLE_VALUE;
+  }
+  HANDLE handle() const throw() {
+    return h_file;
+  }
+  const wstring& path() const throw() {
+    return file_path;
+  }
   unsigned __int64 size();
   bool size_nt(unsigned __int64& file_size) throw();
   unsigned read(void* data, unsigned size);
@@ -62,15 +82,28 @@ public:
   void set_time(const FILETIME& ctime, const FILETIME& atime, const FILETIME& mtime);
   bool set_time_nt(const FILETIME& ctime, const FILETIME& atime, const FILETIME& mtime) throw();
   unsigned __int64 set_pos(__int64 offset, DWORD method = FILE_BEGIN);
-  bool set_pos_nt(__int64 offset, DWORD method = FILE_BEGIN, unsigned __int64* new_pos = nullptr);
+  bool set_pos_nt(__int64 offset, DWORD method = FILE_BEGIN, unsigned __int64* new_pos = nullptr) throw();
   void set_end();
-  bool set_end_nt();
+  bool set_end_nt() throw();
   BY_HANDLE_FILE_INFORMATION get_info();
   bool get_info_nt(BY_HANDLE_FILE_INFORMATION& info) throw();
-  template<typename Type> bool io_control_out(DWORD code, Type& data) {
+  template<typename Type> bool io_control_out_nt(DWORD code, Type& data) throw() {
     DWORD size_ret;
     return DeviceIoControl(h_file, code, nullptr, 0, &data, sizeof(Type), &size_ret, nullptr) != 0;
   }
+  static bool exists(const wstring& file_path) throw();
+  static void set_attr(const wstring& file_path, DWORD attr);
+  static bool set_attr_nt(const wstring& file_path, DWORD attr) throw();
+  static void delete_file(const wstring& file_path);
+  static bool delete_file_nt(const wstring& file_path) throw();
+  static void create_dir(const wstring& dir_path);
+  static bool create_dir_nt(const wstring& dir_path) throw();
+  static void remove_dir(const wstring& file_path);
+  static bool remove_dir_nt(const wstring& file_path) throw();
+  static void move_file(const wstring& file_path, const wstring& new_path, DWORD flags);
+  static bool move_file_nt(const wstring& file_path, const wstring& new_path, DWORD flags) throw();
+  static FindData get_find_data(const wstring& file_path);
+  static bool get_find_data_nt(const wstring& file_path, FindData& find_data) throw();
 };
 
 class Key: private NonCopyable {
@@ -108,19 +141,6 @@ public:
   bool delete_sub_key_nt(const wchar_t* name) throw();
 };
 
-struct FindData: public WIN32_FIND_DATAW {
-  bool is_dir() const {
-    return (dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-  }
-  unsigned __int64 size() const {
-    return (static_cast<unsigned __int64>(nFileSizeHigh) << 32) | nFileSizeLow;
-  }
-  void set_size(unsigned __int64 size) {
-    nFileSizeLow = static_cast<DWORD>(size & 0xFFFFFFFF);
-    nFileSizeHigh = static_cast<DWORD>(size >> 32);
-  }
-};
-
 class FileEnum: private NonCopyable {
 protected:
   wstring dir_path;
@@ -131,13 +151,10 @@ public:
   ~FileEnum() throw();
   bool next();
   bool next_nt(bool& more) throw();
-  const FindData& data() const {
+  const FindData& data() const throw() {
     return find_data;
   }
 };
-
-FindData get_find_data(const wstring& path);
-bool get_find_data_nt(const wstring& path, FindData& find_data);
 
 wstring get_temp_path();
 

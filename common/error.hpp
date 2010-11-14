@@ -16,6 +16,9 @@ struct Error {
   }
   Error(const wstring& message, const char* file, int line): code(E_MESSAGE), messages(1, message), file(file), line(line) {
   }
+  Error(const wstring& message1, const wstring& message2, const char* file, int line): code(E_MESSAGE), messages(1, message1), file(file), line(line) {
+    messages.push_back(message2);
+  }
   Error(const std::exception& e): code(E_MESSAGE), file(__FILE__), line(__LINE__) {
     string message(string(typeid(e).name()) + ": " + e.what());
     messages.push_back(wstring(message.begin(), message.end()));
@@ -34,11 +37,3 @@ struct Error {
 #define CHECK(code) { if (!(code)) FAIL_MSG(L#code); }
 
 #define IGNORE_ERRORS(code) { try { code; } catch (...) { } }
-
-#define ERROR_MESSAGE_BEGIN try {
-#define ERROR_MESSAGE_END(message) \
-  } \
-  catch (Error& e) { \
-    e.messages.push_back(message); \
-    throw e; \
-  }

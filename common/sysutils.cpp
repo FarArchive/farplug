@@ -141,14 +141,6 @@ void File::close() {
   }
 }
 
-HANDLE File::handle() const {
-  return h_file;
-}
-
-const wstring& File::path() const {
-  return file_path;
-}
-
 unsigned __int64 File::size() {
   unsigned __int64 file_size;
   CHECK_FILE(size_nt(file_size));
@@ -237,6 +229,66 @@ BY_HANDLE_FILE_INFORMATION File::get_info() {
 
 bool File::get_info_nt(BY_HANDLE_FILE_INFORMATION& info) {
   return GetFileInformationByHandle(h_file, &info) != 0;
+}
+
+bool File::exists(const wstring& file_path) {
+  return GetFileAttributesW(long_path(file_path).c_str()) != INVALID_FILE_ATTRIBUTES;
+}
+
+void File::set_attr(const wstring& file_path, DWORD attr) {
+  CHECK_FILE(set_attr_nt(file_path, attr));
+}
+
+bool File::set_attr_nt(const wstring& file_path, DWORD attr) {
+  return SetFileAttributesW(long_path(file_path).c_str(), attr) != 0;
+}
+
+void File::delete_file(const wstring& file_path) {
+  CHECK_FILE(delete_file_nt(file_path));
+}
+
+bool File::delete_file_nt(const wstring& file_path) {
+  return DeleteFileW(long_path(file_path).c_str()) != 0;
+}
+
+void File::create_dir(const wstring& file_path) {
+  CHECK_FILE(create_dir_nt(file_path));
+}
+
+bool File::create_dir_nt(const wstring& file_path) {
+  return CreateDirectoryW(long_path(file_path).c_str(), nullptr) != 0;
+}
+
+void File::remove_dir(const wstring& file_path) {
+  CHECK_FILE(remove_dir_nt(file_path));
+}
+
+bool File::remove_dir_nt(const wstring& file_path) {
+  return RemoveDirectoryW(long_path(file_path).c_str()) != 0;
+}
+
+void File::move_file(const wstring& file_path, const wstring& new_path, DWORD flags) {
+  CHECK_FILE(move_file_nt(file_path, new_path, flags));
+}
+
+bool File::move_file_nt(const wstring& file_path, const wstring& new_path, DWORD flags) {
+  return MoveFileExW(long_path(file_path).c_str(), long_path(new_path).c_str(), flags) != 0;
+}
+
+FindData File::get_find_data(const wstring& file_path) {
+  FindData find_data;
+  CHECK_FILE(get_find_data_nt(file_path, find_data));
+  return find_data;
+}
+
+bool File::get_find_data_nt(const wstring& file_path, FindData& find_data) {
+  HANDLE h_find = FindFirstFileW(long_path(file_path).c_str(), &find_data);
+  if (h_find != INVALID_HANDLE_VALUE) {
+    FindClose(h_find);
+    return true;
+  }
+  else
+    return false;
 }
 
 #undef CHECK_FILE
@@ -485,7 +537,8 @@ FileEnum::~FileEnum() {
 
 bool FileEnum::next() {
   bool more;
-  CHECK_SYS(next_nt(more));
+  if (!next_nt(more))
+    throw Error(HRESULT_FROM_WIN32(GetLastError()), dir_path, __FILE__, __LINE__);
   return more;
 }
 
@@ -512,22 +565,6 @@ bool FileEnum::next_nt(bool& more) {
     more = true;
     return true;
   }
-}
-
-FindData get_find_data(const wstring& path) {
-  FindData find_data;
-  CHECK_SYS(get_find_data_nt(path, find_data));
-  return find_data;
-}
-
-bool get_find_data_nt(const wstring& path, FindData& find_data) {
-  HANDLE h_find = FindFirstFileW(long_path(path).c_str(), &find_data);
-  if (h_find != INVALID_HANDLE_VALUE) {
-    FindClose(h_find);
-    return true;
-  }
-  else
-    return false;
 }
 
 wstring get_temp_path() {

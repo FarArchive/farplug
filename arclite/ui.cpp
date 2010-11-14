@@ -393,34 +393,56 @@ bool extract_dialog(ExtractOptions& options) {
   return ExtractDialog(options).show();
 }
 
-RetryDialogResult error_retry_ignore_dialog(const wstring& file_path, const Error& e, bool can_retry) {
-  wostringstream st;
-  st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
-  st << fit_str(file_path, Far::get_optimal_msg_width()) << L'\n';
-  if (e.code != E_MESSAGE) {
-    wstring sys_msg = get_system_message(e.code, Far::get_lang_id());
-    if (!sys_msg.empty())
-      st << word_wrap(sys_msg, Far::get_optimal_msg_width()) << L'\n';
+void retry_or_ignore_error(const Error& error, bool& ignore, bool& ignore_errors, ErrorLog& error_log, ProgressMonitor& progress, bool can_retry, bool can_ignore) {
+  if (error.code == E_ABORT)
+    throw error;
+  ignore = ignore_errors;
+  if (!ignore) {
+    wostringstream st;
+    st << Far::get_msg(MSG_PLUGIN_NAME) << L'\n';
+    if (error.code != E_MESSAGE) {
+      wstring sys_msg = get_system_message(error.code, Far::get_lang_id());
+      if (!sys_msg.empty())
+        st << word_wrap(sys_msg, Far::get_optimal_msg_width()) << L'\n';
+    }
+    for (list<wstring>::const_iterator msg = error.messages.begin(); msg != error.messages.end(); msg++) {
+      st << word_wrap(*msg, Far::get_optimal_msg_width()) << L'\n';
+    }
+    st << extract_file_name(widen(error.file)) << L':' << error.line << L'\n';
+    unsigned button_cnt = 0;
+    unsigned retry_id, ignore_id, ignore_all_id, cancel_id;
+    if (can_retry) {
+      st << Far::get_msg(MSG_BUTTON_RETRY) << L'\n';
+      retry_id = button_cnt;
+      button_cnt++;
+    }
+    if (can_ignore) {
+      st << Far::get_msg(MSG_BUTTON_IGNORE) << L'\n';
+      ignore_id = button_cnt;
+      button_cnt++;
+      st << Far::get_msg(MSG_BUTTON_IGNORE_ALL) << L'\n';
+      ignore_all_id = button_cnt;
+      button_cnt++;
+    }
+    st << Far::get_msg(MSG_BUTTON_CANCEL) << L'\n';
+    cancel_id = button_cnt;
+    button_cnt++;
+    ProgressSuspend ps(progress);
+    unsigned id = Far::message(st.str(), button_cnt, FMSG_WARNING);
+    if (can_retry && id == retry_id) {
+    }
+    else if (can_ignore && id == ignore_id) {
+      ignore = true;
+    }
+    else if (can_ignore && id == ignore_all_id) {
+      ignore = true;
+      ignore_errors = true;
+    }
+    else
+      FAIL(E_ABORT);
   }
-  for (list<wstring>::const_iterator msg = e.messages.begin(); msg != e.messages.end(); msg++) {
-    st << word_wrap(*msg, Far::get_optimal_msg_width()) << L'\n';
-  }
-  st << extract_file_name(widen(e.file)) << L':' << e.line << L'\n';
-  if (can_retry)
-    st << Far::get_msg(MSG_BUTTON_RETRY) << L'\n';
-  st << Far::get_msg(MSG_BUTTON_IGNORE) << L'\n';
-  st << Far::get_msg(MSG_BUTTON_IGNORE_ALL) << L'\n';
-  st << Far::get_msg(MSG_BUTTON_CANCEL) << L'\n';
-  switch (Far::message(st.str(), can_retry ? 4 : 3, FMSG_WARNING)) {
-  case 0:
-    return can_retry ? rdrRetry : rdrIgnore;
-  case 1:
-    return can_retry ? rdrIgnore : rdrIgnoreAll;
-  case 2:
-    return can_retry ? rdrIgnoreAll : rdrCancel;
-  default:
-    return rdrCancel;
-  }
+  if (ignore)
+    error_log.push_back(error);
 }
 
 void show_error_log(const ErrorLog& error_log) {
@@ -437,16 +459,13 @@ void show_error_log(const ErrorLog& error_log) {
   const wchar_t sig = 0xFEFF;
   file.write(&sig, sizeof(sig));
   wstring line;
-  for (ErrorLog::const_iterator iter = error_log.begin(); iter != error_log.end(); iter++) {
-    const wstring& file_path = iter->first;
-    const Error& error = iter->second;
-    line.assign(file_path).append(1, L'\n');
-    if (error.code != E_MESSAGE) {
-      wstring sys_msg = get_system_message(error.code, Far::get_lang_id());
+  for (ErrorLog::const_iterator error = error_log.begin(); error != error_log.end(); error++) {
+    if (error->code != E_MESSAGE) {
+      wstring sys_msg = get_system_message(error->code, Far::get_lang_id());
       if (!sys_msg.empty())
         line.append(sys_msg).append(1, L'\n');
     }
-    for (list<wstring>::const_iterator err_msg = error.messages.begin(); err_msg != error.messages.end(); err_msg++) {
+    for (list<wstring>::const_iterator err_msg = error->messages.begin(); err_msg != error->messages.end(); err_msg++) {
       line.append(*err_msg).append(1, L'\n');
     }
     line.append(1, L'\n');

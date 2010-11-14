@@ -59,7 +59,7 @@ void attach_sfx_module(const wstring& file_path, const wstring& sfx_module) {
       FAIL_MSG(Far::get_msg(MSG_ERROR_SFX_CONVERT));
   }
 
-  FindData file_data = get_find_data(file_path);
+  FindData file_data = File::get_find_data(file_path);
   progress.set_total(file_data.size());
 
   wstring dst_path = file_path + c_sfx_ext;
@@ -67,14 +67,14 @@ void attach_sfx_module(const wstring& file_path, const wstring& sfx_module) {
     File dst_file(dst_path, FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, CREATE_NEW, FILE_ATTRIBUTE_NORMAL);
     append_file(sfx_module, dst_file, progress);
     append_file(file_path, dst_file, progress);
-    CHECK_SYS(SetFileAttributesW(long_path(file_path).c_str(), file_data.dwFileAttributes));
+    File::set_attr(file_path, file_data.dwFileAttributes);
     dst_file.set_time(file_data.ftCreationTime, file_data.ftLastAccessTime, file_data.ftLastWriteTime);
   }
   catch (...) {
-    DeleteFileW(long_path(dst_path).c_str());
+    File::delete_file_nt(dst_path);
     throw;
   }
-  DeleteFileW(long_path(file_path).c_str());
+  File::delete_file_nt(file_path);
 }
 
 

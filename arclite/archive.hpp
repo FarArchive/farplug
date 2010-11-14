@@ -210,7 +210,3 @@ public:
   Archive(): update_props_defined(false) {
   }
 };
-
-IOutStream* get_simple_update_stream(const wstring& arc_path);
-
-void attach_sfx_module(const wstring& file_path, const wstring& sfx_module);

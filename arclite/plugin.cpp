@@ -140,9 +140,9 @@ public:
     wstring final_dir = add_trailing_slash(dst_dir) + arc_name;
     wstring ext = extract_file_ext(final_dir);
     final_dir.erase(final_dir.size() - ext.size(), ext.size());
-    if (GetFileAttributesW(long_path(final_dir).c_str()) != INVALID_FILE_ATTRIBUTES) {
+    if (File::exists(final_dir)) {
       unsigned n = 0;
-      while (GetFileAttributesW(long_path(final_dir + L"." + int_to_str(n)).c_str()) != INVALID_FILE_ATTRIBUTES && n < 100) n++;
+      while (File::exists(final_dir + L"." + int_to_str(n)) && n < 100) n++;
       final_dir += L"." + int_to_str(n);
     }
     return final_dir;
@@ -225,12 +225,12 @@ public:
       try {
         archives = Archive::detect(arc_list[i], false);
         if (archives.empty())
-          FAIL(Far::get_msg(MSG_ERROR_NOT_ARCHIVE));
+          throw Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), arc_list[i], __FILE__, __LINE__);
       }
       catch (const Error& error) {
         if (error.code == E_ABORT)
           throw;
-        error_log.add(arc_list[i], error);
+        error_log.push_back(error);
         continue;
       }
 
@@ -323,12 +323,12 @@ public:
       try {
         archives = Archive::detect(arc_list[i], false);
         if (archives.empty())
-          FAIL(Far::get_msg(MSG_ERROR_NOT_ARCHIVE));
+          throw Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), arc_list[i], __FILE__, __LINE__);
       }
       catch (const Error& error) {
         if (error.code == E_ABORT)
           throw;
-        error_log.add(arc_list[i], error);
+        error_log.push_back(error);
         continue;
       }
 
@@ -348,7 +348,7 @@ public:
       catch (const Error& error) {
         if (error.code == E_ABORT)
           throw;
-        error_log.add(arc_list[i], error);
+        error_log.push_back(error);
       }
     }
 
@@ -425,7 +425,7 @@ public:
     if (new_arc) {
       if (!is_absolute_path(options.arc_path))
         options.arc_path = Far::get_absolute_path(options.arc_path);
-      if (GetFileAttributesW(long_path(options.arc_path).c_str()) != INVALID_FILE_ATTRIBUTES) {
+      if (File::exists(options.arc_path)) {
         if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_UPDATE_DLG_CONFIRM_OVERWRITE), 0, FMSG_MB_YESNO) != 0)
           FAIL(E_ABORT);
       }
@@ -529,7 +529,7 @@ public:
 
     if (!is_absolute_path(options.arc_path))
       options.arc_path = Far::get_absolute_path(options.arc_path);
-    if (GetFileAttributesW(long_path(options.arc_path).c_str()) != INVALID_FILE_ATTRIBUTES) {
+    if (File::exists(options.arc_path)) {
       if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L"\n" + Far::get_msg(MSG_UPDATE_DLG_CONFIRM_OVERWRITE), 0, FMSG_MB_YESNO) != 0)
         FAIL(E_ABORT);
     }

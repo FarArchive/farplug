@@ -23,7 +23,7 @@ private:
       return;
 
     PARTITION_INFORMATION part_info;
-    if (io_control_out(IOCTL_DISK_GET_PARTITION_INFO, part_info)) {
+    if (io_control_out_nt(IOCTL_DISK_GET_PARTITION_INFO, part_info)) {
       device_size = part_info.PartitionLength.QuadPart;
       DWORD sectors_per_cluster, bytes_per_sector, number_of_free_clusters, total_number_of_clusters;
       if (GetDiskFreeSpaceW(add_trailing_slash(file_path).c_str(), &sectors_per_cluster, &bytes_per_sector, &number_of_free_clusters, &total_number_of_clusters))
@@ -35,7 +35,7 @@ private:
     }
 
     DISK_GEOMETRY disk_geometry;
-    if (io_control_out(IOCTL_DISK_GET_DRIVE_GEOMETRY, disk_geometry)) {
+    if (io_control_out_nt(IOCTL_DISK_GET_DRIVE_GEOMETRY, disk_geometry)) {
       device_size = disk_geometry.Cylinders.QuadPart * disk_geometry.TracksPerCylinder * disk_geometry.SectorsPerTrack * disk_geometry.BytesPerSector;
       device_sector_size = disk_geometry.BytesPerSector;
       device_file = true;
@@ -212,7 +212,7 @@ public:
     COM_ERROR_HANDLER_BEGIN
     wstring file_path = add_trailing_slash(archive.arc_dir()) + name;
     FindData find_data;
-    if (!get_find_data_nt(file_path, find_data))
+    if (!File::get_find_data_nt(file_path, find_data))
       return S_FALSE;
     if (find_data.is_dir())
       return S_FALSE;
