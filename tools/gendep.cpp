@@ -143,10 +143,10 @@ int wmain(int argc, wchar_t* argv[]) {
   wstring output;
   set<wstring> file_set;
   for (list<wstring>::const_iterator src_dir = source_dirs.begin(); src_dir != source_dirs.end(); src_dir++) {
-    FileEnum files(get_full_path_name(src_dir->empty() ? L"." : *src_dir));
-    while (files.next()) {
-      if (!files.data().is_dir() && is_valid_ext(files.data().cFileName)) {
-        process_file(output, file_set, add_trailing_slash(*src_dir) + files.data().cFileName, include_dirs);
+    DirList dir_list(get_full_path_name(src_dir->empty() ? L"." : *src_dir));
+    while (dir_list.next()) {
+      if (!dir_list.data().is_dir() && is_valid_ext(dir_list.data().cFileName)) {
+        process_file(output, file_set, add_trailing_slash(*src_dir) + dir_list.data().cFileName, include_dirs);
       }
     }
   }

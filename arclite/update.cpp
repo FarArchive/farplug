@@ -519,16 +519,16 @@ private:
   void scan_dir(const wstring& sub_dir, UInt32 dst_dir_index) {
     wstring path = add_trailing_slash(src_dir) + sub_dir;
     update_progress(path);
-    FileEnum file_enum(path);
+    DirList dir_list(path);
     while (true) {
+      bool more = false;
       RETRY_OR_IGNORE_BEGIN
-      if (!file_enum.next())
-        return;
+      more = dir_list.next();
       RETRY_OR_IGNORE_END(ignore_errors, error_log, *this)
-      if (error_ignored) return;
-      UInt32 file_index = scan_file(sub_dir, file_enum.data(), dst_dir_index);
-      if (file_enum.data().is_dir()) {
-        scan_dir(add_trailing_slash(sub_dir) + file_enum.data().cFileName, file_index);
+      if (error_ignored || !more) break;
+      UInt32 file_index = scan_file(sub_dir, dir_list.data(), dst_dir_index);
+      if (dir_list.data().is_dir()) {
+        scan_dir(add_trailing_slash(sub_dir) + dir_list.data().cFileName, file_index);
       }
     }
   }
@@ -537,14 +537,17 @@ public:
   PrepareUpdate(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, const Archive& archive, FileIndexMap& file_index_map, UInt32& new_index, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(Far::get_msg(MSG_PROGRESS_SCAN_DIRS), false), src_dir(src_dir), archive(archive), file_index_map(file_index_map), new_index(new_index), ignore_errors(ignore_errors), error_log(error_log) {
     for (unsigned i = 0; i < file_names.size(); i++) {
       wstring full_path = add_trailing_slash(src_dir) + file_names[i];
-      FindData find_data;
-      RETRY_OR_IGNORE_BEGIN
-      find_data = File::get_find_data(full_path);
-      RETRY_OR_IGNORE_END(ignore_errors, error_log, *this)
-      if (error_ignored) continue;
-      UInt32 file_index = scan_file(extract_file_path(file_names[i]), find_data, dst_dir_index);
-      if (find_data.is_dir()) {
-        scan_dir(file_names[i], file_index);
+      FileEnum file_enum(full_path);
+      while (true) {
+        bool more = false;
+        RETRY_OR_IGNORE_BEGIN
+        more = file_enum.next();
+        RETRY_OR_IGNORE_END(ignore_errors, error_log, *this)
+        if (error_ignored || !more) break;
+        UInt32 file_index = scan_file(extract_file_path(file_names[i]), file_enum.data(), dst_dir_index);
+        if (file_enum.data().is_dir()) {
+          scan_dir(file_names[i], file_index);
+        }
       }
     }
   }
@@ -759,11 +762,11 @@ private:
 
   void delete_src_dir(const wstring& dir_path) {
     {
-      FileEnum file_enum(dir_path);
-      while (file_enum.next()) {
-        wstring path = add_trailing_slash(dir_path) + file_enum.data().cFileName;
+      DirList dir_list(dir_path);
+      while (dir_list.next()) {
+        wstring path = add_trailing_slash(dir_path) + dir_list.data().cFileName;
         update_progress(path);
-        if (file_enum.data().is_dir())
+        if (dir_list.data().is_dir())
           delete_src_dir(path);
         else
           delete_src_file(path);

@@ -145,11 +145,11 @@ ArcAPI* ArcAPI::get() {
 }
 
 void ArcAPI::load_libs(const wstring& path) {
-  FileEnum file_enum(path);
+  DirList dir_list(path);
   bool more;
-  while (file_enum.next_nt(more) && more) {
+  while (dir_list.next_nt(more) && more) {
     ArcLib arc_lib;
-    arc_lib.module_path = add_trailing_slash(path) + file_enum.data().cFileName;
+    arc_lib.module_path = add_trailing_slash(path) + dir_list.data().cFileName;
     if (_wcsicmp(extract_file_ext(arc_lib.module_path).c_str(), L".dll") != 0)
       continue;
     arc_lib.h_module = LoadLibraryW(arc_lib.module_path.c_str());
@@ -171,10 +171,10 @@ void ArcAPI::load_libs(const wstring& path) {
 }
 
 void ArcAPI::find_sfx_modules(const wstring& path) {
-  FileEnum file_enum(path);
+  DirList dir_list(path);
   bool more;
-  while (file_enum.next_nt(more) && more) {
-    wstring file_path = add_trailing_slash(path) + file_enum.data().cFileName;
+  while (dir_list.next_nt(more) && more) {
+    wstring file_path = add_trailing_slash(path) + dir_list.data().cFileName;
     if (_wcsicmp(extract_file_ext(file_path).c_str(), L".sfx") != 0)
       continue;
     File file;

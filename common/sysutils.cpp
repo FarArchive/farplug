@@ -527,7 +527,7 @@ bool Key::delete_sub_key_nt(const wchar_t* name) {
   return true;
 }
 
-FileEnum::FileEnum(const wstring& dir_path): dir_path(dir_path), h_find(INVALID_HANDLE_VALUE) {
+FileEnum::FileEnum(const wstring& file_mask): file_mask(file_mask), h_find(INVALID_HANDLE_VALUE) {
 }
 
 FileEnum::~FileEnum() {
@@ -538,14 +538,14 @@ FileEnum::~FileEnum() {
 bool FileEnum::next() {
   bool more;
   if (!next_nt(more))
-    throw Error(HRESULT_FROM_WIN32(GetLastError()), dir_path, __FILE__, __LINE__);
+    throw Error(HRESULT_FROM_WIN32(GetLastError()), file_mask, __FILE__, __LINE__);
   return more;
 }
 
 bool FileEnum::next_nt(bool& more) {
   while (true) {
     if (h_find == INVALID_HANDLE_VALUE) {
-      h_find = FindFirstFileW(long_path(add_trailing_slash(dir_path) + L'*').c_str(), &find_data);
+      h_find = FindFirstFileW(long_path(file_mask).c_str(), &find_data);
       if (h_find == INVALID_HANDLE_VALUE)
         return false;
     }
@@ -565,6 +565,9 @@ bool FileEnum::next_nt(bool& more) {
     more = true;
     return true;
   }
+}
+
+DirList::DirList(const wstring& dir_path): FileEnum(add_trailing_slash(dir_path) + L'*') {
 }
 
 wstring get_temp_path() {

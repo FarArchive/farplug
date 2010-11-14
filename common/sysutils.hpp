@@ -143,17 +143,22 @@ public:
 
 class FileEnum: private NonCopyable {
 protected:
-  wstring dir_path;
+  wstring file_mask;
   HANDLE h_find;
   FindData find_data;
 public:
-  FileEnum(const wstring& dir_path) throw();
+  FileEnum(const wstring& file_mask) throw();
   ~FileEnum() throw();
   bool next();
   bool next_nt(bool& more) throw();
   const FindData& data() const throw() {
     return find_data;
   }
+};
+
+class DirList: public FileEnum {
+public:
+  DirList(const wstring& dir_path) throw();
 };
 
 wstring get_temp_path();
