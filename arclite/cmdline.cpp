@@ -19,22 +19,44 @@ wstring lc(const wstring& str) {
 CommandArgs parse_command(const wstring& cmd_text) {
   CommandArgs cmd_args;
   cmd_args.cmd = cmdOpen;
-  list<wstring> tokens = split(cmd_text, L' ');
-  bool command_found = false;
-  for_each(tokens.begin(), tokens.end(), [&] (const wstring& token) {
-    if (token.empty())
-      ;
-    else if (!command_found) {
-      command_found = true;
-      wstring cmd = lc(token);
-      if (cmd == L"c") cmd_args.cmd = cmdCreate;
-      else if (cmd == L"x") cmd_args.cmd = cmdExtract;
-      else if (cmd == L"t") cmd_args.cmd = cmdTest;
-      else cmd_args.args.push_back(token);
+  bool is_token = false;
+  bool is_comma = false;
+  wstring token;
+  for (unsigned i = 0; i < cmd_text.size(); i++) {
+    if (is_token) {
+      if (is_comma) {
+        if (cmd_text[i] == L'"')
+          is_comma = false;
+        token += cmd_text[i];
+      }
+      else if (cmd_text[i] == L' ') {
+        is_token = false;
+        cmd_args.args.push_back(token);
+        token.clear();
+      }
+      else
+        token += cmd_text[i];
     }
-    else
-      cmd_args.args.push_back(token);
-  });
+    else if (cmd_text[i] != L' ') {
+      is_token = true;
+      if (cmd_text[i] == L'"')
+        is_comma = true;
+      token += cmd_text[i];
+    }
+  }
+  if (!token.empty())
+    cmd_args.args.push_back(token);
+  if (!cmd_args.args.empty()) {
+    wstring cmd = lc(cmd_args.args.front());
+    if (cmd == L"c")
+      cmd_args.cmd = cmdCreate;
+    else if (cmd == L"x")
+      cmd_args.cmd = cmdExtract;
+    else if (cmd == L"t")
+      cmd_args.cmd = cmdTest;
+    if (cmd_args.cmd != cmdOpen)
+      cmd_args.args.erase(cmd_args.args.begin());
+  }
   return cmd_args;
 }
 
