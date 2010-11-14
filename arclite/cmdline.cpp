@@ -116,10 +116,12 @@ const wchar_t* c_methods[] = { L"lzma", L"lzma2", L"ppmd" };
 
 CreateCommand parse_create_command(const vector<wstring>& args) {
   CreateCommand command;
+  bool arc_type_spec = false;
   unsigned i = 0;
   for (; i < args.size() && is_param(args[i]); i++) {
     Param param = parse_param(args[i]);
     if (param.name == L"t") {
+      arc_type_spec = true;
       ArcTypes arc_types = ArcAPI::formats().find_by_name(param.value);
       CHECK_FMT(!arc_types.empty());
       command.options.arc_type = arc_types.front();
@@ -167,6 +169,11 @@ CreateCommand parse_create_command(const vector<wstring>& args) {
   CHECK_FMT(!is_param(args[i]));
   command.options.arc_path = unquote(args[i]);
   i++;
+  if (!arc_type_spec) {
+    ArcTypes arc_types = ArcAPI::formats().find_by_ext(extract_file_ext(command.options.arc_path));
+    if (!arc_types.empty())
+      command.options.arc_type = arc_types.front();
+  }
   for (; i < args.size(); i++) {
     CHECK_FMT(!is_param(args[i]));
     if (args[i][0] == L'@')
