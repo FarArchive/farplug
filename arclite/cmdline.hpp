@@ -5,6 +5,7 @@
 enum CommandType {
   cmdOpen,
   cmdCreate,
+  cmdUpdate,
   cmdExtract,
   cmdTest,
 };
@@ -25,25 +26,30 @@ struct OpenCommand {
   }
 };
 
-OpenCommand parse_open_command(const vector<wstring>& args);
+OpenCommand parse_open_command(const CommandArgs& args);
 
-struct CreateCommand {
+struct UpdateCommand {
+  bool new_arc;
+  bool level_defined;
+  bool method_defined;
+  bool solid_defined;
+  bool encrypt_defined;
   UpdateOptions options;
   vector<wstring> files;
   vector<wstring> listfiles;
 };
 
-CreateCommand parse_create_command(const vector<wstring>& args);
+UpdateCommand parse_update_command(const CommandArgs& args);
 
 struct ExtractCommand {
   ExtractOptions options;
   vector<wstring> arc_list;
 };
 
-ExtractCommand parse_extract_command(const vector<wstring>& args);
+ExtractCommand parse_extract_command(const CommandArgs& args);
 
 struct TestCommand {
   vector<wstring> arc_list;
 };
 
-TestCommand parse_test_command(const vector<wstring>& args);
+TestCommand parse_test_command(const CommandArgs& args);

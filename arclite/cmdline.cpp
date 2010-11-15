@@ -50,6 +50,8 @@ CommandArgs parse_command(const wstring& cmd_text) {
     wstring cmd = lc(cmd_args.args.front());
     if (cmd == L"c")
       cmd_args.cmd = cmdCreate;
+    else if (cmd == L"u")
+      cmd_args.cmd = cmdUpdate;
     else if (cmd == L"x")
       cmd_args.cmd = cmdExtract;
     else if (cmd == L"t")
@@ -127,8 +129,9 @@ list<wstring> parse_listfile(const wstring& str) {
 
 // arc:[-d] <archive>
 
-OpenCommand parse_open_command(const vector<wstring>& args) {
+OpenCommand parse_open_command(const CommandArgs& ca) {
   OpenCommand command;
+  const vector<wstring>& args = ca.args;
   CHECK_FMT(!args.empty());
   for (unsigned i = 0; i + 1 < args.size(); i++) {
     CHECK_FMT(is_param(args[i]));
@@ -146,48 +149,63 @@ OpenCommand parse_open_command(const vector<wstring>& args) {
 
 // arc:c [-t:<arc_type>] [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]] [-sfx:<module>] [-v:<volume_size>]
 //   [-mf[:(y|n)]] [-ie[:(y|n)]] [-adv:<advanced>] <archive> (<file1> <file2> ... | @<filelist>)
+// arc:u [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]]
+//   [-mf[:(y|n)]] [-ie[:(y|n)]] [-adv:<advanced>] <archive> (<file1> <file2> ... | @<filelist>)
 //   <level> = 0|1|3|5|7|9
 //   <method> = lzma|lzma2|ppmd
 
 const unsigned c_levels[] = { 0, 1, 3, 5, 7, 9 };
 const wchar_t* c_methods[] = { L"lzma", L"lzma2", L"ppmd" };
 
-CreateCommand parse_create_command(const vector<wstring>& args) {
-  CreateCommand command;
+UpdateCommand parse_update_command(const CommandArgs& ca) {
+  UpdateCommand command;
+  const vector<wstring>& args = ca.args;
+  command.new_arc = ca.cmd == cmdCreate;
+  command.level_defined = false;
+  command.method_defined = false;
+  command.solid_defined = false;
+  command.encrypt_defined = false;
   bool arc_type_spec = false;
   unsigned i = 0;
   for (; i < args.size() && is_param(args[i]); i++) {
     Param param = parse_param(args[i]);
     if (param.name == L"t") {
+      CHECK_FMT(ca.cmd == cmdCreate);
       arc_type_spec = true;
       ArcTypes arc_types = ArcAPI::formats().find_by_name(param.value);
       CHECK_FMT(!arc_types.empty());
       command.options.arc_type = arc_types.front();
     }
     else if (param.name == L"l") {
+      command.level_defined = true;
       command.options.level = str_to_int(param.value);
       CHECK_FMT(find(c_levels, c_levels + ARRAYSIZE(c_levels), command.options.level) != c_levels + ARRAYSIZE(c_levels));
     }
     else if (param.name == L"m") {
+      command.method_defined = true;
       command.options.method = param.value;
       CHECK_FMT(find(c_methods, c_methods + ARRAYSIZE(c_methods), command.options.method) != c_methods + ARRAYSIZE(c_methods));
     }
     else if (param.name == L"s") {
+      command.solid_defined = true;
       command.options.solid = parse_bool_value(param.value);
     }
     else if (param.name == L"p") {
       CHECK_FMT(!param.value.empty());
+      command.encrypt_defined = true;
       command.options.password = param.value;
       command.options.encrypt = true;
     }
     else if (param.name == L"eh")
       command.options.encrypt_header = parse_tri_state_value(param.value);
     else if (param.name == L"sfx") {
+      CHECK_FMT(ca.cmd == cmdCreate);
       CHECK_FMT(!param.value.empty());
       command.options.create_sfx = true;
       command.options.sfx_module = param.value;
     }
     else if (param.name == L"v") {
+      CHECK_FMT(ca.cmd == cmdCreate);
       CHECK_FMT(!param.value.empty());
       command.options.enable_volumes = true;
       command.options.volume_size = param.value;
@@ -207,7 +225,7 @@ CreateCommand parse_create_command(const vector<wstring>& args) {
   CHECK_FMT(!is_param(args[i]));
   command.options.arc_path = unquote(args[i]);
   i++;
-  if (!arc_type_spec) {
+  if (ca.cmd == cmdCreate && !arc_type_spec) {
     ArcTypes arc_types = ArcAPI::formats().find_by_ext(extract_file_ext(command.options.arc_path));
     if (!arc_types.empty())
       command.options.arc_type = arc_types.front();
@@ -225,8 +243,9 @@ CreateCommand parse_create_command(const vector<wstring>& args) {
 
 // arc:x [-ie[:(y|n)]] [-o[:(a|y|n)]] [-mf[:(y|n)]] [-p:<password>] [-sd[:(a|y|n)]] [-da[:(y|n)]] <archive1> <archive2> ... <path>
 
-ExtractCommand parse_extract_command(const vector<wstring>& args) {
+ExtractCommand parse_extract_command(const CommandArgs& ca) {
   ExtractCommand command;
+  const vector<wstring>& args = ca.args;
   unsigned i = 0;
   for (; i < args.size() && is_param(args[i]); i++) {
     Param param = parse_param(args[i]);
@@ -260,8 +279,9 @@ ExtractCommand parse_extract_command(const vector<wstring>& args) {
 
 // arc:t <archive1> <archive2> ...
 
-TestCommand parse_test_command(const vector<wstring>& args) {
+TestCommand parse_test_command(const CommandArgs& ca) {
   TestCommand command;
+  const vector<wstring>& args = ca.args;
   for (unsigned i = 0; i < args.size(); i++) {
     CHECK_FMT(!is_param(args.back()));
     command.arc_list.push_back(unquote(args[i]));

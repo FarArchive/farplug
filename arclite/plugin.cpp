@@ -560,7 +560,7 @@ public:
       Far::panel_go_to_file(PANEL_PASSIVE, options.arc_path);
   }
 
-  static void cmdline_create(const CreateCommand& cmd) {
+  static void cmdline_update(const UpdateCommand& cmd) {
     UpdateOptions options = cmd.options;
     options.arc_path = Far::get_absolute_path(options.arc_path);
     options.sfx_module = Far::get_absolute_path(options.sfx_module);
@@ -605,8 +605,43 @@ public:
       });
     }
 
+    options.open_shared = (Far::adv_control(ACTL_GETSYSTEMSETTINGS) & FSS_COPYFILESOPENEDFORWRITING) != 0;
+
     ErrorLog error_log;
-    Archive().create(src_path, files, options, error_log);
+    if (cmd.new_arc) {
+      Archive().create(src_path, files, options, error_log);
+
+      if (upcase(Far::get_panel_dir(PANEL_ACTIVE)) == upcase(extract_file_path(options.arc_path)))
+        Far::panel_go_to_file(PANEL_ACTIVE, options.arc_path);
+      if (upcase(Far::get_panel_dir(PANEL_PASSIVE)) == upcase(extract_file_path(options.arc_path)))
+        Far::panel_go_to_file(PANEL_PASSIVE, options.arc_path);
+    }
+    else {
+      vector<Archive> archives = Archive::detect(options.arc_path, false);
+      if (archives.empty())
+        throw Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), options.arc_path, __FILE__, __LINE__);
+
+      Archive& archive = archives[0];
+      if (!archive.updatable())
+        throw Error(Far::get_msg(MSG_ERROR_NOT_UPDATABLE), options.arc_path, __FILE__, __LINE__);
+
+      archive.make_index();
+
+      options.arc_type = archive.arc_chain.back().type;
+      archive.load_update_props();
+      if (!cmd.level_defined)
+        options.level = archive.level;
+      if (!cmd.method_defined)
+        options.method = archive.method;
+      if (!cmd.solid_defined)
+        options.solid = archive.solid;
+      if (!cmd.encrypt_defined) {
+        options.encrypt = archive.encrypted;
+        options.password = archive.password;
+      }
+
+      archive.update(src_path, files, wstring(), options, error_log);
+    }
   }
 
   void delete_files(const PluginPanelItem* panel_items, int items_number, int op_mode) {
@@ -764,17 +799,18 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
       CommandArgs cmd_args = parse_command(reinterpret_cast<const wchar_t*>(Item));
       switch (cmd_args.cmd) {
       case cmdOpen: {
-        OpenCommand cmd = parse_open_command(cmd_args.args);
+        OpenCommand cmd = parse_open_command(cmd_args);
         return new Plugin(Far::get_absolute_path(cmd.arc_path), !cmd.detect);
       }
       case cmdCreate:
-        Plugin::cmdline_create(parse_create_command(cmd_args.args));
+      case cmdUpdate:
+        Plugin::cmdline_update(parse_update_command(cmd_args));
         break;
       case cmdExtract:
-        Plugin::cmdline_extract(parse_extract_command(cmd_args.args));
+        Plugin::cmdline_extract(parse_extract_command(cmd_args));
         break;
       case cmdTest:
-        Plugin::cmdline_test(parse_test_command(cmd_args.args));
+        Plugin::cmdline_test(parse_test_command(cmd_args));
         break;
       }
     }
