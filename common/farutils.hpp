@@ -222,5 +222,6 @@ unsigned char get_colors(PaletteColors color_id);
 bool panel_go_to_file(HANDLE h_panel, const wstring& file_path);
 DWORD get_lang_id();
 void close_plugin(HANDLE h_plugin, const wstring& dir);
+void open_help(const wstring& topic);
 
 };

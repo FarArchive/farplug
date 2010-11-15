@@ -760,21 +760,29 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
     }
   }
   else if (OpenFrom == OPEN_COMMANDLINE) {
-    CommandArgs cmd_args = parse_command(reinterpret_cast<const wchar_t*>(Item));
-    switch (cmd_args.cmd) {
-    case cmdOpen: {
-      OpenCommand cmd = parse_open_command(cmd_args.args);
-      return new Plugin(Far::get_absolute_path(cmd.arc_path), !cmd.detect);
+    try {
+      CommandArgs cmd_args = parse_command(reinterpret_cast<const wchar_t*>(Item));
+      switch (cmd_args.cmd) {
+      case cmdOpen: {
+        OpenCommand cmd = parse_open_command(cmd_args.args);
+        return new Plugin(Far::get_absolute_path(cmd.arc_path), !cmd.detect);
+      }
+      case cmdCreate:
+        Plugin::cmdline_create(parse_create_command(cmd_args.args));
+        break;
+      case cmdExtract:
+        Plugin::cmdline_extract(parse_extract_command(cmd_args.args));
+        break;
+      case cmdTest:
+        Plugin::cmdline_test(parse_test_command(cmd_args.args));
+        break;
+      }
     }
-    case cmdCreate:
-      Plugin::cmdline_create(parse_create_command(cmd_args.args));
-      break;
-    case cmdExtract:
-      Plugin::cmdline_extract(parse_extract_command(cmd_args.args));
-      break;
-    case cmdTest:
-      Plugin::cmdline_test(parse_test_command(cmd_args.args));
-      break;
+    catch (const Error& e) {
+      if (e.code == E_BAD_FORMAT)
+        Far::open_help(L"Prefix");
+      else
+        throw;
     }
   }
   return INVALID_HANDLE_VALUE;

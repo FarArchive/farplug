@@ -15,7 +15,7 @@ $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 	~Create and update archive~@Update@
 	~Plugin settings~@Config@
 
-	Plugin command line prefix is #arc#.
+	Plugin command line prefix is ~arc~@Prefix@.
 
 	Archive support comes from 7z.dll library,
 that is a part of ~7-Zip~@http://7-zip.org@ project.
@@ -137,3 +137,45 @@ information from 7z.dll.
 	#plugin_prefix# - Plugin command line prefix (string). Default prefix is #arc#.
 
 	#max_check_size# - Maximum number of bytes to load when detecting archive format (DWORD). Default is 1 Mb.
+
+@Prefix
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
+$ #Prefix command line format#
+
+	#Open archive#
+	arc:[-d] <archive>
+	-d = detect all available formats and show selection menu
+	<archive> = archive file name
+
+	#Create archive#
+	arc:c [-t:<arc_type>] [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]] [-sfx:<module>] [-v:<volume_size>]
+[-mf[:(y|n)]] [-ie[:(y|n)]] [-adv:<advanced>] <archive> (<file> | @@<filelist>) ...
+	-t = archive type (7z, zip, etc.)
+	-l = compression level (0|1|3|5|7|9)
+	-m = compression method (lzma|lzma2|ppmd)
+	-s = solid archive
+	-p = encrypt archive with password
+	-eh = encrypt archive header (file names)
+	-sfx = create self-extracting archive using specified SFX module
+	-v = split archive into multiple volumes (example: -v:700M)
+	-mf = delete files after successful archival
+	-ie = ignore errors (skip files with errors)
+	-adv = advanced settings (see 7-Zip documentation for -m switch)
+	<archive> = archive file name
+	<file> ... = list of files to archive (masks are allowed)
+	@@<filelist> ... = files containing lists of files to archive
+
+	#Extract archive#
+	arc:x [-ie[:(y|n)]] [-o[:(a|y|n)]] [-mf[:(y|n)]] [-p:<password>] [-sd[:(a|y|n)]] [-da[:(y|n)]] <archive> ... <path>
+	-ie = ignore errors (skip files with errors)
+	-o = overwrite existing files (a = ask)
+	-mf = delete files from archive after successful extraction
+	-p = specify password for encrypted archive
+	-sd = extract archive into separate directory (a = decide automatically)
+	-da = delete archive after successful extraction
+	<archive> ... = list of archives
+	<path> = target path
+
+	#Test archive#
+	arc:t <archive> ...
+	<archive> ... = list of archives

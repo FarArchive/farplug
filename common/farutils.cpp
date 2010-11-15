@@ -751,4 +751,8 @@ void close_plugin(HANDLE h_plugin, const wstring& dir) {
   g_far.Control(h_plugin, FCTL_CLOSEPLUGIN, 0, reinterpret_cast<LONG_PTR>(dir.c_str()));
 }
 
+void open_help(const wstring& topic) {
+  g_far.ShowHelp(g_far.ModuleName, topic.c_str(), FHELP_SELFHELP);
+}
+
 };
