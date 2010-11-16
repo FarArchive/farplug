@@ -112,7 +112,7 @@ ArcTypes ArcFormats::find_by_ext(const wstring& ext) const {
 
 
 unsigned SfxModules::find(const wstring& module) const {
-  return distance(begin(), std::find(begin(), end(), module));
+  return static_cast<unsigned>(distance(begin(), std::find(begin(), end(), module)));
 }
 
 

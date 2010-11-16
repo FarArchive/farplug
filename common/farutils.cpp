@@ -53,7 +53,7 @@ int message(const wstring& msg, int button_cnt, DWORD flags) {
 
 unsigned MenuItems::add(const wstring& item) {
   push_back(item);
-  return size() - 1;
+  return static_cast<unsigned>(size() - 1);
 }
 
 int menu(const wstring& title, const MenuItems& items, const wchar_t* help) {
