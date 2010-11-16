@@ -86,6 +86,11 @@ public:
 
 void retry_or_ignore_error(const Error& error, bool& ignore, bool& ignore_errors, ErrorLog& error_log, ProgressMonitor& progress, bool can_retry, bool can_ignore);
 
+struct OpenOptions {
+  bool detect;
+  wstring password;
+};
+
 struct ExtractOptions {
   wstring dst_dir;
   bool ignore_errors;

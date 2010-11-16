@@ -27,7 +27,9 @@ public:
 
   Plugin(const wstring& file_path, bool auto_detect) {
     Archive::max_check_size = g_options.max_check_size;
-    vector<Archive> archives = Archive::detect(file_path, !auto_detect);
+    OpenOptions options;
+    options.detect = !auto_detect;
+    vector<Archive> archives = Archive::open(file_path, options);
 
     if (archives.size() == 0)
       FAIL(E_ABORT);
@@ -223,7 +225,10 @@ public:
     for (unsigned i = 0; i < arc_list.size(); i++) {
       vector<Archive> archives;
       try {
-        archives = Archive::detect(arc_list[i], false);
+        OpenOptions open_options;
+        open_options.detect = false;
+        open_options.password = options.password;
+        archives = Archive::open(arc_list[i], open_options);
         if (archives.empty())
           throw Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), arc_list[i], __FILE__, __LINE__);
       }
@@ -321,7 +326,9 @@ public:
     for (unsigned i = 0; i < arc_list.size(); i++) {
       vector<Archive> archives;
       try {
-        archives = Archive::detect(arc_list[i], false);
+        OpenOptions open_options;
+        open_options.detect = false;
+        archives = Archive::open(arc_list[i], open_options);
         if (archives.empty())
           throw Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), arc_list[i], __FILE__, __LINE__);
       }
@@ -617,7 +624,10 @@ public:
         Far::panel_go_to_file(PANEL_PASSIVE, options.arc_path);
     }
     else {
-      vector<Archive> archives = Archive::detect(options.arc_path, false);
+      OpenOptions open_options;
+      open_options.detect = false;
+      open_options.password = options.password;
+      vector<Archive> archives = Archive::open(options.arc_path, open_options);
       if (archives.empty())
         throw Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), options.arc_path, __FILE__, __LINE__);
 

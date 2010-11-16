@@ -52,7 +52,9 @@ void attach_sfx_module(const wstring& file_path, const wstring& sfx_module) {
   AttachSfxModuleProgress progress(file_path);
 
   {
-    vector<Archive> archives = Archive::detect(file_path, false);
+    OpenOptions options;
+    options.detect = false;
+    vector<Archive> archives = Archive::open(file_path, options);
     if (archives.empty())
       FAIL_MSG(Far::get_msg(MSG_ERROR_SFX_CONVERT));
     if (!archives.front().is_pure_7z())

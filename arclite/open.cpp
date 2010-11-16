@@ -299,7 +299,7 @@ bool Archive::open(IInStream* in_stream) {
   return res == S_OK;
 }
 
-void Archive::detect(const wstring& arc_path, bool all, vector<Archive>& archives) {
+void Archive::open(const wstring& arc_path, const OpenOptions& options, vector<Archive>& archives) {
   size_t parent_idx = -1;
   if (!archives.empty())
     parent_idx = archives.size() - 1;
@@ -379,6 +379,7 @@ void Archive::detect(const wstring& arc_path, bool all, vector<Archive>& archive
     Archive archive;
     archive.arc_path = arc_path;
     archive.arc_info = arc_info;
+    archive.password = options.password;
     if (parent_idx != -1)
       archive.volume_names = archives[parent_idx].volume_names;
     ArcAPI::create_in_archive(arc_entry->type, &archive.in_arc);
@@ -387,16 +388,16 @@ void Archive::detect(const wstring& arc_path, bool all, vector<Archive>& archive
         archive.arc_chain.assign(archives[parent_idx].arc_chain.begin(), archives[parent_idx].arc_chain.end());
       archive.arc_chain.push_back(*arc_entry);
       archives.push_back(archive);
-      detect(arc_path, all, archives);
-      if (!all) break;
+      open(arc_path, options, archives);
+      if (!options.detect) break;
     }
   }
 }
 
-vector<Archive> Archive::detect(const wstring& file_path, bool all) {
+vector<Archive> Archive::open(const wstring& file_path, const OpenOptions& options) {
   vector<Archive> archives;
-  detect(file_path, all, archives);
-  if (!all && !archives.empty())
+  open(file_path, options, archives);
+  if (!options.detect && !archives.empty())
     archives.erase(archives.begin(), archives.end() - 1);
   return archives;
 }
