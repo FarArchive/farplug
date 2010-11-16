@@ -26,7 +26,6 @@ public:
   }
 
   Plugin(const wstring& file_path, bool auto_detect) {
-    Archive::max_check_size = g_options.max_check_size;
     OpenOptions options;
     options.detect = !auto_detect;
     vector<Archive> archives = Archive::open(file_path, options);
@@ -726,6 +725,7 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info) {
   g_options.load();
   g_profiles.load();
   g_plugin_prefix = g_options.plugin_prefix;
+  Archive::max_check_size = g_options.max_check_size;
 }
 
 void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
