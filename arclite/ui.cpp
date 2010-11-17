@@ -85,8 +85,12 @@ void ProgressMonitor::update_ui(bool force) {
           }
           else if (key_event.wVirtualKeyCode == c_vk_p) {
             paused = !paused;
-            if (paused)
+            if (paused) {
+              update_time();
               display();
+            }
+            else
+              discard_time();
           }
         }
       }
