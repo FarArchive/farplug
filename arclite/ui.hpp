@@ -11,9 +11,9 @@ private:
   unsigned __int64 time_total;
   unsigned __int64 time_update;
   bool confirm_esc;
+protected:
   void update_time();
   void discard_time();
-protected:
   virtual void do_update_ui() = 0;
   virtual void do_process_key(const KEY_EVENT_RECORD& ket_event) {
   }
