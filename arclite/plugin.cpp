@@ -25,10 +25,8 @@ public:
   Plugin() {
   }
 
-  Plugin(const wstring& file_path, bool auto_detect) {
-    OpenOptions options;
-    options.detect = !auto_detect;
-    vector<Archive> archives = Archive::open(file_path, options);
+  static Plugin* open(const OpenOptions& options) {
+    vector<Archive> archives = Archive::open(options);
 
     if (archives.size() == 0)
       FAIL(E_ABORT);
@@ -47,7 +45,15 @@ public:
         FAIL(E_ABORT);
     }
 
-    archive = archives[format_idx];
+    Plugin* plugin = new Plugin();
+    try {
+      plugin->archive = archives[format_idx];
+    }
+    catch (...) {
+      delete plugin;
+      throw;
+    }
+    return plugin;
   }
 
   void info(OpenPluginInfo* opi) {
@@ -225,9 +231,10 @@ public:
       vector<Archive> archives;
       try {
         OpenOptions open_options;
+        open_options.arc_path = arc_list[i];
         open_options.detect = false;
         open_options.password = options.password;
-        archives = Archive::open(arc_list[i], open_options);
+        archives = Archive::open(open_options);
         if (archives.empty())
           throw Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), arc_list[i], __FILE__, __LINE__);
       }
@@ -326,8 +333,9 @@ public:
       vector<Archive> archives;
       try {
         OpenOptions open_options;
+        open_options.arc_path = arc_list[i];
         open_options.detect = false;
-        archives = Archive::open(arc_list[i], open_options);
+        archives = Archive::open(open_options);
         if (archives.empty())
           throw Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), arc_list[i], __FILE__, __LINE__);
       }
@@ -624,9 +632,10 @@ public:
     }
     else {
       OpenOptions open_options;
+      open_options.arc_path = options.arc_path;
       open_options.detect = false;
       open_options.password = options.password;
-      vector<Archive> archives = Archive::open(options.arc_path, open_options);
+      vector<Archive> archives = Archive::open(open_options);
       if (archives.empty())
         throw Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), options.arc_path, __FILE__, __LINE__);
 
@@ -710,7 +719,7 @@ public:
   }
 };
 
-TriState auto_detect_next_time = triUndef;
+TriState detect_next_time = triUndef;
 
 int WINAPI GetMinFarVersion(void) {
   return FARMANAGERVERSION;
@@ -756,7 +765,8 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
     unsigned sfx_convert_menu_id = menu_items.add(Far::get_msg(MSG_MENU_SFX_CONVERT));
     int item = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), menu_items);
     if (item == open_menu_id || item == detect_menu_id) {
-      bool auto_detect = item == open_menu_id;
+      OpenOptions options;
+      options.detect = item == detect_menu_id;
       PanelInfo panel_info;
       if (!Far::get_panel_info(PANEL_ACTIVE, panel_info))
         return INVALID_HANDLE_VALUE;
@@ -766,13 +776,12 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
       if (!Far::is_real_file_panel(panel_info)) {
         if ((panel_item.file_attributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
           Far::post_keys(vector<DWORD>(1, KEY_CTRLPGDN));
-          auto_detect_next_time = auto_detect ? triTrue : triFalse;
+          detect_next_time = options.detect ? triTrue : triFalse;
         }
         return INVALID_HANDLE_VALUE;
       }
-      wstring dir = Far::get_panel_dir(PANEL_ACTIVE);
-      wstring path = add_trailing_slash(dir) + panel_item.file_name;
-      return new Plugin(path, auto_detect);
+      options.arc_path = add_trailing_slash(Far::get_panel_dir(PANEL_ACTIVE)) + panel_item.file_name;
+      return Plugin::open(options);
     }
     else if (item == create_menu_id) {
       Plugin::create_archive();
@@ -809,8 +818,9 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
       CommandArgs cmd_args = parse_command(reinterpret_cast<const wchar_t*>(Item));
       switch (cmd_args.cmd) {
       case cmdOpen: {
-        OpenCommand cmd = parse_open_command(cmd_args);
-        return new Plugin(Far::get_absolute_path(cmd.arc_path), !cmd.detect);
+        OpenOptions options = parse_open_command(cmd_args).options;
+        options.arc_path = Far::get_absolute_path(options.arc_path);
+        return Plugin::open(options);
       }
       case cmdCreate:
       case cmdUpdate:
@@ -843,9 +853,10 @@ HANDLE WINAPI OpenFilePluginW(const wchar_t *Name,const unsigned char *Data,int 
     return new Plugin();
   }
   else {
-    bool auto_detect;
-    if (auto_detect_next_time == triUndef) {
-      auto_detect = true;
+    OpenOptions options;
+    options.arc_path = Name;
+    if (detect_next_time == triUndef) {
+      options.detect = false;
       if (!g_options.handle_commands)
         FAIL(E_ABORT);
       if (g_options.use_include_masks && !Far::match_masks(extract_file_name(Name), g_options.include_masks))
@@ -853,12 +864,12 @@ HANDLE WINAPI OpenFilePluginW(const wchar_t *Name,const unsigned char *Data,int 
       if (g_options.use_exclude_masks && Far::match_masks(extract_file_name(Name), g_options.exclude_masks))
         FAIL(E_ABORT);
     }
-    else if (auto_detect_next_time == triTrue)
-      auto_detect = true;
+    else if (detect_next_time == triTrue)
+      options.detect = true;
     else
-      auto_detect = false;
-    auto_detect_next_time = triUndef;
-    return new Plugin(Name, auto_detect);
+      options.detect = false;
+    detect_next_time = triUndef;
+    return Plugin::open(options);
   }
   FAR_ERROR_HANDLER_END(return INVALID_HANDLE_VALUE, return INVALID_HANDLE_VALUE, (OpMode & (OPM_SILENT | OPM_FIND)) != 0);
 }

@@ -143,8 +143,9 @@ $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #Prefix command line format#
 
 	#Open archive#
-	arc:[-d] <archive>
+	arc:[-d] [-p:<password>] <archive>
 	-d = detect all available formats and show selection menu
+	-p = specify password for encrypted archive
 	<archive> = archive file name
 
 	#Create or update archive#

@@ -127,7 +127,7 @@ list<wstring> parse_listfile(const wstring& str) {
 }
 
 
-// arc:[-d] <archive>
+// arc:[-d] [-p:<password>] <archive>
 
 OpenCommand parse_open_command(const CommandArgs& ca) {
   OpenCommand command;
@@ -137,12 +137,16 @@ OpenCommand parse_open_command(const CommandArgs& ca) {
     CHECK_FMT(is_param(args[i]));
     Param param = parse_param(args[i]);
     if (param.name == L"d")
-      command.detect = true;
+      command.options.detect = true;
+    else if (param.name == L"p") {
+      CHECK_FMT(!param.value.empty());
+      command.options.password = param.value;
+    }
     else
       CHECK_FMT(false);
   }
   CHECK_FMT(!is_param(args.back()));
-  command.arc_path = unquote(args.back());
+  command.options.arc_path = unquote(args.back());
   return command;
 }
 

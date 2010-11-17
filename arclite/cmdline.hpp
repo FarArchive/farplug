@@ -20,10 +20,7 @@ CommandArgs parse_command(const wstring& cmd_text);
 list<wstring> parse_listfile(const wstring& str);
 
 struct OpenCommand {
-  wstring arc_path;
-  bool detect;
-  OpenCommand(): detect(false) {
-  }
+  OpenOptions options;
 };
 
 OpenCommand parse_open_command(const CommandArgs& args);

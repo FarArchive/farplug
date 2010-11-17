@@ -53,8 +53,9 @@ void attach_sfx_module(const wstring& file_path, const wstring& sfx_module) {
 
   {
     OpenOptions options;
+    options.arc_path = file_path;
     options.detect = false;
-    vector<Archive> archives = Archive::open(file_path, options);
+    vector<Archive> archives = Archive::open(options);
     if (archives.empty())
       FAIL_MSG(Far::get_msg(MSG_ERROR_SFX_CONVERT));
     if (!archives.front().is_pure_7z())

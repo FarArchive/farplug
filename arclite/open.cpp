@@ -299,7 +299,7 @@ bool Archive::open(IInStream* in_stream) {
   return res == S_OK;
 }
 
-void Archive::open(const wstring& arc_path, const OpenOptions& options, vector<Archive>& archives) {
+void Archive::open(const OpenOptions& options, vector<Archive>& archives) {
   size_t parent_idx = -1;
   if (!archives.empty())
     parent_idx = archives.size() - 1;
@@ -308,7 +308,7 @@ void Archive::open(const wstring& arc_path, const OpenOptions& options, vector<A
   FindData arc_info;
   memset(&arc_info, 0, sizeof(arc_info));
   if (parent_idx == -1) {
-    ArchiveOpenStream* stream_impl = new ArchiveOpenStream(arc_path);
+    ArchiveOpenStream* stream_impl = new ArchiveOpenStream(options.arc_path);
     stream = stream_impl;
     arc_info = stream_impl->get_info();
   }
@@ -377,7 +377,7 @@ void Archive::open(const wstring& arc_path, const OpenOptions& options, vector<A
 
   for (list<ArcEntry>::const_iterator arc_entry = arc_entries.begin(); arc_entry != arc_entries.end(); arc_entry++) {
     Archive archive;
-    archive.arc_path = arc_path;
+    archive.arc_path = options.arc_path;
     archive.arc_info = arc_info;
     archive.password = options.password;
     if (parent_idx != -1)
@@ -388,15 +388,15 @@ void Archive::open(const wstring& arc_path, const OpenOptions& options, vector<A
         archive.arc_chain.assign(archives[parent_idx].arc_chain.begin(), archives[parent_idx].arc_chain.end());
       archive.arc_chain.push_back(*arc_entry);
       archives.push_back(archive);
-      open(arc_path, options, archives);
+      open(options, archives);
       if (!options.detect) break;
     }
   }
 }
 
-vector<Archive> Archive::open(const wstring& file_path, const OpenOptions& options) {
+vector<Archive> Archive::open(const OpenOptions& options) {
   vector<Archive> archives;
-  open(file_path, options, archives);
+  open(options, archives);
   if (!options.detect && !archives.empty())
     archives.erase(archives.begin(), archives.end() - 1);
   return archives;
