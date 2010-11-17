@@ -15,6 +15,7 @@ $ #Configuration#
     #Use full install UI# - full UI installation mode will let you review and select Far components.
     #Update stable builds# - only stable builds are checked for updates.
     #Log installation process# - save installation log file (MsiUpdate_2_x86.log) into system temporary directory.
+    #Show changelog while updating# - show changelog in a separate window when update is started.
     #Additional parameters# - space separated values passed to installer. Examples:
     LAUNCHAPP=1 - start Far after automatic installation is complete.
     MSIFASTINSTALL=1 - do not create system restore points during installation (Windows 7 or higher).
