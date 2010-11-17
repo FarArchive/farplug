@@ -160,11 +160,11 @@ suffix.size.kb = КБ
 suffix.size.mb = МБ
 suffix.size.gb = ГБ
 suffix.size.tb = ТБ
-suffix.speed.b = Б/s
-suffix.speed.kb = КБ/s
-suffix.speed.mb = МБ/s
-suffix.speed.gb = ГБ/s
-suffix.speed.tb = ТБ/s
+suffix.speed.b = Б/с
+suffix.speed.kb = КБ/с
+suffix.speed.mb = МБ/с
+suffix.speed.gb = ГБ/с
+suffix.speed.tb = ТБ/с
 
 # Property names
 kpid.Path = Путь                      
