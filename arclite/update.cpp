@@ -88,6 +88,7 @@ private:
         paused = !paused;
         do_update_ui();
         if (paused) {
+          update_time();
           HANDLE h_con = GetStdHandle(STD_INPUT_HANDLE);
           INPUT_RECORD rec;
           DWORD read_cnt;
@@ -101,6 +102,7 @@ private:
                 }
                 else if (ke.wVirtualKeyCode == c_vk_p) {
                   paused = false;
+                  discard_time();
                 }
               }
             }
