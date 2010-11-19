@@ -943,7 +943,7 @@ private:
       unsigned profile_idx = get_list_pos(profile_ctrl_id);
       if (profile_idx != -1 && profile_idx < profiles.size()) {
         if (Far::message(Far::get_msg(MSG_PLUGIN_NAME) + L'\n' + Far::get_msg(MSG_UPDATE_DLG_CONFIRM_PROFILE_DELETE), 0, FMSG_MB_YESNO) == 0) {
-          profiles.erase(profiles.cbegin() + profile_idx);
+          profiles.erase(profiles.begin() + profile_idx);
           DisableEvents de(*this);
           FarListDelete fld = { profile_idx, 1 };
           send_message(DM_LISTDELETE, profile_ctrl_id, &fld);
@@ -956,7 +956,7 @@ private:
       Far::info_dlg(wstring(), word_wrap(eval_arc_path(), Far::get_optimal_msg_width()));
     }
 
-    if (new_arc && msg == DN_EDITCHANGE || msg == DN_BTNCLICK) {
+    if (new_arc && (msg == DN_EDITCHANGE || msg == DN_BTNCLICK)) {
       unsigned profile_idx = static_cast<unsigned>(profiles.size());
       UpdateOptions options;
       try {
@@ -1276,7 +1276,7 @@ private:
       FarDialogItem dlg_item;
       if (send_message(DM_GETDLGITEMSHORT, param1, &dlg_item) && dlg_item.Type == DI_EDIT) {
         unsigned color = Far::get_colors(COL_DIALOGTEXT);
-        return param2 & 0xFF00FF00 | (color << 16) | color;
+        return (param2 & 0xFF00FF00) | (color << 16) | color;
       }
     }
     return default_dialog_proc(msg, param1, param2);

@@ -150,5 +150,5 @@ clean:
   if exist $(OUTDIR) rd /s /q $(OUTDIR)
 
 
-.PHONY: project distrib build_project build_distrib build_installer depfile clean
+.PHONY: project distrib installer build_project build_distrib build_installer depfile clean
 .SUFFIXES: .wxs

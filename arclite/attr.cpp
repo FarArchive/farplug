@@ -37,13 +37,13 @@ wstring format_str_prop(const PropVariant& prop) {
 
 wstring format_int_prop(const PropVariant& prop) {
   wchar_t buf[32];
-  errno_t res = _i64tow_s(prop.get_int(), buf, ARRAYSIZE(buf), 10);
+  CHECK(_i64tow_s(prop.get_int(), buf, ARRAYSIZE(buf), 10) == 0);
   return buf;
 }
 
 wstring format_uint_prop(const PropVariant& prop) {
   wchar_t buf[32];
-  errno_t res = _ui64tow_s(prop.get_uint(), buf, ARRAYSIZE(buf), 10);
+  CHECK(_ui64tow_s(prop.get_uint(), buf, ARRAYSIZE(buf), 10) == 0);
   return buf;
 }
 
@@ -61,10 +61,11 @@ wstring format_size_prop(const PropVariant& prop) {
 wstring format_filetime_prop(const PropVariant& prop) {
   if (!prop.is_filetime())
     return wstring();
+  FILETIME prop_file_time = prop.get_filetime();
   FILETIME local_file_time;
-  SYSTEMTIME sys_time;
-  if (!FileTimeToLocalFileTime(&prop.get_filetime(), &local_file_time))
+  if (!FileTimeToLocalFileTime(&prop_file_time, &local_file_time))
     return wstring();
+  SYSTEMTIME sys_time;
   if (!FileTimeToSystemTime(&local_file_time, &sys_time))
     return wstring();
   wchar_t buf[64];
@@ -256,7 +257,6 @@ void Archive::load_arc_attr() {
   UInt32 num_props;
   CHECK_COM(in_arc->GetNumberOfArchiveProperties(&num_props));
   for (unsigned i = 0; i < num_props; i++) {
-    Attr attr;
     BStr name;
     PROPID prop_id;
     VARTYPE vt;

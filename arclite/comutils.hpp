@@ -173,6 +173,7 @@ public:
   PropVariant& operator=(const PropVariant& var) {
     clear();
     CHECK_COM(PropVariantCopy(this, &var));
+    return *this;
   }
   PropVariant& operator=(const wstring& val) {
     clear();

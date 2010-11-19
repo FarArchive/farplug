@@ -23,7 +23,8 @@ typedef list<Error> ErrorLog;
     } \
     catch (const Error& error) { \
       bool ignore_errors = false; \
-      retry_or_ignore_error(error, error_ignored, ignore_errors, ErrorLog(), progress, true, false); \
+      ErrorLog error_log; \
+      retry_or_ignore_error(error, error_ignored, ignore_errors, error_log, progress, true, false); \
     } \
   }
 
@@ -76,10 +77,10 @@ class ProgressSuspend: private NonCopyable {
 private:
   ProgressMonitor& progress;
 public:
-  ProgressSuspend::ProgressSuspend(ProgressMonitor& progress): progress(progress) {
+  ProgressSuspend(ProgressMonitor& progress): progress(progress) {
     progress.update_time();
   }
-  ProgressSuspend::~ProgressSuspend() {
+  ~ProgressSuspend() {
     progress.discard_time();
   }
 };
