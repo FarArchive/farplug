@@ -81,14 +81,22 @@ public:
   }
   STDMETHODIMP SetOperationResult(Int32 resultEOperationResult) {
     COM_ERROR_HANDLER_BEGIN
-    if (resultEOperationResult == NArchive::NExtract::NOperationResult::kUnSupportedMethod)
-      FAIL_MSG(Far::get_msg(MSG_ERROR_EXTRACT_UNSUPPORTED_METHOD));
-    else if (resultEOperationResult == NArchive::NExtract::NOperationResult::kDataError)
-      FAIL_MSG(Far::get_msg(MSG_ERROR_EXTRACT_DATA_ERROR));
-    else if (resultEOperationResult == NArchive::NExtract::NOperationResult::kCRCError)
-      FAIL_MSG(Far::get_msg(MSG_ERROR_EXTRACT_CRC_ERROR));
-    else
+    if (resultEOperationResult == NArchive::NExtract::NOperationResult::kOK)
       return S_OK;
+    bool encrypted = !archive.password.empty();
+    Error error;
+    error.code = E_MESSAGE;
+    if (resultEOperationResult == NArchive::NExtract::NOperationResult::kUnSupportedMethod)
+      error.messages.push_back(Far::get_msg(MSG_ERROR_EXTRACT_UNSUPPORTED_METHOD));
+    else if (resultEOperationResult == NArchive::NExtract::NOperationResult::kDataError)
+      error.messages.push_back(Far::get_msg(encrypted ? MSG_ERROR_EXTRACT_DATA_ERROR_ENCRYPTED : MSG_ERROR_EXTRACT_DATA_ERROR));
+    else if (resultEOperationResult == NArchive::NExtract::NOperationResult::kCRCError)
+      error.messages.push_back(Far::get_msg(encrypted ? MSG_ERROR_EXTRACT_CRC_ERROR_ENCRYPTED : MSG_ERROR_EXTRACT_CRC_ERROR));
+    else
+      error.messages.push_back(Far::get_msg(MSG_ERROR_EXTRACT_UNKNOWN));
+    error.messages.push_back(file_path);
+    error.messages.push_back(archive.arc_path);
+    throw error;
     COM_ERROR_HANDLER_END
   }
 
