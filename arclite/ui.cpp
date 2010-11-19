@@ -464,6 +464,7 @@ void show_error_log(const ErrorLog& error_log) {
   file.write(&sig, sizeof(sig));
   wstring line;
   for (ErrorLog::const_iterator error = error_log.begin(); error != error_log.end(); error++) {
+    line.clear();
     if (error->code != E_MESSAGE) {
       wstring sys_msg = get_system_message(error->code, Far::get_lang_id());
       if (!sys_msg.empty())
