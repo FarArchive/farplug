@@ -112,7 +112,6 @@ TriState parse_tri_state_value(const wstring& value) {
 
 list<wstring> parse_listfile(const wstring& str) {
   list<wstring> files;
-  bool is_line = true;
   unsigned pos = 0;
   for (unsigned i = 0; i < str.size(); i++) {
     if (str[i] == L'\r' || str[i] == L'\n') {

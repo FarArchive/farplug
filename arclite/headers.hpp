@@ -1,8 +1,6 @@
 #pragma once
 
 #include <windows.h>
-#include <msi.h>
-#include <winhttp.h>
 #include <shobjidl.h>
 #include <winioctl.h>
 #undef max
@@ -11,6 +9,7 @@
 #include <process.h>
 #include <time.h>
 
+#include <memory>
 #include <string>
 #include <list>
 #include <vector>
