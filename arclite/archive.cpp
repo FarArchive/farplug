@@ -15,12 +15,16 @@ const unsigned char c_guid_7z[] = "\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\
 const unsigned char c_guid_zip[] = "\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x01\x00\x00";
 const unsigned char c_guid_iso[] = "\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE7\x00\x00";
 const unsigned char c_guid_udf[] = "\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xE0\x00\x00";
+const unsigned char c_guid_rar[] = "\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\x03\x00\x00";
+const unsigned char c_guid_split[] = "\x69\x0F\x17\x23\xC1\x40\x8A\x27\x10\x00\x00\x01\x10\xEA\x00\x00";
 const unsigned c_guid_size = 16;
 
 const ArcType c_7z(c_guid_7z, c_guid_7z + c_guid_size);
 const ArcType c_zip(c_guid_zip, c_guid_zip + c_guid_size);
 const ArcType c_iso(c_guid_iso, c_guid_iso + c_guid_size);
 const ArcType c_udf(c_guid_udf, c_guid_udf + c_guid_size);
+const ArcType c_rar(c_guid_rar, c_guid_rar + c_guid_size);
+const ArcType c_split(c_guid_split, c_guid_split + c_guid_size);
 
 const unsigned __int64 c_min_volume_size = 16 * 1024;
 

@@ -6,6 +6,8 @@ extern const ArcType c_7z;
 extern const ArcType c_zip;
 extern const ArcType c_iso;
 extern const ArcType c_udf;
+extern const ArcType c_rar;
+extern const ArcType c_split;
 
 extern const wchar_t* c_method_copy;
 extern const wchar_t* c_method_lzma;
