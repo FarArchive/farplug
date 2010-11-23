@@ -9,8 +9,6 @@
 
 class ArchiveOpenStream: public IInStream, private ComBase, private File {
 private:
-  wstring file_path;
-
   bool device_file;
   unsigned __int64 device_pos;
   unsigned __int64 device_size;
@@ -26,7 +24,7 @@ private:
     if (io_control_out_nt(IOCTL_DISK_GET_PARTITION_INFO, part_info)) {
       device_size = part_info.PartitionLength.QuadPart;
       DWORD sectors_per_cluster, bytes_per_sector, number_of_free_clusters, total_number_of_clusters;
-      if (GetDiskFreeSpaceW(add_trailing_slash(file_path).c_str(), &sectors_per_cluster, &bytes_per_sector, &number_of_free_clusters, &total_number_of_clusters))
+      if (GetDiskFreeSpaceW(add_trailing_slash(path()).c_str(), &sectors_per_cluster, &bytes_per_sector, &number_of_free_clusters, &total_number_of_clusters))
         device_sector_size = bytes_per_sector;
       else
         device_sector_size = 4096;
@@ -43,7 +41,7 @@ private:
     }
   }
 public:
-  ArchiveOpenStream(const wstring& file_path): file_path(file_path) {
+  ArchiveOpenStream(const wstring& file_path) {
     open(file_path, FILE_READ_DATA | FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
     check_device_file();
   }
@@ -112,9 +110,9 @@ public:
   FindData get_info() {
     FindData file_info;
     memset(&file_info, 0, sizeof(file_info));
-    wstring file_name = extract_file_name(file_path);
+    wstring file_name = extract_file_name(path());
     if (file_name.empty())
-      file_name = file_path;
+      file_name = path();
     wcscpy(file_info.cFileName, file_name.c_str());
     BY_HANDLE_FILE_INFORMATION fi;
     if (get_info_nt(fi)) {
@@ -299,6 +297,22 @@ bool Archive::open(IInStream* in_stream) {
   return res == S_OK;
 }
 
+void prioritize(list<ArcEntry>& arc_entries, const ArcType& first, const ArcType& second) {
+  list<ArcEntry>::iterator iter = arc_entries.end();
+  for (list<ArcEntry>::iterator arc_entry = arc_entries.begin(); arc_entry != arc_entries.end(); arc_entry++) {
+    if (arc_entry->type == second) {
+      iter = arc_entry;
+    }
+    else if (arc_entry->type == first) {
+      if (iter != arc_entries.end()) {
+        arc_entries.insert(iter, *arc_entry);
+        arc_entries.erase(arc_entry);
+      }
+      break;
+    }
+  }
+}
+
 void Archive::open(const OpenOptions& options, vector<Archive>& archives) {
   size_t parent_idx = -1;
   if (!archives.empty())
@@ -361,19 +375,9 @@ void Archive::open(const OpenOptions& options, vector<Archive>& archives) {
   });
 
   // special case: UDF must go before ISO
-  list<ArcEntry>::iterator iso_iter = arc_entries.end();
-  for (list<ArcEntry>::iterator arc_entry = arc_entries.begin(); arc_entry != arc_entries.end(); arc_entry++) {
-    if (arc_entry->type == c_iso) {
-      iso_iter = arc_entry;
-    }
-    if (arc_entry->type == c_udf) {
-      if (iso_iter != arc_entries.end()) {
-        arc_entries.insert(iso_iter, *arc_entry);
-        arc_entries.erase(arc_entry);
-      }
-      break;
-    }
-  }
+  prioritize(arc_entries, c_udf, c_iso);
+  // special case: Rar must go before Split
+  prioritize(arc_entries, c_rar, c_split);
 
   for (list<ArcEntry>::const_iterator arc_entry = arc_entries.begin(); arc_entry != arc_entries.end(); arc_entry++) {
     Archive archive;
