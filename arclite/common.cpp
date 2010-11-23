@@ -108,3 +108,13 @@ wstring load_file(const wstring& file_path, unsigned* code_page) {
     return ansi_to_unicode(string(buffer.data(), size), CP_ACP);
   }
 }
+
+wstring auto_rename(const wstring& file_path) {
+  if (File::exists(file_path)) {
+    unsigned n = 0;
+    while (File::exists(file_path + L"." + int_to_str(n))) n++;
+    return file_path + L"." + int_to_str(n);
+  }
+  else
+    return file_path;
+}

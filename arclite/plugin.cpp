@@ -147,11 +147,7 @@ public:
     wstring final_dir = add_trailing_slash(dst_dir) + arc_name;
     wstring ext = extract_file_ext(final_dir);
     final_dir.erase(final_dir.size() - ext.size(), ext.size());
-    if (File::exists(final_dir)) {
-      unsigned n = 0;
-      while (File::exists(final_dir + L"." + int_to_str(n)) && n < 100) n++;
-      final_dir += L"." + int_to_str(n);
-    }
+    final_dir = auto_rename(final_dir);
     return final_dir;
   }
 
@@ -173,7 +169,7 @@ public:
       options.separate_dir = g_options.extract_separate_dir;
     }
     else {
-      options.overwrite = triTrue;
+      options.overwrite = oaOverwrite;
       options.separate_dir = triFalse;
     }
     if (show_dialog) {

@@ -7,12 +7,14 @@ extract.dlg.title = Extract files
 extract.dlg.dst_dir = &Extract files to:
 extract.dlg.ignore_errors = &Ignore errors
 extract.dlg.oo = When destination file exists:
-extract.dlg.oo_ask = &Ask
-extract.dlg.oo_overwrite = &Overwrite
-extract.dlg.oo_skip = &Skip
+extract.dlg.oa_ask = As&k
+extract.dlg.oa_overwrite = &Overwrite
+extract.dlg.oa_skip = &Skip
+extract.dlg.oa_rename = &Rename
+extract.dlg.oa_append = &Append
 extract.dlg.move_files = &Delete files from archive after extraction
 extract.dlg.password = Pass&word:
-extract.dlg.separate_dir = Extract archive into separate di&rectory
+extract.dlg.separate_dir = Ex&tract archive into separate directory
 extract.dlg.delete_archive = De&lete archive after extraction
 
 # Update dialog
@@ -85,10 +87,11 @@ overwrite.dlg.question = Destination file already exists. Overwrite?
 overwrite.dlg.source = Source:
 overwrite.dlg.destination = Destination:
 overwrite.dlg.newer = (newer)
-overwrite.dlg.yes = &Yes
-overwrite.dlg.yes.all = Yes to &All
-overwrite.dlg.no = &No
-overwrite.dlg.no.all = No to A&ll
+overwrite.dlg.all = R&emember choice
+overwrite.dlg.overwrite = &Overwrite
+overwrite.dlg.skip = &Skip
+overwrite.dlg.rename = &Rename
+overwrite.dlg.append = &Append
 
 # Error retry dialog
 button.retry = &Retry

@@ -9,7 +9,7 @@ struct Options {
   unsigned max_check_size;
   // extract
   bool extract_ignore_errors;
-  TriState extract_overwrite;
+  OverwriteAction extract_overwrite;
   TriState extract_separate_dir;
   // update
   wstring update_arc_format_name;

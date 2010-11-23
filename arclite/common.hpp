@@ -87,6 +87,8 @@ public:
 
 void retry_or_ignore_error(const Error& error, bool& ignore, bool& ignore_errors, ErrorLog& error_log, ProgressMonitor& progress, bool can_retry, bool can_ignore);
 
+enum OverwriteAction { oaAsk, oaOverwrite, oaSkip, oaRename, oaAppend };
+
 struct OpenOptions {
   wstring arc_path;
   bool detect;
@@ -98,7 +100,7 @@ struct OpenOptions {
 struct ExtractOptions {
   wstring dst_dir;
   bool ignore_errors;
-  TriState overwrite;
+  OverwriteAction overwrite;
   TriState move_files;
   wstring password;
   TriState separate_dir;
@@ -149,3 +151,4 @@ DWORD translate_seek_method(UInt32 seek_origin);
 wstring expand_macros(const wstring& text);
 void attach_sfx_module(const wstring& file_path, const wstring& sfx_module);
 wstring load_file(const wstring& file_name, unsigned* code_page = nullptr);
+wstring auto_rename(const wstring& file_path);

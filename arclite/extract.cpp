@@ -8,11 +8,11 @@
 
 ExtractOptions::ExtractOptions():
   ignore_errors(false),
-  overwrite(triTrue),
+  overwrite(oaOverwrite),
   move_files(triUndef),
   separate_dir(triFalse),
-  delete_archive(false)
-{}
+  delete_archive(false) {
+}
 
 wstring get_progress_bar_str(unsigned width, unsigned percent1, unsigned percent2) {
   const wchar_t c_pb_black = 9608;
@@ -119,6 +119,7 @@ private:
   struct CacheRecord {
     wstring file_path;
     UInt32 file_id;
+    OverwriteAction overwrite;
     size_t buffer_pos;
     size_t buffer_size;
   };
@@ -149,8 +150,15 @@ private:
   }
   // create new file
   void create_file() {
+    wstring file_path;
+    if (current_rec.overwrite == oaRename)
+      file_path = auto_rename(current_rec.file_path);
+    else
+      file_path = current_rec.file_path;
+    if (current_rec.overwrite == oaOverwrite || current_rec.overwrite == oaAppend)
+      File::set_attr_nt(file_path, FILE_ATTRIBUTE_NORMAL);
     RETRY_OR_IGNORE_BEGIN
-    file.open(current_rec.file_path, FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY);
+    file.open(file_path, FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, current_rec.overwrite == oaAppend ? OPEN_EXISTING : CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY);
     RETRY_OR_IGNORE_END(ignore_errors, error_log, progress)
     if (error_ignored) error_state = true;
     progress.update_cache_file(current_rec.file_path);
@@ -159,10 +167,15 @@ private:
   void allocate_file() {
     if (error_state) return;
     if (archive.get_size(current_rec.file_id) == 0) return;
+    unsigned __int64 size;
+    if (current_rec.overwrite == oaAppend)
+      size = file.size();
+    else
+      size = 0;
     RETRY_OR_IGNORE_BEGIN
-    file.set_pos(archive.get_size(current_rec.file_id), FILE_BEGIN);
+    file.set_pos(size + archive.get_size(current_rec.file_id), FILE_BEGIN);
     file.set_end();
-    file.set_pos(0, FILE_BEGIN);
+    file.set_pos(size, FILE_BEGIN);
     RETRY_OR_IGNORE_END(ignore_errors, error_log, progress)
     if (error_ignored) error_state = true;
   }
@@ -260,10 +273,11 @@ public:
       File::delete_file_nt(current_rec.file_path);
     }
   }
-  void store_file(const wstring& file_path, UInt32 file_id) {
+  void store_file(const wstring& file_path, UInt32 file_id, OverwriteAction overwrite_action) {
     CacheRecord rec;
     rec.file_path = file_path;
     rec.file_id = file_id;
+    rec.overwrite = overwrite_action;
     rec.buffer_pos = buffer_pos;
     rec.buffer_size = 0;
     cache_records.push_back(rec);
@@ -312,14 +326,14 @@ private:
   UInt32 src_dir_index;
   wstring dst_dir;
   Archive& archive;
-  TriState& overwrite_option;
+  OverwriteAction& overwrite_action;
   bool& ignore_errors;
   ErrorLog& error_log;
   FileWriteCache& cache;
   ExtractProgress& progress;
 
 public:
-  ArchiveExtractor(UInt32 src_dir_index, const wstring& dst_dir, Archive& archive, TriState& overwrite_option, bool& ignore_errors, ErrorLog& error_log, FileWriteCache& cache, ExtractProgress& progress): src_dir_index(src_dir_index), dst_dir(dst_dir), archive(archive), overwrite_option(overwrite_option), ignore_errors(ignore_errors), error_log(error_log), cache(cache), progress(progress) {
+  ArchiveExtractor(UInt32 src_dir_index, const wstring& dst_dir, Archive& archive, OverwriteAction& overwrite_action, bool& ignore_errors, ErrorLog& error_log, FileWriteCache& cache, ExtractProgress& progress): src_dir_index(src_dir_index), dst_dir(dst_dir), archive(archive), overwrite_action(overwrite_action), ignore_errors(ignore_errors), error_log(error_log), cache(cache), progress(progress) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -362,9 +376,9 @@ public:
       return S_OK;
 
     FindData dst_file_info;
+    OverwriteAction overwrite;
     if (File::get_find_data_nt(file_path, dst_file_info)) {
-      bool overwrite;
-      if (overwrite_option == triUndef) {
+      if (overwrite_action == oaAsk) {
         OverwriteFileInfo src_ov_info, dst_ov_info;
         src_ov_info.is_dir = file_info.is_dir;
         src_ov_info.size = archive.get_size(index);
@@ -373,37 +387,23 @@ public:
         dst_ov_info.size = dst_file_info.size();
         dst_ov_info.mtime = dst_file_info.ftLastWriteTime;
         ProgressSuspend ps(progress);
-        OverwriteAction oa = overwrite_dialog(file_path, src_ov_info, dst_ov_info);
-        if (oa == oaYes)
-          overwrite = true;
-        else if (oa == oaYesAll) {
-          overwrite = true;
-          overwrite_option = triTrue;
-        }
-        else if (oa == oaNo)
-          overwrite = false;
-        else if (oa == oaNoAll) {
-          overwrite = false;
-          overwrite_option = triFalse;
-        }
-        else if (oa == oaCancel)
+        OverwriteOptions ov_options;
+        if (!overwrite_dialog(file_path, src_ov_info, dst_ov_info, ov_options))
           return E_ABORT;
+        overwrite = ov_options.action;
+        if (ov_options.all)
+          overwrite_action = ov_options.action;
       }
-      else if (overwrite_option == triTrue)
-        overwrite = true;
-      else if (overwrite_option == triFalse)
-        overwrite = false;
-
-      if (overwrite) {
-        File::set_attr_nt(file_path, FILE_ATTRIBUTE_NORMAL);
-      }
-      else {
+      else
+        overwrite = overwrite_action;
+      if (overwrite == oaSkip)
         return S_OK;
-      }
     }
+    else
+      overwrite = oaAsk;
 
     progress.update_extract_file(file_path);
-    cache.store_file(file_path, index);
+    cache.store_file(file_path, index, overwrite);
     ComObject<ISequentialOutStream> out_stream(new CachedFileExtractStream(cache));
     out_stream.detach(outStream);
 
@@ -561,7 +561,7 @@ public:
 
 void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, const ExtractOptions& options, ErrorLog& error_log) {
   bool ignore_errors = options.ignore_errors;
-  TriState overwrite_option = options.overwrite;
+  OverwriteAction overwrite_action = options.overwrite;
 
   prepare_dst_dir(options.dst_dir);
 
@@ -575,7 +575,7 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
 
   ExtractProgress progress;
   FileWriteCache cache(*this, ignore_errors, error_log, progress);
-  ComObject<IArchiveExtractCallback> extractor(new ArchiveExtractor(src_dir_index, options.dst_dir, *this, overwrite_option, ignore_errors, error_log, cache, progress));
+  ComObject<IArchiveExtractCallback> extractor(new ArchiveExtractor(src_dir_index, options.dst_dir, *this, overwrite_action, ignore_errors, error_log, cache, progress));
   COM_ERROR_CHECK(in_arc->Extract(indices.data(), static_cast<UInt32>(indices.size()), 0, extractor));
   cache.finalize();
   progress.clean();

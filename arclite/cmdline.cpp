@@ -244,7 +244,7 @@ UpdateCommand parse_update_command(const CommandArgs& ca) {
 }
 
 
-// arc:x [-ie[:(y|n)]] [-o[:(a|y|n)]] [-mf[:(y|n)]] [-p:<password>] [-sd[:(a|y|n)]] [-da[:(y|n)]] <archive1> <archive2> ... <path>
+// arc:x [-ie[:(y|n)]] [-o[:(o|s|r|a)]] [-mf[:(y|n)]] [-p:<password>] [-sd[:(a|y|n)]] [-da[:(y|n)]] <archive1> <archive2> ... <path>
 
 ExtractCommand parse_extract_command(const CommandArgs& ca) {
   ExtractCommand command;
@@ -254,8 +254,19 @@ ExtractCommand parse_extract_command(const CommandArgs& ca) {
     Param param = parse_param(args[i]);
     if (param.name == L"ie")
       command.options.ignore_errors = parse_bool_value(param.value);
-    else if (param.name == L"o")
-      command.options.overwrite = parse_tri_state_value(param.value);
+    else if (param.name == L"o") {
+      wstring lcvalue = lc(param.value);
+      if (lcvalue == L"o")
+        command.options.overwrite = oaOverwrite;
+      else if (lcvalue == L"s")
+        command.options.overwrite = oaSkip;
+      else if (lcvalue == L"r")
+        command.options.overwrite = oaRename;
+      else if (lcvalue == L"a")
+        command.options.overwrite = oaAppend;
+      else
+        CHECK_FMT(false);
+    }
     else if (param.name == L"mf")
       command.options.move_files = parse_tri_state_value(param.value);
     else if (param.name == L"p") {

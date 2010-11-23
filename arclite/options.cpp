@@ -131,7 +131,7 @@ const bool c_def_handle_commands = true;
 const wchar_t* c_def_plugin_prefix = L"arc";
 const unsigned c_def_max_check_size = 1 << 20;
 const bool c_def_extract_ignore_errors = false;
-const TriState c_def_extract_overwrite = triUndef;
+const OverwriteAction c_def_extract_overwrite = oaAsk;
 const TriState c_def_extract_separate_dir = triUndef;
 const wchar_t* c_def_update_arc_format_name = L"7z";
 const unsigned c_def_update_level = 5;
@@ -158,7 +158,7 @@ void Options::load() {
   plugin_prefix = key.get_str(c_param_plugin_prefix, c_def_plugin_prefix);
   max_check_size = key.get_int(c_param_max_check_size, c_def_max_check_size);
   extract_ignore_errors = key.get_bool(c_param_extract_ignore_errors, c_def_extract_ignore_errors);
-  extract_overwrite = key.get_tri_state(c_param_extract_overwrite, c_def_extract_overwrite);
+  extract_overwrite = static_cast<OverwriteAction>(key.get_int(c_param_extract_overwrite, c_def_extract_overwrite));
   extract_separate_dir = key.get_tri_state(c_param_extract_separate_dir, c_def_extract_separate_dir);
   update_arc_format_name = key.get_str(c_param_update_arc_format_name, c_def_update_arc_format_name);
   update_level = key.get_int(c_param_update_level, c_def_update_level);
@@ -186,7 +186,7 @@ void Options::save() const {
   key.set_str(c_param_plugin_prefix, plugin_prefix, c_def_plugin_prefix);
   key.set_int(c_param_max_check_size, max_check_size, c_def_max_check_size);
   key.set_bool(c_param_extract_ignore_errors, extract_ignore_errors, c_def_extract_ignore_errors);
-  key.set_tri_state(c_param_extract_overwrite, extract_overwrite, c_def_extract_overwrite);
+  key.set_int(c_param_extract_overwrite, extract_overwrite, c_def_extract_overwrite);
   key.set_tri_state(c_param_extract_separate_dir, extract_separate_dir, c_def_extract_separate_dir);
   key.set_str(c_param_update_arc_format_name, update_arc_format_name, c_def_update_arc_format_name);
   key.set_int(c_param_update_level, update_level, c_def_update_level);

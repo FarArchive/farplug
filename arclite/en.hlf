@@ -39,7 +39,7 @@ pressing #B# and paused by pressing #P#.
 Error log will be shown after extraction process is complete.
 
 	#When destination file exists# - Action to perform when extracting file already exists on disk:
-ask user, automatic overwrite or skip file.
+ask user, overwrite, skip file, automatically rename or append to existing file.
 
 	#Delete files after extraction# - Delete files from archive after successful extraction.
  
@@ -169,9 +169,9 @@ $ #Prefix command line format#
 	@@<filelist> ... = files containing lists of files to archive
 
 	#Extract archive#
-	arc:x [-ie[:(y|n)]] [-o[:(a|y|n)]] [-mf[:(y|n)]] [-p:<password>] [-sd[:(a|y|n)]] [-da[:(y|n)]] <archive> ... <path>
+	arc:x [-ie[:(y|n)]] [-o[:(o|s|r|a)]] [-mf[:(y|n)]] [-p:<password>] [-sd[:(a|y|n)]] [-da[:(y|n)]] <archive> ... <path>
 	-ie = ignore errors (skip files with errors)
-	-o = overwrite existing files (a = ask)
+	-o = overwrite existing files (o = overwrite, s = skip, r = rename, a = append)
 	-mf = delete files from archive after successful extraction
 	-p = specify password for encrypted archive
 	-sd = extract archive into separate directory (a = decide automatically)

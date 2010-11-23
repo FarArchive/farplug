@@ -232,17 +232,35 @@ private:
     c_client_xs = 60
   };
 
-  int yes_ctrl_id;
-  int yes_all_ctrl_id;
-  int no_ctrl_id;
-  int no_all_ctrl_id;
+  OverwriteOptions& options;
+
+  int all_ctrl_id;
+  int overwrite_ctrl_id;
+  int skip_ctrl_id;
+  int rename_ctrl_id;
+  int append_ctrl_id;
   int cancel_ctrl_id;
 
-public:
-  OverwriteDialog(): Far::Dialog(Far::get_msg(MSG_OVERWRITE_DLG_TITLE), &c_overwrite_dialog_guid, c_client_xs) {
+  LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
+    if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
+      options.all = get_check(all_ctrl_id);
+      if (param1 == overwrite_ctrl_id)
+        options.action = oaOverwrite;
+      else if (param1 == skip_ctrl_id)
+        options.action = oaSkip;
+      else if (param1 == rename_ctrl_id)
+        options.action = oaRename;
+      else if (param1 == append_ctrl_id)
+        options.action = oaAppend;
+    }
+    return default_dialog_proc(msg, param1, param2);
   }
 
-  OverwriteAction show(const wstring& file_path, const OverwriteFileInfo& src_file_info, const OverwriteFileInfo& dst_file_info) {
+public:
+  OverwriteDialog(OverwriteOptions& options): Far::Dialog(Far::get_msg(MSG_OVERWRITE_DLG_TITLE), &c_overwrite_dialog_guid, c_client_xs), options(options) {
+  }
+
+  bool show(const wstring& file_path, const OverwriteFileInfo& src_file_info, const OverwriteFileInfo& dst_file_info) {
     label(fit_str(file_path, c_client_xs));
     new_line();
     label(Far::get_msg(MSG_OVERWRITE_DLG_QUESTION));
@@ -278,25 +296,25 @@ public:
 
     separator();
     new_line();
-    yes_ctrl_id = def_button(Far::get_msg(MSG_OVERWRITE_DLG_YES), DIF_CENTERGROUP);
-    yes_all_ctrl_id = button(Far::get_msg(MSG_OVERWRITE_DLG_YES_ALL), DIF_CENTERGROUP);
-    no_ctrl_id = button(Far::get_msg(MSG_OVERWRITE_DLG_NO), DIF_CENTERGROUP);
-    no_all_ctrl_id = button(Far::get_msg(MSG_OVERWRITE_DLG_NO_ALL), DIF_CENTERGROUP);
+    all_ctrl_id = check_box(Far::get_msg(MSG_OVERWRITE_DLG_ALL), false);
+    new_line();
+    separator();
+    new_line();
+    overwrite_ctrl_id = def_button(Far::get_msg(MSG_OVERWRITE_DLG_OVERWRITE), DIF_CENTERGROUP);
+    skip_ctrl_id = button(Far::get_msg(MSG_OVERWRITE_DLG_SKIP), DIF_CENTERGROUP);
+    rename_ctrl_id = button(Far::get_msg(MSG_OVERWRITE_DLG_RENAME), DIF_CENTERGROUP);
+    append_ctrl_id = button(Far::get_msg(MSG_OVERWRITE_DLG_APPEND), DIF_CENTERGROUP);
     cancel_ctrl_id = button(Far::get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
     new_line();
 
     int item = Far::Dialog::show();
 
-    if (item == yes_ctrl_id) return oaYes;
-    else if (item == yes_all_ctrl_id) return oaYesAll;
-    else if (item == no_ctrl_id) return oaNo;
-    else if (item == no_all_ctrl_id) return oaNoAll;
-    else return oaCancel;
+    return item >= 0 && item != cancel_ctrl_id;
   }
 };
 
-OverwriteAction overwrite_dialog(const wstring& file_path, const OverwriteFileInfo& src_file_info, const OverwriteFileInfo& dst_file_info) {
-  return OverwriteDialog().show(file_path, src_file_info, dst_file_info);
+bool overwrite_dialog(const wstring& file_path, const OverwriteFileInfo& src_file_info, const OverwriteFileInfo& dst_file_info, OverwriteOptions& options) {
+  return OverwriteDialog(options).show(file_path, src_file_info, dst_file_info);
 }
 
 
@@ -317,9 +335,11 @@ private:
 
   int dst_dir_ctrl_id;
   int ignore_errors_ctrl_id;
-  int oo_ask_ctrl_id;
-  int oo_overwrite_ctrl_id;
-  int oo_skip_ctrl_id;
+  int oa_ask_ctrl_id;
+  int oa_overwrite_ctrl_id;
+  int oa_skip_ctrl_id;
+  int oa_rename_ctrl_id;
+  int oa_append_ctrl_id;
   int move_files_ctrl_id;
   int password_ctrl_id;
   int separate_dir_ctrl_id;
@@ -332,9 +352,12 @@ private:
       options.dst_dir = get_text(dst_dir_ctrl_id);
       options.dst_dir = unquote(strip(options.dst_dir));
       options.ignore_errors = get_check(ignore_errors_ctrl_id);
-      if (get_check(oo_ask_ctrl_id)) options.overwrite = triUndef;
-      else if (get_check(oo_overwrite_ctrl_id)) options.overwrite = triTrue;
-      else options.overwrite = triFalse;
+      if (get_check(oa_ask_ctrl_id)) options.overwrite = oaAsk;
+      else if (get_check(oa_overwrite_ctrl_id)) options.overwrite = oaOverwrite;
+      else if (get_check(oa_skip_ctrl_id)) options.overwrite = oaSkip;
+      else if (get_check(oa_rename_ctrl_id)) options.overwrite = oaRename;
+      else if (get_check(oa_append_ctrl_id)) options.overwrite = oaAppend;
+      else options.overwrite = oaAsk;
       if (options.move_files != triUndef)
         options.move_files = get_check3(move_files_ctrl_id);
       options.password = get_text(password_ctrl_id);
@@ -362,11 +385,16 @@ public:
     label(Far::get_msg(MSG_EXTRACT_DLG_OO));
     new_line();
     spacer(2);
-    oo_ask_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OO_ASK), options.overwrite == triUndef);
+    oa_ask_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OA_ASK), options.overwrite == oaAsk);
     spacer(2);
-    oo_overwrite_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OO_OVERWRITE), options.overwrite == triTrue);
+    oa_overwrite_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OA_OVERWRITE), options.overwrite == oaOverwrite);
     spacer(2);
-    oo_skip_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OO_SKIP), options.overwrite == triFalse);
+    oa_skip_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OA_SKIP), options.overwrite == oaSkip);
+    new_line();
+    spacer(2);
+    oa_rename_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OA_RENAME), options.overwrite == oaRename);
+    spacer(2);
+    oa_append_ctrl_id = radio_button(Far::get_msg(MSG_EXTRACT_DLG_OA_APPEND), options.overwrite == oaAppend);
     new_line();
 
     move_files_ctrl_id = check_box3(Far::get_msg(MSG_EXTRACT_DLG_MOVE_FILES), options.move_files, options.move_files == triUndef ? DIF_DISABLE : 0);
