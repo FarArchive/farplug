@@ -313,7 +313,7 @@ void prioritize(list<ArcEntry>& arc_entries, const ArcType& first, const ArcType
   }
 }
 
-void Archive::open(const OpenOptions& options, vector<Archive>& archives) {
+void Archive::open(const OpenOptions& options, const ArcFormats& arc_formats, vector<Archive>& archives) {
   size_t parent_idx = -1;
   if (!archives.empty())
     parent_idx = archives.size() - 1;
@@ -331,7 +331,6 @@ void Archive::open(const OpenOptions& options, vector<Archive>& archives) {
       return;
   }
 
-  const ArcFormats& arc_formats = ArcAPI::formats();
   list<ArcEntry> arc_entries;
   set<ArcType> found_types;
 
@@ -392,15 +391,15 @@ void Archive::open(const OpenOptions& options, vector<Archive>& archives) {
         archive.arc_chain.assign(archives[parent_idx].arc_chain.begin(), archives[parent_idx].arc_chain.end());
       archive.arc_chain.push_back(*arc_entry);
       archives.push_back(archive);
-      open(options, archives);
+      open(options, arc_formats, archives);
       if (!options.detect) break;
     }
   }
 }
 
-vector<Archive> Archive::open(const OpenOptions& options) {
+vector<Archive> Archive::open(const OpenOptions& options, const ArcFormats& arc_formats) {
   vector<Archive> archives;
-  open(options, archives);
+  open(options, arc_formats, archives);
   if (!options.detect && !archives.empty())
     archives.erase(archives.begin(), archives.end() - 1);
   return archives;

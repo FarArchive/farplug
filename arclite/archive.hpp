@@ -125,7 +125,7 @@ private:
   ComObject<IInArchive> in_arc;
   bool open_sub_stream(IInStream** sub_stream, FindData& sub_arc_info);
   bool open(IInStream* in_stream);
-  static void open(const OpenOptions& options, vector<Archive>& archives);
+  static void open(const OpenOptions& options, const ArcFormats& arc_formats, vector<Archive>& archives);
 public:
   static unsigned max_check_size;
   wstring arc_path;
@@ -139,7 +139,7 @@ public:
     wstring name = extract_file_name(arc_path);
     return name.empty() ? arc_path : name;
   }
-  static vector<Archive> open(const OpenOptions& options);
+  static vector<Archive> open(const OpenOptions& options, const ArcFormats& arc_formats);
   void close();
   void reopen();
   bool is_open() const {

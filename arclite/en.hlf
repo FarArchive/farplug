@@ -132,6 +132,10 @@ This option is not considered when calling plugin from F11 menu.
 	#Generate masks# - Create standard list of masks for #Open files matching masks# field based on
 information from 7z.dll.
 
+	#Enable archive formats# & #Disable archive formats# - Comma separated lists of archive format names that
+will be enabled or disabled when detecting archive format. These options are not active when using plugin menu.
+See #Available Formats# for full list of archive format names you can use.
+
 	Some settings are available via registry only:
 
 	#plugin_prefix# - Plugin command line prefix (string). Default prefix is #arc#.

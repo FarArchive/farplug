@@ -110,6 +110,9 @@ settings.dlg.handle_commands = Handle archive commands (Ctrl-PgDn, Shift-F&2)
 settings.dlg.use_include_masks = &Open files matching masks:
 settings.dlg.use_exclude_masks = &Exclude files matching masks:
 settings.dlg.generate_masks = &Generate masks
+settings.dlg.use_enabled_formats = E&nable archive formats:
+settings.dlg.use_disabled_formats = &Disable archive formats:
+settings.dlg.available_formats = &Available archive formats:
 
 # Attributes dialog
 attr.dlg.title = Attributes

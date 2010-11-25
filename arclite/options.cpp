@@ -125,6 +125,10 @@ const wchar_t* c_param_use_include_masks = L"use_include_masks";
 const wchar_t* c_param_include_masks = L"include_masks";
 const wchar_t* c_param_use_exclude_masks = L"use_exclude_masks";
 const wchar_t* c_param_exclude_masks = L"exclude_masks";
+const wchar_t* c_param_use_enabled_formats = L"use_enabled_formats";
+const wchar_t* c_param_enabled_formats = L"enabled_formats";
+const wchar_t* c_param_use_disabled_formats = L"use_disabled_formats";
+const wchar_t* c_param_disabled_formats = L"disabled_formats";
 
 const bool c_def_handle_create = true;
 const bool c_def_handle_commands = true;
@@ -149,6 +153,10 @@ const bool c_def_use_include_masks = false;
 const wchar_t* c_def_include_masks = L"";
 const bool c_def_use_exclude_masks = false;
 const wchar_t* c_def_exclude_masks = L"";
+const bool c_def_use_enabled_formats = false;
+const wchar_t* c_def_enabled_formats = L"";
+const bool c_def_use_disabled_formats = false;
+const wchar_t* c_def_disabled_formats = L"";
 
 void Options::load() {
   OptionsKey key;
@@ -176,6 +184,10 @@ void Options::load() {
   include_masks = key.get_str(c_param_include_masks, c_def_include_masks);
   use_exclude_masks = key.get_bool(c_param_use_exclude_masks, c_def_use_exclude_masks);
   exclude_masks = key.get_str(c_param_exclude_masks, c_def_exclude_masks);
+  use_enabled_formats = key.get_bool(c_param_use_enabled_formats, c_def_use_enabled_formats);
+  enabled_formats = key.get_str(c_param_enabled_formats, c_def_enabled_formats);
+  use_disabled_formats = key.get_bool(c_param_use_disabled_formats, c_def_use_disabled_formats);
+  disabled_formats = key.get_str(c_param_disabled_formats, c_def_disabled_formats);
 };
 
 void Options::save() const {
@@ -204,6 +216,10 @@ void Options::save() const {
   key.set_str(c_param_include_masks, include_masks, c_def_include_masks);
   key.set_bool(c_param_use_exclude_masks, use_exclude_masks, c_def_use_exclude_masks);
   key.set_str(c_param_exclude_masks, exclude_masks, c_def_exclude_masks);
+  key.set_bool(c_param_use_enabled_formats, use_enabled_formats, c_def_use_enabled_formats);
+  key.set_str(c_param_enabled_formats, enabled_formats, c_def_enabled_formats);
+  key.set_bool(c_param_use_disabled_formats, use_disabled_formats, c_def_use_disabled_formats);
+  key.set_str(c_param_disabled_formats, disabled_formats, c_def_disabled_formats);
 }
 
 const wchar_t* c_param_profile_arc_path = L"arc_path";

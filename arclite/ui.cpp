@@ -1205,6 +1205,11 @@ private:
   int use_exclude_masks_ctrl_id;
   int exclude_masks_ctrl_id;
   int generate_masks_ctrl_id;
+  int use_enabled_formats_ctrl_id;
+  int enabled_formats_ctrl_id;
+  int use_disabled_formats_ctrl_id;
+  int disabled_formats_ctrl_id;
+  int available_formats_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -1216,10 +1221,16 @@ private:
       settings.include_masks = get_text(include_masks_ctrl_id);
       settings.use_exclude_masks = get_check(use_exclude_masks_ctrl_id);
       settings.exclude_masks = get_text(exclude_masks_ctrl_id);
+      settings.use_enabled_formats = get_check(use_enabled_formats_ctrl_id);
+      settings.enabled_formats = get_text(enabled_formats_ctrl_id);
+      settings.use_disabled_formats = get_check(use_disabled_formats_ctrl_id);
+      settings.disabled_formats = get_text(disabled_formats_ctrl_id);
     }
     else if (msg == DN_INITDIALOG) {
       enable(include_masks_ctrl_id, settings.use_include_masks);
       enable(exclude_masks_ctrl_id, settings.use_exclude_masks);
+      enable(enabled_formats_ctrl_id, settings.use_enabled_formats);
+      enable(disabled_formats_ctrl_id, settings.use_disabled_formats);
     }
     else if (msg == DN_BTNCLICK && param1 == use_include_masks_ctrl_id) {
       enable(include_masks_ctrl_id, param2 != 0);
@@ -1229,6 +1240,12 @@ private:
     }
     else if (msg == DN_BTNCLICK && param1 == generate_masks_ctrl_id) {
       generate_masks();
+    }
+    else if (msg == DN_BTNCLICK && param1 == use_enabled_formats_ctrl_id) {
+      enable(enabled_formats_ctrl_id, param2 != 0);
+    }
+    else if (msg == DN_BTNCLICK && param1 == use_disabled_formats_ctrl_id) {
+      enable(disabled_formats_ctrl_id, param2 != 0);
     }
     return default_dialog_proc(msg, param1, param2);
   }
@@ -1245,6 +1262,25 @@ private:
     if (!masks.empty())
       masks.erase(masks.size() - 1);
     set_text(include_masks_ctrl_id, masks);
+  }
+
+  wstring get_available_formats() {
+    const ArcFormats& arc_formats = ArcAPI::formats();
+    vector<wstring> format_list;
+    format_list.reserve(arc_formats.size());
+    for_each(arc_formats.begin(), arc_formats.end(), [&] (const pair<const ArcType, ArcFormat>& arc_type_format) {
+      format_list.push_back(arc_type_format.second.name);
+    });
+    sort(format_list.begin(), format_list.end(), [] (const wstring& a, const wstring& b) -> bool {
+      return upcase(a) < upcase(b);
+    });
+    wstring formats;
+    for_each(format_list.begin(), format_list.end(), [&] (const wstring& format_name) {
+      if (!formats.empty())
+        formats += L',';
+      formats += format_name;
+    });
+    return formats;
   }
 
 public:
@@ -1269,9 +1305,24 @@ public:
     new_line();
     generate_masks_ctrl_id = button(Far::get_msg(MSG_SETTINGS_DLG_GENERATE_MASKS), DIF_BTNNOCLOSE);
     new_line();
-
     separator();
     new_line();
+
+    use_enabled_formats_ctrl_id = check_box(Far::get_msg(MSG_SETTINGS_DLG_USE_ENABLED_FORMATS), settings.use_enabled_formats);
+    new_line();
+    enabled_formats_ctrl_id = edit_box(settings.enabled_formats, c_client_xs);
+    new_line();
+    use_disabled_formats_ctrl_id = check_box(Far::get_msg(MSG_SETTINGS_DLG_USE_DISABLED_FORMATS), settings.use_disabled_formats);
+    new_line();
+    disabled_formats_ctrl_id = edit_box(settings.disabled_formats, c_client_xs);
+    new_line();
+    label(Far::get_msg(MSG_SETTINGS_DLG_AVAILABLE_FORMATS));
+    new_line();
+    available_formats_ctrl_id = edit_box(get_available_formats(), c_client_xs);
+    new_line();
+    separator();
+    new_line();
+
     ok_ctrl_id = def_button(Far::get_msg(MSG_BUTTON_OK), DIF_CENTERGROUP);
     cancel_ctrl_id = button(Far::get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
     new_line();

@@ -29,6 +29,10 @@ struct PluginSettings {
   wstring include_masks;
   bool use_exclude_masks;
   wstring exclude_masks;
+  bool use_enabled_formats;
+  wstring enabled_formats;
+  bool use_disabled_formats;
+  wstring disabled_formats;
 };
 
 bool settings_dialog(PluginSettings& settings);

@@ -110,6 +110,9 @@ settings.dlg.handle_commands = Обрабатывать прочие архив�
 settings.dlg.use_include_masks = Маски &включения:
 settings.dlg.use_exclude_masks = Маски &исключения:
 settings.dlg.generate_masks = &Сгенерировать маски
+settings.dlg.use_enabled_formats = В&ключить форматы архивов:
+settings.dlg.use_disabled_formats = &Отключить форматы архивов:
+settings.dlg.available_formats = &Доступные форматы архивов:
 
 # Attributes dialog
 attr.dlg.title = Атрибуты

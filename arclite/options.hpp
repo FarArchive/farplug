@@ -30,6 +30,11 @@ struct Options {
   wstring include_masks;
   bool use_exclude_masks;
   wstring exclude_masks;
+  // archive formats
+  bool use_enabled_formats;
+  wstring enabled_formats;
+  bool use_disabled_formats;
+  wstring disabled_formats;
   // profiles
   void load();
   void save() const;

@@ -55,7 +55,9 @@ void attach_sfx_module(const wstring& file_path, const wstring& sfx_module) {
     OpenOptions options;
     options.arc_path = file_path;
     options.detect = false;
-    vector<Archive> archives = Archive::open(options);
+    ArcFormats arc_formats;
+    arc_formats[c_7z] = ArcAPI::formats().at(c_7z);
+    vector<Archive> archives = Archive::open(options, arc_formats);
     if (archives.empty())
       FAIL_MSG(Far::get_msg(MSG_ERROR_SFX_CONVERT));
     if (!archives.front().is_pure_7z())
