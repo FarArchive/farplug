@@ -190,6 +190,7 @@ public:
   bool encrypted;
   wstring password;
   bool update_props_defined;
+  bool has_crc;
   void load_update_props();
 public:
   void create(const wstring& src_dir, const vector<wstring>& file_names, const UpdateOptions& options, ErrorLog& error_log);

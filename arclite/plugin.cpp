@@ -64,6 +64,8 @@ public:
     if (archive.is_open()) {
       panel_title += L":" + archive.arc_chain.to_string() + L":" + archive.arc_name();
       host_file = archive.arc_name();
+      if (archive.has_crc)
+        opi->Flags |= OPIF_USECRC32;
     }
     opi->HostFile = host_file.c_str();
     opi->Format = g_plugin_prefix.c_str();

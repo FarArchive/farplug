@@ -296,8 +296,8 @@ void Archive::load_arc_attr() {
   bool total_size_defined = true;
   unsigned __int64 total_size = 0;
   PropVariant prop;
-  for (UInt32 file_id = 0; file_id < num_indices; file_id++) {
-    if (total_size_defined && !file_list[file_id].is_dir) {
+  for (UInt32 file_id = 0; file_id < num_indices && total_size_defined; file_id++) {
+    if (!file_list[file_id].is_dir) {
       if (in_arc->GetProperty(file_id, kpidSize, prop.ref()) == S_OK && prop.is_uint())
         total_size += prop.get_uint();
       else
@@ -320,7 +320,14 @@ void Archive::load_arc_attr() {
     arc_attr.push_back(attr);
   }
 
-
+  // archive files have CRC?
+  has_crc = true;
+  for (UInt32 file_id = 0; file_id < num_indices && has_crc; file_id++) {
+    if (!file_list[file_id].is_dir) {
+      if (in_arc->GetProperty(file_id, kpidCRC, prop.ref()) != S_OK || !prop.is_uint())
+        has_crc = false;
+    }
+  }
 }
 
 void Archive::load_update_props() {
