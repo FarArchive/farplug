@@ -5,7 +5,7 @@
 /*
   plugin.hpp
 
-  Plugin API for FAR Manager 2.0 build 1661
+  Plugin API for FAR Manager 2.0 build 1733
 */
 
 /*
@@ -42,7 +42,7 @@ other possible license with no implications from the above license on them.
 
 #define FARMANAGERVERSION_MAJOR 2
 #define FARMANAGERVERSION_MINOR 0
-#define FARMANAGERVERSION_BUILD 1661
+#define FARMANAGERVERSION_BUILD 1733
 
 #ifndef RC_INVOKED
 
@@ -717,6 +717,7 @@ enum PANELINFOFLAGS
 	PFLAGS_NUMERICSORT        = 0x00000040,
 	PFLAGS_PANELLEFT          = 0x00000080,
 	PFLAGS_DIRECTORIESFIRST   = 0x00000100,
+	PFLAGS_USECRC32           = 0x00000200,
 };
 
 enum PANELINFOTYPE
@@ -1117,6 +1118,7 @@ struct ActlKeyMacro
 		DWORD_PTR Reserved[3];
 	} Param;
 };
+
 
 enum FARCOLORFLAGS
 {
@@ -1628,6 +1630,8 @@ enum XLATMODE
 {
 	XLAT_SWITCHKEYBLAYOUT  = 0x00000001UL,
 	XLAT_SWITCHKEYBBEEP    = 0x00000002UL,
+	XLAT_USEKEYBLAYOUTNAME = 0x00000004UL,
+	XLAT_CONVERTALLCMDLINE = 0x00010000UL,
 };
 
 typedef size_t (WINAPI *FARSTDKEYTOKEYNAME)(int Key,wchar_t *KeyText,size_t Size);
@@ -1797,7 +1801,7 @@ struct PluginInfo
 	int StructSize;
 	DWORD Flags;
 	const wchar_t * const *DiskMenuStrings;
-	int *DiskMenuNumbers;
+	int *Reserved0;
 	int DiskMenuStringsNumber;
 	const wchar_t * const *PluginMenuStrings;
 	int PluginMenuStringsNumber;
@@ -1848,6 +1852,7 @@ enum OPENPLUGININFO_FLAGS
 	OPIF_EXTERNALDELETE          = 0x00002000,
 	OPIF_EXTERNALMKDIR           = 0x00004000,
 	OPIF_USEATTRHIGHLIGHTING     = 0x00008000,
+	OPIF_USECRC32                = 0x00010000,
 };
 
 
