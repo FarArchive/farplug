@@ -895,7 +895,7 @@ void Archive::update(const wstring& src_dir, const vector<wstring>& file_names, 
 
     set_properties(out_arc, options);
 
-    ArchiveUpdateProgress progress(false, options.arc_path);
+    ArchiveUpdateProgress progress(false, arc_path);
     ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(src_dir, dst_dir, num_indices, file_index_map, options, ignore_errors, error_log, progress));
     ComObject<IOutStream> update_stream(new SimpleUpdateStream(temp_arc_name, progress));
 
