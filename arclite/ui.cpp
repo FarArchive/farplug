@@ -624,6 +624,7 @@ private:
   };
 
   bool new_arc;
+  wstring default_arc_name;
   vector<ArcType> main_formats;
   vector<ArcType> other_formats;
   UpdateOptions& options;
@@ -760,7 +761,10 @@ private:
   }
 
   wstring eval_arc_path() {
-    return Far::get_absolute_path(expand_macros(unquote(strip(get_text(arc_path_ctrl_id)))));
+    wstring arc_path = expand_macros(unquote(strip(get_text(arc_path_ctrl_id))));
+    if (arc_path.empty() || arc_path.back() == L'\\')
+      arc_path += default_arc_name;
+    return Far::get_absolute_path(arc_path);
   }
 
   UpdateOptions read_controls() {
@@ -1040,7 +1044,14 @@ private:
   }
 
 public:
-  UpdateDialog(bool new_arc, UpdateOptions& options, UpdateProfiles& profiles): Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), &c_update_dialog_guid, c_client_xs, L"Update"), new_arc(new_arc), options(options), profiles(profiles), arc_type(options.arc_type), events_enabled(true) {
+  UpdateDialog(bool new_arc, UpdateOptions& options, UpdateProfiles& profiles):
+    Far::Dialog(Far::get_msg(new_arc ? MSG_UPDATE_DLG_TITLE_CREATE : MSG_UPDATE_DLG_TITLE), &c_update_dialog_guid, c_client_xs, L"Update"),
+    new_arc(new_arc),
+    default_arc_name(options.arc_path),
+    options(options),
+    profiles(profiles),
+    arc_type(options.arc_type),
+    events_enabled(true) {
   }
 
   bool show() {
