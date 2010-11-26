@@ -38,6 +38,7 @@ wstring get_progress_bar_str(unsigned width, unsigned percent1, unsigned percent
 
 class ExtractProgress: public ProgressMonitor {
 private:
+  wstring arc_path;
   unsigned __int64 extract_completed;
   unsigned __int64 extract_total;
   wstring extract_file_path;
@@ -64,6 +65,8 @@ private:
     unsigned cache_written_percent = calc_percent(cache_written, cache_total);
 
     wostringstream st;
+    st << fit_str(arc_path, c_width) << L'\n';
+    st << L"\x1\n";
     st << fit_str(extract_file_path, c_width) << L'\n';
     st << setw(7) << format_data_size(extract_completed, get_size_suffixes()) << L" / " << format_data_size(extract_total, get_size_suffixes()) << L" @ " << setw(9) << format_data_size(extract_speed, get_speed_suffixes()) << L'\n';
     st << Far::get_progress_bar_str(c_width, percent_done, 100) << L'\n';
@@ -75,7 +78,14 @@ private:
   }
 
 public:
-  ExtractProgress(): ProgressMonitor(Far::get_msg(MSG_PROGRESS_EXTRACT)), extract_completed(0), extract_total(0), cache_stored(0), cache_written(0), cache_total(0) {
+  ExtractProgress(const wstring& arc_path):
+    ProgressMonitor(Far::get_msg(MSG_PROGRESS_EXTRACT)),
+    arc_path(arc_path),
+    extract_completed(0),
+    extract_total(0),
+    cache_stored(0),
+    cache_written(0),
+    cache_total(0) {
   }
 
   void update_extract_file(const wstring& file_path) {
@@ -573,7 +583,7 @@ void Archive::extract(UInt32 src_dir_index, const vector<UInt32>& src_indices, c
   copy(file_indices.begin(), file_indices.end(), back_insert_iterator<vector<UInt32>>(indices));
   sort(indices.begin(), indices.end());
 
-  ExtractProgress progress;
+  ExtractProgress progress(arc_path);
   FileWriteCache cache(*this, ignore_errors, error_log, progress);
   ComObject<IArchiveExtractCallback> extractor(new ArchiveExtractor(src_dir_index, options.dst_dir, *this, overwrite_action, ignore_errors, error_log, cache, progress));
   COM_ERROR_CHECK(in_arc->Extract(indices.data(), static_cast<UInt32>(indices.size()), 0, extractor));
