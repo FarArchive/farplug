@@ -77,6 +77,9 @@ compression.method.ppmd = PP&MD
 # Delete files
 delete.dlg.confirm = Do you want to delete selected files?
 
+# Create directory
+create_dir.dlg.name = Enter directory name:
+
 # Test archive
 test.ok = Archive test complete
 test.menu = Test archive files

@@ -77,6 +77,9 @@ compression.method.ppmd = &PPMD
 # Delete files
 delete.dlg.confirm = Вы хотите удалить выбранные файлы?
 
+# Create directory
+create_dir.dlg.name = Введите имя каталога:
+
 # Test archive
 test.ok = Тест архива завершен успешно
 test.menu = Протестировать архив

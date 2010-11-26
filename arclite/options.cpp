@@ -280,6 +280,7 @@ UpdateOptions::UpdateOptions():
   move_files(c_def_profile_move_files),
   open_shared(c_def_profile_open_shared),
   ignore_errors(c_def_profile_ignore_errors),
+  overwrite(oaAsk),
   advanced(c_def_profile_advanced)
 {}
 

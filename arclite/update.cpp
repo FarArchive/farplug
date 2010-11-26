@@ -914,3 +914,51 @@ void Archive::update(const wstring& src_dir, const vector<wstring>& file_names, 
   if (options.move_files && error_log.empty())
     DeleteSrcFiles(src_dir, file_names, ignore_errors, error_log);
 }
+
+void Archive::create_dir(const wstring& dir_name, const wstring& dst_dir) {
+  FileIndexMap file_index_map;
+  FileIndexInfo file_index_info;
+  file_index_info.rel_path = dst_dir;
+  memset(&file_index_info.find_data,0, sizeof(file_index_info.find_data));
+  file_index_info.find_data.dwFileAttributes = FILE_ATTRIBUTE_DIRECTORY;
+  SYSTEMTIME sys_time;
+  GetSystemTime(&sys_time);
+  FILETIME file_time;
+  SystemTimeToFileTime(&sys_time, &file_time);
+  file_index_info.find_data.ftCreationTime = file_time;
+  file_index_info.find_data.ftLastAccessTime = file_time;
+  file_index_info.find_data.ftLastWriteTime = file_time;
+  wcscpy(file_index_info.find_data.cFileName, dir_name.c_str());
+  file_index_map[num_indices] = file_index_info;
+
+  UpdateOptions options;
+  options.arc_type = arc_chain.back().type;
+  load_update_props();
+  options.level = level;
+  options.method = method;
+  options.solid = solid;
+  options.encrypt = encrypted;
+  options.password = password;
+  options.overwrite = oaOverwrite;
+
+  wstring temp_arc_name = get_temp_file_name();
+  try {
+    ComObject<IOutArchive> out_arc;
+    CHECK_COM(in_arc->QueryInterface(IID_IOutArchive, reinterpret_cast<void**>(&out_arc)));
+
+    ArchiveUpdateProgress progress(false, arc_path);
+    ComObject<IArchiveUpdateCallback> updater(new ArchiveUpdater(wstring(), dst_dir, num_indices, file_index_map, options, options.ignore_errors, ErrorLog(), progress));
+    ComObject<IOutStream> update_stream(new SimpleUpdateStream(temp_arc_name, progress));
+
+    COM_ERROR_CHECK(out_arc->UpdateItems(update_stream, num_indices + 1, updater));
+    close();
+    update_stream.Release();
+    File::move_file(temp_arc_name, arc_path, MOVEFILE_REPLACE_EXISTING);
+  }
+  catch (...) {
+    File::delete_file_nt(temp_arc_name);
+    throw;
+  }
+
+  reopen();
+}

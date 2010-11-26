@@ -17,6 +17,7 @@ private:
 
   wstring current_dir;
   wstring extract_dir;
+  wstring created_dir;
   wstring host_file;
   wstring panel_title;
   vector<InfoPanelLine> info_lines;
@@ -681,6 +682,17 @@ public:
     Far::progress_notify();
   }
 
+  void create_dir(const wchar_t** name, int op_mode) {
+    bool show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
+    created_dir = *name;
+    if (show_dialog) {
+      if (!Far::input_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_CREATE_DIR_DLG_NAME), created_dir))
+        FAIL(E_ABORT);
+      *name = created_dir.c_str();
+    }
+    archive.create_dir(created_dir, remove_path_root(current_dir));
+  }
+
   void show_attr() {
     AttrList attr_list;
     Far::PanelItem panel_item = Far::get_current_panel_item(PANEL_ACTIVE);
@@ -952,6 +964,13 @@ int WINAPI DeleteFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int Ite
   reinterpret_cast<Plugin*>(hPlugin)->delete_files(PanelItem, ItemsNumber, OpMode);
   return TRUE;
   FAR_ERROR_HANDLER_END(return FALSE, return FALSE, (OpMode & OPM_SILENT) != 0);
+}
+
+int WINAPI MakeDirectoryW(HANDLE hPlugin, const wchar_t** Name, int OpMode) {
+  FAR_ERROR_HANDLER_BEGIN;
+  reinterpret_cast<Plugin*>(hPlugin)->create_dir(Name, OpMode);
+  return 1;
+  FAR_ERROR_HANDLER_END(return 0, return -1, (OpMode & OPM_SILENT) != 0);
 }
 
 int WINAPI ProcessHostFileW(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int OpMode) {

@@ -195,6 +195,7 @@ public:
 public:
   void create(const wstring& src_dir, const vector<wstring>& file_names, const UpdateOptions& options, ErrorLog& error_log);
   void update(const wstring& src_dir, const vector<wstring>& file_names, const wstring& dst_dir, const UpdateOptions& options, ErrorLog& error_log);
+  void create_dir(const wstring& dir_name, const wstring& dst_dir);
 
   // delete files in archive
 private:
