@@ -1361,7 +1361,7 @@ public:
     new_line();
     label(Far::get_msg(MSG_SETTINGS_DLG_AVAILABLE_FORMATS));
     new_line();
-    available_formats_ctrl_id = edit_box(get_available_formats(), c_client_xs);
+    available_formats_ctrl_id = edit_box(get_available_formats(), c_client_xs, DIF_READONLY);
     new_line();
     separator();
     new_line();
