@@ -14,7 +14,11 @@ struct OverwriteFileInfo {
   unsigned __int64 size;
   FILETIME mtime;
 };
-bool overwrite_dialog(const wstring& file_path, const OverwriteFileInfo& src_file_info, const OverwriteFileInfo& dst_file_info, OverwriteOptions& options);
+enum OverwriteDialogKind {
+  odkExtract,
+  odkUpdate,
+};
+bool overwrite_dialog(const wstring& file_path, const OverwriteFileInfo& src_file_info, const OverwriteFileInfo& dst_file_info, OverwriteDialogKind kind, OverwriteOptions& options);
 
 bool extract_dialog(ExtractOptions& options);
 

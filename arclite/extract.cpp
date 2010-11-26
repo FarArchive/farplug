@@ -388,7 +388,7 @@ public:
         dst_ov_info.mtime = dst_file_info.ftLastWriteTime;
         ProgressSuspend ps(progress);
         OverwriteOptions ov_options;
-        if (!overwrite_dialog(file_path, src_ov_info, dst_ov_info, ov_options))
+        if (!overwrite_dialog(file_path, src_ov_info, dst_ov_info, odkExtract, ov_options))
           return E_ABORT;
         overwrite = ov_options.action;
         if (ov_options.all)

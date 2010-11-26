@@ -153,7 +153,7 @@ OpenCommand parse_open_command(const CommandArgs& ca) {
 // arc:c [-t:<arc_type>] [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]] [-sfx:<module>] [-v:<volume_size>]
 //   [-mf[:(y|n)]] [-ie[:(y|n)]] [-adv:<advanced>] <archive> (<file1> <file2> ... | @<filelist>)
 // arc:u [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]]
-//   [-mf[:(y|n)]] [-ie[:(y|n)]] [-adv:<advanced>] <archive> (<file1> <file2> ... | @<filelist>)
+//   [-mf[:(y|n)]] [-ie[:(y|n)]] [-o[:(o|s)]] [-adv:<advanced>] <archive> (<file1> <file2> ... | @<filelist>)
 //   <level> = 0|1|3|5|7|9
 //   <method> = lzma|lzma2|ppmd
 
@@ -217,6 +217,16 @@ UpdateCommand parse_update_command(const CommandArgs& ca) {
       command.options.move_files = parse_bool_value(param.value);
     else if (param.name == L"ie")
       command.options.ignore_errors = parse_bool_value(param.value);
+    else if (param.name == L"o") {
+      CHECK_FMT(ca.cmd == cmdUpdate);
+      wstring lcvalue = lc(param.value);
+      if (lcvalue == L"o")
+        command.options.overwrite = oaOverwrite;
+      else if (lcvalue == L"s")
+        command.options.overwrite = oaSkip;
+      else
+        CHECK_FMT(false);
+    }
     else if (param.name == L"adv") {
       CHECK_FMT(!param.value.empty());
       command.options.advanced = param.value;

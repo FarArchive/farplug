@@ -420,6 +420,7 @@ public:
       options.encrypt = archive.encrypted;
       options.encrypt_header = triUndef;
       options.password = archive.password;
+      options.overwrite = g_options.update_overwrite;
     }
     options.create_sfx = false;
     options.enable_volumes = false;
@@ -454,6 +455,7 @@ public:
       archive.method = options.method;
       archive.solid = options.solid;
       archive.encrypted = options.encrypt;
+      g_options.update_overwrite = options.overwrite;
     }
     g_options.update_show_password = options.show_password;
     g_options.update_ignore_errors = options.ignore_errors;

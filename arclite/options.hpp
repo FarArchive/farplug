@@ -21,6 +21,7 @@ struct Options {
   wstring update_sfx_module;
   wstring update_volume_size;
   bool update_ignore_errors;
+  OverwriteAction update_overwrite;
   // panel mode
   unsigned panel_view_mode;
   unsigned panel_sort_mode;

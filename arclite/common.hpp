@@ -125,6 +125,7 @@ struct UpdateOptions {
   bool move_files;
   bool open_shared;
   bool ignore_errors;
+  OverwriteAction overwrite;
   wstring advanced;
   UpdateOptions();
 };

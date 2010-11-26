@@ -490,6 +490,7 @@ private:
   UInt32& new_index;
   bool& ignore_errors;
   ErrorLog& error_log;
+  OverwriteAction overwrite_action;
 
   const wstring* file_path;
 
@@ -528,6 +529,29 @@ private:
         file_index = new_index;
         new_index++;
       }
+      else if (!file_info.is_dir) {
+        OverwriteAction overwrite;
+        if (overwrite_action == oaAsk) {
+          OverwriteFileInfo src_ov_info, dst_ov_info;
+          src_ov_info.is_dir = src_find_data.is_dir();
+          src_ov_info.size = src_find_data.size();
+          src_ov_info.mtime = src_find_data.ftLastWriteTime;
+          dst_ov_info.is_dir = file_info.is_dir;
+          dst_ov_info.size = archive.get_size(file_index);
+          dst_ov_info.mtime = archive.get_mtime(file_index);
+          ProgressSuspend ps(*this);
+          OverwriteOptions ov_options;
+          if (!overwrite_dialog(add_trailing_slash(sub_dir) + file_info.name, src_ov_info, dst_ov_info, odkUpdate, ov_options))
+            return E_ABORT;
+          overwrite = ov_options.action;
+          if (ov_options.all)
+            overwrite_action = ov_options.action;
+        }
+        else
+          overwrite = overwrite_action;
+        if (overwrite == oaSkip)
+          return file_index;
+      }
     }
     FileIndexInfo file_index_info;
     file_index_info.rel_path = sub_dir;
@@ -554,7 +578,7 @@ private:
   }
 
 public:
-  PrepareUpdate(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, const Archive& archive, FileIndexMap& file_index_map, UInt32& new_index, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(Far::get_msg(MSG_PROGRESS_SCAN_DIRS), false), src_dir(src_dir), archive(archive), file_index_map(file_index_map), new_index(new_index), ignore_errors(ignore_errors), error_log(error_log) {
+  PrepareUpdate(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, const Archive& archive, FileIndexMap& file_index_map, UInt32& new_index, OverwriteAction overwrite_action, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(Far::get_msg(MSG_PROGRESS_SCAN_DIRS), false), src_dir(src_dir), archive(archive), file_index_map(file_index_map), new_index(new_index), overwrite_action(overwrite_action), ignore_errors(ignore_errors), error_log(error_log) {
     for (unsigned i = 0; i < file_names.size(); i++) {
       wstring full_path = add_trailing_slash(src_dir) + file_names[i];
       FileEnum file_enum(full_path);
@@ -827,7 +851,7 @@ void Archive::create(const wstring& src_dir, const vector<wstring>& file_names, 
   UInt32 new_index = 0;
 
   FileIndexMap file_index_map;
-  PrepareUpdate(src_dir, file_names, c_root_index, *this, file_index_map, new_index, ignore_errors, error_log);
+  PrepareUpdate(src_dir, file_names, c_root_index, *this, file_index_map, new_index, oaOverwrite, ignore_errors, error_log);
 
   ComObject<IOutArchive> out_arc;
   ArcAPI::create_out_archive(options.arc_type, &out_arc);
@@ -862,7 +886,7 @@ void Archive::update(const wstring& src_dir, const vector<wstring>& file_names, 
   UInt32 new_index = num_indices; // starting index for new files
 
   FileIndexMap file_index_map;
-  PrepareUpdate(src_dir, file_names, find_dir(dst_dir), *this, file_index_map, new_index, ignore_errors, error_log);
+  PrepareUpdate(src_dir, file_names, find_dir(dst_dir), *this, file_index_map, new_index, options.overwrite, ignore_errors, error_log);
 
   wstring temp_arc_name = get_temp_file_name();
   try {
