@@ -6,8 +6,6 @@
 #include "ui.hpp"
 #include "archive.hpp"
 
-IOutStream* get_simple_update_stream(const wstring& arc_path, ProgressMonitor& progress);
-
 class ArchiveFileDeleterProgress: public ProgressMonitor {
 private:
   unsigned __int64 total;
@@ -47,6 +45,52 @@ public:
   void update_completed(unsigned __int64 completed) {
     this->completed = completed;
     update_ui();
+  }
+};
+
+class ArchiveFileDeleterStream: public IOutStream, public ComBase, private File {
+private:
+  ProgressMonitor& progress;
+public:
+  ArchiveFileDeleterStream(const wstring& file_path, ProgressMonitor& progress): progress(progress) {
+    RETRY_OR_IGNORE_BEGIN
+    open(file_path, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
+    RETRY_END(progress)
+  }
+
+  UNKNOWN_IMPL_BEGIN
+  UNKNOWN_IMPL_ITF(ISequentialOutStream)
+  UNKNOWN_IMPL_ITF(IOutStream)
+  UNKNOWN_IMPL_END
+
+  STDMETHODIMP Write(const void *data, UInt32 size, UInt32 *processedSize) {
+    COM_ERROR_HANDLER_BEGIN
+    unsigned size_written;
+    RETRY_OR_IGNORE_BEGIN
+    size_written = write(data, size);
+    RETRY_END(progress)
+    if (processedSize)
+      *processedSize = size_written;
+    return S_OK;
+    COM_ERROR_HANDLER_END
+  }
+
+  STDMETHODIMP Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition) {
+    COM_ERROR_HANDLER_BEGIN
+    unsigned __int64 new_position = set_pos(offset, translate_seek_method(seekOrigin));
+    if (newPosition)
+      *newPosition = new_position;
+    return S_OK;
+    COM_ERROR_HANDLER_END
+  }
+  STDMETHODIMP SetSize(UInt64 newSize) {
+    COM_ERROR_HANDLER_BEGIN
+    RETRY_OR_IGNORE_BEGIN
+    set_pos(newSize, FILE_BEGIN);
+    set_end();
+    RETRY_END(progress)
+    return S_OK;
+    COM_ERROR_HANDLER_END
   }
 };
 
@@ -142,7 +186,7 @@ void Archive::delete_files(const vector<UInt32>& src_indices) {
 
     ArchiveFileDeleterProgress progress;
     ComObject<IArchiveUpdateCallback> deleter(new ArchiveFileDeleter(new_indices, progress));
-    ComObject<IOutStream> update_stream(get_simple_update_stream(temp_arc_name, progress));
+    ComObject<IOutStream> update_stream(new ArchiveFileDeleterStream(temp_arc_name, progress));
 
     COM_ERROR_CHECK(out_arc->UpdateItems(update_stream, static_cast<UInt32>(new_indices.size()), deleter));
     close();

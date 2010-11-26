@@ -24,11 +24,12 @@ private:
   wstring file_path;
   UInt64 file_total;
   UInt64 file_completed;
+  unsigned __int64 total_data_read;
+  unsigned __int64 total_data_written;
 
   virtual void do_update_ui() {
     const unsigned c_width = 60;
 
-    unsigned file_percent = calc_percent(file_completed, file_total);
     percent_done = calc_percent(completed, total);
 
     unsigned __int64 time = time_elapsed();
@@ -50,16 +51,31 @@ private:
     st << fit_str(arc_path, c_width) << L'\n';
     st << L"\x1\n";
     st << fit_str(file_path, c_width) << L'\n';
-    st << setw(7) << format_data_size(file_completed, get_size_suffixes()) << L" / " << format_data_size(file_total, get_size_suffixes()) << L'\n';
-    st << Far::get_progress_bar_str(c_width, file_percent, 100) << L'\n';
+    st << setw(7) << format_data_size(file_completed, get_size_suffixes()) << L" / " <<
+      format_data_size(file_total, get_size_suffixes()) << L'\n';
+    st << Far::get_progress_bar_str(c_width, calc_percent(file_completed, file_total), 100) << L'\n';
     st << L"\x1\n";
-    st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " << format_data_size(total, get_size_suffixes()) << L" [" << setw(2) << percent_done << L"%] @ " << setw(9) << format_data_size(speed, get_speed_suffixes()) << L" -" << format_time((total_time - time) / ticks_per_sec()) << L'\n';
+    st << setw(7) << format_data_size(completed, get_size_suffixes()) << L" / " <<
+      format_data_size(total, get_size_suffixes()) << L" @ " << setw(9) <<
+      format_data_size(speed, get_speed_suffixes()) << L" -" << format_time((total_time - time) / ticks_per_sec()) << L'\n';
+    st << setw(7) << format_data_size(total_data_read, get_size_suffixes()) << L" \x2192 " <<
+      setw(7) << format_data_size(total_data_written, get_size_suffixes()) << L" = " <<
+      setw(2) << calc_percent(total_data_written, total_data_read) << L"%" << L'\n';
     st << Far::get_progress_bar_str(c_width, percent_done, 100) << L'\n';
     progress_text = st.str();
   }
 
 public:
-  ArchiveUpdateProgress(bool new_arc, const wstring& arc_path): ProgressMonitor(Far::get_msg(new_arc ? MSG_PROGRESS_CREATE : MSG_PROGRESS_UPDATE)), new_arc(new_arc), arc_path(arc_path), completed(0), total(0), file_completed(0), file_total(0) {
+  ArchiveUpdateProgress(bool new_arc, const wstring& arc_path):
+    ProgressMonitor(Far::get_msg(new_arc ? MSG_PROGRESS_CREATE : MSG_PROGRESS_UPDATE)),
+    new_arc(new_arc),
+    arc_path(arc_path),
+    completed(0),
+    total(0),
+    file_completed(0),
+    file_total(0),
+    total_data_read(0),
+    total_data_written(0) {
   }
 
   void on_open_file(const wstring& file_path, unsigned __int64 size) {
@@ -70,6 +86,11 @@ public:
   }
   void on_read_file(unsigned size) {
     file_completed += size;
+    total_data_read += size;
+    update_ui();
+  }
+  void on_write_archive(unsigned size) {
+    total_data_written += size;
     update_ui();
   }
   void on_total_update(UInt64 total) {
@@ -101,9 +122,11 @@ DWORD translate_seek_method(UInt32 seek_origin) {
 
 class UpdateStream: public IOutStream {
 protected:
-  ProgressMonitor& progress;
+  ArchiveUpdateProgress& progress;
 public:
-  UpdateStream(ProgressMonitor& progress): progress(progress) {
+  UpdateStream(ArchiveUpdateProgress& progress): progress(progress) {
+  }
+  virtual ~UpdateStream() {
   }
   virtual void clean_files() throw() = 0;
 };
@@ -111,12 +134,10 @@ public:
 
 class SimpleUpdateStream: public UpdateStream, public ComBase, private File {
 public:
-  SimpleUpdateStream(const wstring& file_path, ProgressMonitor& progress): UpdateStream(progress) {
+  SimpleUpdateStream(const wstring& file_path, ArchiveUpdateProgress& progress): UpdateStream(progress) {
     RETRY_OR_IGNORE_BEGIN
     open(file_path, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
     RETRY_END(progress)
-  }
-  ~SimpleUpdateStream() {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -130,6 +151,7 @@ public:
     RETRY_OR_IGNORE_BEGIN
     size_written = write(data, size);
     RETRY_END(progress)
+    progress.on_write_archive(size_written);
     if (processedSize)
       *processedSize = size_written;
     return S_OK;
@@ -160,10 +182,6 @@ public:
   }
 };
 
-IOutStream* get_simple_update_stream(const wstring& arc_path, ProgressMonitor& progress) {
-  return new SimpleUpdateStream(arc_path, progress);
-}
-
 
 class SfxUpdateStream: public UpdateStream, public ComBase, private File {
 private:
@@ -180,7 +198,7 @@ private:
   }
 
 public:
-  SfxUpdateStream(const wstring& file_path, const wstring& sfx_module, ProgressMonitor& progress): UpdateStream(progress), start_offset(0) {
+  SfxUpdateStream(const wstring& file_path, const wstring& sfx_module, ArchiveUpdateProgress& progress): UpdateStream(progress), start_offset(0) {
     RETRY_OR_IGNORE_BEGIN
     open(file_path, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
     write_sfx_header(sfx_module);
@@ -198,6 +216,7 @@ public:
     RETRY_OR_IGNORE_BEGIN
     size_written = write(data, size);
     RETRY_END(progress)
+    progress.on_write_archive(size_written);
     if (processedSize)
       *processedSize = size_written;
     return S_OK;
@@ -266,7 +285,7 @@ private:
   }
 
 public:
-  MultiVolumeUpdateStream(const wstring& file_path, unsigned __int64 volume_size, ProgressMonitor& progress): UpdateStream(progress), file_path(file_path), volume_size(volume_size), stream_pos(0), seek_stream_pos(0), stream_size(0), next_volume(false) {
+  MultiVolumeUpdateStream(const wstring& file_path, unsigned __int64 volume_size, ArchiveUpdateProgress& progress): UpdateStream(progress), file_path(file_path), volume_size(volume_size), stream_pos(0), seek_stream_pos(0), stream_size(0), next_volume(false) {
     RETRY_OR_IGNORE_BEGIN
     volume.open(get_volume_path(0), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
     RETRY_END(progress)
@@ -344,6 +363,7 @@ public:
         stream_size = stream_pos;
     }
     while (data_off < size);
+    progress.on_write_archive(size);
     if (processedSize)
       *processedSize = size;
     return S_OK;
@@ -438,9 +458,9 @@ public:
   STDMETHODIMP Read(void *data, UInt32 size, UInt32 *processedSize) {
     COM_ERROR_HANDLER_BEGIN
     unsigned size_read = read(data, size);
+    progress.on_read_file(size_read);
     if (processedSize)
       *processedSize = size_read;
-    progress.on_read_file(size_read);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
