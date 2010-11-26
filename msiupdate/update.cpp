@@ -102,7 +102,8 @@ void delete_changelog() {
     wstring file_path;
     TransactedKey plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, true, transaction.handle());
     if (plugin_key.query_str_nt(file_path, c_param_changelog_path)) {
-      delete_file_transacted(file_path, transaction.handle());
+      if (File::exists(file_path))
+        delete_file_transacted(file_path, transaction.handle());
       plugin_key.delete_value(c_param_changelog_path);
     }
   }
@@ -191,7 +192,10 @@ void save_to_cache(const string& package, const wstring& cache_dir, const wstrin
     const wchar_t* c_param_cache_index = L"cache_index";
     TransactedKey plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, true, transaction.handle());
 
-    list<wstring> cache_index = split(plugin_key.query_str(c_param_cache_index), L'\n');
+    list<wstring> cache_index;
+    wstring cache_index_str;
+    if (plugin_key.query_str_nt(cache_index_str, c_param_cache_index))
+      cache_index = split(cache_index_str, L'\n');
 
     while (cache_index.size() && cache_index.size() >= g_options.cache_max_size) {
       delete_file_transacted(add_trailing_slash(cache_dir) + cache_index.front(), transaction.handle());
@@ -220,11 +224,13 @@ void execute(bool ask) {
     if (!ask && g_options.open_changelog) {
       wstring changelog_path;
       IGNORE_ERRORS(changelog_path = save_changelog(VER_BUILD(current_version), VER_BUILD(update_info.version)))
-      SHELLEXECUTEINFOW sei = { sizeof(SHELLEXECUTEINFO) };
-      sei.fMask = SEE_MASK_FLAG_NO_UI | SEE_MASK_NO_CONSOLE | SEE_MASK_ASYNCOK;
-      sei.lpFile = changelog_path.c_str();
-      sei.nShow = SW_SHOWDEFAULT;
-      ShellExecuteExW(&sei);
+      if (!changelog_path.empty()) {
+        SHELLEXECUTEINFOW sei = { sizeof(SHELLEXECUTEINFO) };
+        sei.fMask = SEE_MASK_FLAG_NO_UI | SEE_MASK_NO_CONSOLE | SEE_MASK_ASYNCOK;
+        sei.lpFile = changelog_path.c_str();
+        sei.nShow = SW_SHOWDEFAULT;
+        ShellExecuteExW(&sei);
+      }
     }
 
     wstring cache_dir;
