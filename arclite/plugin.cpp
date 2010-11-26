@@ -64,6 +64,8 @@ public:
     panel_title = Far::get_msg(MSG_PLUGIN_NAME);
     if (archive.is_open()) {
       panel_title += L":" + archive.arc_chain.to_string() + L":" + archive.arc_name();
+      if (!current_dir.empty())
+        panel_title += L":" + current_dir;
       host_file = archive.arc_name();
       if (archive.has_crc)
         opi->Flags |= OPIF_USECRC32;
