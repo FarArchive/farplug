@@ -220,7 +220,9 @@ UpdateCommand parse_update_command(const CommandArgs& ca) {
     else if (param.name == L"o") {
       CHECK_FMT(ca.cmd == cmdUpdate);
       wstring lcvalue = lc(param.value);
-      if (lcvalue == L"o")
+      if (lcvalue.empty())
+        command.options.overwrite = oaOverwrite;
+      else if (lcvalue == L"o")
         command.options.overwrite = oaOverwrite;
       else if (lcvalue == L"s")
         command.options.overwrite = oaSkip;
@@ -266,7 +268,9 @@ ExtractCommand parse_extract_command(const CommandArgs& ca) {
       command.options.ignore_errors = parse_bool_value(param.value);
     else if (param.name == L"o") {
       wstring lcvalue = lc(param.value);
-      if (lcvalue == L"o")
+      if (lcvalue.empty())
+        command.options.overwrite = oaOverwrite;
+      else if (lcvalue == L"o")
         command.options.overwrite = oaOverwrite;
       else if (lcvalue == L"s")
         command.options.overwrite = oaSkip;
