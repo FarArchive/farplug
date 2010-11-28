@@ -150,7 +150,8 @@ $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #Prefix command line format#
 
 	#Open archive#
-	arc:[-d] [-p:<password>] <archive>
+	arc:[-d] [-t:<arc_type>] [-p:<password>] <archive>
+	-t = archive type (7z, zip, etc.)
 	-d = detect all available formats and show selection menu
 	-p = specify password for encrypted archive
 	<archive> = archive file name

@@ -7,6 +7,9 @@
 #include "msearch.hpp"
 #include "archive.hpp"
 
+OpenOptions::OpenOptions(): detect(false) {
+}
+
 class ArchiveOpenStream: public IInStream, private ComBase, private File {
 private:
   bool device_file;
@@ -313,7 +316,7 @@ void prioritize(list<ArcEntry>& arc_entries, const ArcType& first, const ArcType
   }
 }
 
-void Archive::open(const OpenOptions& options, const ArcFormats& arc_formats, vector<Archive>& archives) {
+void Archive::open(const OpenOptions& options, vector<Archive>& archives) {
   size_t parent_idx = -1;
   if (!archives.empty())
     parent_idx = archives.size() - 1;
@@ -336,13 +339,13 @@ void Archive::open(const OpenOptions& options, const ArcFormats& arc_formats, ve
 
   // 1. find formats by signature
   vector<ByteVector> signatures;
-  signatures.reserve(arc_formats.size());
+  signatures.reserve(options.arc_types.size());
   vector<ArcType> sig_types;
-  sig_types.reserve(arc_formats.size());
-  for_each(arc_formats.begin(), arc_formats.end(), [&] (const pair<ArcType, ArcFormat>& arc_format) {
-    if (!arc_format.second.start_signature.empty()) {
-      sig_types.push_back(arc_format.first);
-      signatures.push_back(arc_format.second.start_signature);
+  sig_types.reserve(options.arc_types.size());
+  for_each(options.arc_types.begin(), options.arc_types.end(), [&] (const ArcType& arc_type) {
+    if (!ArcAPI::formats().at(arc_type).start_signature.empty()) {
+      sig_types.push_back(arc_type);
+      signatures.push_back(ArcAPI::formats().at(arc_type).start_signature);
     }
   });
 
@@ -358,18 +361,18 @@ void Archive::open(const OpenOptions& options, const ArcFormats& arc_formats, ve
   });
 
   // 2. find formats by file extension
-  ArcTypes types_by_ext = arc_formats.find_by_ext(extract_file_ext(arc_info.cFileName));
+  ArcTypes types_by_ext = ArcAPI::formats().find_by_ext(extract_file_ext(arc_info.cFileName));
   for_each(types_by_ext.begin(), types_by_ext.end(), [&] (const ArcType& arc_type) {
-    if (found_types.count(arc_type) == 0) {
+    if (found_types.count(arc_type) == 0 && find(options.arc_types.begin(), options.arc_types.end(), arc_type) != options.arc_types.end()) {
       found_types.insert(arc_type);
       arc_entries.push_front(ArcEntry(arc_type, 0));
     }
   });
 
   // 3. all other formats
-  for_each(arc_formats.begin(), arc_formats.end(), [&] (const pair<ArcType, ArcFormat>& arc_format) {
-    if (found_types.count(arc_format.first) == 0) {
-      arc_entries.push_back(ArcEntry(arc_format.first, 0));
+  for_each(options.arc_types.begin(), options.arc_types.end(), [&] (const ArcType& arc_type) {
+    if (found_types.count(arc_type) == 0) {
+      arc_entries.push_back(ArcEntry(arc_type, 0));
     }
   });
 
@@ -391,15 +394,15 @@ void Archive::open(const OpenOptions& options, const ArcFormats& arc_formats, ve
         archive.arc_chain.assign(archives[parent_idx].arc_chain.begin(), archives[parent_idx].arc_chain.end());
       archive.arc_chain.push_back(*arc_entry);
       archives.push_back(archive);
-      open(options, arc_formats, archives);
+      open(options, archives);
       if (!options.detect) break;
     }
   }
 }
 
-vector<Archive> Archive::open(const OpenOptions& options, const ArcFormats& arc_formats) {
+vector<Archive> Archive::open(const OpenOptions& options) {
   vector<Archive> archives;
-  open(options, arc_formats, archives);
+  open(options, archives);
   if (!options.detect && !archives.empty())
     archives.erase(archives.begin(), archives.end() - 1);
   return archives;

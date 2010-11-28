@@ -90,10 +90,19 @@ wstring ArcFormat::default_extension() const {
 }
 
 
-ArcTypes ArcFormats::find_by_name(const wstring& name) const {
+ArcTypes ArcFormats::get_arc_types() const {
   ArcTypes types;
   for (const_iterator fmt = begin(); fmt != end(); fmt++) {
-    if (fmt->second.name == name)
+    types.push_back(fmt->first);
+  }
+  return types;
+}
+
+ArcTypes ArcFormats::find_by_name(const wstring& name) const {
+  ArcTypes types;
+  wstring uc_name = upcase(name);
+  for (const_iterator fmt = begin(); fmt != end(); fmt++) {
+    if (upcase(fmt->second.name) == uc_name)
       types.push_back(fmt->first);
   }
   return types;
@@ -101,11 +110,13 @@ ArcTypes ArcFormats::find_by_name(const wstring& name) const {
 
 ArcTypes ArcFormats::find_by_ext(const wstring& ext) const {
   ArcTypes types;
+  if (ext.size() <= 1)
+    return types;
+  wstring uc_ext = upcase(ext.substr(1));
   for (const_iterator fmt = begin(); fmt != end(); fmt++) {
-    list<wstring> ext_list = split(fmt->second.extension_list, L' ');
+    list<wstring> ext_list = split(upcase(fmt->second.extension_list), L' ');
     for (list<wstring>::const_iterator ext_iter = ext_list.begin(); ext_iter != ext_list.end(); ext_iter++) {
-      // ext.c_str() + 1 == remove dot
-      if (_wcsicmp(ext_iter->c_str(), ext.c_str() + 1) == 0) {
+      if (*ext_iter == uc_ext) {
         types.push_back(fmt->first);
         break;
       }

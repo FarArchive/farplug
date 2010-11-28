@@ -1,6 +1,7 @@
 #pragma once
 
 typedef ByteVector ArcType;
+typedef list<ArcType> ArcTypes;
 
 typedef list<Error> ErrorLog;
 
@@ -92,9 +93,9 @@ enum OverwriteAction { oaAsk, oaOverwrite, oaSkip, oaRename, oaAppend };
 struct OpenOptions {
   wstring arc_path;
   bool detect;
+  ArcTypes arc_types;
   wstring password;
-  OpenOptions(): detect(false) {
-  }
+  OpenOptions();
 };
 
 struct ExtractOptions {

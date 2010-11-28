@@ -26,8 +26,8 @@ public:
   Plugin() {
   }
 
-  static Plugin* open(const OpenOptions& options, const ArcFormats& arc_formats) {
-    vector<Archive> archives = Archive::open(options, arc_formats);
+  static Plugin* open(const OpenOptions& options) {
+    vector<Archive> archives = Archive::open(options);
 
     if (archives.size() == 0)
       FAIL(E_ABORT);
@@ -235,7 +235,8 @@ public:
         open_options.arc_path = arc_list[i];
         open_options.detect = false;
         open_options.password = options.password;
-        archives = Archive::open(open_options, ArcAPI::formats());
+        open_options.arc_types = ArcAPI::formats().get_arc_types();
+        archives = Archive::open(open_options);
         if (archives.empty())
           throw Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), arc_list[i], __FILE__, __LINE__);
       }
@@ -336,7 +337,8 @@ public:
         OpenOptions open_options;
         open_options.arc_path = arc_list[i];
         open_options.detect = false;
-        archives = Archive::open(open_options, ArcAPI::formats());
+        open_options.arc_types = ArcAPI::formats().get_arc_types();
+        archives = Archive::open(open_options);
         if (archives.empty())
           throw Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), arc_list[i], __FILE__, __LINE__);
       }
@@ -638,7 +640,8 @@ public:
       open_options.arc_path = options.arc_path;
       open_options.detect = false;
       open_options.password = options.password;
-      vector<Archive> archives = Archive::open(open_options, ArcAPI::formats());
+      open_options.arc_types = ArcAPI::formats().get_arc_types();
+      vector<Archive> archives = Archive::open(open_options);
       if (archives.empty())
         throw Error(Far::get_msg(MSG_ERROR_NOT_ARCHIVE), options.arc_path, __FILE__, __LINE__);
 
@@ -795,7 +798,8 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
         return INVALID_HANDLE_VALUE;
       }
       options.arc_path = add_trailing_slash(Far::get_panel_dir(PANEL_ACTIVE)) + panel_item.file_name;
-      return Plugin::open(options, ArcAPI::formats());
+      options.arc_types = ArcAPI::formats().get_arc_types();
+      return Plugin::open(options);
     }
     else if (item == create_menu_id) {
       Plugin::create_archive();
@@ -834,7 +838,7 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
       case cmdOpen: {
         OpenOptions options = parse_open_command(cmd_args).options;
         options.arc_path = Far::get_absolute_path(options.arc_path);
-        return Plugin::open(options, ArcAPI::formats());
+        return Plugin::open(options);
       }
       case cmdCreate:
       case cmdUpdate:
@@ -867,9 +871,9 @@ HANDLE WINAPI OpenFilePluginW(const wchar_t *Name,const unsigned char *Data,int 
     return new Plugin();
   }
   else {
-    ArcFormats arc_formats = ArcAPI::formats();
     OpenOptions options;
     options.arc_path = Name;
+    options.arc_types = ArcAPI::formats().get_arc_types();
     if (detect_next_time == triUndef) {
       options.detect = false;
       if (!g_options.handle_commands)
@@ -889,26 +893,27 @@ HANDLE WINAPI OpenFilePluginW(const wchar_t *Name,const unsigned char *Data,int 
           list<wstring> name_list = split(upcase(g_options.disabled_formats), L',');
           copy(name_list.cbegin(), name_list.cend(), inserter(disabled_formats, disabled_formats.begin()));
         }
-        ArcFormats::iterator arc_format = arc_formats.begin();
-        while (arc_format != arc_formats.end()) {
-          wstring arc_name = upcase(arc_format->second.name);
-          if (g_options.use_enabled_formats && enabled_formats.count(arc_format->second.name) == 0)
-            arc_format = arc_formats.erase(arc_format);
-          else if (g_options.use_disabled_formats && disabled_formats.count(arc_format->second.name) != 0)
-            arc_format = arc_formats.erase(arc_format);
+
+        const ArcFormats& arc_formats = ArcAPI::formats();
+        ArcTypes::iterator arc_type = options.arc_types.begin();
+        while (arc_type != options.arc_types.end()) {
+          wstring arc_name = upcase(arc_formats.at(*arc_type).name);
+          if (g_options.use_enabled_formats && enabled_formats.count(arc_name) == 0)
+            arc_type = options.arc_types.erase(arc_type);
+          else if (g_options.use_disabled_formats && disabled_formats.count(arc_name) != 0)
+            arc_type = options.arc_types.erase(arc_type);
           else
-            arc_format++;
+            arc_type++;
         }
-        if (arc_formats.empty())
+
+        if (options.arc_types.empty())
           FAIL(E_ABORT);
       }
     }
-    else if (detect_next_time == triTrue)
-      options.detect = true;
     else
-      options.detect = false;
+      options.detect = detect_next_time == triTrue;
     detect_next_time = triUndef;
-    return Plugin::open(options, arc_formats);
+    return Plugin::open(options);
   }
   FAR_ERROR_HANDLER_END(return INVALID_HANDLE_VALUE, return INVALID_HANDLE_VALUE, (OpMode & (OPM_SILENT | OPM_FIND)) != 0);
 }

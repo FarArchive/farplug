@@ -126,23 +126,32 @@ list<wstring> parse_listfile(const wstring& str) {
 }
 
 
-// arc:[-d] [-p:<password>] <archive>
+// arc:[-d] [-t:<arc_type>] [-p:<password>] <archive>
 
 OpenCommand parse_open_command(const CommandArgs& ca) {
   OpenCommand command;
   const vector<wstring>& args = ca.args;
   CHECK_FMT(!args.empty());
+  bool arc_type_spec = false;
   for (unsigned i = 0; i + 1 < args.size(); i++) {
     CHECK_FMT(is_param(args[i]));
     Param param = parse_param(args[i]);
     if (param.name == L"d")
       command.options.detect = true;
+    else if (param.name == L"t") {
+      arc_type_spec = true;
+      command.options.arc_types = ArcAPI::formats().find_by_name(param.value);
+      CHECK_FMT(!command.options.arc_types.empty());
+    }
     else if (param.name == L"p") {
       CHECK_FMT(!param.value.empty());
       command.options.password = param.value;
     }
     else
       CHECK_FMT(false);
+  }
+  if (!arc_type_spec) {
+    command.options.arc_types = ArcAPI::formats().get_arc_types();
   }
   CHECK_FMT(!is_param(args.back()));
   command.options.arc_path = unquote(args.back());
