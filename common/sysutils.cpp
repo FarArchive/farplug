@@ -741,3 +741,8 @@ wstring create_guid() {
   CHECK(StringFromGUID2(guid, guid_str, ARRAYSIZE(guid_str)));
   return guid_str;
 }
+
+void enable_lfh() {
+  ULONG heap_info = 2;
+  HeapSetInformation(reinterpret_cast<HANDLE>(_get_heap_handle()), HeapCompatibilityInformation, &heap_info, sizeof(heap_info));
+}

@@ -864,6 +864,7 @@ int WINAPI GetMinFarVersionW(void) {
 #endif
 
 void WINAPI FAR_EXPORT(SetStartupInfo)(const struct PluginStartupInfo* info) {
+  enable_lfh();
   g_far = *info;
   g_fsf = *info->FSF;
   g_far.FSF = &g_fsf;

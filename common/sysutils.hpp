@@ -235,3 +235,4 @@ public:
 wstring format_file_time(const FILETIME& file_time);
 wstring upcase(const wstring& str);
 wstring create_guid();
+void enable_lfh();

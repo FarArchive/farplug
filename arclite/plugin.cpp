@@ -747,6 +747,7 @@ int WINAPI GetMinFarVersionW(void) {
 }
 
 void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info) {
+  enable_lfh();
   Far::init(Info);
   g_options.load();
   g_profiles.load();

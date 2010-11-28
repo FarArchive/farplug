@@ -720,3 +720,12 @@ FILETIME time_t_to_FILETIME(time_t t) {
   ft.dwHighDateTime = ll >> 32;
   return ft;
 }
+
+void enable_lfh() {
+  typedef BOOL (WINAPI *PHeapSetInformation)(HANDLE HeapHandle, HEAP_INFORMATION_CLASS HeapInformationClass, PVOID HeapInformation, SIZE_T HeapInformationLength);
+  PHeapSetInformation FHeapSetInformation = reinterpret_cast<PHeapSetInformation>(GetProcAddress(GetModuleHandle("kernel32"), "HeapSetInformation"));
+  if (FHeapSetInformation) {
+    ULONG heap_info = 2;
+    FHeapSetInformation(reinterpret_cast<HANDLE>(_get_heap_handle()), HeapCompatibilityInformation, &heap_info, sizeof(heap_info));
+  }
+}
