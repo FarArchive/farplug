@@ -159,7 +159,7 @@ OpenCommand parse_open_command(const CommandArgs& ca) {
 }
 
 
-// arc:c [-t:<arc_type>] [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]] [-sfx:<module>] [-v:<volume_size>]
+// arc:c [-pr:name] [-t:<arc_type>] [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]] [-sfx:<module>] [-v:<volume_size>]
 //   [-mf[:(y|n)]] [-ie[:(y|n)]] [-adv:<advanced>] <archive> (<file1> <file2> ... | @<filelist>)
 // arc:u [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]]
 //   [-mf[:(y|n)]] [-ie[:(y|n)]] [-o[:(o|s)]] [-adv:<advanced>] <archive> (<file1> <file2> ... | @<filelist>)
@@ -178,10 +178,31 @@ UpdateCommand parse_update_command(const CommandArgs& ca) {
   command.solid_defined = false;
   command.encrypt_defined = false;
   bool arc_type_spec = false;
+  for (unsigned i = 0; i < args.size() && is_param(args[i]); i++) {
+    Param param = parse_param(args[i]);
+    if (param.name == L"pr") {
+      CHECK_FMT(ca.cmd == cmdCreate);
+      wstring profile_name = upcase(param.value);
+      for (unsigned j = 0; j < g_profiles.size(); j++) {
+        if (upcase(g_profiles[j].name) == profile_name) {
+          command.options = g_profiles[j].options;
+          command.level_defined = true;
+          command.method_defined = true;
+          command.solid_defined = true;
+          command.encrypt_defined = true;
+          arc_type_spec = true;
+          break;
+        }
+      }
+      break;
+    }
+  }
   unsigned i = 0;
   for (; i < args.size() && is_param(args[i]); i++) {
     Param param = parse_param(args[i]);
-    if (param.name == L"t") {
+    if (param.name == L"pr") {
+    }
+    else if (param.name == L"t") {
       CHECK_FMT(ca.cmd == cmdCreate);
       arc_type_spec = true;
       ArcTypes arc_types = ArcAPI::formats().find_by_name(param.value);
