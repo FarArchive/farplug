@@ -544,9 +544,10 @@ public:
         more = file_enum.next();
         RETRY_OR_IGNORE_END(ignore_errors, error_log, *this)
         if (error_ignored || !more) break;
-        UInt32 file_index = scan_file(extract_file_path(file_names[i]), file_enum.data(), dst_dir_index);
+        wstring sub_dir = extract_file_path(file_names[i]);
+        UInt32 file_index = scan_file(sub_dir, file_enum.data(), dst_dir_index);
         if (file_enum.data().is_dir()) {
-          scan_dir(file_enum.data().cFileName, file_index);
+          scan_dir(add_trailing_slash(sub_dir) + file_enum.data().cFileName, file_index);
         }
       }
     }
