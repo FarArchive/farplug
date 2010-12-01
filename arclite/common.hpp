@@ -128,6 +128,7 @@ struct UpdateOptions {
   bool ignore_errors;
   OverwriteAction overwrite;
   wstring advanced;
+  shared_ptr<Far::FileFilter> filter;
   UpdateOptions();
 };
 

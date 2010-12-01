@@ -1,5 +1,6 @@
 #include "utils.hpp"
 #include "sysutils.hpp"
+#include "farutils.hpp"
 #include "common.hpp"
 #include "archive.hpp"
 #include "options.hpp"

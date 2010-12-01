@@ -659,6 +659,7 @@ private:
   int oa_ask_ctrl_id;
   int oa_overwrite_ctrl_id;
   int oa_skip_ctrl_id;
+  int enable_filter_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -758,6 +759,7 @@ private:
       enable(save_profile_ctrl_id, profile_idx == -1 || profile_idx == profiles.size());
       enable(delete_profile_ctrl_id, profile_idx != -1 && profile_idx < profiles.size());
     }
+    enable(move_files_ctrl_id, !get_check(enable_filter_ctrl_id));
   }
 
   wstring eval_arc_path() {
@@ -767,8 +769,7 @@ private:
     return Far::get_absolute_path(arc_path);
   }
 
-  UpdateOptions read_controls() {
-    UpdateOptions options;
+  void read_controls(UpdateOptions& options) {
     if (new_arc) {
       for (unsigned i = 0; i < main_formats.size(); i++) {
         if (get_check(main_formats_ctrl_id + i)) {
@@ -866,8 +867,6 @@ private:
       else if (get_check(oa_skip_ctrl_id)) options.overwrite = oaSkip;
       else options.overwrite = oaAsk;
     }
-
-    return options;
   }
 
   void write_controls(const UpdateOptions& options) {
@@ -933,7 +932,7 @@ private:
       return default_dialog_proc(msg, param1, param2);
 
     if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
-      options = read_controls();
+      read_controls(options);
       if (new_arc)
         options.arc_path = eval_arc_path();
     }
@@ -988,7 +987,7 @@ private:
     }
     else if (new_arc && msg == DN_BTNCLICK && param1 == save_profile_ctrl_id) {
       UpdateProfile profile;
-      profile.options = read_controls();
+      read_controls(profile.options);
       if (Far::input_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_UPDATE_DLG_INPUT_PROFILE_NAME), profile.name)) {
         unsigned profile_idx = static_cast<unsigned>(profiles.size());
         profiles.push_back(profile);
@@ -1018,12 +1017,24 @@ private:
     else if (new_arc && msg == DN_BTNCLICK && param1 == arc_path_eval_ctrl_id) {
       Far::info_dlg(wstring(), word_wrap(eval_arc_path(), Far::get_optimal_msg_width()));
     }
+    else if (msg == DN_BTNCLICK && param1 == enable_filter_ctrl_id) {
+      if (param2) {
+        options.filter.reset(new Far::FileFilter());
+        if (!options.filter->create(PANEL_NONE, FFT_CUSTOM) || !options.filter->menu()) {
+          DisableEvents de(*this);
+          set_check(enable_filter_ctrl_id, false);
+        }
+      }
+      else
+        options.filter.reset();
+      set_control_state();
+    }
 
     if (new_arc && (msg == DN_EDITCHANGE || msg == DN_BTNCLICK)) {
       unsigned profile_idx = static_cast<unsigned>(profiles.size());
       UpdateOptions options;
       try {
-        options = read_controls();
+        read_controls(options);
       }
       catch (const Error&) {
       }
@@ -1219,6 +1230,9 @@ public:
       oa_skip_ctrl_id = radio_button(Far::get_msg(MSG_UPDATE_DLG_OA_SKIP), options.overwrite == oaSkip);
       new_line();
     }
+
+    enable_filter_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_ENABLE_FILTER), options.filter);
+    new_line();
 
     separator();
     new_line();

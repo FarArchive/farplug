@@ -215,6 +215,19 @@ public:
   void select(unsigned idx, bool value);
 };
 
+class FileFilter: private NonCopyable {
+private:
+  HANDLE h_filter;
+  void clean();
+public:
+  FileFilter();
+  ~FileFilter();
+  bool create(HANDLE h_panel, int type);
+  bool menu();
+  void start();
+  bool match(const FAR_FIND_DATA& find_data);
+};
+
 wstring get_absolute_path(const wstring& rel_path);
 INT_PTR adv_control(int command, void* param = nullptr);
 bool match_masks(const wstring& file_name, const wstring& masks);

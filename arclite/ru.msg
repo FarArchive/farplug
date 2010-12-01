@@ -46,6 +46,7 @@ update.dlg.oa = Если файл существует:
 update.dlg.oa_ask = &Спросить
 update.dlg.oa_overwrite = &Перезаписать
 update.dlg.oa_skip = П&ропустить
+update.dlg.enable_filter = Использовать фильтр
 update.dlg.wrong_arc_type = Необходимо выбрать формат архива
 update.dlg.wrong_level = Необходимо выбрать уровень сжатия
 update.dlg.wrong_method = Необходимо выбрать метод сжатия

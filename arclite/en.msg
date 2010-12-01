@@ -46,6 +46,7 @@ update.dlg.oa = When destination file exists:
 update.dlg.oa_ask = As&k
 update.dlg.oa_overwrite = O&verwrite
 update.dlg.oa_skip = Ski&p
+update.dlg.enable_filter = Use filter
 update.dlg.wrong_arc_type = Select archive format
 update.dlg.wrong_level = Select compression level
 update.dlg.wrong_method = Select compression method

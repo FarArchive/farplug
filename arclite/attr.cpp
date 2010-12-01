@@ -1,10 +1,10 @@
 #include "msg.h"
 #include "error.hpp"
 #include "utils.hpp"
-#include "common.hpp"
-#include "comutils.hpp"
 #include "farutils.hpp"
 #include "sysutils.hpp"
+#include "common.hpp"
+#include "comutils.hpp"
 #include "ui.hpp"
 #include "archive.hpp"
 

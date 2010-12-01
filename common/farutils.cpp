@@ -675,6 +675,38 @@ void Selection::select(unsigned idx, bool value) {
   g_far.Control(h_plugin, FCTL_SETSELECTION, idx, value ? TRUE : FALSE);
 }
 
+//  HANDLE h_filter;
+FileFilter::FileFilter(): h_filter(INVALID_HANDLE_VALUE) {
+}
+
+FileFilter::~FileFilter() {
+  clean();
+}
+
+void FileFilter::clean() {
+  if (h_filter != INVALID_HANDLE_VALUE) {
+    g_far.FileFilterControl(h_filter, FFCTL_FREEFILEFILTER, 0, 0);
+    h_filter = INVALID_HANDLE_VALUE;
+  }
+}
+
+bool FileFilter::create(HANDLE h_panel, int type) {
+  clean();
+  return g_far.FileFilterControl(h_panel, FFCTL_CREATEFILEFILTER, type, reinterpret_cast<LONG_PTR>(&h_filter)) != FALSE;
+}
+
+bool FileFilter::menu() {
+  return g_far.FileFilterControl(h_filter, FFCTL_OPENFILTERSMENU, 0, 0) != FALSE;
+}
+
+void FileFilter::start() {
+  g_far.FileFilterControl(h_filter, FFCTL_STARTINGTOFILTER, 0, 0);
+}
+
+bool FileFilter::match(const FAR_FIND_DATA& find_data) {
+  return g_far.FileFilterControl(h_filter, FFCTL_ISFILEINFILTER, 0, reinterpret_cast<LONG_PTR>(&find_data)) != FALSE;
+}
+
 wstring get_absolute_path(const wstring& rel_path) {
   Buffer<wchar_t> buf(MAX_PATH);
   unsigned len = g_fsf.ConvertPath(CPM_FULL, rel_path.c_str(), buf.data(), static_cast<int>(buf.size()));

@@ -5,7 +5,7 @@
 /*
   plugin.hpp
 
-  Plugin API for FAR Manager 2.0 build 1733
+  Plugin API for FAR Manager 2.0 build 1736
 */
 
 /*
@@ -42,7 +42,7 @@ other possible license with no implications from the above license on them.
 
 #define FARMANAGERVERSION_MAJOR 2
 #define FARMANAGERVERSION_MINOR 0
-#define FARMANAGERVERSION_BUILD 1733
+#define FARMANAGERVERSION_BUILD 1736
 
 #ifndef RC_INVOKED
 
@@ -1984,6 +1984,7 @@ enum FAR_FILE_FILTER_TYPE
 	FFT_FINDFILE,
 	FFT_COPY,
 	FFT_SELECT,
+	FFT_CUSTOM,
 };
 
 enum FAR_REGEXP_CONTROL_COMMANDS

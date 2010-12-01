@@ -491,6 +491,7 @@ private:
   bool& ignore_errors;
   ErrorLog& error_log;
   OverwriteAction overwrite_action;
+  Far::FileFilter* filter;
 
   const wstring* file_path;
 
@@ -506,7 +507,17 @@ private:
     update_ui();
   }
 
-  UInt32 scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index) {
+  bool scan_file(const wstring& sub_dir, const FindData& src_find_data, UInt32 dst_dir_index, UInt32& file_index) {
+    FAR_FIND_DATA filter_data;
+    filter_data.dwFileAttributes = src_find_data.dwFileAttributes;
+    filter_data.ftCreationTime = src_find_data.ftCreationTime;
+    filter_data.ftLastAccessTime = src_find_data.ftLastAccessTime;
+    filter_data.ftLastWriteTime = src_find_data.ftLastWriteTime;
+    filter_data.nFileSize = src_find_data.size();
+    filter_data.nPackSize = 0;
+    filter_data.lpwszFileName = src_find_data.cFileName;
+    if (filter && !filter->match(filter_data))
+      return false;
     ArcFileInfo file_info;
     file_info.is_dir = src_find_data.is_dir();
     file_info.parent = dst_dir_index;
@@ -516,7 +527,6 @@ private:
       const ArcFileInfo& fi_right = right == -1 ? file_info : archive.file_list[right];
       return fi_left < fi_right;
     });
-    UInt32 file_index;
     if (fi_range.first == fi_range.second) {
       // new file
       file_index = new_index;
@@ -542,7 +552,7 @@ private:
           ProgressSuspend ps(*this);
           OverwriteOptions ov_options;
           if (!overwrite_dialog(add_trailing_slash(sub_dir) + file_info.name, src_ov_info, dst_ov_info, odkUpdate, ov_options))
-            return E_ABORT;
+            FAIL(E_ABORT);
           overwrite = ov_options.action;
           if (ov_options.all)
             overwrite_action = ov_options.action;
@@ -550,49 +560,56 @@ private:
         else
           overwrite = overwrite_action;
         if (overwrite == oaSkip)
-          return file_index;
+          return false;
       }
     }
     FileIndexInfo file_index_info;
     file_index_info.rel_path = sub_dir;
     file_index_info.find_data = src_find_data;
     file_index_map[file_index] = file_index_info;
-    return file_index;
+    return true;
   }
 
-  void scan_dir(const wstring& sub_dir, UInt32 dst_dir_index) {
-    wstring path = add_trailing_slash(src_dir) + sub_dir;
-    update_progress(path);
-    DirList dir_list(path);
+  bool process_file_enum(FileEnum& file_enum, const wstring& sub_dir, UInt32 dst_dir_index) {
+    bool not_empty = false;
     while (true) {
       bool more = false;
       RETRY_OR_IGNORE_BEGIN
-      more = dir_list.next();
+      more = file_enum.next();
       RETRY_OR_IGNORE_END(ignore_errors, error_log, *this)
       if (error_ignored || !more) break;
-      UInt32 file_index = scan_file(sub_dir, dir_list.data(), dst_dir_index);
-      if (dir_list.data().is_dir()) {
-        scan_dir(add_trailing_slash(sub_dir) + dir_list.data().cFileName, file_index);
+      UInt32 saved_new_index = new_index;
+      UInt32 file_index;
+      if (scan_file(sub_dir, file_enum.data(), dst_dir_index, file_index)) {
+        if (file_enum.data().is_dir()) {
+          if (!scan_dir(add_trailing_slash(sub_dir) + file_enum.data().cFileName, file_index)) {
+            file_index_map.erase(file_index);
+            new_index = saved_new_index;
+          }
+          else
+            not_empty = true;
+        }
+        else
+          not_empty = true;
       }
     }
+    return not_empty;
+  }
+
+  bool scan_dir(const wstring& sub_dir, UInt32 dst_dir_index) {
+    wstring path = add_trailing_slash(src_dir) + sub_dir;
+    update_progress(path);
+    DirList dir_list(path);
+    return process_file_enum(dir_list, sub_dir, dst_dir_index);
   }
 
 public:
-  PrepareUpdate(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, const Archive& archive, FileIndexMap& file_index_map, UInt32& new_index, OverwriteAction overwrite_action, bool& ignore_errors, ErrorLog& error_log): ProgressMonitor(Far::get_msg(MSG_PROGRESS_SCAN_DIRS), false), src_dir(src_dir), archive(archive), file_index_map(file_index_map), new_index(new_index), overwrite_action(overwrite_action), ignore_errors(ignore_errors), error_log(error_log) {
+  PrepareUpdate(const wstring& src_dir, const vector<wstring>& file_names, UInt32 dst_dir_index, const Archive& archive, FileIndexMap& file_index_map, UInt32& new_index, OverwriteAction overwrite_action, bool& ignore_errors, ErrorLog& error_log, Far::FileFilter* filter): ProgressMonitor(Far::get_msg(MSG_PROGRESS_SCAN_DIRS), false), src_dir(src_dir), archive(archive), file_index_map(file_index_map), new_index(new_index), overwrite_action(overwrite_action), ignore_errors(ignore_errors), error_log(error_log), filter(filter) {
+    if (filter) filter->start();
     for (unsigned i = 0; i < file_names.size(); i++) {
       wstring full_path = add_trailing_slash(src_dir) + file_names[i];
       FileEnum file_enum(full_path);
-      while (true) {
-        bool more = false;
-        RETRY_OR_IGNORE_BEGIN
-        more = file_enum.next();
-        RETRY_OR_IGNORE_END(ignore_errors, error_log, *this)
-        if (error_ignored || !more) break;
-        UInt32 file_index = scan_file(extract_file_path(file_names[i]), file_enum.data(), dst_dir_index);
-        if (file_enum.data().is_dir()) {
-          scan_dir(file_names[i], file_index);
-        }
-      }
+      process_file_enum(file_enum, extract_file_path(file_names[i]), dst_dir_index);
     }
   }
 };
@@ -851,7 +868,7 @@ void Archive::create(const wstring& src_dir, const vector<wstring>& file_names, 
   UInt32 new_index = 0;
 
   FileIndexMap file_index_map;
-  PrepareUpdate(src_dir, file_names, c_root_index, *this, file_index_map, new_index, oaOverwrite, ignore_errors, error_log);
+  PrepareUpdate(src_dir, file_names, c_root_index, *this, file_index_map, new_index, oaOverwrite, ignore_errors, error_log, options.filter.get());
 
   ComObject<IOutArchive> out_arc;
   ArcAPI::create_out_archive(options.arc_type, &out_arc);
@@ -877,7 +894,7 @@ void Archive::create(const wstring& src_dir, const vector<wstring>& file_names, 
     throw;
   }
 
-  if (options.move_files && error_log.empty())
+  if (options.move_files && error_log.empty() && !options.filter)
     DeleteSrcFiles(src_dir, file_names, ignore_errors, error_log);
 }
 
@@ -886,7 +903,7 @@ void Archive::update(const wstring& src_dir, const vector<wstring>& file_names, 
   UInt32 new_index = num_indices; // starting index for new files
 
   FileIndexMap file_index_map;
-  PrepareUpdate(src_dir, file_names, find_dir(dst_dir), *this, file_index_map, new_index, options.overwrite, ignore_errors, error_log);
+  PrepareUpdate(src_dir, file_names, find_dir(dst_dir), *this, file_index_map, new_index, options.overwrite, ignore_errors, error_log, options.filter.get());
 
   wstring temp_arc_name = get_temp_file_name();
   try {
@@ -911,7 +928,7 @@ void Archive::update(const wstring& src_dir, const vector<wstring>& file_names, 
 
   reopen();
 
-  if (options.move_files && error_log.empty())
+  if (options.move_files && error_log.empty() && !options.filter)
     DeleteSrcFiles(src_dir, file_names, ignore_errors, error_log);
 }
 
