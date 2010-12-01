@@ -546,7 +546,7 @@ public:
         if (error_ignored || !more) break;
         UInt32 file_index = scan_file(extract_file_path(file_names[i]), file_enum.data(), dst_dir_index);
         if (file_enum.data().is_dir()) {
-          scan_dir(file_names[i], file_index);
+          scan_dir(file_enum.data().cFileName, file_index);
         }
       }
     }
