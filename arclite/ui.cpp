@@ -959,15 +959,19 @@ private:
     if (new_arc && (msg == DN_EDITCHANGE || msg == DN_BTNCLICK)) {
       unsigned profile_idx = static_cast<unsigned>(profiles.size());
       UpdateOptions options;
+      bool valid_options = true;
       try {
         options = read_controls();
       }
       catch (const Error&) {
+        valid_options = false;
       }
-      for (unsigned i = 0; i < profiles.size(); i++) {
-        if (options == profiles[i].options) {
-          profile_idx = i;
-          break;
+      if (valid_options) {
+        for (unsigned i = 0; i < profiles.size(); i++) {
+          if (options == profiles[i].options) {
+            profile_idx = i;
+            break;
+          }
         }
       }
       if (profile_idx != get_list_pos(profile_ctrl_id)) {
