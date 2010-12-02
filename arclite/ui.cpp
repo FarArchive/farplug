@@ -1392,6 +1392,23 @@ public:
     new_line();
     available_formats_ctrl_id = edit_box(get_available_formats(), c_client_xs, DIF_READONLY);
     new_line();
+
+    separator(Far::get_msg(MSG_SETTINGS_DLG_LIB_INFO));
+    new_line();
+    const ArcLibs& libs = ArcAPI::libs();
+    if (libs.empty()) {
+      label(Far::get_msg(MSG_SETTINGS_DLG_LIB_NOT_FOUND));
+      new_line();
+    }
+    else {
+      const ArcLib& lib = libs.front();
+      label(fit_str(lib.module_path, c_client_xs), c_client_xs);
+      new_line();
+      label(Far::get_msg(MSG_SETTINGS_DLG_LIB_VERSION) + L' ' +
+        int_to_str(HIWORD(lib.version >> 32)) + L'.' + int_to_str(LOWORD(lib.version >> 32)) + L'.' +
+        int_to_str(HIWORD(lib.version & 0xFFFFFFFF)) + L'.' + int_to_str(LOWORD(lib.version & 0xFFFFFFFF)));
+      new_line();
+    }
     separator();
     new_line();
 

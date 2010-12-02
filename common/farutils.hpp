@@ -158,6 +158,7 @@ public:
   void spacer(unsigned size);
   void pad(unsigned pos);
   unsigned separator();
+  unsigned separator(const wstring& text);
   unsigned label(const wstring& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned edit_box(const wstring& text, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
   unsigned mask_edit_box(const wstring& text, const wstring& mask, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);

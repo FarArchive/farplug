@@ -342,11 +342,19 @@ void Dialog::pad(unsigned pos) {
 }
 
 unsigned Dialog::separator() {
+  return separator(wstring());
+}
+
+unsigned Dialog::separator(const wstring& text) {
   DialogItem di;
   di.type = DI_TEXT;
   di.y1 = y;
   di.y2 = y;
   di.flags = DIF_SEPARATOR;
+  if (!text.empty()) {
+    di.flags |= DIF_CENTERTEXT;
+    di.text_idx = new_value(text);
+  }
   return new_item(di);
 }
 
