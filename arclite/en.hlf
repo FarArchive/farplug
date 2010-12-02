@@ -119,6 +119,9 @@ Error log will be shown after archival process is complete.
 	#When destination file exists# - Action to perform when file already present in archive:
 ask user, overwrite or skip file.
 
+	#Use filter# - Archive files matching file filter. See ~filters menu~@<..\..>FiltersMenu@ for more details.
+Empty directories are not archived when filter is active.
+
 @Config
 $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #Plugin settings#
