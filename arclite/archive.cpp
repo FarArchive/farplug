@@ -160,13 +160,12 @@ ArcAPI* ArcAPI::get() {
 }
 
 void ArcAPI::load_libs(const wstring& path) {
-  DirList dir_list(path);
+  FileEnum file_enum(path);
+  wstring dir = extract_file_path(path);
   bool more;
-  while (dir_list.next_nt(more) && more) {
+  while (file_enum.next_nt(more) && more) {
     ArcLib arc_lib;
-    arc_lib.module_path = add_trailing_slash(path) + dir_list.data().cFileName;
-    if (_wcsicmp(extract_file_ext(arc_lib.module_path).c_str(), L".dll") != 0)
-      continue;
+    arc_lib.module_path = add_trailing_slash(dir) + file_enum.data().cFileName;
     arc_lib.h_module = LoadLibraryW(arc_lib.module_path.c_str());
     if (arc_lib.h_module == nullptr)
       continue;
@@ -186,12 +185,11 @@ void ArcAPI::load_libs(const wstring& path) {
 }
 
 void ArcAPI::find_sfx_modules(const wstring& path) {
-  DirList dir_list(path);
+  FileEnum file_enum(path);
+  wstring dir = extract_file_path(path);
   bool more;
-  while (dir_list.next_nt(more) && more) {
-    wstring file_path = add_trailing_slash(path) + dir_list.data().cFileName;
-    if (_wcsicmp(extract_file_ext(file_path).c_str(), L".sfx") != 0)
-      continue;
+  while (file_enum.next_nt(more) && more) {
+    wstring file_path = add_trailing_slash(dir) + file_enum.data().cFileName;
     File file;
     if (!file.open_nt(file_path, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0))
       continue;
@@ -207,16 +205,26 @@ void ArcAPI::find_sfx_modules(const wstring& path) {
 }
 
 void ArcAPI::load() {
-  load_libs(Far::get_plugin_module_path());
-  find_sfx_modules(Far::get_plugin_module_path());
-  wstring _7zip_path;
-  Key _7zip_key;
-  _7zip_key.open_nt(HKEY_CURRENT_USER, L"Software\\7-Zip", KEY_QUERY_VALUE, false) && _7zip_key.query_str_nt(_7zip_path, L"Path");
-  if (_7zip_path.empty())
-    _7zip_key.open_nt(HKEY_LOCAL_MACHINE, L"Software\\7-Zip", KEY_QUERY_VALUE, false) && _7zip_key.query_str_nt(_7zip_path, L"Path");
-  if (!_7zip_path.empty()) {
-    load_libs(_7zip_path);
-    find_sfx_modules(_7zip_path);
+  load_libs(add_trailing_slash(Far::get_plugin_module_path()) + L"*.dll");
+  find_sfx_modules(add_trailing_slash(Far::get_plugin_module_path()) + L"*.sfx");
+  if (arc_libs.empty() || sfx_modules.empty()) {
+    wstring _7zip_path;
+    Key _7zip_key;
+    _7zip_key.open_nt(HKEY_CURRENT_USER, L"Software\\7-Zip", KEY_QUERY_VALUE, false) && _7zip_key.query_str_nt(_7zip_path, L"Path");
+    if (_7zip_path.empty())
+      _7zip_key.open_nt(HKEY_LOCAL_MACHINE, L"Software\\7-Zip", KEY_QUERY_VALUE, false) && _7zip_key.query_str_nt(_7zip_path, L"Path");
+    if (!_7zip_path.empty()) {
+      if (arc_libs.empty())
+        load_libs(add_trailing_slash(_7zip_path) + L"7z.dll");
+      if (sfx_modules.empty())
+        find_sfx_modules(add_trailing_slash(_7zip_path) + L"*.sfx");
+    }
+  }
+  if (arc_libs.empty()) {
+    wstring _7z_dll_path;
+    IGNORE_ERRORS(_7z_dll_path = search_path(L"7z.dll"));
+    if (!_7z_dll_path.empty())
+      load_libs(_7z_dll_path);
   }
   for (unsigned i = 0; i < arc_libs.size(); i++) {
     const ArcLib& arc_lib = arc_libs[i];

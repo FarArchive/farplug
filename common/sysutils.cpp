@@ -746,3 +746,16 @@ void enable_lfh() {
   ULONG heap_info = 2;
   HeapSetInformation(reinterpret_cast<HANDLE>(_get_heap_handle()), HeapCompatibilityInformation, &heap_info, sizeof(heap_info));
 }
+
+wstring search_path(const wstring& file_name) {
+  Buffer<wchar_t> path(MAX_PATH);
+  wchar_t* name_ptr;
+  DWORD size = SearchPathW(nullptr, file_name.c_str(), nullptr, path.size(), path.data(), &name_ptr);
+  if (size > path.size()) {
+    path.resize(size);
+    size = SearchPathW(nullptr, file_name.c_str(), nullptr, path.size(), path.data(), &name_ptr);
+  }
+  CHECK_SYS(size);
+  CHECK(size < path.size());
+  return wstring(path.data(), size);
+}
