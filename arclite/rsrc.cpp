@@ -319,3 +319,197 @@ void replace_icon(const wstring& pe_path, const wstring& ico_path) {
   });
   rupdate.finalize();
 }
+
+
+struct VersionEncoder: public ByteVector {
+private:
+  template<typename T> void encode(const T& d) {
+    const unsigned char* b = reinterpret_cast<const unsigned char*>(&d);
+    insert(end(), b, b + sizeof(T));
+  }
+  void encode_string(const wchar_t* d, size_t l) {
+    const unsigned char* b = reinterpret_cast<const unsigned char*>(d);
+    insert(end(), b, b + (l + 1) * sizeof(wchar_t));
+  }
+public:
+  void encode_WORD(WORD d) {
+    encode(d);
+  }
+  void encode_DWORD(DWORD d) {
+    encode(d);
+  }
+  void encode_string(const wchar_t* d) {
+    encode_string(d, wcslen(d));
+  }
+  void encode_string(const wstring& d) {
+    encode_string(d.c_str(), d.size());
+  }
+  void pad() {
+    unsigned l = size() % 4;
+    if (l)
+      insert(end(), 4 - l, 0);
+  }
+  void update_length(size_t p) {
+    assert(p + sizeof(WORD) <= size());
+    *reinterpret_cast<WORD*>(data() + p) = size() - p;
+  }
+};
+
+struct VersionInfo {
+  wstring version;
+  wstring comments;
+  wstring company_name;
+  wstring file_description;
+  wstring legal_copyright;
+  wstring product_name;
+};
+
+struct IdLang {
+  RsrcId id;
+  WORD lang_id;
+};
+
+void replace_ver_info(const wstring& pe_path, const VersionInfo& ver_info) {
+  // numeric version
+  list<wstring> ver_parts = split(ver_info.version, L'.');
+  DWORD ver_hi = 0, ver_lo = 0;
+  list<wstring>::const_iterator ver_part = ver_parts.cbegin();
+  if (ver_part != ver_parts.end()) {
+    ver_hi |= (str_to_int(*ver_part) & 0xFFFF) << 16;
+    ver_part++;
+  }
+  if (ver_part != ver_parts.end()) {
+    ver_hi |= str_to_int(*ver_part) & 0xFFFF;
+    ver_part++;
+  }
+  if (ver_part != ver_parts.end()) {
+    ver_lo |= (str_to_int(*ver_part) & 0xFFFF) << 16;
+    ver_part++;
+  }
+  if (ver_part != ver_parts.end()) {
+    ver_lo |= str_to_int(*ver_part) & 0xFFFF;
+    ver_part++;
+  }
+
+  // existing version info list
+  list<IdLang> vi_list;
+  RsrcModule module(pe_path);
+  list<RsrcId> ids = enum_rsrc_names(module.handle(), RT_VERSION);
+  for_each(ids.begin(), ids.end(), [&] (const RsrcId& id) {
+    list<WORD> lang_ids = enum_rsrc_langs(module.handle(), RT_VERSION, id);
+    for_each(lang_ids.begin(), lang_ids.end(), [&] (WORD lang_id) {
+      IdLang id_lang;
+      id_lang.id = id;
+      id_lang.lang_id = lang_id;
+      vi_list.push_back(id_lang);
+    });
+  });
+  module.close();
+
+  WORD lang_id;
+  RsrcId ver_id;
+  if (vi_list.empty()) {
+    ver_id = MAKEINTRESOURCE(1);
+    lang_id = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
+  }
+  else {
+    ver_id = vi_list.front().id;
+    lang_id = vi_list.front().lang_id;
+  }
+
+  // encode version info
+  VersionEncoder e;
+  e.reserve(4096);
+
+  size_t vs_versioninfo_pos = e.size();
+  e.encode_WORD(0); // VS_VERSIONINFO
+  e.encode_WORD(sizeof(VS_FIXEDFILEINFO));
+  e.encode_WORD(0);
+  e.encode_string(L"VS_VERSION_INFO");
+  e.pad();
+
+  e.encode_DWORD(0xFEEF04BD); // VS_FIXEDFILEINFO
+  e.encode_DWORD(0x00010000);
+  e.encode_DWORD(ver_hi);
+  e.encode_DWORD(ver_lo);
+  e.encode_DWORD(ver_hi);
+  e.encode_DWORD(ver_lo);
+  e.encode_DWORD(0x3F);
+  e.encode_DWORD(0);
+  e.encode_DWORD(VOS_NT_WINDOWS32);
+  e.encode_DWORD(VFT_APP);
+  e.encode_DWORD(0);
+  e.encode_DWORD(0);
+  e.encode_DWORD(0);
+  e.pad();
+
+  size_t string_file_info_pos = e.size();
+  e.encode_WORD(0); // StringFileInfo
+  e.encode_WORD(0);
+  e.encode_WORD(1);
+  e.encode_string(L"StringFileInfo");
+  e.pad();
+
+  size_t string_table_pos = e.size();
+  e.encode_WORD(0); // StringTable
+  e.encode_WORD(0);
+  e.encode_WORD(1);
+  wostringstream st;
+  st << hex << setw(4) << setfill(L'0') << lang_id << L"04b0";
+  e.encode_string(st.str());
+  e.pad();
+
+  map<wstring, wstring> strings;
+  strings[L"Comments"] = ver_info.comments;
+  strings[L"CompanyName"] = ver_info.company_name;
+  strings[L"FileDescription"] = ver_info.file_description;
+  strings[L"FileVersion"] = ver_info.version;
+  strings[L"LegalCopyright"] = ver_info.legal_copyright;
+  strings[L"ProductName"] = ver_info.product_name;
+  strings[L"ProductVersion"] = ver_info.version;
+
+  for_each(strings.cbegin(), strings.cend(), [&] (const pair<wstring, wstring>& str) {
+    size_t string_pos = e.size();
+    e.encode_WORD(0); // String
+    e.encode_WORD(str.second.size() + 1);
+    e.encode_WORD(1);
+    e.encode_string(str.first);
+    e.pad();
+    e.encode_string(str.second);
+    e.pad();
+    e.update_length(string_pos);
+  });
+
+  e.update_length(string_table_pos);
+
+  e.update_length(string_file_info_pos);
+
+  size_t var_file_info_pos = e.size();
+  e.encode_WORD(0); // VarFileInfo
+  e.encode_WORD(0);
+  e.encode_WORD(1);
+  e.encode_string(L"VarFileInfo");
+  e.pad();
+
+  size_t var_pos = e.size();
+  e.encode_WORD(0); // Var
+  e.encode_WORD(4);
+  e.encode_WORD(0);
+  e.encode_string(L"Translation");
+  e.pad();
+  e.encode_WORD(lang_id);
+  e.encode_WORD(0x04B0);
+  e.update_length(var_pos);
+
+  e.update_length(var_file_info_pos);
+
+  e.update_length(vs_versioninfo_pos);
+
+  // wrire resource
+  ResourceUpdate rupdate(pe_path);
+  for_each(vi_list.cbegin(), vi_list.cend(), [&] (const IdLang& id_lang) {
+    rupdate.update(RT_VERSION, id_lang.id, id_lang.lang_id, nullptr, 0);
+  });
+  rupdate.update(RT_VERSION, ver_id, lang_id, e.data(), e.size());
+  rupdate.finalize();
+}
