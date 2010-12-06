@@ -160,7 +160,7 @@ $ #Prefix command line format#
 	<archive> = archive file name
 
 	#Create or update archive#
-	arc:c [-pr:name] [-t:<arc_type>] [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]] [-sfx:<module>] [-v:<volume_size>]
+	arc:c [-pr:name] [-t:<arc_type>] [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]] [-sfx[:<module>]] [-v:<volume_size>]
 [-mf[:(y|n)]] [-ie[:(y|n)]] [-adv:<advanced>] <archive> (<file> | @@<filelist>) ...
 	arc:u [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]]
 [-mf[:(y|n)]] [-ie[:(y|n)]] [-o[:(o|s)]] [-adv:<advanced>] <archive> (<file> | @@<filelist>) ...
@@ -171,7 +171,7 @@ $ #Prefix command line format#
 	-s = solid archive
 	-p = encrypt archive with password
 	-eh = encrypt archive header (file names)
-	-sfx = create self-extracting archive using specified SFX module
+	-sfx = create self-extracting archive using specified SFX module (7z.sfx by default)
 	-v = split archive into multiple volumes (example: -v:700M)
 	-mf = delete files after successful archival
 	-ie = ignore errors (skip files with errors)

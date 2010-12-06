@@ -61,9 +61,15 @@ public:
   ArcTypes find_by_ext(const wstring& ext) const;
 };
 
-class SfxModules: public vector<wstring> {
+struct SfxModule {
+  wstring path;
+  wstring description;
+  bool is_installer;
+};
+
+class SfxModules: public vector<SfxModule> {
 public:
-  unsigned find(const wstring& module) const;
+  unsigned find_by_name(const wstring& name) const;
 };
 
 class ArcAPI {

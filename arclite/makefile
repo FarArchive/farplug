@@ -61,6 +61,8 @@ OBJS = $(COMMON_OBJS) $(OUTDIR)\archive.obj $(OUTDIR)\plugin.obj $(OUTDIR)\ui.ob
 
 LIBS = user32.lib advapi32.lib ole32.lib oleaut32.lib version.lib
 
+SFX = .\$(OUTDIR)\7z.sfx .\$(OUTDIR)\7zCon.sfx .\$(OUTDIR)\7zS2.sfx .\$(OUTDIR)\7zS2con.sfx .\$(OUTDIR)\7zSD.sfx
+
 project: depfile $(OUTDIR)\far.ini
   $(MAKE) -nologo -$(MAKEFLAGS) build_project BUILD=1
 
@@ -70,7 +72,7 @@ distrib: depfile $(OUTDIR)\far.ini
 installer: depfile $(OUTDIR)\far.ini
   $(MAKE) -nologo -$(MAKEFLAGS) build_installer BUILD=1
 
-build_project: $(OUTDIR)\$(MODULE).dll $(OUTDIR)\en.lng $(OUTDIR)\ru.lng $(OUTDIR)\en.hlf $(OUTDIR)\ru.hlf $(OUTDIR)\7z.dll
+build_project: $(OUTDIR)\$(MODULE).dll $(OUTDIR)\en.lng $(OUTDIR)\ru.lng $(OUTDIR)\en.hlf $(OUTDIR)\ru.hlf $(OUTDIR)\7z.dll $(SFX)
 
 $(OUTDIR)\$(MODULE).dll: $(OUTDIR)\plugin.def $(OBJS) $(OUTDIR)\headers.pch $(OUTDIR)\version.res project.ini
   link $(LINKFLAGS) -def:$(OUTDIR)\plugin.def -out:$@ $(OBJS) $(OUTDIR)\headers.obj $(OUTDIR)\version.res $(LIBS)
@@ -120,6 +122,9 @@ COPY = copy /y $** $@
 $(OUTDIR)\7z.dll: $(7Z_DLL)
   $(COPY)
 
+{sfx}.sfx{.\$(OUTDIR)}.sfx:
+  $(COPY)
+
 $(OUTDIR)\far.ini: $(FARSDK)\plugin.hpp
   $(TOOLSDIR)\farver $** $@
 
@@ -132,7 +137,7 @@ $(OUTDIR):
 
 
 DISTRIB = $(OUTDIR)\$(MODULE)_$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)_uni
-DISTRIB_FILES = .\$(OUTDIR)\$(MODULE).dll .\$(OUTDIR)\$(MODULE).map .\$(OUTDIR)\en.lng .\$(OUTDIR)\ru.lng .\$(OUTDIR)\en.hlf .\$(OUTDIR)\ru.hlf .\$(OUTDIR)\7z.dll
+DISTRIB_FILES = .\$(OUTDIR)\$(MODULE).dll .\$(OUTDIR)\$(MODULE).map .\$(OUTDIR)\en.lng .\$(OUTDIR)\ru.lng .\$(OUTDIR)\en.hlf .\$(OUTDIR)\ru.hlf .\$(OUTDIR)\7z.dll $(SFX)
 !if "$(PLATFORM)" != "x86"
 DISTRIB = $(DISTRIB)_$(PLATFORM)
 !endif
@@ -171,4 +176,4 @@ clean:
 
 
 .PHONY: project distrib installer build_project build_distrib build_installer depfile clean
-.SUFFIXES: .wxs
+.SUFFIXES: .wxs .sfx

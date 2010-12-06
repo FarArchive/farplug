@@ -115,7 +115,6 @@ const wchar_t* c_param_update_method = L"update_method";
 const wchar_t* c_param_update_solid = L"update_solid";
 const wchar_t* c_param_update_show_password = L"update_show_password";
 const wchar_t* c_param_update_encrypt_header = L"update_encrypt_header";
-const wchar_t* c_param_update_sfx_module = L"update_sfx_module";
 const wchar_t* c_param_update_volume_size = L"update_volume_size";
 const wchar_t* c_param_update_ignore_errors = L"update_ignore_errors";
 const wchar_t* c_param_update_overwrite = L"update_overwrite";
@@ -144,7 +143,6 @@ const wchar_t* c_def_update_method = L"LZMA";
 const bool c_def_update_solid = true;
 const bool c_def_update_show_password = false;
 const TriState c_def_update_encrypt_header = triUndef;
-const wchar_t* c_def_update_sfx_module = L"";
 const wchar_t* c_def_update_volume_size = L"";
 const bool c_def_update_ignore_errors = false;
 const OverwriteAction c_def_update_overwrite = oaAsk;
@@ -159,6 +157,54 @@ const bool c_def_use_enabled_formats = false;
 const wchar_t* c_def_enabled_formats = L"";
 const bool c_def_use_disabled_formats = false;
 const wchar_t* c_def_disabled_formats = L"";
+
+void load_sfx_options(OptionsKey& key, SfxOptions& sfx_options) {
+  SfxOptions def_sfx_options;
+#define GET_VALUE(name, type) sfx_options.name = key.get_##type(L"sfx."L#name, def_sfx_options.name)
+  GET_VALUE(name, str);
+  GET_VALUE(replace_icon, bool);
+  GET_VALUE(icon_path, str);
+  GET_VALUE(replace_version, bool);
+  GET_VALUE(ver_info.version, str);
+  GET_VALUE(ver_info.comments, str);
+  GET_VALUE(ver_info.company_name, str);
+  GET_VALUE(ver_info.file_description, str);
+  GET_VALUE(ver_info.legal_copyright, str);
+  GET_VALUE(ver_info.product_name, str);
+  GET_VALUE(append_install_config, bool);
+  GET_VALUE(install_config.title, str);
+  GET_VALUE(install_config.begin_prompt, str);
+  GET_VALUE(install_config.progress, str);
+  GET_VALUE(install_config.run_program, str);
+  GET_VALUE(install_config.directory, str);
+  GET_VALUE(install_config.execute_file, str);
+  GET_VALUE(install_config.execute_parameters, str);
+#undef GET_VALUE
+}
+
+void save_sfx_options(OptionsKey& key, const SfxOptions& sfx_options) {
+  SfxOptions def_sfx_options;
+#define SET_VALUE(name, type) key.set_##type(L"sfx."L#name, sfx_options.name, def_sfx_options.name)
+  SET_VALUE(name, str);
+  SET_VALUE(replace_icon, bool);
+  SET_VALUE(icon_path, str);
+  SET_VALUE(replace_version, bool);
+  SET_VALUE(ver_info.version, str);
+  SET_VALUE(ver_info.comments, str);
+  SET_VALUE(ver_info.company_name, str);
+  SET_VALUE(ver_info.file_description, str);
+  SET_VALUE(ver_info.legal_copyright, str);
+  SET_VALUE(ver_info.product_name, str);
+  SET_VALUE(append_install_config, bool);
+  SET_VALUE(install_config.title, str);
+  SET_VALUE(install_config.begin_prompt, str);
+  SET_VALUE(install_config.progress, str);
+  SET_VALUE(install_config.run_program, str);
+  SET_VALUE(install_config.directory, str);
+  SET_VALUE(install_config.execute_file, str);
+  SET_VALUE(install_config.execute_parameters, str);
+#undef SET_VALUE
+}
 
 void Options::load() {
   OptionsKey key;
@@ -176,7 +222,7 @@ void Options::load() {
   update_solid = key.get_bool(c_param_update_solid, c_def_update_solid);
   update_show_password = key.get_bool(c_param_update_show_password, c_def_update_show_password);
   update_encrypt_header = key.get_tri_state(c_param_update_encrypt_header, c_def_update_encrypt_header);
-  update_sfx_module = key.get_str(c_param_update_sfx_module, c_def_update_sfx_module);
+  load_sfx_options(key, update_sfx_options);
   update_volume_size = key.get_str(c_param_update_volume_size, c_def_update_volume_size);
   update_ignore_errors = key.get_bool(c_param_update_ignore_errors, c_def_update_ignore_errors);
   update_overwrite = static_cast<OverwriteAction>(key.get_int(c_param_update_overwrite, c_def_update_overwrite));
@@ -209,7 +255,7 @@ void Options::save() const {
   key.set_bool(c_param_update_solid, update_solid, c_def_update_solid);
   key.set_bool(c_param_update_show_password, update_show_password, c_def_update_show_password);
   key.set_tri_state(c_param_update_encrypt_header, update_encrypt_header, c_def_update_encrypt_header);
-  key.set_str(c_param_update_sfx_module, update_sfx_module, c_def_update_sfx_module);
+  save_sfx_options(key, update_sfx_options);
   key.set_str(c_param_update_volume_size, update_volume_size, c_def_update_volume_size);
   key.set_bool(c_param_update_ignore_errors, update_ignore_errors, c_def_update_ignore_errors);
   key.set_int(c_param_update_overwrite, update_overwrite, c_def_update_overwrite);
@@ -237,7 +283,6 @@ const wchar_t* c_param_profile_encrypt = L"encrypt";
 const wchar_t* c_param_profile_encrypt_header = L"encrypt_header";
 const wchar_t* c_param_profile_encrypt_header_defined = L"encrypt_header_defined";
 const wchar_t* c_param_profile_create_sfx = L"create_sfx";
-const wchar_t* c_param_profile_sfx_module = L"sfx_module";
 const wchar_t* c_param_profile_enable_volumes = L"enable_volumes";
 const wchar_t* c_param_profile_volume_size = L"volume_size";
 const wchar_t* c_param_profile_move_files = L"move_files";
@@ -255,7 +300,6 @@ const bool c_def_profile_show_password = false;
 const bool c_def_profile_encrypt = false;
 const TriState c_def_profile_encrypt_header = triUndef;
 const bool c_def_profile_create_sfx = false;
-const wchar_t* c_def_profile_sfx_module = L"";
 const bool c_def_profile_enable_volumes = false;
 const wchar_t* c_def_profile_volume_size = L"";
 const bool c_def_profile_move_files = false;
@@ -274,7 +318,6 @@ UpdateOptions::UpdateOptions():
   encrypt(c_def_profile_encrypt),
   encrypt_header(c_def_profile_encrypt_header),
   create_sfx(c_def_profile_create_sfx),
-  sfx_module(c_def_profile_sfx_module),
   enable_volumes(c_def_profile_enable_volumes),
   volume_size(c_def_profile_volume_size),
   move_files(c_def_profile_move_files),
@@ -282,6 +325,12 @@ UpdateOptions::UpdateOptions():
   ignore_errors(c_def_profile_ignore_errors),
   overwrite(oaAsk),
   advanced(c_def_profile_advanced)
+{}
+
+SfxOptions::SfxOptions():
+  replace_icon(false),
+  replace_version(false),
+  append_install_config(false)
 {}
 
 void UpdateProfiles::load() {
@@ -304,7 +353,7 @@ void UpdateProfiles::load() {
       GET_VALUE(encrypt, bool);
       GET_VALUE(encrypt_header, tri_state);
       GET_VALUE(create_sfx, bool);
-      GET_VALUE(sfx_module, str);
+      load_sfx_options(key, profile.options.sfx_options);
       GET_VALUE(enable_volumes, bool);
       GET_VALUE(volume_size, str);
       GET_VALUE(move_files, bool);
@@ -338,7 +387,7 @@ void UpdateProfiles::save() const {
     SET_VALUE(encrypt, bool);
     SET_VALUE(encrypt_header, tri_state);
     SET_VALUE(create_sfx, bool);
-    SET_VALUE(sfx_module, str);
+    save_sfx_options(key, profile.options.sfx_options);
     SET_VALUE(enable_volumes, bool);
     SET_VALUE(volume_size, str);
     SET_VALUE(move_files, bool);

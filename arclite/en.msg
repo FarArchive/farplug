@@ -36,7 +36,8 @@ update.dlg.show_password = Show password
 update.dlg.password = Pass&word:
 update.dlg.password2 = Repeat:
 update.dlg.encrypt_header = Encrypt &header
-update.dlg.create_sfx = Create self-e&xtracting archive using SFX module:
+update.dlg.create_sfx = Create self-e&xtracting archive
+update.dlg.sfx_options = SFX options
 update.dlg.enable_volumes = Split into &volumes
 update.dlg.volume_size = Volume size:
 update.dlg.move_files = &Delete files after archiving
@@ -52,7 +53,6 @@ update.dlg.wrong_level = Select compression level
 update.dlg.wrong_method = Select compression method
 update.dlg.passwords_dont_match = Passwords don't match
 update.dlg.password_is_empty = Password is empty
-update.dlg.wrong_sfx_module = Select SFX module
 update.dlg.wrong_volume_size = Invalid volume size
 update.dlg.confirm_overwrite = Target file already exists. Do you want to overwrite it?
 update.dlg.input_profile_name = Input profile name
@@ -128,9 +128,35 @@ settings.dlg.lib_version = Version:
 # Attributes dialog
 attr.dlg.title = Attributes
 
-# SFX convert dialog
-sfx_convert.dlg.title = Convert archive into SFX archive
-sfx_convert.dlg.module = Select SFX module:
+# SFX options dialog
+sfx_options.dlg.title = SFX Options
+sfx_options.dlg.name = Module name:
+sfx_options.dlg.replace_icon = Replace icon
+sfx_options.dlg.icon_path = Icon Path:
+sfx_options.dlg.replace_version = Replace version
+sfx_options.dlg.ver_info.version = Version:
+sfx_options.dlg.ver_info.comments = Comments:
+sfx_options.dlg.ver_info.company_name = Company name:
+sfx_options.dlg.ver_info.file_description = File description:
+sfx_options.dlg.ver_info.legal_copyright = Legal copyright:
+sfx_options.dlg.ver_info.product_name = Product name:
+sfx_options.dlg.append_install_config = Install configuration
+sfx_options.dlg.install_config.title = Title:
+sfx_options.dlg.install_config.begin_prompt = Begin prompt:
+sfx_options.dlg.install_config.progress = Progress:
+sfx_options.dlg.install_config.run_program = Run program:
+sfx_options.dlg.install_config.directory = Directory:
+sfx_options.dlg.install_config.execute_file = Execute file:
+sfx_options.dlg.install_config.execute_parameters = Execute parameters:
+sfx_options.dlg.wrong_module = Select SFX module
+
+# SFX module description
+sfx_descr.7z = Standard GUI
+sfx_descr.7zcon = Standard console
+sfx_descr.7zs = Installer GUI (static)
+sfx_descr.7zs2 = Small installer GUI
+sfx_descr.7zs2con = Small installer console
+sfx_descr.7zsd = Installer GUI
 
 # Plugin menu
 menu.open = &Open archive

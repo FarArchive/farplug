@@ -109,6 +109,36 @@ struct ExtractOptions {
   ExtractOptions();
 };
 
+struct VersionInfo {
+  wstring version;
+  wstring comments;
+  wstring company_name;
+  wstring file_description;
+  wstring legal_copyright;
+  wstring product_name;
+};
+
+struct SfxInstallConfig {
+  wstring title;
+  wstring begin_prompt;
+  wstring progress;
+  wstring run_program;
+  wstring directory;
+  wstring execute_file;
+  wstring execute_parameters;
+};
+
+struct SfxOptions {
+  wstring name;
+  bool replace_icon;
+  wstring icon_path;
+  bool replace_version;
+  VersionInfo ver_info;
+  bool append_install_config;
+  SfxInstallConfig install_config;
+  SfxOptions();
+};
+
 struct UpdateOptions {
   wstring arc_path;
   ArcType arc_type;
@@ -120,7 +150,7 @@ struct UpdateOptions {
   bool encrypt;
   TriState encrypt_header;
   bool create_sfx;
-  wstring sfx_module;
+  SfxOptions sfx_options;
   bool enable_volumes;
   wstring volume_size;
   bool move_files;
@@ -152,6 +182,5 @@ unsigned __int64 get_module_version(const wstring& file_path);
 unsigned __int64 parse_size_string(const wstring& str);
 DWORD translate_seek_method(UInt32 seek_origin);
 wstring expand_macros(const wstring& text);
-void attach_sfx_module(const wstring& file_path, const wstring& sfx_module);
 wstring load_file(const wstring& file_name, unsigned* code_page = nullptr);
 wstring auto_rename(const wstring& file_path);

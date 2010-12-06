@@ -522,6 +522,30 @@ void show_error_log(const ErrorLog& error_log) {
   Far::viewer(temp_file.get_path(), Far::get_msg(MSG_LOG_TITLE), VF_DISABLEHISTORY | VF_ENABLE_F6);
 }
 
+bool operator==(const SfxOptions& o1, const SfxOptions& o2) {
+  if (o1.name != o2.name || o1.replace_icon != o2.replace_icon ||
+    o1.replace_version != o2.replace_version || o1.append_install_config != o2.append_install_config)
+    return false;
+  if (o1.replace_icon) {
+    if (o1.icon_path != o2.icon_path)
+      return false;
+  }
+  if (o1.replace_version) {
+    if (o1.ver_info.version != o2.ver_info.version || o1.ver_info.comments != o2.ver_info.comments ||
+      o1.ver_info.company_name != o2.ver_info.company_name || o1.ver_info.file_description != o2.ver_info.file_description ||
+      o1.ver_info.legal_copyright != o2.ver_info.legal_copyright || o1.ver_info.product_name != o2.ver_info.product_name)
+      return false;
+  }
+  if (o1.append_install_config) {
+    if (o1.install_config.title != o2.install_config.title || o1.install_config.begin_prompt != o2.install_config.begin_prompt ||
+      o1.install_config.progress != o2.install_config.progress || o1.install_config.run_program != o2.install_config.run_program ||
+      o1.install_config.directory != o2.install_config.directory || o1.install_config.execute_file != o2.install_config.execute_file ||
+      o1.install_config.execute_parameters != o2.install_config.execute_parameters)
+      return false;
+  }
+  return true;
+}
+
 bool operator==(const UpdateOptions& o1, const UpdateOptions& o2) {
   if (o1.arc_type != o2.arc_type || o1.level != o2.level)
     return false;
@@ -557,7 +581,7 @@ bool operator==(const UpdateOptions& o1, const UpdateOptions& o2) {
     if (o1.create_sfx != o2.create_sfx)
       return false;
     if (is_sfx) {
-      if (o1.sfx_module != o2.sfx_module)
+      if (!(o1.sfx_options == o2.sfx_options))
         return false;
     }
   }
@@ -650,7 +674,7 @@ private:
   int password_verify_ctrl_id;
   int password_visible_ctrl_id;
   int create_sfx_ctrl_id;
-  int sfx_module_ctrl_id;
+  int sfx_options_ctrl_id;
   int move_files_ctrl_id;
   int open_shared_ctrl_id;
   int ignore_errors_ctrl_id;
@@ -747,7 +771,7 @@ private:
       if (create_sfx && enable_volumes)
         enable_volumes = false;
       enable(create_sfx_ctrl_id, is_7z && !enable_volumes);
-      for (int i = create_sfx_ctrl_id + 1; i <= sfx_module_ctrl_id; i++) {
+      for (int i = create_sfx_ctrl_id + 1; i <= sfx_options_ctrl_id; i++) {
         enable(i, is_7z && create_sfx && !enable_volumes);
       }
       enable(enable_volumes_ctrl_id, !is_7z || !create_sfx);
@@ -841,12 +865,8 @@ private:
 
     if (new_arc) {
       options.create_sfx = get_check(create_sfx_ctrl_id);
-      if (options.create_sfx) {
-        options.sfx_module = get_text(sfx_module_ctrl_id);
-        if (options.sfx_module.empty()) {
-          FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_WRONG_SFX_MODULE));
-        }
-      }
+      if (options.create_sfx)
+        options.sfx_options = this->options.sfx_options;
 
       options.enable_volumes = get_check(enable_volumes_ctrl_id);
       if (options.enable_volumes) {
@@ -909,7 +929,7 @@ private:
 
     if (new_arc) {
       set_check(create_sfx_ctrl_id, options.create_sfx);
-      set_list_pos(sfx_module_ctrl_id, ArcAPI::sfx().find(options.sfx_module));
+      this->options.sfx_options = options.sfx_options;
 
       set_check(enable_volumes_ctrl_id, options.enable_volumes);
       set_text(volume_size_ctrl_id, options.volume_size);
@@ -1027,6 +1047,10 @@ private:
       }
       else
         options.filter.reset();
+      set_control_state();
+    }
+    else if (msg == DN_BTNCLICK && param1 == sfx_options_ctrl_id) {
+      sfx_options_dialog(options.sfx_options);
       set_control_state();
     }
 
@@ -1194,15 +1218,8 @@ public:
 
     if (new_arc) {
       create_sfx_ctrl_id = check_box(Far::get_msg(MSG_UPDATE_DLG_CREATE_SFX), options.create_sfx);
-      new_line();
-      vector<wstring> sfx_module_list;
-      const SfxModules& sfx_modules = ArcAPI::sfx();
-      sfx_module_list.reserve(sfx_modules.size() + 1);
-      for_each(sfx_modules.begin(), sfx_modules.end(), [&] (const wstring& sfx_module) {
-        sfx_module_list.push_back(sfx_module);
-      });
-      sfx_module_list.push_back(wstring());
-      sfx_module_ctrl_id = combo_box(sfx_module_list, sfx_modules.find(options.sfx_module), c_client_xs, DIF_DROPDOWNLIST | DIF_EDITPATH);
+      spacer(2);
+      sfx_options_ctrl_id = button(Far::get_msg(MSG_UPDATE_DLG_SFX_OPTIONS), DIF_BTNNOCLOSE);
       new_line();
       separator();
       new_line();

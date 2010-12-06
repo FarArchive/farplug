@@ -18,7 +18,7 @@ struct Options {
   bool update_solid;
   bool update_show_password;
   TriState update_encrypt_header;
-  wstring update_sfx_module;
+  SfxOptions update_sfx_options;
   wstring update_volume_size;
   bool update_ignore_errors;
   OverwriteAction update_overwrite;

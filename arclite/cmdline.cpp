@@ -160,7 +160,7 @@ OpenCommand parse_open_command(const CommandArgs& ca) {
 }
 
 
-// arc:c [-pr:name] [-t:<arc_type>] [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]] [-sfx:<module>] [-v:<volume_size>]
+// arc:c [-pr:name] [-t:<arc_type>] [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]] [-sfx[:<module>]] [-v:<volume_size>]
 //   [-mf[:(y|n)]] [-ie[:(y|n)]] [-adv:<advanced>] <archive> (<file1> <file2> ... | @<filelist>)
 // arc:u [-l:<level>] [-m:<method>] [-s[:(y|n)]] [-p:<password>] [-eh[:(y|n)]]
 //   [-mf[:(y|n)]] [-ie[:(y|n)]] [-o[:(o|s)]] [-adv:<advanced>] <archive> (<file1> <file2> ... | @<filelist>)
@@ -234,9 +234,11 @@ UpdateCommand parse_update_command(const CommandArgs& ca) {
       command.options.encrypt_header = parse_tri_state_value(param.value);
     else if (param.name == L"sfx") {
       CHECK_FMT(ca.cmd == cmdCreate);
-      CHECK_FMT(!param.value.empty());
       command.options.create_sfx = true;
-      command.options.sfx_module = param.value;
+      if (param.value.empty())
+        command.options.sfx_options.name = L"7z.sfx";
+      else
+        command.options.sfx_options.name = param.value;
     }
     else if (param.name == L"v") {
       CHECK_FMT(ca.cmd == cmdCreate);

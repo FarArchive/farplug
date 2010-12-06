@@ -12,3 +12,4 @@ glob:lzo\src\*
 glob:openssl\include\*
 glob:openssl\lib\*
 glob:openssl\src\*
+glob:sfx\*

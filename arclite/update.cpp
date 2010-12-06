@@ -183,25 +183,18 @@ public:
 };
 
 
+void create_sfx_module(const wstring& file_path, const SfxOptions& sfx_options);
+
 class SfxUpdateStream: public UpdateStream, public ComBase, private File {
 private:
   unsigned __int64 start_offset;
 
-  void write_sfx_header(const wstring& sfx_module) {
-    File sfx_module_file(sfx_module, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0);
-    unsigned __int64 sfx_module_size = sfx_module_file.size();
-    CHECK(sfx_module_size < 1024 * 1024);
-    Buffer<char> buffer(static_cast<size_t>(sfx_module_size));
-    CHECK(sfx_module_file.read(buffer.data(), static_cast<unsigned>(buffer.size())) == sfx_module_size);
-    CHECK(write(buffer.data(), static_cast<unsigned>(buffer.size())) == buffer.size());
-    start_offset = buffer.size();
-  }
-
 public:
-  SfxUpdateStream(const wstring& file_path, const wstring& sfx_module, ArchiveUpdateProgress& progress): UpdateStream(progress), start_offset(0) {
+  SfxUpdateStream(const wstring& file_path, const SfxOptions& sfx_options, ArchiveUpdateProgress& progress): UpdateStream(progress) {
     RETRY_OR_IGNORE_BEGIN
-    open(file_path, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, 0);
-    write_sfx_header(sfx_module);
+    create_sfx_module(file_path, sfx_options);
+    open(file_path, FILE_WRITE_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0);
+    start_offset = set_pos(0, FILE_END);
     RETRY_END(progress)
   }
 
@@ -881,7 +874,7 @@ void Archive::create(const wstring& src_dir, const vector<wstring>& file_names, 
   if (options.enable_volumes)
     stream_impl = new MultiVolumeUpdateStream(options.arc_path, parse_size_string(options.volume_size), progress);
   else if (options.create_sfx && options.arc_type == c_7z)
-    stream_impl = new SfxUpdateStream(options.arc_path, options.sfx_module, progress);
+    stream_impl = new SfxUpdateStream(options.arc_path, options.sfx_options, progress);
   else
     stream_impl = new SimpleUpdateStream(options.arc_path, progress);
   ComObject<IOutStream> update_stream(stream_impl);

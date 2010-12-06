@@ -11,6 +11,8 @@
 
 wstring g_plugin_prefix;
 
+void attach_sfx_module(const wstring& file_path, const SfxOptions& sfx_options);
+
 class Plugin {
 private:
   Archive archive;
@@ -406,7 +408,7 @@ public:
         options.arc_type = c_7z;
       else
         options.arc_type = arc_types.front();
-      options.sfx_module = g_options.update_sfx_module;
+      options.sfx_options = g_options.update_sfx_options;
       if (ArcAPI::formats().count(options.arc_type))
         options.arc_path += ArcAPI::formats().at(options.arc_type).default_extension();
 
@@ -449,7 +451,7 @@ public:
           FAIL(E_ABORT);
       }
       g_options.update_arc_format_name = ArcAPI::formats().at(options.arc_type).name;
-      g_options.update_sfx_module = options.sfx_module;
+      g_options.update_sfx_options = options.sfx_options;
       g_options.update_volume_size = options.volume_size;
       g_options.update_level = options.level;
       g_options.update_method = options.method;
@@ -523,7 +525,7 @@ public:
       options.arc_type = c_7z;
     else
       options.arc_type = arc_types.front();
-    options.sfx_module = g_options.update_sfx_module;
+    options.sfx_options = g_options.update_sfx_options;
     if (ArcAPI::formats().count(options.arc_type))
       options.arc_path += ArcAPI::formats().at(options.arc_type).default_extension();
 
@@ -554,7 +556,7 @@ public:
         FAIL(E_ABORT);
     }
     g_options.update_arc_format_name = ArcAPI::formats().at(options.arc_type).name;
-    g_options.update_sfx_module = options.sfx_module;
+    g_options.update_sfx_options = options.sfx_options;
     g_options.update_volume_size = options.volume_size;
     g_options.update_level = options.level;
     g_options.update_method = options.method;
@@ -583,7 +585,6 @@ public:
   static void cmdline_update(const UpdateCommand& cmd) {
     UpdateOptions options = cmd.options;
     options.arc_path = Far::get_absolute_path(options.arc_path);
-    options.sfx_module = Far::get_absolute_path(options.sfx_module);
 
     vector<wstring> files;
     files.reserve(cmd.files.size());
@@ -728,11 +729,11 @@ public:
   }
 
   static void convert_to_sfx(const vector<wstring>& file_list) {
-    wstring sfx_module = g_options.update_sfx_module;
-    if (!sfx_convert_dialog(sfx_module))
+    SfxOptions sfx_options = g_options.update_sfx_options;
+    if (!sfx_options_dialog(sfx_options))
       FAIL(E_ABORT);
     for (unsigned i = 0; i < file_list.size(); i++) {
-      attach_sfx_module(file_list[i], sfx_module);
+      attach_sfx_module(file_list[i], sfx_options);
     }
   }
 };
