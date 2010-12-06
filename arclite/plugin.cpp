@@ -282,8 +282,9 @@ public:
 
   static void bulk_extract(const vector<wstring>& arc_list) {
     ExtractOptions options;
-    wstring dst_dir;
-    options.dst_dir = Far::get_panel_dir(PANEL_PASSIVE);
+    PanelInfo panel_info;
+    if (Far::get_panel_info(PANEL_PASSIVE, panel_info) && Far::is_real_file_panel(panel_info))
+      options.dst_dir = Far::get_panel_dir(PANEL_PASSIVE);
     options.move_files = triUndef;
     options.delete_archive = false;
     options.ignore_errors = g_options.extract_ignore_errors;
