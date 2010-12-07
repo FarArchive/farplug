@@ -26,6 +26,21 @@
         <Component Id="ru.lng" Guid="$(var.Guid.ru.lng)" Win64="$(var.Win64)">
           <File Id="ru.lng" KeyPath="yes" Source="$(var.SourceDir)\ru.lng" />
         </Component>
+        <Component Id="_7z.sfx" Guid="$(var.Guid._7z.sfx)" Win64="$(var.Win64)">
+          <File Id="_7z.sfx" KeyPath="yes" Source="$(var.SourceDir)\7z.sfx" />
+        </Component>
+        <Component Id="_7zCon.sfx" Guid="$(var.Guid._7zCon.sfx)" Win64="$(var.Win64)">
+          <File Id="_7zCon.sfx" KeyPath="yes" Source="$(var.SourceDir)\7zCon.sfx" />
+        </Component>
+        <Component Id="_7zS2.sfx" Guid="$(var.Guid._7zS2.sfx)" Win64="$(var.Win64)">
+          <File Id="_7zS2.sfx" KeyPath="yes" Source="$(var.SourceDir)\7zS2.sfx" />
+        </Component>
+        <Component Id="_7zS2con.sfx" Guid="$(var.Guid._7zS2con.sfx)" Win64="$(var.Win64)">
+          <File Id="_7zS2con.sfx" KeyPath="yes" Source="$(var.SourceDir)\7zS2con.sfx" />
+        </Component>
+        <Component Id="_7zSD.sfx" Guid="$(var.Guid._7zSD.sfx)" Win64="$(var.Win64)">
+          <File Id="_7zSD.sfx" KeyPath="yes" Source="$(var.SourceDir)\7zSD.sfx" />
+        </Component>
       </Directory>
     </DirectoryRef>
   </Fragment>
@@ -38,6 +53,11 @@
       <ComponentRef Id="en.lng" />
       <ComponentRef Id="ru.hlf" />
       <ComponentRef Id="ru.lng" />
+      <ComponentRef Id="_7z.sfx" />
+      <ComponentRef Id="_7zCon.sfx" />
+      <ComponentRef Id="_7zS2.sfx" />
+      <ComponentRef Id="_7zS2con.sfx" />
+      <ComponentRef Id="_7zSD.sfx" />
     </Feature>
   </Fragment>
 </Wix>

@@ -12,6 +12,11 @@
   <?define Guid.en.lng = "824DB1EC-3FC1-4866-A01D-80FD5A19181B" ?>
   <?define Guid.ru.hlf = "BC825A7B-7789-457A-94D1-B8E5F2442951" ?>
   <?define Guid.ru.lng = "13A5EE51-E550-4147-8687-0469D37EAA57" ?>
+  <?define Guid._7z.sfx = "EB61CA5E-F3A3-41A5-B20A-DD91EA831624" ?>
+  <?define Guid._7zCon.sfx = "C879B688-1130-4B55-A869-7ACE789D0F4D" ?>
+  <?define Guid._7zS2.sfx = "7FAFAABC-C27E-4819-B971-65E6ECCBE011" ?>
+  <?define Guid._7zS2con.sfx = "6FD12F8C-61CC-4B11-9CEE-92F0D0ACAE0A" ?>
+  <?define Guid._7zSD.sfx = "7F49CB31-05C6-45D9-A241-0D92838A90E9" ?>
 <?endif?>
 <?if $(var.Platform) = x64 ?>
   <?define Guid.UpgradeCode = "4A6EC287-2582-46E6-AA84-9326A497173A" ?>
@@ -22,5 +27,10 @@
   <?define Guid.en.lng = "72210263-65A5-4F9D-81DD-AB1CE2F05C15" ?>
   <?define Guid.ru.hlf = "91F1F48D-188F-467B-94F8-AD83117BCF0A" ?>
   <?define Guid.ru.lng = "1DB6DC46-C467-410E-BB80-EC2E2F70926E" ?>
+  <?define Guid._7z.sfx = "04C490BB-27C2-4DFA-B4B2-F5CD822B5191" ?>
+  <?define Guid._7zCon.sfx = "A56055DC-9914-47CD-A739-BFADD67C6FCB" ?>
+  <?define Guid._7zS2.sfx = "AFE09561-996D-48C7-90BB-997B190CA310" ?>
+  <?define Guid._7zS2con.sfx = "69172107-CC9D-41F0-B01D-0C17ECC1EA34" ?>
+  <?define Guid._7zSD.sfx = "689A6706-448E-42F0-A13C-A18C4630C447" ?>
 <?endif?>
 <Include />
