@@ -14,6 +14,7 @@ $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 	~Extract archive~@Extract@
 	~Create and update archive~@Update@
 	~Plugin settings~@Config@
+	~Self-extracting archive options~@SfxOptions@
 
 	Plugin command line prefix is ~arc~@Prefix@.
 
@@ -195,3 +196,47 @@ $ #Prefix command line format#
 	#Test archive#
 	arc:t <archive> ...
 	<archive> ... = list of archives
+
+@SfxOptions
+$^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
+$ #Self-extracting archive options#
+
+	#Module name# - Select one of the available SFX modules:
+
+		#Standard GUI (7z.sfx)# - Standard GUI SFX module. It supports 7z archives created with the
+following set of codecs: LZMA, LZMA2, PPMD, BCJ, BCJ2, ARM, Copy, AES.
+
+		#Standard console (7zCon.sfx)# - Console equivalent of the above.
+
+		#Installer GUI (7zSD.sfx)# - This module is used to create simple setup programs.
+It extracts archive into temporary directory and then runs specified program and removes
+temporary files after program termination. Additional parameters can be specified under
+#Install configuration# group. Module supports 7z archives created with the
+following set of codecs: LZMA, LZMA2, BCJ, BCJ2, ARM, Copy i.e. encryption and PPMD compression
+are not supported.
+
+		#Small installer GUI (7zS2.sfx)# - Alternative installer module. It features much smaller size,
+has no progress window and does not support installer configuration. It also has higher memory
+requirements because entire solid block is decompressed into RAM (that is entire archive in simplest case).
+		Small SFX uses 3 levels of priorities to select file to execute:
+		1) Files in root directory have higher priority than files in subdirectories.
+		2) File extension priorities (from high to low priority order): bat, exe, inf, msi, html, htm.
+		3) File name priorities (from high to low priority order): setup, install, run, start.
+
+		#Small installer console (7zS2con.sfx)# - Same as above but runs as console application.
+
+	#Replace icon# - Place custom icon (*.ico file) into created executable.
+	
+	#Replace version# - Specify custom version information for created executable.
+#Version# string should be like 1.2.3.4
+
+	#Install configuration# - Configuration for installer module.
+
+		#Title# - Window title.
+		#Begin prompt# - Prompt shown by installer before unpacking archive.
+		#Progress meter# - Show or hide progress indicator.
+		#Run program# - Program from archive to execute after extraction is complete. Default value is setup.exe.
+Special marker %%T will be replaced by path to temporary directory with extracted files.
+		#Execute file# - Name of file to execute. This could be a program or a document from archive
+or any system program.
+		#Execute parameters# - Parameters for #Execute file#.

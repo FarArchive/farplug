@@ -258,7 +258,7 @@ private:
   }
 
 public:
-  SfxOptionsDialog(SfxOptions& options): Far::Dialog(Far::get_msg(MSG_SFX_OPTIONS_DLG_TITLE), &c_sfx_options_dialog_guid, c_client_xs), options(options) {
+  SfxOptionsDialog(SfxOptions& options): Far::Dialog(Far::get_msg(MSG_SFX_OPTIONS_DLG_TITLE), &c_sfx_options_dialog_guid, c_client_xs, L"SfxOptions"), options(options) {
   }
 
   bool show() {
