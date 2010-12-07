@@ -69,7 +69,7 @@ pressing #B# and paused by pressing #P#.
 	"Create archive" dialog allows you to specify archive path and various archival parameters.
 Reduced version of this dialog is used when updating existing archives.
 
-	#Profile# - Select named collection of archival settings. #Create# button creates new profile using current settings.
+	#Profile# - Select named collection of archival settings. #Save# button saves profile using current settings.
 #Delete# button deletes selected profile.
 
 	#Archive path# - Full or relative archive path. Far's macro sequences can be used to form path by enclosing them inside

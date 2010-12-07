@@ -781,7 +781,6 @@ private:
       bool other_format = get_check(other_formats_ctrl_id);
       enable(other_formats_ctrl_id + 1, other_format);
       unsigned profile_idx = get_list_pos(profile_ctrl_id);
-      enable(save_profile_ctrl_id, profile_idx == -1 || profile_idx == profiles.size());
       enable(delete_profile_ctrl_id, profile_idx != -1 && profile_idx < profiles.size());
     }
     enable(move_files_ctrl_id, !get_check(enable_filter_ctrl_id));
@@ -1040,16 +1039,72 @@ private:
     else if (new_arc && msg == DN_BTNCLICK && param1 == save_profile_ctrl_id) {
       UpdateProfile profile;
       read_controls(profile.options);
+      unsigned profile_idx;
+      for (profile_idx = 0; profile_idx < profiles.size(); profile_idx++) {
+        if (profiles[profile_idx].options == profile.options)
+          break;
+      }
+      if (profile_idx < profiles.size())
+        profile.name = profiles[profile_idx].name;
       if (Far::input_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_UPDATE_DLG_INPUT_PROFILE_NAME), profile.name)) {
-        unsigned profile_idx = static_cast<unsigned>(profiles.size());
-        profiles.push_back(profile);
         DisableEvents de(*this);
-        FarListInsert fli;
-        memset(&fli, 0, sizeof(fli));
-        fli.Index = profile_idx;
-        fli.Item.Text = profile.name.c_str();
-        send_message(DM_LISTINSERT, profile_ctrl_id, &fli);
-        set_list_pos(profile_ctrl_id, profile_idx);
+        unsigned existing_idx;
+        for (existing_idx = 0; existing_idx < profiles.size(); existing_idx++) {
+          if (upcase(profiles[existing_idx].name) == upcase(profile.name))
+            break;
+        }
+        if (profile_idx < profiles.size()) {
+          if (existing_idx < profiles.size() && profile_idx != existing_idx) {
+            // update existing profile
+            profiles[existing_idx].name = profile.name;
+            profiles[existing_idx].options = profile.options;
+            FarListUpdate flu;
+            memset(&flu, 0, sizeof(flu));
+            flu.Index = existing_idx;
+            flu.Item.Text = profile.name.c_str();
+            send_message(DM_LISTUPDATE, profile_ctrl_id, &flu);
+            set_list_pos(profile_ctrl_id, existing_idx);
+            // delete current profile
+            profiles.erase(profiles.begin() + profile_idx);
+            FarListDelete fld;
+            memset(&fld, 0, sizeof(fld));
+            fld.StartIndex = profile_idx;
+            fld.Count = 1;
+            send_message(DM_LISTDELETE, profile_ctrl_id, &fld);
+          }
+          else {
+            // rename current profile
+            profiles[profile_idx].name = profile.name;
+            FarListUpdate flu;
+            memset(&flu, 0, sizeof(flu));
+            flu.Index = profile_idx;
+            flu.Item.Text = profile.name.c_str();
+            send_message(DM_LISTUPDATE, profile_ctrl_id, &flu);
+          }
+        }
+        else {
+          if (existing_idx < profiles.size()) {
+            // update existing profile
+            profiles[existing_idx].name = profile.name;
+            profiles[existing_idx].options = profile.options;
+            FarListUpdate flu;
+            memset(&flu, 0, sizeof(flu));
+            flu.Index = existing_idx;
+            flu.Item.Text = profile.name.c_str();
+            send_message(DM_LISTUPDATE, profile_ctrl_id, &flu);
+            set_list_pos(profile_ctrl_id, existing_idx);
+          }
+          else {
+            // create new profile
+            profiles.push_back(profile);
+            FarListInsert fli;
+            memset(&fli, 0, sizeof(fli));
+            fli.Index = profiles.size() - 1;
+            fli.Item.Text = profile.name.c_str();
+            send_message(DM_LISTINSERT, profile_ctrl_id, &fli);
+            set_list_pos(profile_ctrl_id, profiles.size() - 1);
+          }
+        }
         set_control_state();
       }
     }
