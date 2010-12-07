@@ -132,24 +132,24 @@ attr.dlg.title = Attributes
 
 # SFX options dialog
 sfx_options.dlg.title = SFX Options
-sfx_options.dlg.name = Module name:
-sfx_options.dlg.replace_icon = Replace icon
-sfx_options.dlg.icon_path = Icon Path:
-sfx_options.dlg.replace_version = Replace version
-sfx_options.dlg.ver_info.version = Version:
-sfx_options.dlg.ver_info.comments = Comments:
-sfx_options.dlg.ver_info.company_name = Company name:
-sfx_options.dlg.ver_info.file_description = File description:
-sfx_options.dlg.ver_info.legal_copyright = Legal copyright:
-sfx_options.dlg.ver_info.product_name = Product name:
-sfx_options.dlg.append_install_config = Install configuration
-sfx_options.dlg.install_config.title = Title:
-sfx_options.dlg.install_config.begin_prompt = Begin prompt:
-sfx_options.dlg.install_config.progress = Progress:
-sfx_options.dlg.install_config.run_program = Run program:
-sfx_options.dlg.install_config.directory = Directory:
-sfx_options.dlg.install_config.execute_file = Execute file:
-sfx_options.dlg.install_config.execute_parameters = Execute parameters:
+sfx_options.dlg.name = &Module name:
+sfx_options.dlg.replace_icon = Replace &icon
+sfx_options.dlg.icon_path = Icon &path:
+sfx_options.dlg.replace_version = Replace &version
+sfx_options.dlg.ver_info.version = V&ersion:
+sfx_options.dlg.ver_info.comments = &Comments:
+sfx_options.dlg.ver_info.company_name = C&ompany name:
+sfx_options.dlg.ver_info.file_description = File &description:
+sfx_options.dlg.ver_info.legal_copyright = &Legal copyright:
+sfx_options.dlg.ver_info.product_name = Product &name:
+sfx_options.dlg.append_install_config = In&stall configuration
+sfx_options.dlg.install_config.title = &Title:
+sfx_options.dlg.install_config.begin_prompt = &Begin prompt:
+sfx_options.dlg.install_config.progress = Pro&gress meter:
+sfx_options.dlg.install_config.run_program = &Run program:
+sfx_options.dlg.install_config.directory = Director&y:
+sfx_options.dlg.install_config.execute_file = E&xecute file:
+sfx_options.dlg.install_config.execute_parameters = Execute p&arameters:
 sfx_options.dlg.wrong_module = Select SFX module
 
 # SFX module description

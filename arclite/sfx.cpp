@@ -225,7 +225,11 @@ private:
       if (options.append_install_config) {
         options.install_config.title = get_text(install_config_title_ctrl_id);
         options.install_config.begin_prompt = get_text(install_config_begin_prompt_ctrl_id);
-        options.install_config.progress = get_text(install_config_progress_ctrl_id);
+        TriState value = get_check3(install_config_progress_ctrl_id);
+        if (value == triUndef)
+          options.install_config.progress.clear();
+        else
+          options.install_config.progress = value == triTrue ? L"yes" : L"no";
         options.install_config.run_program = get_text(install_config_run_program_ctrl_id);
         options.install_config.directory = get_text(install_config_directory_ctrl_id);
         options.install_config.execute_file = get_text(install_config_execute_file_ctrl_id);
@@ -282,12 +286,12 @@ public:
 
     unsigned label_len = 0;
     vector<wstring> labels;
+    labels.push_back(Far::get_msg(MSG_SFX_OPTIONS_DLG_VER_INFO_PRODUCT_NAME));
     labels.push_back(Far::get_msg(MSG_SFX_OPTIONS_DLG_VER_INFO_VERSION));
-    labels.push_back(Far::get_msg(MSG_SFX_OPTIONS_DLG_VER_INFO_COMMENTS));
     labels.push_back(Far::get_msg(MSG_SFX_OPTIONS_DLG_VER_INFO_COMPANY_NAME));
     labels.push_back(Far::get_msg(MSG_SFX_OPTIONS_DLG_VER_INFO_FILE_DESCRIPTION));
+    labels.push_back(Far::get_msg(MSG_SFX_OPTIONS_DLG_VER_INFO_COMMENTS));
     labels.push_back(Far::get_msg(MSG_SFX_OPTIONS_DLG_VER_INFO_LEGAL_COPYRIGHT));
-    labels.push_back(Far::get_msg(MSG_SFX_OPTIONS_DLG_VER_INFO_PRODUCT_NAME));
     for (unsigned i = 0; i < labels.size(); i++)
       if (label_len < labels[i].size())
         label_len = labels[i].size();
@@ -298,12 +302,12 @@ public:
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    ver_info_version_ctrl_id = edit_box(options.ver_info.version);
+    ver_info_product_name_ctrl_id = edit_box(options.ver_info.product_name);
     new_line();
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    ver_info_comments_ctrl_id = edit_box(options.ver_info.comments);
+    ver_info_version_ctrl_id = edit_box(options.ver_info.version);
     new_line();
     spacer(2);
     label(*label_text++);
@@ -318,12 +322,12 @@ public:
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    ver_info_legal_copyright_ctrl_id = edit_box(options.ver_info.legal_copyright);
+    ver_info_comments_ctrl_id = edit_box(options.ver_info.comments);
     new_line();
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    ver_info_product_name_ctrl_id = edit_box(options.ver_info.product_name);
+    ver_info_legal_copyright_ctrl_id = edit_box(options.ver_info.legal_copyright);
     new_line();
 
     label_len = 0;
@@ -355,7 +359,14 @@ public:
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    install_config_progress_ctrl_id = edit_box(options.install_config.progress);
+    TriState value;
+    if (options.install_config.progress == L"yes")
+      value = triTrue;
+    else if (options.install_config.progress == L"no")
+      value = triFalse;
+    else
+      value = triUndef;
+    install_config_progress_ctrl_id = check_box3(wstring(), value);
     new_line();
     spacer(2);
     label(*label_text++);

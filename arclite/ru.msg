@@ -131,35 +131,35 @@ settings.dlg.lib_version = Версия:
 attr.dlg.title = Атрибуты
 
 # SFX options dialog
-sfx_options.dlg.title = SFX Options
-sfx_options.dlg.name = Module name:
-sfx_options.dlg.replace_icon = Replace icon
-sfx_options.dlg.icon_path = Icon Path:
-sfx_options.dlg.replace_version = Replace version
-sfx_options.dlg.ver_info.version = Version:
-sfx_options.dlg.ver_info.comments = Comments:
-sfx_options.dlg.ver_info.company_name = Company name:
-sfx_options.dlg.ver_info.file_description = File description:
-sfx_options.dlg.ver_info.legal_copyright = Legal copyright:
-sfx_options.dlg.ver_info.product_name = Product name:
-sfx_options.dlg.append_install_config = Install configuration
-sfx_options.dlg.install_config.title = Title:
-sfx_options.dlg.install_config.begin_prompt = Begin prompt:
-sfx_options.dlg.install_config.progress = Progress:
-sfx_options.dlg.install_config.run_program = Run program:
-sfx_options.dlg.install_config.directory = Directory:
-sfx_options.dlg.install_config.execute_file = Execute file:
-sfx_options.dlg.install_config.execute_parameters = Execute parameters:
-sfx_options.dlg.wrong_module = Select SFX module
+sfx_options.dlg.title = Параметры SFX
+sfx_options.dlg.name = &Модуль:
+sfx_options.dlg.replace_icon = Заменить &иконку
+sfx_options.dlg.icon_path = &Путь к ICO файлу:
+sfx_options.dlg.replace_version = Заменить информацию о &версии
+sfx_options.dlg.ver_info.version = В&ерсия:
+sfx_options.dlg.ver_info.comments = &Комментарии:
+sfx_options.dlg.ver_info.company_name = На&звание компании:
+sfx_options.dlg.ver_info.file_description = &Описание файла:
+sfx_options.dlg.ver_info.legal_copyright = Копи&райт:
+sfx_options.dlg.ver_info.product_name = Название про&дукта:
+sfx_options.dlg.append_install_config = Параметры и&нсталлятора
+sfx_options.dlg.install_config.title = З&аголовок:
+sfx_options.dlg.install_config.begin_prompt = Вопро&с:
+sfx_options.dlg.install_config.progress = Индика&тор распаковки:
+sfx_options.dlg.install_config.run_program = Зап&устить программу из архива:
+sfx_options.dlg.install_config.directory = Ката&лог с программой:
+sfx_options.dlg.install_config.execute_file = Запустит&ь произвольный файл:
+sfx_options.dlg.install_config.execute_parameters = Параметр&ы запуска:
+sfx_options.dlg.wrong_module = Необходимо указать SFX модуль
 
 # SFX module description
-sfx_descr.7z = Standard GUI
-sfx_descr.7zcon = Standard console
-sfx_descr.7zs = Installer GUI (static)
-sfx_descr.7zs2 = Small installer GUI
-sfx_descr.7zs2con = Small installer console
-sfx_descr.7zsd = Installer GUI
-sfx_descr.unknown = Unknown
+sfx_descr.7z = Стандартный
+sfx_descr.7zcon = Стандартный консольный
+sfx_descr.7zs = Инсталлятор (статический)
+sfx_descr.7zs2 = Инсталлятор упрощенный
+sfx_descr.7zs2con = Инсталлятор упрощенный консольный
+sfx_descr.7zsd = Инсталлятор
+sfx_descr.unknown = Неизвестный
 
 # Plugin menu
 menu.open = &Открыть архив
