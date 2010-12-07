@@ -57,6 +57,8 @@ update.dlg.wrong_volume_size = Invalid volume size
 update.dlg.confirm_overwrite = Target file already exists. Do you want to overwrite it?
 update.dlg.input_profile_name = Input profile name
 update.dlg.confirm_profile_delete = Do you want to delete selected profile?
+update.dlg.sfx_no_ppmd = Selected SFX module does not support PPMD compression
+update.dlg.sfx_no_encrypt = Selected SFX module does not support encryption
 
 # Archive types
 compression.archive.7z = &7z
@@ -157,6 +159,7 @@ sfx_descr.7zs = Installer GUI (static)
 sfx_descr.7zs2 = Small installer GUI
 sfx_descr.7zs2con = Small installer console
 sfx_descr.7zsd = Installer GUI
+sfx_descr.unknown = Unknown
 
 # Plugin menu
 menu.open = &Open archive

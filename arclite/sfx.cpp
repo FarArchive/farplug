@@ -182,7 +182,7 @@ private:
       enable(ctrl_id, replace_version);
 
     unsigned sfx_id = get_list_pos(name_ctrl_id);
-    bool install_config_enabled = sfx_id < ArcAPI::sfx().size() && ArcAPI::sfx()[sfx_id].is_installer;
+    bool install_config_enabled = sfx_id < ArcAPI::sfx().size() && ArcAPI::sfx()[sfx_id].install_config();
     enable(append_install_config_ctrl_id, install_config_enabled);
 
     bool append_install_config = get_check(append_install_config_ctrl_id);
@@ -220,7 +220,7 @@ private:
         options.ver_info.legal_copyright.clear();
         options.ver_info.product_name.clear();
       }
-      bool install_config_enabled = sfx_modules[sfx_id].is_installer;
+      bool install_config_enabled = sfx_modules[sfx_id].install_config();
       options.append_install_config = install_config_enabled && get_check(append_install_config_ctrl_id);
       if (options.append_install_config) {
         options.install_config.title = get_text(install_config_title_ctrl_id);
@@ -264,9 +264,10 @@ public:
     names.reserve(sfx_modules.size() + 1);
     unsigned name_width = 0;
     for_each(sfx_modules.begin(), sfx_modules.end(), [&] (const SfxModule& sfx_module) {
-      names.push_back(sfx_module.description);
-      if (name_width < sfx_module.description.size())
-        name_width = sfx_module.description.size();
+      wstring name = sfx_module.description();
+      names.push_back(name);
+      if (name_width < name.size())
+        name_width = name.size();
     });
     names.push_back(wstring());
     name_ctrl_id = combo_box(names, sfx_modules.find_by_name(options.name), name_width + 6, DIF_DROPDOWNLIST);

@@ -864,9 +864,17 @@ private:
     }
 
     if (new_arc) {
-      options.create_sfx = get_check(create_sfx_ctrl_id);
-      if (options.create_sfx)
+      options.create_sfx = is_7z && get_check(create_sfx_ctrl_id);
+      if (options.create_sfx) {
         options.sfx_options = this->options.sfx_options;
+        unsigned sfx_id = ArcAPI::sfx().find_by_name(options.sfx_options.name);
+        if (sfx_id >= ArcAPI::sfx().size())
+          FAIL_MSG(Far::get_msg(MSG_SFX_OPTIONS_DLG_WRONG_MODULE));
+        if (options.method == c_method_ppmd && !ArcAPI::sfx()[sfx_id].all_codecs())
+          FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_SFX_NO_PPMD));
+        if (options.encrypt && !ArcAPI::sfx()[sfx_id].all_codecs())
+          FAIL_MSG(Far::get_msg(MSG_UPDATE_DLG_SFX_NO_ENCRYPT));
+      }
 
       options.enable_volumes = get_check(enable_volumes_ctrl_id);
       if (options.enable_volumes) {

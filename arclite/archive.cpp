@@ -189,20 +189,45 @@ void ArcAPI::load_libs(const wstring& path) {
 }
 
 
-struct KnownSfxModule {
+struct SfxModuleInfo {
   const wchar_t* module_name;
   unsigned descr_id;
-  bool is_installer;
+  bool all_codecs;
+  bool install_config;
 };
 
-const KnownSfxModule c_known_sfx_modules[] = {
-  { L"7z.sfx", MSG_SFX_DESCR_7Z, false },
-  { L"7zCon.sfx", MSG_SFX_DESCR_7ZCON, false },
-  { L"7zS.sfx", MSG_SFX_DESCR_7ZS, true },
-  { L"7zSD.sfx", MSG_SFX_DESCR_7ZSD, true },
-  { L"7zS2.sfx", MSG_SFX_DESCR_7ZS2, true },
-  { L"7zS2con.sfx", MSG_SFX_DESCR_7ZS2CON, true },
+const SfxModuleInfo c_known_sfx_modules[] = {
+  { L"7z.sfx", MSG_SFX_DESCR_7Z, true, false },
+  { L"7zCon.sfx", MSG_SFX_DESCR_7ZCON, true, false },
+  { L"7zS.sfx", MSG_SFX_DESCR_7ZS, false, true },
+  { L"7zSD.sfx", MSG_SFX_DESCR_7ZSD, false, true },
+  { L"7zS2.sfx", MSG_SFX_DESCR_7ZS2, false, false },
+  { L"7zS2con.sfx", MSG_SFX_DESCR_7ZS2CON, false, false },
 };
+
+const SfxModuleInfo* find(const wstring& path) {
+  unsigned i = 0;
+  for (; i < ARRAYSIZE(c_known_sfx_modules) && upcase(extract_file_name(path)) != upcase(c_known_sfx_modules[i].module_name); i++);
+  if (i < ARRAYSIZE(c_known_sfx_modules))
+    return c_known_sfx_modules + i;
+  else
+    return nullptr;
+}
+
+wstring SfxModule::description() const {
+  const SfxModuleInfo* info = find(path);
+  return info ? Far::get_msg(info->descr_id) : Far::get_msg(MSG_SFX_DESCR_UNKNOWN) + L" [" + extract_file_name(path) + L"]";
+}
+
+bool SfxModule::all_codecs() const {
+  const SfxModuleInfo* info = find(path);
+  return info ? info->all_codecs : true;
+}
+
+bool SfxModule::install_config() const {
+  const SfxModuleInfo* info = find(path);
+  return info ? info->install_config : true;
+}
 
 void ArcAPI::find_sfx_modules(const wstring& path) {
   FileEnum file_enum(path);
@@ -221,18 +246,6 @@ void ArcAPI::find_sfx_modules(const wstring& path) {
     string sig(buffer.data(), sz);
     if (sig != "MZ")
       continue;
-
-    unsigned known_id = 0;
-    for (; known_id < ARRAYSIZE(c_known_sfx_modules) && upcase(file_enum.data().cFileName) != upcase(c_known_sfx_modules[known_id].module_name); known_id++);
-    if (known_id < ARRAYSIZE(c_known_sfx_modules)) {
-      sfx_module.description = Far::get_msg(c_known_sfx_modules[known_id].descr_id);
-      sfx_module.is_installer = c_known_sfx_modules[known_id].is_installer;
-    }
-    else {
-      sfx_module.description = extract_file_name(sfx_module.path);
-      sfx_module.is_installer = true;
-    }
-
     sfx_modules.push_back(sfx_module);
   }
 }

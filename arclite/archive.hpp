@@ -63,8 +63,9 @@ public:
 
 struct SfxModule {
   wstring path;
-  wstring description;
-  bool is_installer;
+  wstring description() const;
+  bool all_codecs() const;
+  bool install_config() const;
 };
 
 class SfxModules: public vector<SfxModule> {

@@ -57,6 +57,8 @@ update.dlg.wrong_volume_size = Неверно указан размер куск
 update.dlg.confirm_overwrite = Целевой архив уже существует. Хотите перезаписать его?
 update.dlg.input_profile_name = Введите название профиля
 update.dlg.confirm_profile_delete = Хотите удалить текущий профиль?
+update.dlg.sfx_no_ppmd = Выбранный SFX модуль не поддерживает сжатие методом PPMD
+update.dlg.sfx_no_encrypt = Выбранный SFX модуль не поддерживает шифрование данных
 
 # Archive types
 compression.archive.7z = &7z
@@ -157,6 +159,7 @@ sfx_descr.7zs = Installer GUI (static)
 sfx_descr.7zs2 = Small installer GUI
 sfx_descr.7zs2con = Small installer console
 sfx_descr.7zsd = Installer GUI
+sfx_descr.unknown = Unknown
 
 # Plugin menu
 menu.open = &Открыть архив
