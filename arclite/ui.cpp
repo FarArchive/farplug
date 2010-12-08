@@ -654,8 +654,6 @@ private:
   UpdateOptions& options;
   UpdateProfiles& profiles;
 
-  bool events_enabled;
-
   int profile_ctrl_id;
   int save_profile_ctrl_id;
   int delete_profile_ctrl_id;
@@ -726,21 +724,6 @@ private:
     old_ext = new_ext;
     return true;
   }
-
-  class DisableEvents {
-  private:
-    UpdateDialog& dlg;
-    bool events_enabled;
-  public:
-    DisableEvents(UpdateDialog& dlg): dlg(dlg), events_enabled(dlg.events_enabled) {
-      dlg.events_enabled = false;
-      dlg.send_message(DM_ENABLEREDRAW, FALSE);
-    }
-    ~DisableEvents() {
-      dlg.send_message(DM_ENABLEREDRAW, TRUE);
-      dlg.events_enabled = events_enabled;
-    }
-  };
 
   void set_control_state() {
     DisableEvents de(*this);
@@ -979,9 +962,6 @@ private:
   }
 
   LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
-    if (!events_enabled)
-      return default_dialog_proc(msg, param1, param2);
-
     if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
       read_controls(options);
       if (new_arc)
@@ -1137,7 +1117,7 @@ private:
       set_control_state();
     }
     else if (msg == DN_BTNCLICK && param1 == sfx_options_ctrl_id) {
-      sfx_options_dialog(options.sfx_options);
+      sfx_options_dialog(options.sfx_options, profiles);
       set_control_state();
     }
 
@@ -1176,8 +1156,7 @@ public:
     default_arc_name(options.arc_path),
     options(options),
     profiles(profiles),
-    arc_type(options.arc_type),
-    events_enabled(true) {
+    arc_type(options.arc_type) {
   }
 
   bool show() {

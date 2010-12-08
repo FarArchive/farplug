@@ -730,8 +730,10 @@ public:
 
   static void convert_to_sfx(const vector<wstring>& file_list) {
     SfxOptions sfx_options = g_options.update_sfx_options;
-    if (!sfx_options_dialog(sfx_options))
+    if (!sfx_options_dialog(sfx_options, g_profiles))
       FAIL(E_ABORT);
+    g_options.update_sfx_options = sfx_options;
+    g_options.save();
     for (unsigned i = 0; i < file_list.size(); i++) {
       attach_sfx_module(file_list[i], sfx_options);
     }

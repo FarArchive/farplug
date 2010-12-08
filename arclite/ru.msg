@@ -132,7 +132,8 @@ attr.dlg.title = Атрибуты
 
 # SFX options dialog
 sfx_options.dlg.title = Параметры SFX
-sfx_options.dlg.name = &Модуль:
+sfx_options.dlg.profile = Использовать про&филь:
+sfx_options.dlg.module = &Модуль:
 sfx_options.dlg.replace_icon = Заменить &иконку
 sfx_options.dlg.icon_path = &Путь к ICO файлу:
 sfx_options.dlg.replace_version = Заменить информацию о &версии

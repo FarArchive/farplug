@@ -136,6 +136,15 @@ void attach_sfx_module(const wstring& file_path, const SfxOptions& sfx_options) 
 }
 
 
+struct SfxProfile {
+  wstring name;
+  SfxOptions options;
+};
+
+typedef vector<SfxProfile> SfxProfiles;
+
+bool operator==(const SfxOptions& o1, const SfxOptions& o2);
+
 const GUID c_sfx_options_dialog_guid = { /* 0DCE48E5-B205-44A0-B8BF-96B28E2FD3B3 */
   0x0DCE48E5,
   0xB205,
@@ -150,8 +159,10 @@ private:
   };
 
   SfxOptions& options;
+  SfxProfiles profiles;
 
-  int name_ctrl_id;
+  int profile_ctrl_id;
+  int module_ctrl_id;
   int replace_icon_ctrl_id;
   int icon_path_ctrl_id;
   int replace_version_ctrl_id;
@@ -173,6 +184,8 @@ private:
   int cancel_ctrl_id;
 
   void set_control_state() {
+    DisableEvents de(*this);
+
     bool replace_icon = get_check(replace_icon_ctrl_id);
     for (int ctrl_id = replace_icon_ctrl_id + 1; ctrl_id < replace_version_ctrl_id; ctrl_id++)
       enable(ctrl_id, replace_icon);
@@ -181,8 +194,8 @@ private:
     for (int ctrl_id = replace_version_ctrl_id + 1; ctrl_id < append_install_config_ctrl_id; ctrl_id++)
       enable(ctrl_id, replace_version);
 
-    unsigned sfx_id = get_list_pos(name_ctrl_id);
-    bool install_config_enabled = sfx_id < ArcAPI::sfx().size() && ArcAPI::sfx()[sfx_id].install_config();
+    unsigned module_id = get_list_pos(module_ctrl_id);
+    bool install_config_enabled = module_id < ArcAPI::sfx().size() && ArcAPI::sfx()[module_id].install_config();
     enable(append_install_config_ctrl_id, install_config_enabled);
 
     bool append_install_config = get_check(append_install_config_ctrl_id);
@@ -190,60 +203,97 @@ private:
       enable(ctrl_id, install_config_enabled && append_install_config);
   }
 
+  void read_controls(SfxOptions& options) {
+    const SfxModules& sfx_modules = ArcAPI::sfx();
+    unsigned sfx_id = get_list_pos(module_ctrl_id);
+    if (sfx_id >= sfx_modules.size()) {
+      FAIL_MSG(Far::get_msg(MSG_SFX_OPTIONS_DLG_WRONG_MODULE));
+    }
+    options.name = extract_file_name(sfx_modules[sfx_id].path);
+    options.replace_icon = get_check(replace_icon_ctrl_id);
+    if (options.replace_icon)
+      options.icon_path = get_text(icon_path_ctrl_id);
+    else
+      options.icon_path.clear();
+    options.replace_version = get_check(replace_version_ctrl_id);
+    if (options.replace_version) {
+      options.ver_info.version = get_text(ver_info_version_ctrl_id);
+      options.ver_info.comments = get_text(ver_info_comments_ctrl_id);
+      options.ver_info.company_name = get_text(ver_info_company_name_ctrl_id);
+      options.ver_info.file_description = get_text(ver_info_file_description_ctrl_id);
+      options.ver_info.legal_copyright = get_text(ver_info_legal_copyright_ctrl_id);
+      options.ver_info.product_name = get_text(ver_info_product_name_ctrl_id);
+    }
+    else {
+      options.ver_info.version.clear();
+      options.ver_info.comments.clear();
+      options.ver_info.company_name.clear();
+      options.ver_info.file_description.clear();
+      options.ver_info.legal_copyright.clear();
+      options.ver_info.product_name.clear();
+    }
+    bool install_config_enabled = sfx_modules[sfx_id].install_config();
+    options.append_install_config = install_config_enabled && get_check(append_install_config_ctrl_id);
+    if (options.append_install_config) {
+      options.install_config.title = get_text(install_config_title_ctrl_id);
+      options.install_config.begin_prompt = get_text(install_config_begin_prompt_ctrl_id);
+      TriState value = get_check3(install_config_progress_ctrl_id);
+      if (value == triUndef)
+        options.install_config.progress.clear();
+      else
+        options.install_config.progress = value == triTrue ? L"yes" : L"no";
+      options.install_config.run_program = get_text(install_config_run_program_ctrl_id);
+      options.install_config.directory = get_text(install_config_directory_ctrl_id);
+      options.install_config.execute_file = get_text(install_config_execute_file_ctrl_id);
+      options.install_config.execute_parameters = get_text(install_config_execute_parameters_ctrl_id);
+    }
+    else {
+      options.install_config.title.clear();
+      options.install_config.begin_prompt.clear();
+      options.install_config.progress.clear();
+      options.install_config.run_program.clear();
+      options.install_config.directory.clear();
+      options.install_config.execute_file.clear();
+      options.install_config.execute_parameters.clear();
+    }
+  }
+
+  void write_controls(const SfxOptions& options) {
+    DisableEvents de(*this);
+
+    set_list_pos(module_ctrl_id, ArcAPI::sfx().find_by_name(options.name));
+
+    set_check(replace_icon_ctrl_id, options.replace_icon);
+    set_text(icon_path_ctrl_id, options.icon_path);
+
+    set_check(replace_version_ctrl_id, options.replace_version);
+    set_text(ver_info_product_name_ctrl_id, options.ver_info.product_name);
+    set_text(ver_info_version_ctrl_id, options.ver_info.version);
+    set_text(ver_info_company_name_ctrl_id, options.ver_info.company_name);
+    set_text(ver_info_file_description_ctrl_id, options.ver_info.file_description);
+    set_text(ver_info_comments_ctrl_id, options.ver_info.comments);
+    set_text(ver_info_legal_copyright_ctrl_id, options.ver_info.legal_copyright);
+
+    set_check(append_install_config_ctrl_id, options.append_install_config);
+    set_text(install_config_title_ctrl_id, options.install_config.title);
+    set_text(install_config_begin_prompt_ctrl_id, options.install_config.begin_prompt);
+    TriState value;
+    if (options.install_config.progress == L"yes")
+      value = triTrue;
+    else if (options.install_config.progress == L"no")
+      value = triFalse;
+    else
+      value = triUndef;
+    set_check3(install_config_progress_ctrl_id, value);
+    set_text(install_config_run_program_ctrl_id, options.install_config.run_program);
+    set_text(install_config_directory_ctrl_id, options.install_config.directory);
+    set_text(install_config_execute_file_ctrl_id, options.install_config.execute_file);
+    set_text(install_config_execute_parameters_ctrl_id, options.install_config.execute_parameters);
+  }
+
   LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
     if (msg == DN_CLOSE && param1 >= 0 && param1 != cancel_ctrl_id) {
-      const SfxModules& sfx_modules = ArcAPI::sfx();
-      unsigned sfx_id = get_list_pos(name_ctrl_id);
-      if (sfx_id >= sfx_modules.size()) {
-        FAIL_MSG(Far::get_msg(MSG_SFX_OPTIONS_DLG_WRONG_MODULE));
-      }
-      options.name = extract_file_name(sfx_modules[sfx_id].path);
-      options.replace_icon = get_check(replace_icon_ctrl_id);
-      if (options.replace_icon)
-        options.icon_path = get_text(icon_path_ctrl_id);
-      else
-        options.icon_path.clear();
-      options.replace_version = get_check(replace_version_ctrl_id);
-      if (options.replace_version) {
-        options.ver_info.version = get_text(ver_info_version_ctrl_id);
-        options.ver_info.comments = get_text(ver_info_comments_ctrl_id);
-        options.ver_info.company_name = get_text(ver_info_company_name_ctrl_id);
-        options.ver_info.file_description = get_text(ver_info_file_description_ctrl_id);
-        options.ver_info.legal_copyright = get_text(ver_info_legal_copyright_ctrl_id);
-        options.ver_info.product_name = get_text(ver_info_product_name_ctrl_id);
-      }
-      else {
-        options.ver_info.version.clear();
-        options.ver_info.comments.clear();
-        options.ver_info.company_name.clear();
-        options.ver_info.file_description.clear();
-        options.ver_info.legal_copyright.clear();
-        options.ver_info.product_name.clear();
-      }
-      bool install_config_enabled = sfx_modules[sfx_id].install_config();
-      options.append_install_config = install_config_enabled && get_check(append_install_config_ctrl_id);
-      if (options.append_install_config) {
-        options.install_config.title = get_text(install_config_title_ctrl_id);
-        options.install_config.begin_prompt = get_text(install_config_begin_prompt_ctrl_id);
-        TriState value = get_check3(install_config_progress_ctrl_id);
-        if (value == triUndef)
-          options.install_config.progress.clear();
-        else
-          options.install_config.progress = value == triTrue ? L"yes" : L"no";
-        options.install_config.run_program = get_text(install_config_run_program_ctrl_id);
-        options.install_config.directory = get_text(install_config_directory_ctrl_id);
-        options.install_config.execute_file = get_text(install_config_execute_file_ctrl_id);
-        options.install_config.execute_parameters = get_text(install_config_execute_parameters_ctrl_id);
-      }
-      else {
-        options.install_config.title.clear();
-        options.install_config.begin_prompt.clear();
-        options.install_config.progress.clear();
-        options.install_config.run_program.clear();
-        options.install_config.directory.clear();
-        options.install_config.execute_file.clear();
-        options.install_config.execute_parameters.clear();
-      }
+      read_controls(options);
     }
     else if (msg == DN_INITDIALOG) {
       set_control_state();
@@ -251,37 +301,90 @@ private:
     else if (msg == DN_BTNCLICK) {
       set_control_state();
     }
-    else if (msg == DN_EDITCHANGE && param1 == name_ctrl_id) {
+    else if (msg == DN_EDITCHANGE && param1 == module_ctrl_id) {
       set_control_state();
     }
+    else if (msg == DN_EDITCHANGE && param1 == profile_ctrl_id) {
+      unsigned profile_idx = get_list_pos(profile_ctrl_id);
+      if (profile_idx != -1 && profile_idx < profiles.size()) {
+        write_controls(profiles[profile_idx].options);
+        set_control_state();
+      }
+    }
+
+    if (msg == DN_EDITCHANGE || msg == DN_BTNCLICK) {
+      unsigned profile_idx = static_cast<unsigned>(profiles.size());
+      SfxOptions options;
+      bool valid_options = true;
+      try {
+        read_controls(options);
+      }
+      catch (const Error&) {
+        valid_options = false;
+      }
+      if (valid_options) {
+        for (unsigned i = 0; i < profiles.size(); i++) {
+          if (options == profiles[i].options) {
+            profile_idx = i;
+            break;
+          }
+        }
+      }
+      if (profile_idx != get_list_pos(profile_ctrl_id)) {
+        DisableEvents de(*this);
+        set_list_pos(profile_ctrl_id, profile_idx);
+        set_control_state();
+      }
+    }
+
     return default_dialog_proc(msg, param1, param2);
   }
 
 public:
-  SfxOptionsDialog(SfxOptions& options): Far::Dialog(Far::get_msg(MSG_SFX_OPTIONS_DLG_TITLE), &c_sfx_options_dialog_guid, c_client_xs, L"SfxOptions"), options(options) {
+  SfxOptionsDialog(SfxOptions& options, const UpdateProfiles& update_profiles): Far::Dialog(Far::get_msg(MSG_SFX_OPTIONS_DLG_TITLE), &c_sfx_options_dialog_guid, c_client_xs, L"SfxOptions"), options(options) {
+    for_each(update_profiles.cbegin(), update_profiles.cend(), [&] (const UpdateProfile& update_profile) {
+      if (update_profile.options.create_sfx) {
+        SfxProfile sfx_profile;
+        sfx_profile.name = update_profile.name;
+        sfx_profile.options = update_profile.options.sfx_options;
+        profiles.push_back(sfx_profile);
+      }
+    });
   }
 
   bool show() {
-    label(Far::get_msg(MSG_SFX_OPTIONS_DLG_NAME));
-    vector<wstring> names;
+    label(Far::get_msg(MSG_SFX_OPTIONS_DLG_PROFILE));
+    vector<wstring> profile_names;
+    profile_names.reserve(profiles.size());
+    for (unsigned i = 0; i < profiles.size(); i++) {
+      profile_names.push_back(profiles[i].name);
+    }
+    profile_names.push_back(wstring());
+    profile_ctrl_id = combo_box(profile_names, profiles.size(), 30, DIF_DROPDOWNLIST);
+    new_line();
+    separator();
+    new_line();
+
+    label(Far::get_msg(MSG_SFX_OPTIONS_DLG_MODULE));
+    vector<wstring> module_names;
     const SfxModules& sfx_modules = ArcAPI::sfx();
-    names.reserve(sfx_modules.size() + 1);
+    module_names.reserve(sfx_modules.size() + 1);
     unsigned name_width = 0;
     for_each(sfx_modules.begin(), sfx_modules.end(), [&] (const SfxModule& sfx_module) {
       wstring name = sfx_module.description();
-      names.push_back(name);
+      module_names.push_back(name);
       if (name_width < name.size())
         name_width = name.size();
     });
-    names.push_back(wstring());
-    name_ctrl_id = combo_box(names, sfx_modules.find_by_name(options.name), name_width + 6, DIF_DROPDOWNLIST);
+    module_names.push_back(wstring());
+    module_ctrl_id = combo_box(module_names, sfx_modules.find_by_name(options.name), name_width + 6, DIF_DROPDOWNLIST);
     new_line();
 
     replace_icon_ctrl_id = check_box(Far::get_msg(MSG_SFX_OPTIONS_DLG_REPLACE_ICON), options.replace_icon);
     new_line();
     spacer(2);
     label(Far::get_msg(MSG_SFX_OPTIONS_DLG_ICON_PATH));
-    icon_path_ctrl_id = history_edit_box(options.icon_path, L"arclite.icon_path", AUTO_SIZE, DIF_EDITPATH);
+    icon_path_ctrl_id = history_edit_box(options.icon_path, L"arclite.icon_path", AUTO_SIZE, DIF_EDITPATH | DIF_SELECTONENTRY);
     new_line();
 
     unsigned label_len = 0;
@@ -302,32 +405,32 @@ public:
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    ver_info_product_name_ctrl_id = edit_box(options.ver_info.product_name);
+    ver_info_product_name_ctrl_id = edit_box(options.ver_info.product_name, AUTO_SIZE, DIF_SELECTONENTRY);
     new_line();
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    ver_info_version_ctrl_id = edit_box(options.ver_info.version);
+    ver_info_version_ctrl_id = edit_box(options.ver_info.version, AUTO_SIZE, DIF_SELECTONENTRY);
     new_line();
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    ver_info_company_name_ctrl_id = edit_box(options.ver_info.company_name);
+    ver_info_company_name_ctrl_id = edit_box(options.ver_info.company_name, AUTO_SIZE, DIF_SELECTONENTRY);
     new_line();
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    ver_info_file_description_ctrl_id = edit_box(options.ver_info.file_description);
+    ver_info_file_description_ctrl_id = edit_box(options.ver_info.file_description, AUTO_SIZE, DIF_SELECTONENTRY);
     new_line();
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    ver_info_comments_ctrl_id = edit_box(options.ver_info.comments);
+    ver_info_comments_ctrl_id = edit_box(options.ver_info.comments, AUTO_SIZE, DIF_SELECTONENTRY);
     new_line();
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    ver_info_legal_copyright_ctrl_id = edit_box(options.ver_info.legal_copyright);
+    ver_info_legal_copyright_ctrl_id = edit_box(options.ver_info.legal_copyright, AUTO_SIZE, DIF_SELECTONENTRY);
     new_line();
 
     label_len = 0;
@@ -349,12 +452,12 @@ public:
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    install_config_title_ctrl_id = edit_box(options.install_config.title);
+    install_config_title_ctrl_id = edit_box(options.install_config.title, AUTO_SIZE, DIF_SELECTONENTRY);
     new_line();
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    install_config_begin_prompt_ctrl_id = edit_box(options.install_config.begin_prompt);
+    install_config_begin_prompt_ctrl_id = edit_box(options.install_config.begin_prompt, AUTO_SIZE, DIF_SELECTONENTRY);
     new_line();
     spacer(2);
     label(*label_text++);
@@ -371,22 +474,22 @@ public:
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    install_config_run_program_ctrl_id = edit_box(options.install_config.run_program);
+    install_config_run_program_ctrl_id = edit_box(options.install_config.run_program, AUTO_SIZE, DIF_SELECTONENTRY);
     new_line();
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    install_config_directory_ctrl_id = edit_box(options.install_config.directory);
+    install_config_directory_ctrl_id = edit_box(options.install_config.directory, AUTO_SIZE, DIF_SELECTONENTRY);
     new_line();
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    install_config_execute_file_ctrl_id = edit_box(options.install_config.execute_file);
+    install_config_execute_file_ctrl_id = edit_box(options.install_config.execute_file, AUTO_SIZE, DIF_SELECTONENTRY);
     new_line();
     spacer(2);
     label(*label_text++);
     pad(label_len);
-    install_config_execute_parameters_ctrl_id = edit_box(options.install_config.execute_parameters);
+    install_config_execute_parameters_ctrl_id = edit_box(options.install_config.execute_parameters, AUTO_SIZE, DIF_SELECTONENTRY);
     new_line();
 
     separator();
@@ -401,6 +504,6 @@ public:
   }
 };
 
-bool sfx_options_dialog(SfxOptions& sfx_options) {
-  return SfxOptionsDialog(sfx_options).show();
+bool sfx_options_dialog(SfxOptions& sfx_options, const UpdateProfiles& update_profiles) {
+  return SfxOptionsDialog(sfx_options, update_profiles).show();
 }

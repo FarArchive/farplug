@@ -132,9 +132,10 @@ attr.dlg.title = Attributes
 
 # SFX options dialog
 sfx_options.dlg.title = SFX Options
-sfx_options.dlg.name = &Module name:
+sfx_options.dlg.profile = Apply &profile:
+sfx_options.dlg.module = &Module name:
 sfx_options.dlg.replace_icon = Replace &icon
-sfx_options.dlg.icon_path = Icon &path:
+sfx_options.dlg.icon_path = Icon pat&h:
 sfx_options.dlg.replace_version = Replace &version
 sfx_options.dlg.ver_info.version = V&ersion:
 sfx_options.dlg.ver_info.comments = &Comments:

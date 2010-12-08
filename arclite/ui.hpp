@@ -43,4 +43,4 @@ bool settings_dialog(PluginSettings& settings);
 
 void attr_dialog(const AttrList& attr_list);
 
-bool sfx_options_dialog(SfxOptions& sfx_options);
+bool sfx_options_dialog(SfxOptions& sfx_options, const UpdateProfiles& update_profiles);

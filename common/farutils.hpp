@@ -140,9 +140,24 @@ private:
   void calc_frame_size();
   unsigned new_item(const DialogItem& di);
   static LONG_PTR WINAPI internal_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2);
+  bool events_enabled;
 protected:
+  class DisableEvents {
+  private:
+    Dialog& dlg;
+    bool events_enabled;
+  public:
+    DisableEvents(Dialog& dlg): dlg(dlg), events_enabled(dlg.events_enabled) {
+      dlg.events_enabled = false;
+      dlg.send_message(DM_ENABLEREDRAW, FALSE);
+    }
+    ~DisableEvents() {
+      dlg.send_message(DM_ENABLEREDRAW, TRUE);
+      dlg.events_enabled = events_enabled;
+    }
+  };
   unsigned get_label_len(const wstring& str);
-  virtual LONG_PTR default_dialog_proc(int msg, int param1, LONG_PTR param2);
+  LONG_PTR default_dialog_proc(int msg, int param1, LONG_PTR param2);
   virtual LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
     return default_dialog_proc(msg, param1, param2);
   }
