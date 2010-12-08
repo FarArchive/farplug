@@ -143,8 +143,6 @@ struct SfxProfile {
 
 typedef vector<SfxProfile> SfxProfiles;
 
-bool operator==(const SfxOptions& o1, const SfxOptions& o2);
-
 const GUID c_sfx_options_dialog_guid = { /* 0DCE48E5-B205-44A0-B8BF-96B28E2FD3B3 */
   0x0DCE48E5,
   0xB205,

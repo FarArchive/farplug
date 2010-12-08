@@ -364,6 +364,7 @@ void UpdateProfiles::load() {
       push_back(profile);
     }
   }
+  sort_by_name();
 }
 
 void UpdateProfiles::save() const {
@@ -396,4 +397,47 @@ void UpdateProfiles::save() const {
     SET_VALUE(advanced, str);
 #undef SET_VALUE
   });
+}
+
+unsigned UpdateProfiles::find_by_name(const wstring& name) {
+  unsigned idx = 0;
+  for (idx = 0; idx < size() && upcase(at(idx).name) != upcase(name); idx++);
+  return idx;
+}
+
+unsigned UpdateProfiles::find_by_options(const UpdateOptions& options) {
+  unsigned idx;
+  for (idx = 0; idx < size() && !(at(idx).options == options); idx++);
+  return idx;
+}
+
+void UpdateProfiles::sort_by_name() {
+  sort(begin(), end(), [] (const UpdateProfile& p1, const UpdateProfile& p2) -> bool {
+    return upcase(p1.name) < upcase(p2.name);
+  });
+}
+
+void UpdateProfiles::update(const wstring& name, const UpdateOptions& options) {
+  unsigned name_idx = find_by_name(name);
+  unsigned options_idx = find_by_options(options);
+  if (name_idx < size() && options_idx < size()) {
+    at(name_idx).name = name;
+    at(name_idx).options = options;
+    erase(begin() + options_idx);
+  }
+  else if (name_idx < size()) {
+    at(name_idx).name = name;
+    at(name_idx).options = options;
+  }
+  else if (options_idx < size()) {
+    at(options_idx).name = name;
+    at(options_idx).options = options;
+  }
+  else {
+    UpdateProfile new_profile;
+    new_profile.name = name;
+    new_profile.options = options;
+    push_back(new_profile);
+  }
+  sort_by_name();
 }

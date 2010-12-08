@@ -162,6 +162,9 @@ struct UpdateOptions {
   UpdateOptions();
 };
 
+bool operator==(const UpdateOptions& o1, const UpdateOptions& o2);
+bool operator==(const SfxOptions& o1, const SfxOptions& o2);
+
 struct UpdateProfile {
   wstring name;
   UpdateOptions options;
@@ -169,6 +172,10 @@ struct UpdateProfile {
 struct UpdateProfiles: public vector<UpdateProfile> {
   void load();
   void save() const;
+  unsigned find_by_name(const wstring& name);
+  unsigned find_by_options(const UpdateOptions& options);
+  void sort_by_name();
+  void update(const wstring& name, const UpdateOptions& options);
 };
 
 struct Attr {
