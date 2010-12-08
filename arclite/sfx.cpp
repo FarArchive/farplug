@@ -112,7 +112,7 @@ void attach_sfx_module(const wstring& file_path, const SfxOptions& sfx_options) 
   try {
     create_sfx_module(dst_path, sfx_options);
 
-    File dst_file(dst_path, FILE_WRITE_DATA, FILE_SHARE_READ, OPEN_EXISTING, 0);
+    File dst_file(dst_path, FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, OPEN_EXISTING, 0);
     dst_file.set_pos(0, FILE_END);
 
     File src_file(file_path, FILE_READ_DATA, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
