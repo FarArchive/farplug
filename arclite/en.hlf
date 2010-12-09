@@ -112,7 +112,7 @@ Standard SFX modules can unpack 7z archives only.
 
 	#Delete files after archiving# - Delete files from disk after successful archival.
 
-	#Archive files open for writing# - This option value is taken from ~Far system settings~@<..\..>SystemSettings@
+	#Archive files open for writing# - This option value is taken from ~Far system settings~@:SystemSettings@
 
 	#Ignore errors# - Do not interrupt archival when unable to open input files.
 Error log will be shown after archival process is complete.
@@ -120,7 +120,7 @@ Error log will be shown after archival process is complete.
 	#When destination file exists# - Action to perform when file already present in archive:
 ask user, overwrite or skip file.
 
-	#Use filter# - Archive files matching file filter. See ~filters menu~@<..\..>FiltersMenu@ for more details.
+	#Use filter# - Archive files matching file filter. See ~filters menu~@:FiltersMenu@ for more details.
 Empty directories are not archived when filter is active.
 
 @Config

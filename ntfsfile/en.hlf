@@ -63,7 +63,7 @@ Summary is shown for directories and multiple files:
 @file_panel_mode
 $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 $ #File panel mode#
-~Customizing file panel view modes~@<..\..\>PanelViewModes@
+~Customizing file panel view modes~@:PanelViewModes@
 
 Custom columns:
     #DSZ# - file data size i.e. size of DATA attribute(s). For attributes - attribute data size.
