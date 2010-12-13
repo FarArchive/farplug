@@ -133,7 +133,7 @@ public:
 
 class ArchiveOpener: public IArchiveOpenCallback, public IArchiveOpenVolumeCallback, public ICryptoGetTextPassword, public ComBase, public ProgressMonitor {
 private:
-  Archive& archive;
+  ComObject<Archive> archive;
   FindData volume_file_info;
 
   UInt64 total_files;
@@ -159,7 +159,7 @@ private:
   }
 
 public:
-  ArchiveOpener(Archive& archive): ProgressMonitor(Far::get_msg(MSG_PROGRESS_OPEN)), archive(archive), volume_file_info(archive.arc_info), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
+  ArchiveOpener(Archive* archive): ProgressMonitor(Far::get_msg(MSG_PROGRESS_OPEN)), archive(archive), volume_file_info(archive->arc_info), total_files(0), total_bytes(0), completed_files(0), completed_bytes(0) {
   }
 
   UNKNOWN_IMPL_BEGIN
@@ -211,13 +211,13 @@ public:
 
   STDMETHODIMP GetStream(const wchar_t *name, IInStream **inStream) {
     COM_ERROR_HANDLER_BEGIN
-    wstring file_path = add_trailing_slash(archive.arc_dir()) + name;
+    wstring file_path = add_trailing_slash(archive->arc_dir()) + name;
     FindData find_data;
     if (!File::get_find_data_nt(file_path, find_data))
       return S_FALSE;
     if (find_data.is_dir())
       return S_FALSE;
-    archive.volume_names.insert(name);
+    archive->volume_names.insert(name);
     volume_file_info = find_data;
     ComObject<IInStream> file_stream(new ArchiveOpenStream(file_path));
     file_stream.detach(inStream);
@@ -228,12 +228,12 @@ public:
 
   STDMETHODIMP CryptoGetTextPassword(BSTR *password) {
     COM_ERROR_HANDLER_BEGIN
-    if (archive.password.empty()) {
+    if (archive->password.empty()) {
       ProgressSuspend ps(*this);
-      if (!password_dialog(archive.password, archive.arc_path))
+      if (!password_dialog(archive->password, archive->arc_path))
         FAIL(E_ABORT);
     }
-    BStr(archive.password).detach(password);
+    BStr(archive->password).detach(password);
     return S_OK;
     COM_ERROR_HANDLER_END
   }
@@ -256,7 +256,7 @@ bool Archive::open_sub_stream(IInStream** sub_stream, FindData& sub_arc_info) {
     return false;
 
   ComObject<ISequentialInStream> sub_seq_stream;
-  if (get_stream->GetStream(main_subfile, &sub_seq_stream) != S_OK || !sub_seq_stream)
+  if (get_stream->GetStream(main_subfile, sub_seq_stream.ref()) != S_OK || !sub_seq_stream)
     return false;
 
   if (sub_seq_stream->QueryInterface(IID_IInStream, reinterpret_cast<void**>(sub_stream)) != S_OK || !sub_stream)
@@ -293,7 +293,7 @@ bool Archive::open_sub_stream(IInStream** sub_stream, FindData& sub_arc_info) {
 
 bool Archive::open(IInStream* in_stream) {
   CHECK_COM(in_stream->Seek(0, STREAM_SEEK_SET, nullptr));
-  ComObject<IArchiveOpenCallback> opener(new ArchiveOpener(*this));
+  ComObject<IArchiveOpenCallback> opener(new ArchiveOpener(this));
   const UInt64 max_check_start_position = max_check_size;
   HRESULT res;
   COM_ERROR_CHECK(res = in_arc->Open(in_stream, &max_check_start_position, opener));
@@ -316,7 +316,7 @@ void prioritize(list<ArcEntry>& arc_entries, const ArcType& first, const ArcType
   }
 }
 
-void Archive::open(const OpenOptions& options, vector<Archive>& archives) {
+void Archive::open(const OpenOptions& options, vector<ComObject<Archive>>& archives) {
   size_t parent_idx = -1;
   if (!archives.empty())
     parent_idx = archives.size() - 1;
@@ -330,7 +330,7 @@ void Archive::open(const OpenOptions& options, vector<Archive>& archives) {
     arc_info = stream_impl->get_info();
   }
   else {
-    if (!archives[parent_idx].open_sub_stream(&stream, arc_info))
+    if (!archives[parent_idx]->open_sub_stream(stream.ref(), arc_info))
       return;
   }
 
@@ -382,17 +382,17 @@ void Archive::open(const OpenOptions& options, vector<Archive>& archives) {
   prioritize(arc_entries, c_rar, c_split);
 
   for (list<ArcEntry>::const_iterator arc_entry = arc_entries.begin(); arc_entry != arc_entries.end(); arc_entry++) {
-    Archive archive;
-    archive.arc_path = options.arc_path;
-    archive.arc_info = arc_info;
-    archive.password = options.password;
+    ComObject<Archive> archive(new Archive());
+    archive->arc_path = options.arc_path;
+    archive->arc_info = arc_info;
+    archive->password = options.password;
     if (parent_idx != -1)
-      archive.volume_names = archives[parent_idx].volume_names;
-    ArcAPI::create_in_archive(arc_entry->type, &archive.in_arc);
-    if (archive.open(stream)) {
+      archive->volume_names = archives[parent_idx]->volume_names;
+    ArcAPI::create_in_archive(arc_entry->type, archive->in_arc.ref());
+    if (archive->open(stream)) {
       if (parent_idx != -1)
-        archive.arc_chain.assign(archives[parent_idx].arc_chain.begin(), archives[parent_idx].arc_chain.end());
-      archive.arc_chain.push_back(*arc_entry);
+        archive->arc_chain.assign(archives[parent_idx]->arc_chain.begin(), archives[parent_idx]->arc_chain.end());
+      archive->arc_chain.push_back(*arc_entry);
       archives.push_back(archive);
       open(options, archives);
       if (!options.detect) break;
@@ -400,8 +400,8 @@ void Archive::open(const OpenOptions& options, vector<Archive>& archives) {
   }
 }
 
-vector<Archive> Archive::open(const OpenOptions& options) {
-  vector<Archive> archives;
+vector<ComObject<Archive>> Archive::open(const OpenOptions& options) {
+  vector<ComObject<Archive>> archives;
   open(options, archives);
   if (!options.detect && !archives.empty())
     archives.erase(archives.begin(), archives.end() - 1);
@@ -415,14 +415,14 @@ void Archive::reopen() {
   ComObject<IInStream> stream(stream_impl);
   arc_info = stream_impl->get_info();
   ArcChain::const_iterator arc_entry = arc_chain.begin();
-  ArcAPI::create_in_archive(arc_entry->type, &in_arc);
+  ArcAPI::create_in_archive(arc_entry->type, in_arc.ref());
   if (!open(stream))
     FAIL(E_FAIL);
   arc_entry++;
   while (arc_entry != arc_chain.end()) {
     ComObject<IInStream> sub_stream;
-    CHECK(open_sub_stream(&sub_stream, arc_info));
-    ArcAPI::create_in_archive(arc_entry->type, &in_arc);
+    CHECK(open_sub_stream(sub_stream.ref(), arc_info));
+    ArcAPI::create_in_archive(arc_entry->type, in_arc.ref());
     if (!open(sub_stream))
       FAIL(E_FAIL);
     arc_entry++;
