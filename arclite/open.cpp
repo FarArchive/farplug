@@ -112,7 +112,7 @@ public:
 
   FindData get_info() {
     FindData file_info;
-    memset(&file_info, 0, sizeof(file_info));
+    memzero(file_info);
     wstring file_name = extract_file_name(path());
     if (file_name.empty())
       file_name = path();
@@ -240,63 +240,31 @@ public:
 };
 
 
-bool Archive::open_sub_stream(IInStream** sub_stream, FindData& sub_arc_info) {
-  UInt32 main_subfile;
-  PropVariant prop;
-  if (in_arc->GetArchiveProperty(kpidMainSubfile, prop.ref()) != S_OK || prop.vt != VT_UI4)
-    return false;
-  main_subfile = prop.ulVal;
-
-  UInt32 num_items;
-  if (in_arc->GetNumberOfItems(&num_items) != S_OK || main_subfile >= num_items)
+bool Archive::get_stream(UInt32 index, IInStream** stream) {
+  if (index >= num_indices)
     return false;
 
   ComObject<IInArchiveGetStream> get_stream;
   if (in_arc->QueryInterface(IID_IInArchiveGetStream, reinterpret_cast<void**>(&get_stream)) != S_OK || !get_stream)
     return false;
 
-  ComObject<ISequentialInStream> sub_seq_stream;
-  if (get_stream->GetStream(main_subfile, sub_seq_stream.ref()) != S_OK || !sub_seq_stream)
+  ComObject<ISequentialInStream> seq_stream;
+  if (get_stream->GetStream(index, seq_stream.ref()) != S_OK || !seq_stream)
     return false;
 
-  if (sub_seq_stream->QueryInterface(IID_IInStream, reinterpret_cast<void**>(sub_stream)) != S_OK || !sub_stream)
+  if (seq_stream->QueryInterface(IID_IInStream, reinterpret_cast<void**>(stream)) != S_OK || !stream)
     return false;
-
-  if (in_arc->GetProperty(main_subfile, kpidPath, prop.ref()) == S_OK && prop.vt == VT_BSTR)
-    wcscpy(sub_arc_info.cFileName, extract_file_name(prop.bstrVal).c_str());
-
-  if (in_arc->GetProperty(main_subfile, kpidAttrib, prop.ref()) == S_OK && prop.is_uint())
-    sub_arc_info.dwFileAttributes = static_cast<DWORD>(prop.get_uint());
-  else
-    sub_arc_info.dwFileAttributes = 0;
-
-  if (in_arc->GetProperty(main_subfile, kpidSize, prop.ref()) == S_OK && prop.is_uint())
-    sub_arc_info.set_size(prop.get_uint());
-  else
-    sub_arc_info.set_size(0);
-
-  if (in_arc->GetProperty(main_subfile, kpidCTime, prop.ref()) == S_OK && prop.is_filetime())
-    sub_arc_info.ftCreationTime = prop.get_filetime();
-  else
-    sub_arc_info.ftCreationTime = arc_info.ftCreationTime;
-  if (in_arc->GetProperty(main_subfile, kpidMTime, prop.ref()) == S_OK && prop.is_filetime())
-    sub_arc_info.ftLastWriteTime = prop.get_filetime();
-  else
-    sub_arc_info.ftLastWriteTime = arc_info.ftLastWriteTime;
-  if (in_arc->GetProperty(main_subfile, kpidATime, prop.ref()) == S_OK && prop.is_filetime())
-    sub_arc_info.ftLastAccessTime = prop.get_filetime();
-  else
-    sub_arc_info.ftLastAccessTime = arc_info.ftLastAccessTime;
 
   return true;
 }
 
-bool Archive::open(IInStream* in_stream) {
-  CHECK_COM(in_stream->Seek(0, STREAM_SEEK_SET, nullptr));
+bool Archive::open(IInStream* stream, const ArcType& type) {
+  ArcAPI::create_in_archive(type, in_arc.ref());
+  CHECK_COM(stream->Seek(0, STREAM_SEEK_SET, nullptr));
   ComObject<IArchiveOpenCallback> opener(new ArchiveOpener(this));
   const UInt64 max_check_start_position = max_check_size;
   HRESULT res;
-  COM_ERROR_CHECK(res = in_arc->Open(in_stream, &max_check_start_position, opener));
+  COM_ERROR_CHECK(res = in_arc->Open(stream, &max_check_start_position, opener));
   return res == S_OK;
 }
 
@@ -316,33 +284,16 @@ void prioritize(list<ArcEntry>& arc_entries, const ArcType& first, const ArcType
   }
 }
 
-void Archive::open(const OpenOptions& options, vector<ComObject<Archive>>& archives) {
-  size_t parent_idx = -1;
-  if (!archives.empty())
-    parent_idx = archives.size() - 1;
-
-  ComObject<IInStream> stream;
-  FindData arc_info;
-  memset(&arc_info, 0, sizeof(arc_info));
-  if (parent_idx == -1) {
-    ArchiveOpenStream* stream_impl = new ArchiveOpenStream(options.arc_path);
-    stream = stream_impl;
-    arc_info = stream_impl->get_info();
-  }
-  else {
-    if (!archives[parent_idx]->open_sub_stream(stream.ref(), arc_info))
-      return;
-  }
-
-  list<ArcEntry> arc_entries;
+ArcEntries Archive::detect(IInStream* stream, const wstring& file_ext, const ArcTypes& arc_types) {
+  ArcEntries arc_entries;
   set<ArcType> found_types;
 
   // 1. find formats by signature
   vector<ByteVector> signatures;
-  signatures.reserve(options.arc_types.size());
+  signatures.reserve(arc_types.size());
   vector<ArcType> sig_types;
-  sig_types.reserve(options.arc_types.size());
-  for_each(options.arc_types.begin(), options.arc_types.end(), [&] (const ArcType& arc_type) {
+  sig_types.reserve(arc_types.size());
+  for_each(arc_types.begin(), arc_types.end(), [&] (const ArcType& arc_type) {
     if (!ArcAPI::formats().at(arc_type).start_signature.empty()) {
       sig_types.push_back(arc_type);
       signatures.push_back(ArcAPI::formats().at(arc_type).start_signature);
@@ -361,16 +312,16 @@ void Archive::open(const OpenOptions& options, vector<ComObject<Archive>>& archi
   });
 
   // 2. find formats by file extension
-  ArcTypes types_by_ext = ArcAPI::formats().find_by_ext(extract_file_ext(arc_info.cFileName));
+  ArcTypes types_by_ext = ArcAPI::formats().find_by_ext(file_ext);
   for_each(types_by_ext.begin(), types_by_ext.end(), [&] (const ArcType& arc_type) {
-    if (found_types.count(arc_type) == 0 && find(options.arc_types.begin(), options.arc_types.end(), arc_type) != options.arc_types.end()) {
+    if (found_types.count(arc_type) == 0 && find(arc_types.begin(), arc_types.end(), arc_type) != arc_types.end()) {
       found_types.insert(arc_type);
       arc_entries.push_front(ArcEntry(arc_type, 0));
     }
   });
 
   // 3. all other formats
-  for_each(options.arc_types.begin(), options.arc_types.end(), [&] (const ArcType& arc_type) {
+  for_each(arc_types.begin(), arc_types.end(), [&] (const ArcType& arc_type) {
     if (found_types.count(arc_type) == 0) {
       arc_entries.push_back(ArcEntry(arc_type, 0));
     }
@@ -381,15 +332,40 @@ void Archive::open(const OpenOptions& options, vector<ComObject<Archive>>& archi
   // special case: Rar must go before Split
   prioritize(arc_entries, c_rar, c_split);
 
-  for (list<ArcEntry>::const_iterator arc_entry = arc_entries.begin(); arc_entry != arc_entries.end(); arc_entry++) {
+  return arc_entries;
+}
+
+void Archive::open(const OpenOptions& options, vector<ComObject<Archive>>& archives) {
+  size_t parent_idx = -1;
+  if (!archives.empty())
+    parent_idx = archives.size() - 1;
+
+  ComObject<IInStream> stream;
+  FindData arc_info;
+  memzero(arc_info);
+  if (parent_idx == -1) {
+    ArchiveOpenStream* stream_impl = new ArchiveOpenStream(options.arc_path);
+    stream = stream_impl;
+    arc_info = stream_impl->get_info();
+  }
+  else {
+    UInt32 main_file;
+    if (!archives[parent_idx]->get_main_file(main_file))
+      return;
+    if (!archives[parent_idx]->get_stream(main_file, stream.ref()))
+      return;
+    arc_info = archives[parent_idx]->get_file_info(main_file);
+  }
+
+  ArcEntries arc_entries = detect(stream, extract_file_ext(arc_info.cFileName), options.arc_types);
+  for (ArcEntries::const_iterator arc_entry = arc_entries.begin(); arc_entry != arc_entries.end(); arc_entry++) {
     ComObject<Archive> archive(new Archive());
     archive->arc_path = options.arc_path;
     archive->arc_info = arc_info;
     archive->password = options.password;
     if (parent_idx != -1)
       archive->volume_names = archives[parent_idx]->volume_names;
-    ArcAPI::create_in_archive(arc_entry->type, archive->in_arc.ref());
-    if (archive->open(stream)) {
+    if (archive->open(stream, arc_entry->type)) {
       if (parent_idx != -1)
         archive->arc_chain.assign(archives[parent_idx]->arc_chain.begin(), archives[parent_idx]->arc_chain.end());
       archive->arc_chain.push_back(*arc_entry);
@@ -415,16 +391,16 @@ void Archive::reopen() {
   ComObject<IInStream> stream(stream_impl);
   arc_info = stream_impl->get_info();
   ArcChain::const_iterator arc_entry = arc_chain.begin();
-  ArcAPI::create_in_archive(arc_entry->type, in_arc.ref());
-  if (!open(stream))
+  if (!open(stream, arc_entry->type))
     FAIL(E_FAIL);
   arc_entry++;
   while (arc_entry != arc_chain.end()) {
+    UInt32 main_file;
+    CHECK(get_main_file(main_file));
     ComObject<IInStream> sub_stream;
-    CHECK(open_sub_stream(sub_stream.ref(), arc_info));
-    ArcAPI::create_in_archive(arc_entry->type, in_arc.ref());
-    if (!open(sub_stream))
-      FAIL(E_FAIL);
+    CHECK(get_stream(main_file, sub_stream.ref()))
+    arc_info = get_file_info(main_file);
+    CHECK(open(sub_stream, arc_entry->type));
     arc_entry++;
   }
 }

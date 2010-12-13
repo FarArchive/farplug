@@ -608,7 +608,7 @@ public:
     // common source directory
     wstring src_path = extract_file_path(Far::get_absolute_path(files.front()));
     wstring src_path_upcase = upcase(src_path);
-    wstring full_path; 
+    wstring full_path;
     for_each(files.begin(), files.end(), [&] (const wstring& file) {
       while (!substr_match(upcase(file), 0, src_path_upcase.c_str())) {
         if (is_root_path(src_path))

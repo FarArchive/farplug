@@ -650,7 +650,7 @@ void Event::set() {
 
 WindowClass::WindowClass(const wstring& name, WindowProc window_proc): name(name) {
   WNDCLASSW wndclass;
-  memset(&wndclass, 0, sizeof(wndclass));
+  memzero(wndclass);
   wndclass.lpfnWndProc = window_proc;
   wndclass.cbWndExtra = sizeof(this);
   wndclass.hInstance = g_h_instance;

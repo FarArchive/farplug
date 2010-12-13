@@ -119,7 +119,7 @@ struct DialogItem {
   unsigned list_size;
   unsigned list_pos;
   DialogItem() {
-    memset(this, 0, sizeof(*this));
+    memzero(*this);
   }
 };
 

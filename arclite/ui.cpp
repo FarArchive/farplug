@@ -965,7 +965,7 @@ private:
     DisableEvents de(*this);
     vector<FarListItem> fl_items;
     FarListItem fl_item;
-    memset(&fl_item, 0, sizeof(fl_item));
+    memzero(fl_item);
     for (unsigned i = 0; i < profiles.size(); i++) {
       fl_item.Text = profiles[i].name.c_str();
       fl_items.push_back(fl_item);
