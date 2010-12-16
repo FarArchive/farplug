@@ -1,4 +1,4 @@
-CPPFLAGS = -nologo -EHsc -I..\common user32.lib advapi32.lib ole32.lib
+CPPFLAGS = -nologo -EHsc -I..\common -DUNICODE user32.lib advapi32.lib ole32.lib
 
 build:
   $(CPP) $(CPPFLAGS) gendep.cpp
