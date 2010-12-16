@@ -692,6 +692,9 @@ public:
   }
 
   void create_dir(const wchar_t** name, int op_mode) {
+    if (!archive.updatable()) {
+      FAIL_MSG(Far::get_msg(MSG_ERROR_NOT_UPDATABLE));
+    }
     bool show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
     created_dir = *name;
     if (show_dialog) {
@@ -984,7 +987,7 @@ int WINAPI MakeDirectoryW(HANDLE hPlugin, const wchar_t** Name, int OpMode) {
   FAR_ERROR_HANDLER_BEGIN;
   reinterpret_cast<Plugin*>(hPlugin)->create_dir(Name, OpMode);
   return 1;
-  FAR_ERROR_HANDLER_END(return 0, return -1, (OpMode & OPM_SILENT) != 0);
+  FAR_ERROR_HANDLER_END(return -1, return -1, (OpMode & OPM_SILENT) != 0);
 }
 
 int WINAPI ProcessHostFileW(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int OpMode) {
