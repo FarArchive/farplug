@@ -429,6 +429,8 @@ public:
       options.encrypt_header = triUndef;
       options.password = archive->password;
       options.overwrite = g_options.update_overwrite;
+      if (op_mode & OPM_EDIT)
+        options.overwrite = oaOverwrite;
     }
     options.create_sfx = false;
     options.enable_volumes = false;
