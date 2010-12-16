@@ -787,7 +787,7 @@ HANDLE WINAPI OpenPluginW(int OpenFrom, INT_PTR Item) {
     unsigned extract_menu_id = menu_items.add(Far::get_msg(MSG_MENU_EXTRACT));
     unsigned test_menu_id = menu_items.add(Far::get_msg(MSG_MENU_TEST));
     unsigned sfx_convert_menu_id = menu_items.add(Far::get_msg(MSG_MENU_SFX_CONVERT));
-    unsigned item = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), menu_items);
+    unsigned item = Far::menu(Far::get_msg(MSG_PLUGIN_NAME), menu_items, L"Contents");
     if (item == open_menu_id || item == detect_menu_id) {
       OpenOptions options;
       options.detect = item == detect_menu_id;
