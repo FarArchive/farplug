@@ -557,7 +557,7 @@ bool operator==(const SfxOptions& o1, const SfxOptions& o2) {
   return true;
 }
 
-bool operator==(const UpdateOptions& o1, const UpdateOptions& o2) {
+bool operator==(const ProfileOptions& o1, const ProfileOptions& o2) {
   if (o1.arc_type != o2.arc_type || o1.level != o2.level)
     return false;
   bool is_7z = o1.arc_type == c_7z;
@@ -579,7 +579,7 @@ bool operator==(const UpdateOptions& o1, const UpdateOptions& o2) {
       return false;
     bool is_encrypted = o1.encrypt;
     if (is_encrypted) {
-      if (o1.password != o2.password || o1.show_password != o2.show_password)
+      if (o1.password != o2.password)
         return false;
       if (is_7z) {
         if (o1.encrypt_header != o2.encrypt_header)
@@ -605,7 +605,7 @@ bool operator==(const UpdateOptions& o1, const UpdateOptions& o2) {
         return false;
     }
   }
-  if (o1.move_files != o2.move_files || o1.open_shared != o2.open_shared || o1.ignore_errors != o2.ignore_errors)
+  if (o1.move_files != o2.move_files || o1.ignore_errors != o2.ignore_errors)
     return false;
   return true;
 }
@@ -897,7 +897,7 @@ private:
     }
   }
 
-  void write_controls(const UpdateOptions& options) {
+  void write_controls(const ProfileOptions& options) {
     DisableEvents de(*this);
     if (new_arc) {
       arc_type = options.arc_type;
@@ -930,7 +930,6 @@ private:
 
     set_check(encrypt_ctrl_id, options.encrypt);
     set_check3(encrypt_header_ctrl_id, options.encrypt_header);
-    set_check(show_password_ctrl_id, options.show_password);
     set_text(password_ctrl_id, options.password);
     set_text(password_verify_ctrl_id, options.password);
     set_text(password_visible_ctrl_id, options.password);
@@ -944,15 +943,7 @@ private:
     }
 
     set_check(move_files_ctrl_id, options.move_files);
-    set_check(open_shared_ctrl_id, options.open_shared);
     set_check(ignore_errors_ctrl_id, options.ignore_errors);
-
-    if (!new_arc) {
-      if (options.overwrite == oaAsk) set_check(oa_ask_ctrl_id);
-      else if (options.overwrite == oaOverwrite) set_check(oa_overwrite_ctrl_id);
-      else if (options.overwrite == oaSkip) set_check(oa_skip_ctrl_id);
-      else set_check(oa_ask_ctrl_id);
-    }
   }
 
   void populate_profile_list() {
