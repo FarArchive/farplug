@@ -25,7 +25,7 @@ private:
   vector<InfoPanelLine> info_lines;
 
 public:
-  Plugin() {
+  Plugin(): archive(new Archive()) {
   }
 
   static Plugin* open(const OpenOptions& options) {
@@ -692,7 +692,7 @@ public:
   }
 
   void create_dir(const wchar_t** name, int op_mode) {
-    if (!archive.updatable()) {
+    if (!archive->updatable()) {
       FAIL_MSG(Far::get_msg(MSG_ERROR_NOT_UPDATABLE));
     }
     bool show_dialog = (op_mode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
