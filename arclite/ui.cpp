@@ -390,6 +390,9 @@ private:
       options.delete_archive = get_check(delete_archive_ctrl_id);
       options.save_params = get_check(save_params_ctrl_id);
     }
+    else if (msg == DN_BTNCLICK && param1 == delete_archive_ctrl_id) {
+      enable(move_files_ctrl_id, options.move_files != triUndef && !get_check(delete_archive_ctrl_id));
+    }
     return default_dialog_proc(msg, param1, param2);
   }
 
