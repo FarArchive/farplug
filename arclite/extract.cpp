@@ -11,7 +11,8 @@ ExtractOptions::ExtractOptions():
   overwrite(oaOverwrite),
   move_files(triUndef),
   separate_dir(triFalse),
-  delete_archive(false) {
+  delete_archive(false),
+  save_params(false) {
 }
 
 wstring get_progress_bar_str(unsigned width, unsigned percent1, unsigned percent2) {

@@ -369,6 +369,7 @@ private:
   int password_ctrl_id;
   int separate_dir_ctrl_id;
   int delete_archive_ctrl_id;
+  int save_params_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -387,6 +388,7 @@ private:
       options.password = get_text(password_ctrl_id);
       options.separate_dir = get_check3(separate_dir_ctrl_id);
       options.delete_archive = get_check(delete_archive_ctrl_id);
+      options.save_params = get_check(save_params_ctrl_id);
     }
     return default_dialog_proc(msg, param1, param2);
   }
@@ -431,6 +433,11 @@ public:
 
     label(Far::get_msg(MSG_EXTRACT_DLG_PASSWORD));
     password_ctrl_id = pwd_edit_box(options.password, 20);
+    new_line();
+
+    separator();
+    new_line();
+    save_params_ctrl_id = check_box(Far::get_msg(MSG_EXTRACT_DLG_SAVE_PARAMS), false);
     new_line();
 
     separator();
