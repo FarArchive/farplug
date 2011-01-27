@@ -739,6 +739,10 @@ unsigned char get_colors(PaletteColors color_id) {
   return static_cast<unsigned char>(g_far.AdvControl(g_far.ModuleNumber, ACTL_GETCOLOR, reinterpret_cast<void*>(color_id)));
 }
 
+bool panel_go_to_dir(HANDLE h_panel, const wstring& dir) {
+  return g_far.Control(h_panel, FCTL_SETPANELDIR, 0, reinterpret_cast<LONG_PTR>(dir.c_str())) != 0;
+}
+
 // set current file on panel to file_path
 bool panel_go_to_file(HANDLE h_panel, const wstring& file_path) {
   wstring dir = extract_file_path(file_path);

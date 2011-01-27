@@ -159,7 +159,8 @@ public:
   }
 
   void get_files(const PluginPanelItem* panel_items, int items_number, int move, const wchar_t** dest_path, int op_mode) {
-    if (items_number == 1 && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
+    bool single_item = items_number == 1;
+    if (single_item && wcscmp(panel_items[0].FindData.lpwszFileName, L"..") == 0) return;
     ExtractOptions options;
     options.dst_dir = *dest_path;
     options.move_files = archive->updatable() ? (move ? triTrue : triFalse) : triUndef;
@@ -174,6 +175,7 @@ public:
     if (show_dialog) {
       options.overwrite = g_options.extract_overwrite;
       options.separate_dir = g_options.extract_separate_dir;
+      options.open_dir = g_options.extract_open_dir;
     }
     else {
       options.overwrite = oaOverwrite;
@@ -190,7 +192,7 @@ public:
         extract_dir = options.dst_dir;
         *dest_path = extract_dir.c_str();
       }
-      if (options.separate_dir == triTrue || (options.separate_dir == triUndef && items_number > 1 && (op_mode & OPM_TOPLEVEL))) {
+      if (options.separate_dir == triTrue || (options.separate_dir == triUndef && !single_item && (op_mode & OPM_TOPLEVEL))) {
         options.dst_dir = get_separate_dir_path(options.dst_dir, archive->arc_name());
       }
       if (!options.password.empty())
@@ -199,6 +201,7 @@ public:
         g_options.extract_ignore_errors = options.ignore_errors;
         g_options.extract_overwrite = options.overwrite;
         g_options.extract_separate_dir = options.separate_dir;
+        g_options.extract_open_dir = options.open_dir;
         g_options.save();
       }
     }
@@ -213,11 +216,12 @@ public:
 
     ErrorLog error_log;
     archive->extract(src_dir_index, indices, options, error_log);
-    if (!error_log.empty()) {
-      if (show_dialog)
-        show_error_log(error_log);
+
+    if (!error_log.empty() && show_dialog) {
+      show_error_log(error_log);
     }
-    else {
+
+    if (error_log.empty()) {
       if (options.delete_archive) {
         archive->close();
         archive->delete_archive();
@@ -227,10 +231,18 @@ public:
         archive->delete_files(indices);
       Far::progress_notify();
     }
+
+    if (options.open_dir) {
+      if (single_item)
+        Far::panel_go_to_file(PANEL_ACTIVE, add_trailing_slash(options.dst_dir) + panel_items[0].FindData.lpwszFileName);
+      else
+        Far::panel_go_to_dir(PANEL_ACTIVE, options.dst_dir);
+    }
   }
 
   static void extract(const vector<wstring>& arc_list, ExtractOptions options) {
     wstring dst_dir = options.dst_dir;
+    wstring dst_file_name;
     ErrorLog error_log;
     for (unsigned i = 0; i < arc_list.size(); i++) {
       vector<ComObject<Archive>> archives;
@@ -257,8 +269,14 @@ public:
       archive->make_index();
 
       FileIndexRange dir_list = archive->get_dir_list(c_root_index);
+
+      unsigned num_items = dir_list.second - dir_list.first;
+      if (arc_list.size() == 1 && num_items == 1) {
+        dst_file_name = archive->file_list[*dir_list.first].name;
+      }
+
       vector<UInt32> indices;
-      indices.reserve(dir_list.second - dir_list.first);
+      indices.reserve(num_items);
       for_each(dir_list.first, dir_list.second, [&] (UInt32 file_index) {
         indices.push_back(file_index);
       });
@@ -284,6 +302,15 @@ public:
       Far::update_panel(PANEL_ACTIVE, false);
       Far::progress_notify();
     }
+
+    if (options.open_dir) {
+      if (arc_list.size() > 1)
+        Far::panel_go_to_dir(PANEL_ACTIVE, dst_dir);
+      else if (dst_file_name.empty())
+        Far::panel_go_to_dir(PANEL_ACTIVE, options.dst_dir);
+      else
+        Far::panel_go_to_file(PANEL_ACTIVE, add_trailing_slash(options.dst_dir) + dst_file_name);
+    }
   }
 
   static void bulk_extract(const vector<wstring>& arc_list) {
@@ -296,6 +323,7 @@ public:
     options.ignore_errors = g_options.extract_ignore_errors;
     options.overwrite = g_options.extract_overwrite;
     options.separate_dir = g_options.extract_separate_dir;
+    options.open_dir = g_options.extract_open_dir;
 
     if (!extract_dialog(options))
       FAIL(E_ABORT);
@@ -308,6 +336,7 @@ public:
       g_options.extract_ignore_errors = options.ignore_errors;
       g_options.extract_overwrite = options.overwrite;
       g_options.extract_separate_dir = options.separate_dir;
+      g_options.extract_open_dir = options.open_dir;
       g_options.save();
     }
 
