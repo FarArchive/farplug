@@ -21,8 +21,8 @@ FAR Manager plugin
   - Far Manager <(FAR_VER_MAJOR)>.<(FAR_VER_MINOR)>.<(FAR_VER_BUILD)>
   - Windows 2000+
 
-Новые версии: http://forum.farmanager.com/viewtopic.php?t=2050
-Обсуждение: http://forum.farmanager.com/viewtopic.php?t=2051
+Новые версии: <(UPDATE_URL)>
+Обсуждение: <(SUPPORT_URL)>
 
 ---------------------------------------------------------------
 
@@ -46,5 +46,5 @@ System requirements:
   - Far Manager <(FAR_VER_MAJOR)>.<(FAR_VER_MINOR)>.<(FAR_VER_BUILD)>
   - Windows 2000+
 
-New versions: http://forum.farmanager.com/viewtopic.php?t=2050
-Discussion: http://forum.farmanager.com/viewtopic.php?t=2051
+New versions: <(UPDATE_URL)>
+Discussion: <(SUPPORT_URL)>

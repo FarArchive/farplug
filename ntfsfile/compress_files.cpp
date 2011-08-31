@@ -1,10 +1,8 @@
-#include "farapi_config.h"
-
 #define _ERROR_WINDOWS
 #include "error.h"
 
 #include "msg.h"
-
+#include "guids.h"
 #include "utils.h"
 #include "dlgapi.h"
 #include "log.h"
@@ -14,7 +12,7 @@
 #include "compress_files.h"
 
 extern struct PluginStartupInfo g_far;
-extern Array<unsigned char> g_colors;
+extern Array<FarColor> g_colors;
 
 CompressFilesParams g_compress_files_params;
 
@@ -242,7 +240,7 @@ void CompressFiles::do_update_ui() {
     if (total_size)
       lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_SIZE).data(), &format_inf_amount_short(total_size));
     if (total_size && total_file_cnt)
-      lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+      lines += L"\x1";
     if (total_file_cnt)
       lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_FILES).data(), total_file_cnt);
     draw_text_box(far_get_msg(MSG_ESTIMATE_PROGRESS_TITLE), lines, c_client_xs);
@@ -261,7 +259,7 @@ void CompressFiles::do_update_ui() {
     // file name
     UnicodeString file_name_label(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_FILE_NAME));
     lines += file_name_label + ' ' + fit_str(current_file_name, c_client_xs - file_name_label.size() - 1);
-    lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+    lines += L"\x1";
 
     if (progress_phase == phase_estimate) {
       // file compression ratio
@@ -323,7 +321,7 @@ void CompressFiles::do_update_ui() {
       }
     }
 
-    lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+    lines += L"\x1";
 
     // total percent done
     unsigned total_percent_done;
@@ -349,8 +347,8 @@ void CompressFiles::do_update_ui() {
     }
 
     if (err_cnt) {
-      lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
-      lines += UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_ERRORS).data(), &UnicodeString::format(L"\1%c%u\2", CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), err_cnt));
+      lines += L"\x1";
+      lines += UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_ERRORS).data(), err_cnt);
     }
 
     draw_text_box(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_TITLE), lines, c_client_xs);
@@ -665,7 +663,7 @@ private:
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
-  static LONG_PTR WINAPI dialog_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
+  static INT_PTR WINAPI dialog_proc(HANDLE h_dlg, int msg, int param1, void* param2) {
     BEGIN_ERROR_HANDLER;
     CompressFilesDialog* dlg = static_cast<CompressFilesDialog*>(FarDialog::get_dlg(h_dlg));
     if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != dlg->cancel_ctrl_id)) {
@@ -677,17 +675,17 @@ private:
   }
 
 public:
-  CompressFilesDialog(CompressFilesParams& params): FarDialog(far_get_msg(MSG_COMPRESS_FILES_TITLE), c_client_xs), params(params) {
+  CompressFilesDialog(CompressFilesParams& params): FarDialog(c_compress_files_dialog_guid, far_get_msg(MSG_COMPRESS_FILES_TITLE), c_client_xs), params(params) {
   }
 
   bool show() {
     label(far_get_msg(MSG_COMPRESS_FILES_MIN_FILE_SIZE));
     spacer(1);
-    min_file_size_ctrl_id = var_edit_box(int_to_str(params.min_file_size), 5, 5);
+    min_file_size_ctrl_id = var_edit_box(int_to_str(params.min_file_size), 5);
     new_line();
     label(far_get_msg(MSG_COMPRESS_FILES_MAX_COMPRESSION_RATIO));
     spacer(1);
-    max_compression_ratio_ctrl_id = var_edit_box(int_to_str(params.max_compression_ratio), 5, 5);
+    max_compression_ratio_ctrl_id = var_edit_box(int_to_str(params.max_compression_ratio), 5);
     new_line();
     separator();
     new_line();
@@ -696,7 +694,7 @@ public:
     cancel_ctrl_id = button(far_get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
     new_line();
 
-    int item = FarDialog::show(dialog_proc, FAR_T("compress_files"));
+    int item = FarDialog::show(dialog_proc, L"compress_files");
 
     return (item != -1) && (item != cancel_ctrl_id);
   }

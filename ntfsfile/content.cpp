@@ -1,17 +1,15 @@
-#include "farapi_config.h"
-
 #define _ERROR_WINDOWS
 #include "error.h"
 
 #include "msg.h"
-
+#include "guids.h"
 #include "utils.h"
 #include "options.h"
 #include "dlgapi.h"
 #include "content.h"
 
 extern struct PluginStartupInfo g_far;
-extern Array<unsigned char> g_colors;
+extern Array<FarColor> g_colors;
 
 // LZO library exception
 class LzoError: public Error {
@@ -53,7 +51,7 @@ struct OptionsDlgData {
   int cancel_ctrl_id;
 };
 
-LONG_PTR WINAPI options_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
+INT_PTR WINAPI options_dlg_proc(HANDLE h_dlg, int msg, int param1, void* param2) {
   BEGIN_ERROR_HANDLER;
   FarDialog* dlg = FarDialog::get_dlg(h_dlg);
   const OptionsDlgData* dlg_data = (const OptionsDlgData*) dlg->get_dlg_data(0);
@@ -107,7 +105,7 @@ LONG_PTR WINAPI options_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR par
 // returns false if user cancelled dialog
 // fills 'options' structure otherwise
 bool show_options_dialog(ContentOptions& options, bool single_file) {
-  FarDialog dlg(far_get_msg(MSG_CONTENT_SETTINGS_TITLE), 30);
+  FarDialog dlg(c_content_options_dialog_guid, far_get_msg(MSG_CONTENT_SETTINGS_TITLE), 30);
   OptionsDlgData dlg_data;
   dlg.add_dlg_data(&dlg_data);
   dlg.add_dlg_data(&options);
@@ -163,7 +161,7 @@ UnicodeString ed2k_extract_hash_from_url(const UnicodeString& url) {
 void save_hashes_to_file(const UnicodeString& file_name, const ContentOptions& options, const ContentInfo& info) {
   UnicodeString hashes_file_name = file_name + L".hashes";
   if (GetFileAttributesW(hashes_file_name.data()) != INVALID_FILE_ATTRIBUTES) { // file already exists
-    if (far_message(far_get_msg(MSG_CONTENT_RESULT_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_CONTENT_RESULT_FILE_EXISTS), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK) + L"\n" + far_get_msg(MSG_BUTTON_CANCEL), 2) != 0) return;
+    if (far_message(c_file_exists_dialog_guid, far_get_msg(MSG_CONTENT_RESULT_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_CONTENT_RESULT_FILE_EXISTS), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK) + L"\n" + far_get_msg(MSG_BUTTON_CANCEL), 2) != 0) return;
   }
   HANDLE h_file = CreateFileW(hashes_file_name.data(), FILE_WRITE_DATA, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
   CHECK_SYS(h_file != INVALID_HANDLE_VALUE);
@@ -189,16 +187,17 @@ void save_hashes_to_file(const UnicodeString& file_name, const ContentOptions& o
     AnsiString line = "ED2K: " + unicode_to_oem(format_hex_array(info.ed2k)) + "\n";
     CHECK_SYS(WriteFile(h_file, line.data(), line.size(), &bw, NULL));
   }
-  far_message(far_get_msg(MSG_CONTENT_RESULT_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_CONTENT_RESULT_FILE_SAVED), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK), 1);
+  far_message(c_file_saved_dialog_guid, far_get_msg(MSG_CONTENT_RESULT_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_CONTENT_RESULT_FILE_SAVED), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK), 1);
 }
 
 struct ResultDlgData {
   int verify_edit_ctrl_id;
-  int result_label_ctrl_id;
+  int correct_result_label_ctrl_id;
+  int wrong_result_label_ctrl_id;
   int save_file_ctrl_id;
 };
 
-LONG_PTR WINAPI result_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
+INT_PTR WINAPI result_dlg_proc(HANDLE h_dlg, int msg, int param1, void* param2) {
   BEGIN_ERROR_HANDLER;
   FarDialog* dlg = FarDialog::get_dlg(h_dlg);
   const ResultDlgData* dlg_data = (const ResultDlgData*) dlg->get_dlg_data(0);
@@ -216,20 +215,8 @@ LONG_PTR WINAPI result_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR para
         ((options->sha256) && (format_hex_array(info->sha256).icompare(user_hash) == 0)) ||
         ((options->ed2k) && ((format_hex_array(info->ed2k).icompare(user_hash) == 0) ||
         (format_hex_array(info->ed2k).icompare(ed2k_extract_hash_from_url(user_hash)) == 0)));
-      unsigned char result_color;
-      UnicodeString result_text;
-      if (user_hash.size() != 0) {
-        if (result) {
-          result_color = CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_GREEN);
-          result_text = far_get_msg(MSG_CONTENT_RESULT_CORRECT);
-        }
-        else {
-          result_color = CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED);
-          result_text = far_get_msg(MSG_CONTENT_RESULT_WRONG);
-        }
-        dlg->set_color(dlg_data->result_label_ctrl_id, result_color);
-      }
-      dlg->set_text(dlg_data->result_label_ctrl_id, result_text);
+      dlg->set_visible(dlg_data->correct_result_label_ctrl_id, result && user_hash.size());
+      dlg->set_visible(dlg_data->wrong_result_label_ctrl_id, !result && user_hash.size());
     }
   }
   else if (msg == DN_BTNCLICK) {
@@ -238,6 +225,18 @@ LONG_PTR WINAPI result_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR para
       dlg->set_focus(dlg_data->verify_edit_ctrl_id);
     }
   }
+  else if (msg == DN_CTLCOLORDLGITEM) {
+    FarDialogItemColors* item_colors = static_cast<FarDialogItemColors*>(param2);
+    if (param1 == dlg_data->correct_result_label_ctrl_id) {
+      item_colors->Colors[0].ForegroundColor = FOREGROUND_GREEN;
+      item_colors->Colors[0].Flags |= FCF_FG_4BIT;
+    }
+    else if (param1 == dlg_data->wrong_result_label_ctrl_id) {
+      item_colors->Colors[0].ForegroundColor = FOREGROUND_RED;
+      item_colors->Colors[0].Flags |= FCF_FG_4BIT;
+    }
+  }
+
   END_ERROR_HANDLER(;,;);
   return g_far.DefDlgProc(h_dlg, msg, param1, param2);
 }
@@ -245,7 +244,7 @@ LONG_PTR WINAPI result_dlg_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR para
 // show content analysis result dialog
 void show_result_dialog(const UnicodeString& file_name, const ContentOptions& options, const ContentInfo& info) {
   ResultDlgData dlg_data;
-  FarDialog dlg(far_get_msg(MSG_CONTENT_RESULT_TITLE), 30);
+  FarDialog dlg(c_content_result_dialog_guid, far_get_msg(MSG_CONTENT_RESULT_TITLE), 30);
   dlg.add_dlg_data(&dlg_data);
   dlg.add_dlg_data((void*) &file_name);
   dlg.add_dlg_data((void*) &options);
@@ -333,12 +332,14 @@ void show_result_dialog(const UnicodeString& file_name, const ContentOptions& op
 
     dlg.label(far_get_msg(MSG_CONTENT_RESULT_VERIFY));
     dlg.pad(pad_size);
-    dlg_data.verify_edit_ctrl_id = dlg.var_edit_box(L"", 1024, verify_box_size + 1);
+    dlg_data.verify_edit_ctrl_id = dlg.var_edit_box(L"", verify_box_size + 1);
     dlg.new_line();
 
     dlg.label(far_get_msg(MSG_CONTENT_RESULT_RESULT));
     dlg.spacer(1);
-    dlg_data.result_label_ctrl_id = dlg.label(L"", max(far_get_msg(MSG_CONTENT_RESULT_CORRECT).size(), far_get_msg(MSG_CONTENT_RESULT_WRONG).size()));
+    dlg_data.correct_result_label_ctrl_id = dlg.label(far_get_msg(MSG_CONTENT_RESULT_CORRECT), AUTO_SIZE, DIF_HIDDEN);
+    dlg.same_pos();
+    dlg_data.wrong_result_label_ctrl_id = dlg.label(far_get_msg(MSG_CONTENT_RESULT_WRONG), AUTO_SIZE, DIF_HIDDEN);
     dlg.new_line();
   }
 
@@ -783,7 +784,7 @@ void process_file_content(const UnicodeString& file_name, const ContentOptions& 
 // show content analysis result dialog
 void show_result_dialog(const CompressionStats& stats) {
   UnicodeString str;
-  FarDialog dlg(far_get_msg(MSG_CONTENT_MULTI_RESULT_TITLE), 30);
+  FarDialog dlg(c_content_result_dialog_guid, far_get_msg(MSG_CONTENT_MULTI_RESULT_TITLE), 30);
   if (stats.file_cnt != 0) {
     // processing speed
     str.copy_fmt(far_get_msg(MSG_CONTENT_MULTI_RESULT_PROCESSED).data(), &format_inf_amount_short(stats.data_size), &format_time2(stats.time));
@@ -902,7 +903,7 @@ protected:
       lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_COMPRESSION).data(), &format_inf_amount_short(comp_size),
         &format_inf_amount_short(data_size), 100 * comp_size / data_size);
     }
-    lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+    lines += L"\x1";
 
     // progress bar
     if (est_size != 0) {
@@ -922,12 +923,12 @@ protected:
     }
 
     if ((file_cnt != 0) || (dir_cnt != 0) || (reparse_cnt != 0) || (err_cnt != 0)) {
-      lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+      lines += L"\x1";
     }
     if (file_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_FILES).data(), file_cnt, est_file_cnt);
     if (dir_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_DIRS).data(), dir_cnt, est_dir_cnt);
     if (reparse_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_REPARSE).data(), reparse_cnt);
-    if (err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_ERRORS).data(), &UnicodeString::format(L"\1%c%u\2", CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), err_cnt));
+    if (err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_ERRORS).data(), err_cnt);
     draw_text_box(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_TITLE), lines, c_client_xs);
   }
 public:
@@ -943,12 +944,12 @@ protected:
     ObjectArray<UnicodeString> lines;
     if (st.est_size != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_SIZE).data(), &format_inf_amount_short(st.est_size));
     if ((st.est_size != 0) && ((st.est_file_cnt != 0) || (st.est_dir_cnt != 0) || (st.est_reparse_cnt != 0) || (st.est_err_cnt != 0))) {
-      lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+      lines += L"\x1";
     }
     if (st.est_file_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_FILES).data(), st.est_file_cnt);
     if (st.est_dir_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_DIRS).data(), st.est_dir_cnt);
     if (st.est_reparse_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_REPARSE).data(), st.est_reparse_cnt);
-    if (st.est_err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_ERRORS).data(), &UnicodeString::format(L"\1%c%u\2", CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), st.est_err_cnt));
+    if (st.est_err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_ESTIMATE_PROGRESS_ERRORS).data(), st.est_err_cnt);
     draw_text_box(far_get_msg(MSG_ESTIMATE_PROGRESS_TITLE), lines, c_client_xs);
     SetConsoleTitleW(far_get_msg(MSG_ESTIMATE_PROGRESS_TITLE).data());
     far_set_progress_state(TBPF_INDETERMINATE);

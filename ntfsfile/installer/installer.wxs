@@ -5,10 +5,10 @@
   <Product Id="*" Language="1033" Codepage="1252" Name="$(var.Product) for $(var.FarManager)" Version="$(var.Version)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.Guid.UpgradeCode)">
     <Package Id="*" Platform="$(var.Platform)" Compressed="yes" Manufacturer="$(var.Manufacturer)" Description="$(var.Product) $(var.Version) for $(var.FarManager)" InstallerVersion="200" SummaryCodepage="1252" />
     <Property Id="INSTALLDIR">
-      <RegistrySearch Id="InstallDir" Root="HKLM" Key="Software\Far2" Name="$(var.InstallDir)" Type="directory" Win64="$(var.Win64)" />
+      <RegistrySearch Id="InstallDir" Root="HKLM" Key="Software\Far Manager" Name="$(var.InstallDir)" Type="directory" Win64="$(var.Win64)" />
     </Property>
     <Property Id="USERINSTALLDIR">
-      <RegistrySearch Id="UserInstallDir" Root="HKCU" Key="Software\Far2" Name="$(var.InstallDir)" Type="directory" Win64="$(var.Win64)" />
+      <RegistrySearch Id="UserInstallDir" Root="HKCU" Key="Software\Far Manager" Name="$(var.InstallDir)" Type="directory" Win64="$(var.Win64)" />
     </Property>
     <Property Id="ALLUSERS" Value="1" />
     <Property Id="REINSTALLMODE" Value="amus" />

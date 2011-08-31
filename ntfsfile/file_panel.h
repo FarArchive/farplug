@@ -1,44 +1,16 @@
 #pragma once
 
 struct PluginItemList: public Array<PluginPanelItem> {
-#ifdef FARAPI17
-  ObjectArray<Array<unsigned char> > names;
-#endif
-#ifdef FARAPI18
   ObjectArray<UnicodeString> names;
-#endif
-  ObjectArray<FarStr> col_str;
-  ObjectArray<Array<const FarCh*> > col_data;
-};
-
-struct CompositeFileName {
-  FarStr long_name;
-  // short_name is needed only for correct handling of Unicode file names in Far 1.x
-#ifdef FARAPI17
-  FarStr short_name;
-#endif
-  CompositeFileName() {
-  }
-  explicit CompositeFileName(const FAR_FIND_DATA& find_data): long_name(FAR_FILE_NAME(find_data))
-#ifdef FARAPI17
-  , short_name(FAR_SHORT_FILE_NAME(find_data))
-#endif
-  {
-  }
-  bool operator==(const FAR_FIND_DATA& find_data) const {
-#ifdef FARAPI17
-    if (short_name.size() && *FAR_SHORT_FILE_NAME(find_data)) return short_name == FAR_SHORT_FILE_NAME(find_data);
-    else
-#endif
-    return long_name == FAR_FILE_NAME(find_data);
-  }
+  ObjectArray<UnicodeString> col_str;
+  ObjectArray<Array<const wchar_t*> > col_data;
 };
 
 struct PanelState {
-  FarStr directory;
-  CompositeFileName current_file;
-  CompositeFileName top_panel_file;
-  ObjectArray<CompositeFileName> selected_files;
+  UnicodeString directory;
+  UnicodeString current_file;
+  UnicodeString top_panel_file;
+  ObjectArray<UnicodeString> selected_files;
 };
 
 class FileListProgress: public ProgressMonitor {
@@ -75,22 +47,19 @@ private:
   };
   UnicodeString current_dir;
   NtfsVolume volume;
-#ifdef FARAPI17
-  AnsiString current_dir_oem;
-#endif // FARAPI17
   ObjectArray<PluginItemList> file_lists;
   PanelMode panel_mode;
-  FarStr panel_title;
-  FarStr col_types;
-  FarStr col_widths;
-  FarStr status_col_types;
-  FarStr status_col_widths;
-  Array<const FarCh*> col_titles;
+  UnicodeString panel_title;
+  UnicodeString col_types;
+  UnicodeString col_widths;
+  UnicodeString status_col_types;
+  UnicodeString status_col_widths;
+  Array<const wchar_t*> col_titles;
   Array<unsigned> col_sizes;
   Array<unsigned> col_indices;
   PanelState saved_state;
   static Array<FilePanel*> g_file_panels;
-  void parse_column_spec(const UnicodeString& src_col_types, const UnicodeString& src_col_widths, FarStr& col_types, FarStr& col_widths, bool title);
+  void parse_column_spec(const UnicodeString& src_col_types, const UnicodeString& src_col_widths, UnicodeString& col_types, UnicodeString& col_widths, bool title);
   PluginItemList create_panel_items(const std::list<PanelItemData>& pid_list, bool search_mode);
   void scan_dir(const UnicodeString& root_path, const UnicodeString& rel_path, std::list<PanelItemData>& pid_list, FileListProgress& progress);
   void sort_file_list(std::list<PanelItemData>& pid_list);
@@ -152,10 +121,10 @@ public:
     return current_dir;
   }
   static FilePanel* FilePanel::get_active_panel();
-  void new_file_list(PluginPanelItem*& panel_items, int& item_num, bool search_mode);
+  void new_file_list(PluginPanelItem*& panel_items, size_t& item_num, bool search_mode);
   void clear_file_list(void* file_list_ptr);
   void change_directory(const UnicodeString& target_dir, bool search_mode);
-  void fill_plugin_info(OpenPluginInfo* info);
+  void fill_plugin_info(OpenPanelInfo* info);
   void toggle_mft_mode();
   void reload_mft();
   static void reload_mft_all();

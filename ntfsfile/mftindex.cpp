@@ -1,5 +1,3 @@
-#include "farapi_config.h"
-
 #define _ERROR_WINDOWS
 #include "error.h"
 
@@ -400,9 +398,6 @@ void FilePanel::toggle_mft_mode() {
   if (!mft_mode) {
     current_dir = get_real_path(current_dir);
     if (current_dir.equal(current_dir.size() - 1, L':')) current_dir = add_trailing_slash(current_dir);
-#ifdef FARAPI17
-    current_dir_oem = unicode_to_oem(current_dir);
-#endif // FARAPI17
     volume.open(extract_path_root(current_dir));
     mft_index.invalidate();
     if (g_file_panel_mode.use_usn_journal && g_file_panel_mode.use_cache) {

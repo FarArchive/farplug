@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<?define Manufacturer = "farplug.googlecode.com" ?>
-<?define SupportUrl = "http://forum.farmanager.com/viewtopic.php?t=2051" ?>
-<?define InfoUrl = "http://farplug.googlecode.com/" ?>
-<?define UpdateUrl = "http://forum.farmanager.com/viewtopic.php?t=2050" ?>
+<?define Manufacturer = "<(AUTHOR)>" ?>
+<?define SupportUrl = "<(SUPPORT_URL)>" ?>
+<?define InfoUrl = "<(HOME_URL)>" ?>
+<?define UpdateUrl = "<(UPDATE_URL)>" ?>
 <?if $(var.Platform) = x86 ?>
   <?define Guid.UpgradeCode = "B970628E-BBDC-4B06-AED7-A5E8F0411EF0" ?>
   <?define Guid.en.hlf = "E3BA8CE7-7069-4CA6-A57B-497980F519B6" ?>

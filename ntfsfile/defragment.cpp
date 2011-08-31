@@ -1,5 +1,3 @@
-#include "farapi_config.h"
-
 #define _ERROR_WINDOWS
 #include "error.h"
 

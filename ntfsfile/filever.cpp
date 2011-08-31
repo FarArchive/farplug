@@ -1,16 +1,14 @@
-#include "farapi_config.h"
-
 #define _ERROR_WINDOWS
 #include "error.h"
 
 #include "msg.h"
-
+#include "guids.h"
 #include "utils.h"
 #include "dlgapi.h"
 #include "filever.h"
 
 extern struct PluginStartupInfo g_far;
-extern Array<unsigned char> g_colors;
+extern Array<FarColor> g_colors;
 
 struct NameValue {
   UnicodeString name;
@@ -25,7 +23,7 @@ struct VarVerInfo {
   ObjectArray<NameValue> strings;
 };
 
-struct VersionInfo {
+struct VersionData {
   ObjectArray<NameValue> fixed;
   ObjectArray<VarVerInfo> var;
   ObjectArray<NameValue> sig;
@@ -35,8 +33,8 @@ struct VersionInfo {
 ObjectArray<NameValue> get_signature_info(const UnicodeString& file_name);
 ObjectArray<NameValue> get_prop_list(const UnicodeString& file_name);
 
-VersionInfo get_version_info(const UnicodeString& file_name) {
-  VersionInfo ver_info;
+VersionData get_version_info(const UnicodeString& file_name) {
+  VersionData ver_info;
 
   DWORD dw_handle;
   DWORD ver_size = GetFileVersionInfoSizeW(file_name.data(), &dw_handle);
@@ -495,14 +493,16 @@ struct FileVersionDialogData {
   int lang_cp_ctrl_id;
   unsigned var_cnt;
   int verify_ctrl_id;
-  int verify_result_ctrl_id;
+  int verify_progress_ctrl_id;
+  int verify_ok_ctrl_id;
+  int verify_failed_ctrl_id;
 };
 
-LONG_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
+INT_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, void* param2) {
   BEGIN_ERROR_HANDLER;
   FarDialog* dlg = FarDialog::get_dlg(h_dlg);
   const FileVersionDialogData* dlg_data = reinterpret_cast<const FileVersionDialogData*>(dlg->get_dlg_data(0));
-  const VersionInfo* version_info = reinterpret_cast<const VersionInfo*>(dlg->get_dlg_data(1));
+  const VersionData* version_info = reinterpret_cast<const VersionData*>(dlg->get_dlg_data(1));
   if (msg == DN_INITDIALOG) {
     file_version_dialog_proc(h_dlg, DN_EDITCHANGE, dlg_data->lang_cp_ctrl_id, 0);
     return FALSE;
@@ -516,10 +516,10 @@ LONG_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG
       int ctrl_id = dlg_data->lang_cp_ctrl_id + 1;
       for (unsigned i = 0; i < version_info->var[lang_cp_idx].strings.size(); i++) {
         dlg->set_text(ctrl_id, version_info->var[lang_cp_idx].strings[i].name);
-        g_far.SendDlgMessage(h_dlg, DM_SHOWITEM, ctrl_id, 1);
+        g_far.SendDlgMessage(h_dlg, DM_SHOWITEM, ctrl_id, reinterpret_cast<void*>(1));
         ctrl_id++;
         dlg->set_text(ctrl_id, version_info->var[lang_cp_idx].strings[i].value);
-        g_far.SendDlgMessage(h_dlg, DM_SHOWITEM, ctrl_id, 1);
+        g_far.SendDlgMessage(h_dlg, DM_SHOWITEM, ctrl_id, reinterpret_cast<void*>(1));
         ctrl_id++;
       }
       for (unsigned i = version_info->var[lang_cp_idx].strings.size(); i < dlg_data->var_cnt; i++) {
@@ -531,31 +531,31 @@ LONG_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG
     }
 
     FarDialogItem dlg_item;
-    for (unsigned ctrl_id = 0; g_far.SendDlgMessage(h_dlg, DM_GETDLGITEMSHORT, ctrl_id, reinterpret_cast<LONG_PTR>(&dlg_item)); ctrl_id++) {
+    for (unsigned ctrl_id = 0; g_far.SendDlgMessage(h_dlg, DM_GETDLGITEMSHORT, ctrl_id, &dlg_item); ctrl_id++) {
       if (dlg_item.Type == DI_EDIT || dlg_item.Type == DI_COMBOBOX) {
         g_far.SendDlgMessage(h_dlg, DM_EDITUNCHANGEDFLAG, ctrl_id, 0);
         EditorSetPosition esp = { 0 };
-        g_far.SendDlgMessage(h_dlg, DM_SETEDITPOSITION, ctrl_id, reinterpret_cast<LONG_PTR>(&esp));
+        g_far.SendDlgMessage(h_dlg, DM_SETEDITPOSITION, ctrl_id, &esp);
       }
     }
 
     return TRUE;
   }
   else if (msg == DN_BTNCLICK && param1 == dlg_data->verify_ctrl_id) {
-    dlg->set_color(dlg_data->verify_result_ctrl_id, g_colors[COL_DIALOGTEXT]);
-    dlg->set_text(dlg_data->verify_result_ctrl_id, far_get_msg(MSG_FILE_VER_VERIFY_IN_PROGRESS));
+    dlg->set_visible(dlg_data->verify_ok_ctrl_id, false);
+    dlg->set_visible(dlg_data->verify_failed_ctrl_id, false);
+    dlg->set_visible(dlg_data->verify_progress_ctrl_id, true);
     LONG result = verify_signature(dlg_data->file_name);
-    unsigned char result_color;
-    UnicodeString result_text;
     if (result == ERROR_SUCCESS) {
-      result_color = CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_GREEN);
-      result_text = far_get_msg(MSG_FILE_VER_VERIFY_OK);
+      dlg->set_visible(dlg_data->verify_ok_ctrl_id, true);
     }
     else {
       if (result == TRUST_E_NOSIGNATURE)
         result = GetLastError();
-      if (result == TRUST_E_NOSIGNATURE)
+      UnicodeString result_text;
+      if (result == TRUST_E_NOSIGNATURE) {
         result_text = far_get_msg(MSG_FILE_VER_VERIFY_BAD);
+      }
       else {
         #define RESULT_TEXT(code) if (result == code) result_text = L#code
         RESULT_TEXT(TRUST_E_PROVIDER_UNKNOWN);
@@ -569,11 +569,21 @@ LONG_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, LONG
         if (result_text.size() == 0)
           result_text = UnicodeString::format(L"0x%x", result);
       }
-      result_color = CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED);
+      dlg->set_text(dlg_data->verify_failed_ctrl_id, result_text);
+      dlg->set_visible(dlg_data->verify_failed_ctrl_id, true);
     }
-    dlg->set_text(dlg_data->verify_result_ctrl_id, result_text);
-    dlg->set_color(dlg_data->verify_result_ctrl_id, result_color);
     return TRUE;
+  }
+  else if (msg == DN_CTLCOLORDLGITEM) {
+    FarDialogItemColors* item_colors = static_cast<FarDialogItemColors*>(param2);
+    if (param1 == dlg_data->verify_ok_ctrl_id) {
+      item_colors->Colors[0].ForegroundColor = FOREGROUND_GREEN;
+      item_colors->Colors[0].Flags |= FCF_FG_4BIT;
+    }
+    else if (param1 == dlg_data->verify_failed_ctrl_id) {
+      item_colors->Colors[0].ForegroundColor = FOREGROUND_RED;
+      item_colors->Colors[0].Flags |= FCF_FG_4BIT;
+    }
   }
   END_ERROR_HANDLER(;,;);
   return g_far.DefDlgProc(h_dlg, msg, param1, param2);
@@ -588,7 +598,7 @@ void calc_max_widths(const ObjectArray<NameValue>& name_values, unsigned& name_w
   }
 }
 
-void show_file_version_dialog(const UnicodeString& file_name, const VersionInfo& version_info) {
+void show_file_version_dialog(const UnicodeString& file_name, const VersionData& version_info) {
   FileVersionDialogData dlg_data;
   dlg_data.file_name = file_name;
 
@@ -617,7 +627,6 @@ void show_file_version_dialog(const UnicodeString& file_name, const VersionInfo&
   }
 
   name_width += 1;
-  unsigned max_value_len = value_width;
   value_width += 1;
   unsigned dlg_width = name_width + value_width;
   unsigned max_width = get_msg_width();
@@ -626,13 +635,13 @@ void show_file_version_dialog(const UnicodeString& file_name, const VersionInfo&
     value_width = dlg_width - name_width;
   }
 
-  FarDialog dlg(far_get_msg(MSG_FILE_VER_TITLE), dlg_width);
+  FarDialog dlg(c_file_version_dialog_guid, far_get_msg(MSG_FILE_VER_TITLE), dlg_width);
   dlg.add_dlg_data(&dlg_data);
-  dlg.add_dlg_data(const_cast<VersionInfo*>(&version_info));
+  dlg.add_dlg_data(const_cast<VersionData*>(&version_info));
 
   for (unsigned i = 0; i < version_info.fixed.size(); i++) {
     dlg.label(version_info.fixed[i].name, name_width);
-    dlg.var_edit_box(version_info.fixed[i].value, version_info.fixed[i].value.size(), value_width, DIF_READONLY | DIF_SELECTONENTRY);
+    dlg.var_edit_box(version_info.fixed[i].value, value_width, DIF_READONLY | DIF_SELECTONENTRY);
     dlg.new_line();
   }
 
@@ -641,14 +650,14 @@ void show_file_version_dialog(const UnicodeString& file_name, const VersionInfo&
     dlg.new_line();
     dlg.label(far_get_msg(MSG_FILE_VER_LANGUAGE), name_width);
     if (version_info.var.size() == 1)
-      dlg_data.lang_cp_ctrl_id = dlg.var_edit_box(lang_items[0], lang_items[0].size(), value_width, DIF_READONLY | DIF_SELECTONENTRY);
+      dlg_data.lang_cp_ctrl_id = dlg.var_edit_box(lang_items[0], value_width, DIF_READONLY | DIF_SELECTONENTRY);
     else
-      dlg_data.lang_cp_ctrl_id = dlg.combo_box(lang_items, 0, 10, value_width, DIF_DROPDOWNLIST | DIF_SELECTONENTRY);
+      dlg_data.lang_cp_ctrl_id = dlg.combo_box(lang_items, 0, value_width, DIF_DROPDOWNLIST | DIF_SELECTONENTRY);
     dlg.new_line();
 
     for (unsigned i = 0; i < dlg_data.var_cnt; i++) {
       dlg.label(UnicodeString(), name_width);
-      dlg.var_edit_box(UnicodeString(), max_value_len, value_width, DIF_READONLY | DIF_SELECTONENTRY);
+      dlg.var_edit_box(UnicodeString(), value_width, DIF_READONLY | DIF_SELECTONENTRY);
       dlg.new_line();
     }
   }
@@ -662,12 +671,17 @@ void show_file_version_dialog(const UnicodeString& file_name, const VersionInfo&
     }
     for (unsigned i = 0; i < version_info.sig.size(); i++) {
       dlg.label(version_info.sig[i].name, name_width);
-      dlg.var_edit_box(version_info.sig[i].value, version_info.sig[i].value.size(), value_width, DIF_READONLY | DIF_SELECTONENTRY);
+      dlg.var_edit_box(version_info.sig[i].value, value_width, DIF_READONLY | DIF_SELECTONENTRY);
       dlg.new_line();
     }
+    
     dlg_data.verify_ctrl_id = dlg.button(far_get_msg(MSG_FILE_VER_VERIFY_SIGNATURE), DIF_BTNNOCLOSE);
     dlg.pad(name_width);
-    dlg_data.verify_result_ctrl_id = dlg.label(UnicodeString(), 30);
+    dlg_data.verify_progress_ctrl_id = dlg.label(far_get_msg(MSG_FILE_VER_VERIFY_IN_PROGRESS), AUTO_SIZE, DIF_HIDDEN);
+    dlg.same_pos();
+    dlg_data.verify_ok_ctrl_id = dlg.label(far_get_msg(MSG_FILE_VER_VERIFY_OK), AUTO_SIZE, DIF_HIDDEN);
+    dlg.same_pos();
+    dlg_data.verify_failed_ctrl_id = dlg.label(UnicodeString(), 30, DIF_HIDDEN);
     dlg.new_line();
   }
   else
@@ -680,7 +694,7 @@ void show_file_version_dialog(const UnicodeString& file_name, const VersionInfo&
     }
     for (unsigned i = 0; i < version_info.props.size(); i++) {
       dlg.label(version_info.props[i].name, name_width);
-      dlg.var_edit_box(version_info.props[i].value, version_info.props[i].value.size(), value_width, DIF_READONLY | DIF_SELECTONENTRY);
+      dlg.var_edit_box(version_info.props[i].value, value_width, DIF_READONLY | DIF_SELECTONENTRY);
       dlg.new_line();
     }
   }
@@ -689,9 +703,9 @@ void show_file_version_dialog(const UnicodeString& file_name, const VersionInfo&
 }
 
 void plugin_show_file_version(const UnicodeString& file_name) {
-  VersionInfo version_info = get_version_info(file_name);
+  VersionData version_info = get_version_info(file_name);
   if (version_info.fixed.size() || version_info.sig.size() || version_info.props.size())
     show_file_version_dialog(file_name, version_info);
   else
-    far_message(far_get_msg(MSG_FILE_VER_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_FILE_VER_NO_INFO), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK), 1);
+    far_message(c_no_file_version_dialog_guid, far_get_msg(MSG_FILE_VER_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_FILE_VER_NO_INFO), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK), 1);
 }

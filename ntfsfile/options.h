@@ -8,6 +8,7 @@ struct ContentOptions {
   bool sha1;
   bool sha256;
   bool ed2k;
+  ContentOptions();
 };
 
 struct FilePanelMode {
@@ -30,15 +31,14 @@ struct FilePanelMode {
   bool default_mft_mode;
   bool backward_mft_scan;
   bool flat_mode_auto_off;
-#ifdef FARAPI17
-  bool use_std_sort;
-#endif
   UnicodeString cache_dir;
+  FilePanelMode();
 };
 
 struct CompressFilesParams {
   unsigned min_file_size; // MB
   unsigned max_compression_ratio; // 75% = comp_size / file_size
+  CompressFilesParams();
 };
 
 /* plugin options */

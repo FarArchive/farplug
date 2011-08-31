@@ -1,10 +1,8 @@
-#include "farapi_config.h"
-
 #define _ERROR_WINDOWS
 #include "error.h"
 
 #include "msg.h"
-
+#include "guids.h"
 #include "dlgapi.h"
 #include "options.h"
 #include "log.h"
@@ -482,113 +480,68 @@ void Log::show() {
   }
 }
 
-int far_control_int(HANDLE h_panel, int command, int param) {
-#ifdef FARAPI17
-  return g_far.Control(h_panel, command, reinterpret_cast<void*>(param));
-#endif
-#ifdef FARAPI18
-  return g_far.Control(h_panel, command, param, 0);
-#endif
+int far_control_int(HANDLE h_panel, FILE_CONTROL_COMMANDS command, int param) {
+  return g_far.PanelControl(h_panel, command, param, 0);
 }
 
-int far_control_ptr(HANDLE h_panel, int command, const void* param) {
-#ifdef FARAPI17
-  return g_far.Control(h_panel, command, const_cast<void*>(param));
-#endif
-#ifdef FARAPI18
-  return g_far.Control(h_panel, command, 0, reinterpret_cast<LONG_PTR>(param));
-#endif
+int far_control_ptr(HANDLE h_panel, FILE_CONTROL_COMMANDS command, const void* param) {
+  return g_far.PanelControl(h_panel, command, 0, const_cast<void*>(param));
 }
 
-FarStr far_get_panel_dir(HANDLE h_panel, const PanelInfo& pi) {
-  FarStr cur_dir;
-#ifdef FARAPI17
-  return pi.CurDir;
-#endif
-#ifdef FARAPI18
-  unsigned cur_dir_size = g_far.Control(h_panel, FCTL_GETPANELDIR, 0, 0) - 1;
-  g_far.Control(h_panel, FCTL_GETPANELDIR, cur_dir_size + 1, reinterpret_cast<LONG_PTR>(cur_dir.buf(cur_dir_size)));
+UnicodeString far_get_panel_dir(HANDLE h_panel, const PanelInfo& pi) {
+  UnicodeString cur_dir;
+  unsigned cur_dir_size = g_far.PanelControl(h_panel, FCTL_GETPANELDIR, 0, 0) - 1;
+  g_far.PanelControl(h_panel, FCTL_GETPANELDIR, cur_dir_size + 1, cur_dir.buf(cur_dir_size));
   cur_dir.set_size(cur_dir_size);
-#endif
   return cur_dir;
 }
 
 UnicodeString far_get_full_path(const UnicodeString& file_name) {
   UnicodeString full_file_name;
-#ifdef FARAPI17
-  LPWSTR file_part;
-  DWORD ret = GetFullPathNameW(file_name.data(), MAX_PATH, full_file_name.buf(MAX_PATH), &file_part);
-  if (ret > MAX_PATH) {
-    ret = GetFullPathNameW(file_name.data(), ret, full_file_name.buf(ret), &file_part);
-  }
-  CHECK_SYS(ret);
-  full_file_name.set_size(ret);
-#endif
-#ifdef FARAPI18
   const unsigned c_buf_size = 0x10000;
   int size = g_fsf.ConvertPath(CPM_FULL, file_name.data(), full_file_name.buf(c_buf_size), c_buf_size);
   if (size > c_buf_size) g_fsf.ConvertPath(CPM_FULL, file_name.data(), full_file_name.buf(size), size);
   full_file_name.set_size();
-#endif
   return full_file_name;
 }
 
 PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi) {
-#ifdef FARAPI17
-  return pi.PanelItems + index;
-#endif
-#ifdef FARAPI18
   static Array<unsigned char> ppi;
-  unsigned size = g_far.Control(h_panel, FCTL_GETPANELITEM, index, NULL);
-  ppi.extend(size);
-  g_far.Control(h_panel, FCTL_GETPANELITEM, index, reinterpret_cast<LONG_PTR>(ppi.buf()));
+  unsigned size = g_far.PanelControl(h_panel, FCTL_GETPANELITEM, index, nullptr);
+  FarGetPluginPanelItem gpi;
+  gpi.Size = size;
+  gpi.Item = reinterpret_cast<PluginPanelItem*>(ppi.buf(size));
+  g_far.PanelControl(h_panel, FCTL_GETPANELITEM, index, &gpi);
   ppi.set_size(size);
   return reinterpret_cast<PluginPanelItem*>(ppi.buf());
-#endif
 }
 
 PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi) {
-#ifdef FARAPI17
-  return pi.SelectedItems + index;
-#endif
-#ifdef FARAPI18
   static Array<unsigned char> ppi;
-  unsigned size = g_far.Control(h_panel, FCTL_GETSELECTEDPANELITEM, index, NULL);
-  ppi.extend(size);
-  g_far.Control(h_panel, FCTL_GETSELECTEDPANELITEM, index, reinterpret_cast<LONG_PTR>(ppi.buf()));
+  unsigned size = g_far.PanelControl(h_panel, FCTL_GETSELECTEDPANELITEM, index, nullptr);
+  FarGetPluginPanelItem gpi;
+  gpi.Size = size;
+  gpi.Item = reinterpret_cast<PluginPanelItem*>(ppi.buf(size));
+  g_far.PanelControl(h_panel, FCTL_GETSELECTEDPANELITEM, index, &gpi);
   ppi.set_size(size);
   return reinterpret_cast<PluginPanelItem*>(ppi.buf());
-#endif
 }
 
 void far_set_progress_state(TBPFLAG state) {
-#ifdef FARAPI18
-  g_far.AdvControl(g_far.ModuleNumber, ACTL_SETPROGRESSSTATE, reinterpret_cast<void*>(state));
-#endif
+  g_far.AdvControl(&c_plugin_guid, ACTL_SETPROGRESSSTATE, state, nullptr);
 }
 
 void far_set_progress_value(unsigned __int64 completed, unsigned __int64 total) {
-#ifdef FARAPI18
-  PROGRESSVALUE pv;
+  ProgressValue pv;
   pv.Completed = completed;
   pv.Total = total;
-  g_far.AdvControl(g_far.ModuleNumber, ACTL_SETPROGRESSVALUE, &pv);
-#endif
+  g_far.AdvControl(&c_plugin_guid, ACTL_SETPROGRESSVALUE, 0, &pv);
 }
 
-#ifdef FARAPI17
-#  ifdef _WIN64
-#    define PLUGIN_TYPE L"x64"
-#  else
-#    define PLUGIN_TYPE L""
-#  endif
-#endif
-#ifdef FARAPI18
-#  ifdef _WIN64
-#    define PLUGIN_TYPE L"uni x64"
-#  else
-#    define PLUGIN_TYPE L"uni"
-#  endif
+#ifdef _WIN64
+#  define PLUGIN_TYPE L"uni x64"
+#else
+#  define PLUGIN_TYPE L"uni"
 #endif
 
 ModuleVersion g_version;
@@ -599,7 +552,7 @@ void error_dlg(const Error& e) {
   UnicodeString err_msg = word_wrap(e.message(), get_msg_width());
   if (err_msg.size() != 0) msg.add(err_msg).add('\n');
   msg.add_fmt(L"%S:%u v.%u.%u.%u.%u "PLUGIN_TYPE, &extract_file_name(oem_to_unicode(e.file)), e.line, g_version.major, g_version.minor, g_version.patch, g_version.revision);
-  far_message(msg, 0, FMSG_WARNING | FMSG_MB_OK);
+  far_message(c_error_dialog_guid, msg, 0, FMSG_WARNING | FMSG_MB_OK);
 }
 
 void error_dlg(const std::exception& e) {
@@ -608,7 +561,7 @@ void error_dlg(const std::exception& e) {
   UnicodeString err_msg = word_wrap(oem_to_unicode(e.what()), get_msg_width());
   if (err_msg.size() != 0) msg.add(err_msg).add('\n');
   msg.add_fmt(L"v.%u.%u.%u.%u "PLUGIN_TYPE, g_version.major, g_version.minor, g_version.patch, g_version.revision);
-  far_message(msg, 0, FMSG_WARNING | FMSG_MB_OK);
+  far_message(c_error_dialog_guid, msg, 0, FMSG_WARNING | FMSG_MB_OK);
 }
 
 // get system directory for temporary files

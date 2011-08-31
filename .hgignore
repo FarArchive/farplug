@@ -13,3 +13,8 @@ glob:openssl\include\*
 glob:openssl\lib\*
 glob:openssl\src\*
 glob:sfx\*
+syntax: glob
+*.vcxproj.user
+*.sdf
+*.sln
+*.suo

@@ -1,10 +1,8 @@
-#include "farapi_config.h"
-
 #define _ERROR_WINDOWS
 #include "error.h"
 
 #include "msg.h"
-
+#include "guids.h"
 #include "options.h"
 #include "utils.h"
 #include "dlgapi.h"
@@ -31,36 +29,23 @@ PanelState save_state(HANDLE h_panel) {
     if (pi.CurrentItem < pi.ItemsNumber) {
       PluginPanelItem* ppi = far_get_panel_item(h_panel, pi.CurrentItem, pi);
       if (ppi) {
-        state.current_file = CompositeFileName(ppi->FindData);
+        state.current_file = ppi->FileName;
       }
     }
     if (pi.TopPanelItem < pi.ItemsNumber) {
       PluginPanelItem* ppi = far_get_panel_item(h_panel, pi.TopPanelItem, pi);
       if (ppi) {
-        state.top_panel_file = CompositeFileName(ppi->FindData);
+        state.top_panel_file = ppi->FileName;
       }
     }
     state.selected_files.extend(pi.SelectedItemsNumber);
-    for (int i = 0; i < pi.SelectedItemsNumber; i++) {
+    for (size_t i = 0; i < pi.SelectedItemsNumber; i++) {
       PluginPanelItem* ppi = far_get_selected_panel_item(h_panel, i, pi);
       if (ppi) {
-        if (ppi->Flags & PPIF_SELECTED) state.selected_files += CompositeFileName(ppi->FindData);
+        if (ppi->Flags & PPIF_SELECTED) state.selected_files += ppi->FileName;
       }
     }
-    struct Compare {
-      int operator()(const CompositeFileName& item1, const CompositeFileName& item2) {
-        int res = item1.long_name.compare(item2.long_name);
-#ifdef FARAPI17
-        if (res == 0) {
-          if (item1.short_name.size() && item2.short_name.size()) return item1.short_name.compare(item2.short_name);
-          else return 0;
-        }
-        else
-#endif
-        return res;
-      }
-    };
-    state.selected_files.sort<Compare>();
+    state.selected_files.sort();
   }
   return state;
 }
@@ -69,49 +54,26 @@ void restore_state(HANDLE h_panel, const PanelState& state) {
   PanelInfo pi;
   if (state.selected_files.size()) {
     if (far_control_ptr(h_panel, FCTL_GETPANELINFO, &pi)) {
-#ifdef FARAPI18
-      g_far.Control(h_panel, FCTL_BEGINSELECTION, 0, 0);
-      CLEAN(HANDLE, h_panel, g_far.Control(h_panel, FCTL_ENDSELECTION, 0, 0));
-#endif
-      for (int i = 0; i < pi.ItemsNumber; i++) {
+      g_far.PanelControl(h_panel, FCTL_BEGINSELECTION, 0, nullptr);
+      CLEAN(HANDLE, h_panel, g_far.PanelControl(h_panel, FCTL_ENDSELECTION, 0, nullptr));
+      for (size_t i = 0; i < pi.ItemsNumber; i++) {
         PluginPanelItem* ppi = far_get_panel_item(h_panel, i, pi);
         if (ppi) {
-          struct Compare {
-            int operator()(const FAR_FIND_DATA& find_data, const CompositeFileName& file_name) {
-              int res = file_name.long_name.compare(FAR_FILE_NAME(find_data));
-#ifdef FARAPI17
-              if (res == 0) {
-                if (file_name.short_name.size() && *FAR_SHORT_FILE_NAME(find_data)) return -file_name.short_name.compare(FAR_SHORT_FILE_NAME(find_data));
-                else return 0;
-              }
-              else
-#endif
-              return -res;
-            }
-          };
-          if (state.selected_files.bsearch<Compare, FAR_FIND_DATA>(ppi->FindData) != -1) {
-#ifdef FARAPI17
-            ppi->Flags |= PPIF_SELECTED;
-#endif
-#ifdef FARAPI18
-            g_far.Control(h_panel, FCTL_SETSELECTION, i, TRUE);
-#endif
+          if (state.selected_files.bsearch(ppi->FileName) != -1) {
+            g_far.PanelControl(h_panel, FCTL_SETSELECTION, i, reinterpret_cast<void*>(true));
           }
         }
       }
-#ifdef FARAPI17
-      g_far.Control(h_panel, FCTL_SETSELECTION, &pi);
-#endif
     }
   }
   if (far_control_ptr(h_panel, FCTL_GETPANELINFO, &pi)) {
     PanelRedrawInfo pri;
     memset(&pri, 0, sizeof(pri));
-    for (int i = 0; i < pi.ItemsNumber; i++) {
+    for (size_t i = 0; i < pi.ItemsNumber; i++) {
       PluginPanelItem* ppi = far_get_panel_item(h_panel, i, pi);
       if (ppi) {
-        if (state.current_file == ppi->FindData) pri.CurrentItem = i;
-        if (state.top_panel_file == ppi->FindData) pri.TopPanelItem = i;
+        if (state.current_file == ppi->FileName) pri.CurrentItem = i;
+        if (state.top_panel_file == ppi->FileName) pri.TopPanelItem = i;
       }
     }
     far_control_ptr(h_panel, FCTL_REDRAWPANEL, &pri);
@@ -125,21 +87,14 @@ FilePanel* FilePanel::open() {
     panel->mft_mode = false;
     panel->saved_state = save_state(INVALID_HANDLE_VALUE);
     if (g_file_panel_mode.default_mft_mode) {
-      panel->current_dir = FARSTR_TO_UNICODE(panel->saved_state.directory);
+      panel->current_dir = panel->saved_state.directory;
       panel->toggle_mft_mode();
     }
     else {
-      panel->change_directory(FARSTR_TO_UNICODE(panel->saved_state.directory), false);
+      panel->change_directory(panel->saved_state.directory, false);
     }
     // signal to restore selection & current item after panel is created
-#ifdef FARAPI17
-    DWORD key = KEY_F24 | KEY_CTRL | KEY_ALT | KEY_SHIFT;
-    KeySequence ks = { KSFLAGS_DISABLEOUTPUT, 1, &key };
-    g_far.AdvControl(g_far.ModuleNumber, ACTL_POSTKEYSEQUENCE, &ks);
-#endif
-#ifdef FARAPI18
-    g_far.AdvControl(g_far.ModuleNumber, ACTL_SYNCHRO, panel);
-#endif
+    g_far.AdvControl(&c_plugin_guid, ACTL_SYNCHRO, 0, panel);
     g_file_panels += panel;
   }
   catch (...) {
@@ -150,17 +105,10 @@ FilePanel* FilePanel::open() {
 }
 
 void FilePanel::apply_saved_state() {
-#ifdef FARAPI17
-  g_far.Control(this, FCTL_SETSORTMODE, &g_file_panel_mode.sort_mode);
-  g_far.Control(this, FCTL_SETSORTORDER, &g_file_panel_mode.reverse_sort);
-  g_far.Control(this, FCTL_SETNUMERICSORT, &g_file_panel_mode.numeric_sort);
-#endif
-#ifdef FARAPI18
   far_control_int(this, FCTL_SETSORTMODE, g_file_panel_mode.sort_mode);
   far_control_int(this, FCTL_SETSORTORDER, g_file_panel_mode.reverse_sort);
   far_control_int(this, FCTL_SETNUMERICSORT, g_file_panel_mode.numeric_sort);
   far_control_int(this, FCTL_SETDIRECTORIESFIRST, g_file_panel_mode.sort_dirs_first);
-#endif
   restore_state(this, saved_state);
 }
 
@@ -180,13 +128,11 @@ void FilePanel::on_close() {
   }
   delete_usn_journal();
   PanelInfo pi;
-  if (far_control_ptr(this, FCTL_GETPANELSHORTINFO, &pi)) {
+  if (far_control_ptr(this, FCTL_GETPANELINFO, &pi)) {
     g_file_panel_mode.sort_mode = pi.SortMode;
     g_file_panel_mode.reverse_sort = pi.Flags & PFLAGS_REVERSESORTORDER ? 1 : 0;
     g_file_panel_mode.numeric_sort = pi.Flags & PFLAGS_NUMERICSORT ? 1 : 0;
-#ifdef FARAPI18
     g_file_panel_mode.sort_dirs_first = pi.Flags & PFLAGS_DIRECTORIESFIRST ? 1 : 0;
-#endif
   }
   store_plugin_options();
   g_file_panels.remove(g_file_panels.search(this));
@@ -196,8 +142,8 @@ void FilePanel::on_close() {
 FilePanel* FilePanel::get_active_panel() {
   for (unsigned i = 0; i < g_file_panels.size(); i++) {
     PanelInfo pi;
-    if (far_control_ptr(g_file_panels[i], FCTL_GETPANELSHORTINFO, &pi)) {
-      if (pi.Focus) {
+    if (far_control_ptr(g_file_panels[i], FCTL_GETPANELINFO, &pi)) {
+      if (pi.Flags & PFLAGS_FOCUS) {
         return g_file_panels[i];
       }
     }
@@ -234,113 +180,80 @@ PluginItemList FilePanel::create_panel_items(const std::list<PanelItemData>& pid
   PluginItemList pi_list;
   unsigned sz = static_cast<unsigned>(pid_list.size());
   pi_list.extend(sz);
-#ifdef FARAPI17
-  pi_list.names.extend(sz);
-  UnicodeString uname;
-  AnsiString oname;
-#endif
-#ifdef FARAPI18
   pi_list.names.extend(sz * 2);
-#endif
   pi_list.col_str.extend(sz * col_indices.size());
   pi_list.col_data.extend(sz);
-  Array<const FarCh*> col_data;
+  Array<const wchar_t*> col_data;
   col_data.extend(col_indices.size());
   for (std::list<PanelItemData>::const_iterator pid = pid_list.begin(); pid != pid_list.end(); pid++) {
     PluginPanelItem pi;
     memset(&pi, 0, sizeof(pi));
-#ifdef FARAPI17
-    unicode_to_oem(oname, pid->file_name);
-    oem_to_unicode(uname, oname);
-    if ((uname != pid->file_name) || (pid->file_name.size() >= MAX_PATH)) {
-      Array<unsigned char> uni_name;
-      u32 uni_name_size = sizeof(u32) + pid->file_name.size() * sizeof(wchar_t);
-      uni_name.extend(uni_name_size);
-      uni_name.add(reinterpret_cast<const u8*>(&uni_name_size), sizeof(uni_name_size));
-      uni_name.add(reinterpret_cast<const u8*>(pid->file_name.data()), pid->file_name.size() * sizeof(wchar_t));
-      pi_list.names += uni_name;
-      pi.UserData = reinterpret_cast<DWORD_PTR>(pi_list.names.last().data());
-      pi.Flags |= PPIF_USERDATA;
-    }
-    strcpy(pi.FindData.cFileName, pid->file_name.size() >= MAX_PATH ? unicode_to_oem(pid->file_name).left(MAX_PATH - 1).data() : unicode_to_oem(pid->file_name).data());
-    strcpy(pi.FindData.cAlternateFileName, unicode_to_oem(pid->alt_file_name).data());
-#endif
-#ifdef FARAPI18
     pi_list.names += pid->file_name;
-    pi.FindData.lpwszFileName = const_cast<wchar_t*>(pi_list.names.last().data());
+    pi.FileName = const_cast<wchar_t*>(pi_list.names.last().data());
     if (pid->alt_file_name.size() != 0) {
       pi_list.names += pid->alt_file_name;
-      pi.FindData.lpwszAlternateFileName = const_cast<wchar_t*>(pi_list.names.last().data());
+      pi.AlternateFileName = const_cast<wchar_t*>(pi_list.names.last().data());
     }
-#endif
-    pi.FindData.dwFileAttributes = pid->file_attr;
-    pi.FindData.ftCreationTime = pid->creation_time;
-    pi.FindData.ftLastAccessTime = pid->last_access_time;
-    pi.FindData.ftLastWriteTime = pid->last_write_time;
-#ifdef FARAPI17
-    pi.FindData.nFileSizeHigh = (DWORD) (pid->data_size >> 32);
-    pi.FindData.nFileSizeLow = (DWORD) (pid->data_size & 0xFFFFFFFF);
-    pi.PackSizeHigh = (DWORD) (pid->disk_size >> 32);
-    pi.PackSize = (DWORD) (pid->disk_size & 0xFFFFFFFF);
-#endif
-#ifdef FARAPI18
-    pi.FindData.nFileSize = pid->data_size;
-    pi.FindData.nPackSize = pid->disk_size;
-#endif
+    pi.FileAttributes = pid->file_attr;
+    pi.CreationTime = pid->creation_time;
+    pi.LastAccessTime = pid->last_access_time;
+    pi.LastWriteTime = pid->last_write_time;
+    pi.FileSize = pid->data_size;
+    pi.PackSize = pid->disk_size;
     pi.NumberOfLinks = pid->hard_link_cnt;
     // custom columns
     col_data.clear();
     for (unsigned i = 0; i < col_indices.size(); i++) {
-      if (search_mode) col_data += FAR_T("");
+      if (search_mode) col_data += L"";
       else if (pid->error) col_data += far_msg_ptr(MSG_FILE_PANEL_ERROR_MARKER);
       else {
         switch (col_indices[i]) {
         case 0: // data size
-          if ((pid->stream_cnt == 0) && !pid->ntfs_attr) col_data += FAR_T("");
+          if ((pid->stream_cnt == 0) && !pid->ntfs_attr) col_data += L"";
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(format_data_size(pid->data_size, short_size_suffixes), col_sizes[i]));
+            pi_list.col_str += fit_col_str(format_data_size(pid->data_size, short_size_suffixes), col_sizes[i]);
             col_data += pi_list.col_str.last().data();
           }
           break;
         case 1: // disk size
-          if (pid->resident) col_data += FAR_T("");
+          if (pid->resident) col_data += L"";
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(format_data_size(pid->disk_size, short_size_suffixes), col_sizes[i]));
+            pi_list.col_str += fit_col_str(format_data_size(pid->disk_size, short_size_suffixes), col_sizes[i]);
             col_data += pi_list.col_str.last().data();
           }
           break;
         case 2: // fragment count
-          if (pid->resident) col_data += FAR_T("");
+          if (pid->resident) col_data += L"";
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(int_to_str(pid->fragment_cnt), col_sizes[i]));
+            pi_list.col_str += fit_col_str(int_to_str(pid->fragment_cnt), col_sizes[i]);
             col_data += pi_list.col_str.last().data();
           }
           break;
         case 3: // stream count
-          if (pid->ntfs_attr) col_data += FAR_T("");
+          if (pid->ntfs_attr) col_data += L"";
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(int_to_str(pid->stream_cnt), col_sizes[i]));
+            pi_list.col_str += fit_col_str(int_to_str(pid->stream_cnt), col_sizes[i]);
             col_data += pi_list.col_str.last().data();
           }
           break;
         case 4: // hard links
-          if (pid->ntfs_attr) col_data += FAR_T("");
+          if (pid->ntfs_attr) col_data += L"";
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(int_to_str(pid->hard_link_cnt), col_sizes[i]));
+            pi_list.col_str += fit_col_str(int_to_str(pid->hard_link_cnt), col_sizes[i]);
             col_data += pi_list.col_str.last().data();
           }
           break;
         case 5: // mft record count
-          if (pid->ntfs_attr) col_data += FAR_T("");
+          if (pid->ntfs_attr) col_data += L"";
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(int_to_str(pid->mft_rec_cnt), col_sizes[i]));
+            pi_list.col_str += fit_col_str(int_to_str(pid->mft_rec_cnt), col_sizes[i]);
             col_data += pi_list.col_str.last().data();
           }
           break;
         case 6: // valid size
-          if ((pid->stream_cnt == 0) && !pid->ntfs_attr) col_data += FAR_T("");
+          if ((pid->stream_cnt == 0) && !pid->ntfs_attr) col_data += L"";
           else {
-            pi_list.col_str += UNICODE_TO_FARSTR(fit_col_str(format_data_size(pid->valid_size, short_size_suffixes), col_sizes[i]));
+            pi_list.col_str += fit_col_str(format_data_size(pid->valid_size, short_size_suffixes), col_sizes[i]);
             col_data += pi_list.col_str.last().data();
           }
           break;
@@ -350,7 +263,7 @@ PluginItemList FilePanel::create_panel_items(const std::list<PanelItemData>& pid
       }
     }
     pi_list.col_data += col_data;
-    pi.CustomColumnData = (FarCh**) pi_list.col_data.last().data();
+    pi.CustomColumnData = (wchar_t**) pi_list.col_data.last().data();
     pi.CustomColumnNumber = pi_list.col_data.last().size();
     pi_list += pi;
   }
@@ -607,7 +520,7 @@ void FilePanel::sort_file_list(std::list<PanelItemData>& pid_list) {
   }
 }
 
-void FilePanel::new_file_list(PluginPanelItem*& panel_items, int& item_num, bool search_mode) {
+void FilePanel::new_file_list(PluginPanelItem*& panel_items, size_t& item_num, bool search_mode) {
   FileListProgress progress;
   std::list<PanelItemData> pid_list;
   if (mft_mode) {
@@ -674,32 +587,24 @@ void FilePanel::change_directory(const UnicodeString& target_dir, bool search_mo
     SetCurrentDirectoryW(new_cur_dir.data());
   }
   current_dir = new_cur_dir;
-#ifdef FARAPI17
-  current_dir_oem = unicode_to_oem(current_dir);
-#endif // FARAPI17
   if (g_file_panel_mode.flat_mode_auto_off) flat_mode = false;
 }
 
-void FilePanel::fill_plugin_info(OpenPluginInfo* info) {
-  info->StructSize = sizeof(struct OpenPluginInfo);
-  info->Flags = OPIF_USEFILTER | OPIF_USESORTGROUPS | OPIF_ADDDOTS | OPIF_REALNAMES;
-  info->Flags |= !flat_mode || g_file_panel_mode.use_highlighting ? OPIF_USEHIGHLIGHTING : OPIF_USEATTRHIGHLIGHTING;
+void FilePanel::fill_plugin_info(OpenPanelInfo* info) {
+  info->StructSize = sizeof(OpenPanelInfo);
+  info->Flags = OPIF_ADDDOTS | OPIF_REALNAMES;
+  if (flat_mode && !g_file_panel_mode.use_highlighting)
+    info->Flags |=  OPIF_USEATTRHIGHLIGHTING;
   panel_title = far_msg_ptr(MSG_FILE_PANEL_TITLE_PREFIX);
   if (flat_mode || mft_mode) {
-    panel_title += FAR_T('(');
-    if (flat_mode) panel_title += FAR_T('*');
-    if (mft_mode) panel_title += FAR_T('$');
-    panel_title += FAR_T(')');
+    panel_title += L'(';
+    if (flat_mode) panel_title += L'*';
+    if (mft_mode) panel_title += L'$';
+    panel_title += L')';
   }
-  panel_title += FAR_T(':');
-#ifdef FARAPI17
-  info->CurDir = current_dir_oem.data();
-  panel_title += current_dir_oem;
-#endif // FARAPI17
-#ifdef FARAPI18
+  panel_title += L':';
   info->CurDir = current_dir.data();
   panel_title += current_dir;
-#endif // FARAPI18
   info->PanelTitle = panel_title.data();
 
   col_indices.clear();
@@ -707,12 +612,13 @@ void FilePanel::fill_plugin_info(OpenPluginInfo* info) {
   parse_column_spec(g_file_panel_mode.col_types, g_file_panel_mode.col_widths, col_types, col_widths, true);
   parse_column_spec(g_file_panel_mode.status_col_types, g_file_panel_mode.status_col_widths, status_col_types, status_col_widths, false);
   memset(&panel_mode, 0, sizeof(panel_mode));
-  panel_mode.ColumnTypes = const_cast<FarCh*>(col_types.data());
-  panel_mode.ColumnWidths = const_cast<FarCh*>(col_widths.data());
-  panel_mode.ColumnTitles = const_cast<FarCh**>(col_titles.data());
-  panel_mode.StatusColumnTypes = const_cast<FarCh*>(status_col_types.data());
-  panel_mode.StatusColumnWidths = const_cast<FarCh*>(status_col_widths.data());
-  panel_mode.FullScreen = g_file_panel_mode.wide;
+  panel_mode.StructSize = sizeof(PanelMode);
+  panel_mode.ColumnTypes = const_cast<wchar_t*>(col_types.data());
+  panel_mode.ColumnWidths = const_cast<wchar_t*>(col_widths.data());
+  panel_mode.ColumnTitles = const_cast<wchar_t**>(col_titles.data());
+  panel_mode.StatusColumnTypes = const_cast<wchar_t*>(status_col_types.data());
+  panel_mode.StatusColumnWidths = const_cast<wchar_t*>(status_col_widths.data());
+  panel_mode.Flags = g_file_panel_mode.wide ? PMFLAGS_FULLSCREEN : 0;
   info->PanelModesArray = &panel_mode;
   info->PanelModesNumber = 1;
   info->StartPanelMode = '0';
@@ -744,13 +650,10 @@ private:
   int cache_dir_lbl_id;
   int cache_dir_ctrl_id;
   int flat_mode_auto_off_ctrl_id;
-#ifdef FARAPI17
-  int use_std_sort_ctrl_id;
-#endif
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
-  static LONG_PTR WINAPI dialog_proc(HANDLE h_dlg, int msg, int param1, LONG_PTR param2) {
+  static INT_PTR WINAPI dialog_proc(HANDLE h_dlg, int msg, int param1, void* param2) {
     BEGIN_ERROR_HANDLER;
     FilePanelModeDialog* dlg = (FilePanelModeDialog*) FarDialog::get_dlg(h_dlg);
     if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != dlg->cancel_ctrl_id)) {
@@ -770,9 +673,6 @@ private:
       dlg->mode.backward_mft_scan = dlg->get_check(dlg->backward_mft_scan_ctrl_id);
       dlg->mode.cache_dir = dlg->get_text(dlg->cache_dir_ctrl_id);
       dlg->mode.flat_mode_auto_off = dlg->get_check(dlg->flat_mode_auto_off_ctrl_id);
-#ifdef FARAPI17
-      dlg->mode.use_std_sort = dlg->get_check(dlg->use_std_sort_ctrl_id);
-#endif
     }
     else if ((msg == DN_BTNCLICK) && (param1 == dlg->show_streams_ctrl_id)) {
       dlg->enable(dlg->show_main_stream_ctrl_id, param2 != 0);
@@ -792,7 +692,7 @@ private:
   }
 
 public:
-  FilePanelModeDialog(FilePanelMode& mode): FarDialog(far_get_msg(MSG_FILE_PANEL_MODE_TITLE), c_client_xs), mode(mode) {
+  FilePanelModeDialog(FilePanelMode& mode): FarDialog(c_file_panel_mode_dialog_guid, far_get_msg(MSG_FILE_PANEL_MODE_TITLE), c_client_xs), mode(mode) {
   }
 
   bool show() {
@@ -800,20 +700,20 @@ public:
     pad(c_client_xs / 2);
     unsigned status_col_types_lbl_id = label(far_get_msg(MSG_FILE_PANEL_MODE_STATUS_COL_TYPES));
     new_line();
-    col_types_ctrl_id = var_edit_box(mode.col_types, 30, c_client_xs / 2 - 1);
+    col_types_ctrl_id = var_edit_box(mode.col_types, c_client_xs / 2 - 1);
     link_label(col_types_ctrl_id, col_types_lbl_id);
     pad(c_client_xs / 2);
-    status_col_types_ctrl_id = var_edit_box(mode.status_col_types, 30, c_client_xs / 2 - 1);
+    status_col_types_ctrl_id = var_edit_box(mode.status_col_types, c_client_xs / 2 - 1);
     link_label(status_col_types_ctrl_id, status_col_types_lbl_id);
     new_line();
     unsigned col_widths_lbl_id = label(far_get_msg(MSG_FILE_PANEL_MODE_COL_WIDTHS));
     pad(c_client_xs / 2);
     unsigned status_col_widths_lbl_id = label(far_get_msg(MSG_FILE_PANEL_MODE_STATUS_COL_WIDTHS));
     new_line();
-    col_widths_ctrl_id = var_edit_box(mode.col_widths, 30, c_client_xs / 2 - 1);
+    col_widths_ctrl_id = var_edit_box(mode.col_widths, c_client_xs / 2 - 1);
     link_label(col_widths_ctrl_id, col_widths_lbl_id);
     pad(c_client_xs / 2);
-    status_col_widths_ctrl_id = var_edit_box(mode.status_col_widths, 30, c_client_xs / 2 - 1);
+    status_col_widths_ctrl_id = var_edit_box(mode.status_col_widths, c_client_xs / 2 - 1);
     link_label(status_col_widths_ctrl_id, status_col_widths_lbl_id);
     new_line();
     separator();
@@ -845,7 +745,7 @@ public:
     for (unsigned i = 0; i < items.size(); i++) {
       max_size = max(max_size, items[i].size());
     }
-    sort_mode_ctrl_id = combo_box(items, mode.custom_sort_mode, 30, max_size + 1, DIF_DROPDOWNLIST);
+    sort_mode_ctrl_id = combo_box(items, mode.custom_sort_mode, max_size + 1, DIF_DROPDOWNLIST);
     new_line();
     default_mft_mode_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_DEFAULT_MFT_MODE), mode.default_mft_mode);
     spacer(2);
@@ -859,10 +759,6 @@ public:
     new_line();
     use_highlighting_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_HIGHLIGHTING), mode.use_highlighting);
     new_line();
-#ifdef FARAPI17
-    use_std_sort_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_STD_SORT), mode.use_std_sort);
-    new_line();
-#endif
     separator();
     new_line();
     use_usn_journal_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_USN_JOURNAL), mode.use_usn_journal);
@@ -873,7 +769,7 @@ public:
     spacer(2);
     cache_dir_lbl_id = label(far_get_msg(MSG_FILE_PANEL_CACHE_DIR), AUTO_SIZE, mode.use_cache && mode.use_usn_journal ? 0 : DIF_DISABLE);
     spacer(1);
-    cache_dir_ctrl_id = var_edit_box(mode.cache_dir, MAX_PATH, AUTO_SIZE, mode.use_cache && mode.use_usn_journal ? 0 : DIF_DISABLE);
+    cache_dir_ctrl_id = var_edit_box(mode.cache_dir, AUTO_SIZE, mode.use_cache && mode.use_usn_journal ? 0 : DIF_DISABLE);
     new_line();
     separator();
     new_line();
@@ -882,7 +778,7 @@ public:
     cancel_ctrl_id = button(far_get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
     new_line();
 
-    int item = FarDialog::show(dialog_proc, FAR_T("file_panel_mode"));
+    int item = FarDialog::show(dialog_proc, L"file_panel_mode");
 
     return (item != -1) && (item != cancel_ctrl_id);
   }
@@ -892,10 +788,10 @@ bool show_file_panel_mode_dialog(FilePanelMode& mode) {
   return FilePanelModeDialog(mode).show();
 }
 
-void FilePanel::parse_column_spec(const UnicodeString& src_col_types, const UnicodeString& src_col_widths, FarStr& col_types, FarStr& col_widths, bool title) {
+void FilePanel::parse_column_spec(const UnicodeString& src_col_types, const UnicodeString& src_col_widths, UnicodeString& col_types, UnicodeString& col_widths, bool title) {
   const wchar_t* c_col_names[c_cust_col_cnt] = { L"DSZ", L"RSZ", L"FRG", L"STM", L"LNK", L"MFT", L"VSZ" };
   const unsigned c_def_col_sizes[c_cust_col_cnt] = { 7, 7, 5, 3, 3, 3, 7 };
-  const FarCh* c_col_titles[c_cust_col_cnt] = { far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_DATA_SIZE), far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_DISK_SIZE), far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_FRAGMENTS), far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_STREAMS), far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_HARD_LINKS), far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_MFT_RECORDS), far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_VALID_SIZE) };
+  const wchar_t* c_col_titles[c_cust_col_cnt] = { far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_DATA_SIZE), far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_DISK_SIZE), far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_FRAGMENTS), far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_STREAMS), far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_HARD_LINKS), far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_MFT_RECORDS), far_msg_ptr(MSG_FILE_PANEL_MODE_COL_TITLE_VALID_SIZE) };
 
   col_types.clear();
   col_widths.clear();
@@ -934,9 +830,9 @@ void FilePanel::parse_column_spec(const UnicodeString& src_col_types, const Unic
       // standard column
       if (title) col_titles += NULL;
     }
-    if (col_types.size() != 0) col_types += FAR_T(',');
-    col_types += UNICODE_TO_FARSTR(name);
-    if (col_widths.size() != 0) col_widths += FAR_T(',');
-    col_widths += UNICODE_TO_FARSTR(int_to_str(size));
+    if (col_types.size() != 0) col_types += L',';
+    col_types += name;
+    if (col_widths.size() != 0) col_widths += L',';
+    col_widths += int_to_str(size);
   }
 }

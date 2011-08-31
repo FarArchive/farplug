@@ -32,7 +32,6 @@ using namespace std;
 
 #include "plugin.hpp"
 #include "farcolor.hpp"
-#include "farkeys.hpp"
 
 #include "col/AnsiString.h"
 #include "col/UnicodeString.h"

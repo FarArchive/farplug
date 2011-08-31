@@ -95,9 +95,9 @@ public:
   }
 };
 
-int far_control_int(HANDLE h_panel, int command, int param);
-int far_control_ptr(HANDLE h_panel, int command, const void* param);
-FarStr far_get_panel_dir(HANDLE h_panel, const PanelInfo& pi);
+int far_control_int(HANDLE h_panel, FILE_CONTROL_COMMANDS command, int param);
+int far_control_ptr(HANDLE h_panel, FILE_CONTROL_COMMANDS command, const void* param);
+UnicodeString far_get_panel_dir(HANDLE h_panel, const PanelInfo& pi);
 UnicodeString far_get_full_path(const UnicodeString& file_name);
 PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
 PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
@@ -120,7 +120,7 @@ void far_set_progress_value(unsigned __int64 completed, unsigned __int64 total);
     failure; \
   } \
   catch (...) { \
-    far_message(L"\nFailure!", 0, FMSG_WARNING | FMSG_MB_OK); \
+    far_message(c_error_dialog_guid, L"\nFailure!", 0, FMSG_WARNING | FMSG_MB_OK); \
     failure; \
   }
 

@@ -21,7 +21,7 @@ metadata.totals.hl = (+%u hl)
 metadata.totals.rp_files = (+%u rp)
 metadata.totals.dirs = Directories: %u
 metadata.totals.rp_dirs = (+%u rp)
-metadata.totals.errors = Errors: %c%c%u%c%c
+metadata.totals.errors = Errors: %S
 metadata.totals.excess_fragments = +%S
 
 # Menu
@@ -148,7 +148,7 @@ content.multi.progress.elapsed = Elapsed: %S  Left: %S  Total: %S
 content.multi.progress.files = Files processed: %u from %u
 content.multi.progress.dirs = Directories processed: %u from %u
 content.multi.progress.reparse = Reparse points skipped: %u
-content.multi.progress.errors = Errors (objects skipped): %S
+content.multi.progress.errors = Errors (objects skipped): %u
 content.multi.progress.console.title = {%u%%} Processing...
 
 # Estimate total size progress
@@ -157,7 +157,7 @@ estimate.progress.size = Total size: %S
 estimate.progress.files = Files: %u
 estimate.progress.dirs = Directories: %u
 estimate.progress.reparse = Reparse points: %u
-estimate.progress.errors = Errors: %S
+estimate.progress.errors = Errors: %u
 
 # Defragmentator
 defrag.progress.title = Defragmenting
@@ -245,7 +245,7 @@ compress_files.progress.defragment = Reducing number of extents from %u to %u
 compress_files.progress.defragment.clusters = Moved %Lu clusters from %Lu total
 compress_files.progress.defragment.analyze = Analyzing volume...
 compress_files.progress.files = Files processed: %u from %u
-compress_files.progress.errors = Errors (objects skipped): %S
+compress_files.progress.errors = Errors (objects skipped): %u
 
 # Generic buttons
 button.ok = OK
