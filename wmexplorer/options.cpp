@@ -145,7 +145,7 @@ PluginOptions::PluginOptions():
   copy_buf_size(-1),
   hide_rom_files(false),
   exit_on_dot_dot(true),
-  prefix(L"WMExplorer"),
+  prefix(L"wme"),
   show_free_space(true),
   ignore_errors(false),
   overwrite(ooAsk),
@@ -153,9 +153,9 @@ PluginOptions::PluginOptions():
   use_file_filters(false),
   save_def_values(true),
   last_dev_type(dtPDA),
-  key_attr(L"CtrlA"),
-  key_execute(L"CtrlAltS"),
-  key_hide_rom_files(L"CtrlAltI") {
+  key_attr(L"CtrlShiftA"),
+  key_execute(L"CtrlShiftS"),
+  key_hide_rom_files(L"CtrlShiftI") {
 }
 
 void load_plugin_options(PluginOptions& plugin_options) {
