@@ -12,7 +12,7 @@ disk.menu.smartphone = smartphone
 
 # Create file list
 create.list.progress.title = Scanning directories...
-create.list.progress.objects = Files: %u; Dirs: %u; Errors: %c%c%u
+create.list.progress.objects = Files: %u; Dirs: %u; Errors: %u
 create.list.progress.size = Total size: %S
 
 # Copy files
@@ -34,7 +34,7 @@ copy.files.progress.size = Processed %7S from %7S [%3u%%] at %9S
 copy.files.progress.file.size = Processed %7S from %7S [%3u%%] at %9S
 copy.files.progress.time = Elapsed: %8S  Left: %8S  Total: %8S
 move.remote.files.progress.time = Elapsed: %8S
-copy.files.progress.stats = Files(Ov/Skip): %u(%u/%u); Dirs: %u; Errors: %c%c%u
+copy.files.progress.stats = Files(Ov/Skip): %u(%u/%u); Dirs: %u; Errors: %u
 move.remote.files.progress.stats = Files: %u; Dirs: %u
 
 overwrite.dlg.title = Overwrite file
@@ -60,7 +60,7 @@ delete.files.dlg.label = Delete selected files
 
 delete.files.progress.title = Delete in progress...
 delete.files.progress.time = Elapsed: %8S  Left: %8S  Total: %8S
-delete.files.progress.stats = Files: %u; Dirs: %u; Errors: %c%c%u
+delete.files.progress.stats = Files: %u; Dirs: %u; Errors: %u
 
 delete.files.stats.title = Delete finished
 delete.files.stats.errors = Errors encountered: %u

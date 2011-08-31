@@ -1,7 +1,5 @@
-#include "farapi_config.h"
-
 #include "msg.h"
-
+#include "guids.h"
 #define _ERROR_WINDOWS
 #include "error.h"
 #include "util.h"
@@ -12,53 +10,62 @@
 #include "ui.h"
 
 extern struct PluginStartupInfo g_far;
-extern Array<unsigned char> g_colors;
+extern struct FarStandardFunctions g_fsf;
+extern Array<FarColor> g_colors;
 extern unsigned __int64 g_time_freq;
 
 UnicodeString far_get_msg(int id) {
-  return FARSTR_TO_UNICODE(g_far.GetMsg(g_far.ModuleNumber, id));
+  return g_far.GetMsg(&c_plugin_guid, id);
 }
 
-const FarCh* far_msg_ptr(int id) {
-  return g_far.GetMsg(g_far.ModuleNumber, id);
+const wchar_t* far_msg_ptr(int id) {
+  return g_far.GetMsg(&c_plugin_guid, id);
 }
 
-int far_message(const UnicodeString& msg, int button_cnt, DWORD flags) {
-  return g_far.Message(g_far.ModuleNumber, flags | FMSG_ALLINONE, NULL, (const FarCh* const*) UNICODE_TO_FARSTR(msg).data(), 0, button_cnt);
+int far_message(const GUID& guid, const UnicodeString& msg, int button_cnt, FARMESSAGEFLAGS flags) {
+  return g_far.Message(&c_plugin_guid, &guid, flags | FMSG_ALLINONE, nullptr, (const wchar_t* const*) msg.data(), 0, button_cnt);
 }
 
-int far_message(const FarCh* const* msg, int msg_cnt, int button_cnt, DWORD flags) {
-  return g_far.Message(g_far.ModuleNumber, flags, NULL, msg, msg_cnt, button_cnt);
+int far_message(const GUID& guid, const wchar_t* const* msg, int msg_cnt, int button_cnt, FARMESSAGEFLAGS flags) {
+  return g_far.Message(&c_plugin_guid, &guid, flags, nullptr, msg, msg_cnt, button_cnt);
 }
 
 void far_load_colors() {
-  unsigned colors_size = (unsigned) g_far.AdvControl(g_far.ModuleNumber, ACTL_GETARRAYCOLOR, NULL);
-  g_far.AdvControl(g_far.ModuleNumber, ACTL_GETARRAYCOLOR, g_colors.buf(colors_size));
+  unsigned colors_size = (unsigned) g_far.AdvControl(&c_plugin_guid, ACTL_GETARRAYCOLOR, 0, nullptr);
+  g_far.AdvControl(&c_plugin_guid, ACTL_GETARRAYCOLOR, colors_size, g_colors.buf(colors_size));
   g_colors.set_size(colors_size);
 }
 
-int far_menu(const UnicodeString& title, const ObjectArray<UnicodeString>& items) {
+int far_menu(const GUID& guid, const UnicodeString& title, const ObjectArray<UnicodeString>& items) {
   Array<FarMenuItem> menu_items;
   FarMenuItem mi;
   for (unsigned i = 0; i < items.size(); i++) {
     memset(&mi, 0, sizeof(mi));
-#ifdef FARAPI17
-    FAR_STRCPY(mi.Text, unicode_to_oem(items[i]).data());
-#endif // FARAPI17
-#ifdef FARAPI18
     mi.Text = items[i].data();
-#endif // FARAPI18
     menu_items += mi;
   }
-  return g_far.Menu(g_far.ModuleNumber, -1, -1, 0, FMENU_WRAPMODE, UNICODE_TO_FARSTR(title).data(), NULL, NULL, NULL, NULL, menu_items.data(), menu_items.size());
+  return g_far.Menu(&c_plugin_guid, &guid, -1, -1, 0, FMENU_WRAPMODE, title.data(), NULL, NULL, NULL, NULL, menu_items.data(), menu_items.size());
 }
 
 int far_viewer(const UnicodeString& file_name, const UnicodeString& title) {
-  return g_far.Viewer(UNICODE_TO_FARSTR(file_name).data(), UNICODE_TO_FARSTR(title).data(), 0, 0, -1, -1, VF_DISABLEHISTORY | VF_ENABLE_F6 | VF_NONMODAL
-#ifdef FARAPI18
-  , CP_UNICODE
-#endif // FARAPI18
-  );
+  return g_far.Viewer(file_name.data(), title.data(), 0, 0, -1, -1, VF_DISABLEHISTORY | VF_ENABLE_F6 | VF_NONMODAL, CP_UNICODE);
+}
+
+void draw_text_box(const UnicodeString& title, const ObjectArray<UnicodeString>& lines, unsigned client_xs) {
+  unsigned size = 0;
+  for (unsigned i = 0; i < lines.size(); i++) {
+    size += min(lines[i].size(), client_xs) + 1;
+  }
+  UnicodeString text;
+  text.extend(size);
+  for (unsigned i = 0; i < lines.size(); i++) {
+    if (lines[i].size() <= client_xs)
+      text += lines[i];
+    else
+      text += lines[i].left(client_xs);
+    text += L'\n';
+  }
+  far_message(c_progress_dialog_guid, text, 0, FMSG_LEFTALIGN);
 }
 
 UiLink::UiLink(bool lazy): lazy(lazy), h_scr(NULL), clear_scr(false) {
@@ -98,8 +105,8 @@ bool UiLink::update_needed() {
       if ((rec.EventType == KEY_EVENT) && (rec.Event.KeyEvent.wVirtualKeyCode == VK_ESCAPE) && rec.Event.KeyEvent.bKeyDown && ((rec.Event.KeyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | LEFT_CTRL_PRESSED | RIGHT_ALT_PRESSED | RIGHT_CTRL_PRESSED | SHIFT_PRESSED)) == 0)) esc_key = true;
     }
     if (esc_key) {
-      if (g_far.AdvControl(g_far.ModuleNumber, ACTL_GETCONFIRMATIONS, NULL) & FCS_INTERRUPTOPERATION) {
-        if (far_message(far_get_msg(MSG_PLUGIN_NAME).add('\n').add(far_get_msg(MSG_PROGRESS_INTERRUPT)), 0, FMSG_MB_YESNO) == 0) BREAK;
+      if (g_far.AdvControl(&c_plugin_guid, ACTL_GETCONFIRMATIONS, 0, nullptr) & FCS_INTERRUPTOPERATION) {
+        if (far_message(c_interrupt_dialog_guid, far_get_msg(MSG_PLUGIN_NAME).add('\n').add(far_get_msg(MSG_PROGRESS_INTERRUPT)), 0, FMSG_MB_YESNO) == 0) BREAK;
       }
       else BREAK;
     }
@@ -208,7 +215,7 @@ void draw_progress_msg(const UnicodeString& message) {
 void draw_create_list_progress(const CreateListStats& stats) {
   const unsigned c_client_xs = 50;
   ObjectArray<UnicodeString> lines;
-  lines += center(UnicodeString::format(far_get_msg(MSG_CREATE_LIST_PROGRESS_OBJECTS).data(), stats.files, stats.dirs, '\1', stats.errors == 0 ? g_colors[COL_DIALOGTEXT] : CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), stats.errors), c_client_xs);
+  lines += center(UnicodeString::format(far_get_msg(MSG_CREATE_LIST_PROGRESS_OBJECTS).data(), stats.files, stats.dirs, stats.errors), c_client_xs);
   lines += center(UnicodeString::format(far_get_msg(MSG_CREATE_LIST_PROGRESS_SIZE).data(), &format_data_size(stats.size, get_size_suffixes())), c_client_xs);
   draw_text_box(far_get_msg(MSG_CREATE_LIST_PROGRESS_TITLE), lines, c_client_xs);
   SetConsoleTitleW(far_get_msg(MSG_CREATE_LIST_PROGRESS_TITLE).data());
@@ -235,16 +242,16 @@ struct CopyFilesDlgData {
   }
 };
 
-LONG_PTR WINAPI copy_files_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2) {
+INT_PTR WINAPI copy_files_dlg_proc(HANDLE hDlg, int Msg, int Param1, void* Param2) {
   CopyFilesDlgData* dlg_data = (CopyFilesDlgData*) Dlg_GetDlgData(g_far, hDlg);
   if ((Msg == DN_CLOSE) && (Param1 >= 0) && (Param1 != dlg_data->cancel_ctrl_id)) {
     CopyFilesOptions* options = dlg_data->options;
 
-    FarStr dst_dir;
+    UnicodeString dst_dir;
     unsigned len = (unsigned) g_far.SendDlgMessage(hDlg, DM_GETTEXTLENGTH, dlg_data->dst_dir_ctrl_id, 0);
-    g_far.SendDlgMessage(hDlg, DM_GETTEXTPTR, dlg_data->dst_dir_ctrl_id, (LONG_PTR) dst_dir.buf(len));
+    g_far.SendDlgMessage(hDlg, DM_GETTEXTPTR, dlg_data->dst_dir_ctrl_id, dst_dir.buf(len));
     dst_dir.set_size(len);
-    options->dst_dir = FARSTR_TO_UNICODE(dst_dir);
+    options->dst_dir = dst_dir;
     options->dst_dir.strip();
     unquote(options->dst_dir);
 
@@ -269,12 +276,12 @@ LONG_PTR WINAPI copy_files_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR P
 bool show_copy_files_dlg(CopyFilesOptions& options, bool f_put) {
   CopyFilesDlgData dlg_data(&options, f_put);
   const unsigned c_client_xs = 60;
-  FarDialog dlg(far_get_msg(MSG_COPY_FILES_DLG_TITLE), c_client_xs);
+  FarDialog dlg(c_copy_files_dialog_guid, far_get_msg(MSG_COPY_FILES_DLG_TITLE), c_client_xs);
   // source file list
   dlg.label(far_get_msg(MSG_COPY_FILES_DLG_PATH));
   dlg.new_line();
   // destination directory edit box
-  dlg_data.dst_dir_ctrl_id = dlg.var_edit_box(options.dst_dir, 32767, c_client_xs);
+  dlg_data.dst_dir_ctrl_id = dlg.var_edit_box(options.dst_dir, c_client_xs);
   dlg.new_line();
   // separator
   dlg.separator();
@@ -327,7 +334,7 @@ bool show_copy_files_dlg(CopyFilesOptions& options, bool f_put) {
   dlg_data.cancel_ctrl_id = dlg.button(far_get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
   dlg.new_line();
 
-  int item = dlg.show(copy_files_dlg_proc, &dlg_data, FAR_T("copy.files.dlg"));
+  int item = dlg.show(copy_files_dlg_proc, &dlg_data, L"copy.files.dlg");
 
   return (item != -1) && (item != dlg_data.cancel_ctrl_id);
 }
@@ -343,7 +350,7 @@ struct OverwriteDlgData {
 OverwriteAction show_overwrite_dlg(const UnicodeString& file_path, const FileInfo& src_file_info, const FileInfo& dst_file_info) {
   OverwriteDlgData dlg_data;
   const unsigned c_client_xs = 60;
-  FarDialog dlg(far_get_msg(src_file_info.is_dir() ? MSG_OVERWRITE_DLG_DIRECTORY_TITLE : MSG_OVERWRITE_DLG_TITLE), c_client_xs);
+  FarDialog dlg(c_overwrite_dialog_guid, far_get_msg(src_file_info.is_dir() ? MSG_OVERWRITE_DLG_DIRECTORY_TITLE : MSG_OVERWRITE_DLG_TITLE), c_client_xs);
   // file info
   dlg.label(fit_str(file_path, c_client_xs));
   dlg.new_line();
@@ -407,7 +414,7 @@ void show_copy_files_results_dlg(const CopyFilesStats& stats, const Log& log) {
   msg.add_fmt(far_get_msg(MSG_COPY_FILES_STATS_DIRS).data(), stats.dirs).add('\n');
   msg.add(far_get_msg(MSG_BUTTON_OK)).add('\n');
   if (log.size() != 0) msg.add(far_get_msg(MSG_LOG_SHOW)).add('\n');
-  if (far_message(msg, log.size() != 0 ? 2 : 1, FMSG_LEFTALIGN) == 1) {
+  if (far_message(c_copy_files_stats_dialog_guid, msg, log.size() != 0 ? 2 : 1, FMSG_LEFTALIGN) == 1) {
     show_log(log);
   }
 }
@@ -444,7 +451,7 @@ void draw_copy_files_progress(const CopyFilesProgress& progress, const CopyFiles
   unsigned len2 = c_client_xs - len1;
   lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
   // separator
-  lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+  lines += L"\x1";
 
   // total data size
   unsigned __int64 time = (curr_time - progress.start_time) * 1000 / g_time_freq; // ms
@@ -471,10 +478,10 @@ void draw_copy_files_progress(const CopyFilesProgress& progress, const CopyFiles
   len2 = c_client_xs - len1;
   lines += UnicodeString::format(L"%.*c%.*c", len1, c_pb_black, len2, c_pb_white);
   // separator
-  lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+  lines += L"\x1";
 
   // stats
-  lines += UnicodeString::format(far_get_msg(MSG_COPY_FILES_PROGRESS_STATS).data(), stats.files, stats.overwritten, stats.skipped, stats.dirs, '\1', stats.errors == 0 ? g_colors[COL_DIALOGTEXT] : CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), stats.errors);
+  lines += UnicodeString::format(far_get_msg(MSG_COPY_FILES_PROGRESS_STATS).data(), stats.files, stats.overwritten, stats.skipped, stats.dirs, stats.errors);
 
   draw_text_box(far_get_msg(move ? MSG_MOVE_FILES_PROGRESS_TITLE : MSG_COPY_FILES_PROGRESS_TITLE), lines, c_client_xs);
 }
@@ -491,13 +498,13 @@ void draw_move_remote_files_progress(const CopyFilesProgress& progress, const Co
   UnicodeString dst_label(far_get_msg(MSG_COPY_FILES_PROGRESS_DST));
   lines += dst_label + ' ' + fit_str(progress.dst_path, c_client_xs - dst_label.size() - 1);
   // separator
-  lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+  lines += L"\x1";
 
   // times
   unsigned __int64 time = (curr_time - progress.start_time) * 1000 / g_time_freq; // ms
   lines += UnicodeString::format(far_get_msg(MSG_MOVE_REMOTE_FILES_PROGRESS_TIME).data(), &format_time(time));
   // separator
-  lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+  lines += L"\x1";
 
   // stats
   lines += UnicodeString::format(far_get_msg(MSG_MOVE_REMOTE_FILES_PROGRESS_STATS).data(), stats.files, stats.dirs);
@@ -519,7 +526,7 @@ struct DeleteFilesDlgData {
   }
 };
 
-LONG_PTR WINAPI delete_files_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2) {
+INT_PTR WINAPI delete_files_dlg_proc(HANDLE hDlg, int Msg, int Param1, void* Param2) {
   DeleteFilesDlgData* dlg_data = (DeleteFilesDlgData*) Dlg_GetDlgData(g_far, hDlg);
   if ((Msg == DN_CLOSE) && (Param1 >= 0) && (Param1 != dlg_data->cancel_ctrl_id)) {
     DeleteFilesOptions* options = dlg_data->options;
@@ -535,7 +542,7 @@ LONG_PTR WINAPI delete_files_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
 
 bool show_delete_files_dlg(DeleteFilesOptions& options) {
   DeleteFilesDlgData dlg_data(&options);
-  FarDialog dlg(far_get_msg(MSG_DELETE_FILES_DLG_TITLE), 60);
+  FarDialog dlg(c_delete_files_dialog_guid, far_get_msg(MSG_DELETE_FILES_DLG_TITLE), 60);
   dlg.label(far_get_msg(MSG_DELETE_FILES_DLG_LABEL));
   dlg.new_line();
 
@@ -563,7 +570,7 @@ bool show_delete_files_dlg(DeleteFilesOptions& options) {
   dlg_data.cancel_ctrl_id = dlg.button(far_get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
   dlg.new_line();
 
-  int item = dlg.show(delete_files_dlg_proc, &dlg_data, FAR_T("delete.files.dlg"));
+  int item = dlg.show(delete_files_dlg_proc, &dlg_data, L"delete.files.dlg");
 
   // if user cancelled dialog
   return (item != -1) && (item != dlg_data.cancel_ctrl_id);
@@ -579,7 +586,7 @@ void draw_delete_files_progress(const DeleteFilesProgress& progress, const Delet
   // current path
   lines += fit_str(progress.curr_path, c_client_xs);
   // separator
-  lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+  lines += L"\x1";
   // file progress bar
   unsigned len1;
   if (progress.total_objects == 0) len1 = c_client_xs;
@@ -594,7 +601,7 @@ void draw_delete_files_progress(const DeleteFilesProgress& progress, const Delet
   far_set_progress_state(TBPF_NORMAL);
   far_set_progress_value(percent, 100);
   // separator
-  lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+  lines += L"\x1";
   // times
   unsigned __int64 time = (curr_time - progress.start_time) * 1000 / g_time_freq; // ms
   unsigned __int64 total_time;
@@ -602,9 +609,9 @@ void draw_delete_files_progress(const DeleteFilesProgress& progress, const Delet
   else total_time = time * progress.total_objects / progress.objects;
   lines += UnicodeString::format(far_get_msg(MSG_DELETE_FILES_PROGRESS_TIME).data(), &format_time(time), &format_time(total_time - time), &format_time(total_time));
   // separator
-  lines += UnicodeString::format(L"%.*c", c_client_xs, c_horiz1);
+  lines += L"\x1";
   // stats
-  lines += UnicodeString::format(far_get_msg(MSG_DELETE_FILES_PROGRESS_STATS).data(), stats.files, stats.dirs, '\1', stats.errors == 0 ? g_colors[COL_DIALOGTEXT] : CHANGE_FG(g_colors[COL_DIALOGTEXT], FOREGROUND_RED), stats.errors);
+  lines += UnicodeString::format(far_get_msg(MSG_DELETE_FILES_PROGRESS_STATS).data(), stats.files, stats.dirs, stats.errors);
 
   draw_text_box(far_get_msg(MSG_DELETE_FILES_PROGRESS_TITLE), lines, c_client_xs);
 }
@@ -617,7 +624,7 @@ void show_delete_files_results_dlg(const DeleteFilesStats& stats, const Log& log
   msg.add_fmt(far_get_msg(MSG_DELETE_FILES_STATS_DIRS).data(), stats.dirs).add('\n');
   msg.add(far_get_msg(MSG_BUTTON_OK)).add('\n');
   if (log.size() != 0) msg.add(far_get_msg(MSG_LOG_SHOW)).add('\n');
-  if (far_message(msg, log.size() != 0 ? 2 : 1, FMSG_LEFTALIGN) == 1) {
+  if (far_message(c_delete_files_stats_dialog_guid, msg, log.size() != 0 ? 2 : 1, FMSG_LEFTALIGN) == 1) {
     show_log(log);
   }
 }
@@ -631,16 +638,16 @@ struct CreateDirDlgData {
   }
 };
 
-LONG_PTR WINAPI create_dir_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2) {
+INT_PTR WINAPI create_dir_dlg_proc(HANDLE hDlg, int Msg, int Param1, void* Param2) {
   CreateDirDlgData* dlg_data = (CreateDirDlgData*) Dlg_GetDlgData(g_far, hDlg);
   if ((Msg == DN_CLOSE) && (Param1 >= 0) && (Param1 != dlg_data->cancel_ctrl_id)) {
     CreateDirOptions* options = dlg_data->options;
 
-    FarStr file_name;
+    UnicodeString file_name;
     unsigned len = (unsigned) g_far.SendDlgMessage(hDlg, DM_GETTEXTLENGTH, dlg_data->file_name_ctrl_id, 0);
-    g_far.SendDlgMessage(hDlg, DM_GETTEXTPTR, dlg_data->file_name_ctrl_id, (LONG_PTR) file_name.buf(len));
+    g_far.SendDlgMessage(hDlg, DM_GETTEXTPTR, dlg_data->file_name_ctrl_id, file_name.buf(len));
     file_name.set_size(len);
-    options->file_name = FARSTR_TO_UNICODE(file_name);
+    options->file_name = file_name;
     options->file_name.strip();
     unquote(options->file_name);
   }
@@ -650,11 +657,11 @@ LONG_PTR WINAPI create_dir_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR P
 bool show_create_dir_dlg(CreateDirOptions& options) {
   CreateDirDlgData dlg_data(&options);
   const unsigned c_client_xs = 60;
-  FarDialog dlg(far_get_msg(MSG_CREATE_DIR_DLG_TITLE), c_client_xs);
+  FarDialog dlg(c_create_dir_dialog_guid, far_get_msg(MSG_CREATE_DIR_DLG_TITLE), c_client_xs);
   dlg.label(far_get_msg(MSG_CREATE_DIR_DLG_PATH));
   dlg.new_line();
   // destination directory edit box
-  dlg_data.file_name_ctrl_id = dlg.var_edit_box(options.file_name, MAX_PATH, c_client_xs);
+  dlg_data.file_name_ctrl_id = dlg.var_edit_box(options.file_name, c_client_xs);
   dlg.new_line();
   dlg.separator();
   dlg.new_line();
@@ -685,7 +692,7 @@ struct DefOptionValuesDlgData {
   }
 };
 
-LONG_PTR WINAPI def_option_values_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2) {
+INT_PTR WINAPI def_option_values_dlg_proc(HANDLE hDlg, int Msg, int Param1, void* Param2) {
   DefOptionValuesDlgData* dlg_data = (DefOptionValuesDlgData*) Dlg_GetDlgData(g_far, hDlg);
   if ((Msg == DN_CLOSE) && (Param1 >= 0) && (Param1 != dlg_data->cancel_ctrl_id)) {
     PluginOptions* options = dlg_data->options;
@@ -708,7 +715,7 @@ LONG_PTR WINAPI def_option_values_dlg_proc(HANDLE hDlg, int Msg, int Param1, LON
 
 bool show_def_option_values_dlg(PluginOptions& options) {
   DefOptionValuesDlgData dlg_data(&options);
-  FarDialog dlg(far_get_msg(MSG_OPTIONS_DLG_DEF_OPTION_VALUES_TITLE), 40);
+  FarDialog dlg(c_def_option_values_dialog, far_get_msg(MSG_OPTIONS_DLG_DEF_OPTION_VALUES_TITLE), 40);
 
   // ignore errors option
   dlg_data.ignore_errors_ctrl_id = dlg.check_box(far_get_msg(MSG_OPTIONS_IGNORE_ERRORS), options.ignore_errors);
@@ -746,7 +753,7 @@ bool show_def_option_values_dlg(PluginOptions& options) {
   dlg_data.cancel_ctrl_id = dlg.button(far_get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
   dlg.new_line();
 
-  int item = dlg.show(def_option_values_dlg_proc, &dlg_data, FAR_T("Config"));
+  int item = dlg.show(def_option_values_dlg_proc, &dlg_data, L"Config");
 
   return (item != -1) && (item != dlg_data.cancel_ctrl_id);
 }
@@ -763,35 +770,34 @@ struct HotKeyOptionsDlgData {
 };
 
 bool verify_hot_key(HANDLE h_dlg, int ctrl_id) {
-  FarStr hot_key;
-  unsigned len = (unsigned) g_far.SendDlgMessage(h_dlg, DM_GETTEXTLENGTH, ctrl_id, 0);
-  g_far.SendDlgMessage(h_dlg, DM_GETTEXTPTR, ctrl_id, (LONG_PTR) hot_key.buf(len));
+  UnicodeString hot_key;
+  unsigned len = (unsigned) g_far.SendDlgMessage(h_dlg, DM_GETTEXTLENGTH, ctrl_id, nullptr);
+  g_far.SendDlgMessage(h_dlg, DM_GETTEXTPTR, ctrl_id, hot_key.buf(len));
   hot_key.set_size(len);
-  unsigned vcode, state;
-  if (virt_key_from_name(FARSTR_TO_UNICODE(hot_key), vcode, state)) return true;
-  else {
-    far_message(far_get_msg(MSG_PLUGIN_NAME) + L"\n" + UnicodeString::format(far_get_msg(MSG_ERR_INVALID_HOT_KEY).data(), FARSTR_TO_UNICODE(hot_key).data()), 0, FMSG_WARNING | FMSG_MB_OK);
+  INPUT_RECORD input_rec;
+  if (!g_fsf.FarNameToInputRecord(hot_key.data(), &input_rec) || input_rec.EventType != KEY_EVENT) {
+    far_message(c_error_dialog_guid, far_get_msg(MSG_PLUGIN_NAME) + L"\n" + UnicodeString::format(far_get_msg(MSG_ERR_INVALID_HOT_KEY).data(), hot_key.data()), 0, FMSG_WARNING | FMSG_MB_OK);
     return false;
   }
+  return true;
 }
 
-void save_hot_key(HANDLE h_dlg, int ctrl_id, const wchar_t* param_name, KeyOption& option) {
-  FarStr hot_key;
-  unsigned len = (unsigned) g_far.SendDlgMessage(h_dlg, DM_GETTEXTLENGTH, ctrl_id, 0);
-  g_far.SendDlgMessage(h_dlg, DM_GETTEXTPTR, ctrl_id, (LONG_PTR) hot_key.buf(len));
+UnicodeString get_hot_key(HANDLE h_dlg, int ctrl_id) {
+  UnicodeString hot_key;
+  unsigned len = (unsigned) g_far.SendDlgMessage(h_dlg, DM_GETTEXTLENGTH, ctrl_id, nullptr);
+  g_far.SendDlgMessage(h_dlg, DM_GETTEXTPTR, ctrl_id, hot_key.buf(len));
   hot_key.set_size(len);
-  VERIFY(virt_key_from_name(FARSTR_TO_UNICODE(hot_key), option.vcode, option.state));
-  set_str_option(param_name, FARSTR_TO_UNICODE(hot_key));
+  return hot_key;
 }
 
-LONG_PTR WINAPI hot_key_options_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2) {
+INT_PTR WINAPI hot_key_options_dlg_proc(HANDLE hDlg, int Msg, int Param1, void* Param2) {
   HotKeyOptionsDlgData* dlg_data = (HotKeyOptionsDlgData*) Dlg_GetDlgData(g_far, hDlg);
   if ((Msg == DN_CLOSE) && (Param1 >= 0) && (Param1 != dlg_data->cancel_ctrl_id)) {
     PluginOptions* options = dlg_data->options;
     if (verify_hot_key(hDlg, dlg_data->key_execute_ctrl_id) && verify_hot_key(hDlg, dlg_data->key_attr_ctrl_id) && verify_hot_key(hDlg, dlg_data->key_hide_rom_files_ctrl_id)) {
-      save_hot_key(hDlg, dlg_data->key_execute_ctrl_id, L"key_execute", options->key_execute);
-      save_hot_key(hDlg, dlg_data->key_attr_ctrl_id, L"key_attr", options->key_attr);
-      save_hot_key(hDlg, dlg_data->key_hide_rom_files_ctrl_id, L"key_hide_rom_files", options->key_hide_rom_files);
+      options->key_execute = get_hot_key(hDlg, dlg_data->key_execute_ctrl_id);
+      options->key_attr = get_hot_key(hDlg, dlg_data->key_attr_ctrl_id);
+      options->key_hide_rom_files = get_hot_key(hDlg, dlg_data->key_hide_rom_files_ctrl_id);
     }
     else return FALSE;
   }
@@ -800,20 +806,20 @@ LONG_PTR WINAPI hot_key_options_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_
 
 bool show_hot_key_options_dlg(PluginOptions& options) {
   HotKeyOptionsDlgData dlg_data(&options);
-  FarDialog dlg(far_get_msg(MSG_OPTIONS_DLG_HOT_KEYS_TITLE), 40);
+  FarDialog dlg(c_hot_keys_dialog_guid, far_get_msg(MSG_OPTIONS_DLG_HOT_KEYS_TITLE), 40);
 
   unsigned p = max(max(far_get_msg(MSG_OPTIONS_DLG_HOT_KEY_EXECUTE).size(), far_get_msg(MSG_OPTIONS_DLG_HOT_KEY_ATTR).size()), far_get_msg(MSG_OPTIONS_DLG_HOT_KEY_HIDE_ROM_FILES).size()) + 1;
   dlg.label(far_get_msg(MSG_OPTIONS_DLG_HOT_KEY_EXECUTE));
   dlg.pad(p);
-  dlg_data.key_execute_ctrl_id = dlg.var_edit_box(get_str_option(L"key_execute", L"CtrlAltS"), 30, 15);
+  dlg_data.key_execute_ctrl_id = dlg.var_edit_box(options.key_execute, 15);
   dlg.new_line();
   dlg.label(far_get_msg(MSG_OPTIONS_DLG_HOT_KEY_ATTR));
   dlg.pad(p);
-  dlg_data.key_attr_ctrl_id = dlg.var_edit_box(get_str_option(L"key_attr", L"CtrlA"), 30, 15);
+  dlg_data.key_attr_ctrl_id = dlg.var_edit_box(options.key_attr, 15);
   dlg.new_line();
   dlg.label(far_get_msg(MSG_OPTIONS_DLG_HOT_KEY_HIDE_ROM_FILES));
   dlg.pad(p);
-  dlg_data.key_hide_rom_files_ctrl_id = dlg.var_edit_box(get_str_option(L"key_hide_rom_files", L"CtrlAltI"), 30, 15);
+  dlg_data.key_hide_rom_files_ctrl_id = dlg.var_edit_box(options.key_hide_rom_files, 15);
   dlg.new_line();
 
   dlg.separator();
@@ -822,7 +828,7 @@ bool show_hot_key_options_dlg(PluginOptions& options) {
   dlg_data.cancel_ctrl_id = dlg.button(far_get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
   dlg.new_line();
 
-  int item = dlg.show(hot_key_options_dlg_proc, &dlg_data, FAR_T("Config"));
+  int item = dlg.show(hot_key_options_dlg_proc, &dlg_data, L"Config");
 
   return (item != -1) && (item != dlg_data.cancel_ctrl_id);
 }
@@ -830,7 +836,6 @@ bool show_hot_key_options_dlg(PluginOptions& options) {
 struct PluginOptionsDlgData {
   int add_to_plugin_menu_ctrl_id;
   int add_to_disk_menu_ctrl_id;
-  int disk_menu_number_ctrl_id;
   int hide_copy_dlg_ctrl_id;
   int save_last_dir_ctrl_id;
   int hide_rom_files_ctrl_id;
@@ -850,17 +855,17 @@ struct PluginOptionsDlgData {
   }
 };
 
-LONG_PTR WINAPI plugin_options_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2) {
+INT_PTR WINAPI plugin_options_dlg_proc(HANDLE hDlg, int Msg, int Param1, void* Param2) {
   PluginOptionsDlgData* dlg_data = (PluginOptionsDlgData*) Dlg_GetDlgData(g_far, hDlg);
   PluginOptions* options = dlg_data->options;
   bool auto_buf_size = DlgItem_GetCheck(g_far, hDlg, dlg_data->auto_buf_size_ctrl_id) == BSTATE_CHECKED;
   if (Msg == DN_INITDIALOG) {
-    g_far.SendDlgMessage(hDlg, DM_SHOWITEM, dlg_data->copy_buf_size_ctrl_id, auto_buf_size ? 0 : 1);
-    g_far.SendDlgMessage(hDlg, DM_SHOWITEM, dlg_data->copy_buf_size_ctrl_id + 1, auto_buf_size ? 0 : 1);
+    g_far.SendDlgMessage(hDlg, DM_SHOWITEM, dlg_data->copy_buf_size_ctrl_id, reinterpret_cast<void*>(auto_buf_size ? 0 : 1));
+    g_far.SendDlgMessage(hDlg, DM_SHOWITEM, dlg_data->copy_buf_size_ctrl_id + 1, reinterpret_cast<void*>(auto_buf_size ? 0 : 1));
   }
   else if ((Msg == DN_BTNCLICK) && (Param1 == dlg_data->auto_buf_size_ctrl_id)) {
-    g_far.SendDlgMessage(hDlg, DM_SHOWITEM, dlg_data->copy_buf_size_ctrl_id, auto_buf_size ? 0 : 1);
-    g_far.SendDlgMessage(hDlg, DM_SHOWITEM, dlg_data->copy_buf_size_ctrl_id + 1, auto_buf_size ? 0 : 1);
+    g_far.SendDlgMessage(hDlg, DM_SHOWITEM, dlg_data->copy_buf_size_ctrl_id, reinterpret_cast<void*>(auto_buf_size ? 0 : 1));
+    g_far.SendDlgMessage(hDlg, DM_SHOWITEM, dlg_data->copy_buf_size_ctrl_id + 1, reinterpret_cast<void*>(auto_buf_size ? 0 : 1));
   }
   else if ((Msg == DN_BTNCLICK) && (Param1 == dlg_data->def_options_values_ctrl_id)) {
     if (show_def_option_values_dlg(*options)) save_plugin_options(*options);
@@ -871,25 +876,18 @@ LONG_PTR WINAPI plugin_options_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_P
     g_far.SendDlgMessage(hDlg, DM_SETFOCUS, dlg_data->ok_ctrl_id, 0);
   }
   else if ((Msg == DN_CLOSE) && (Param1 >= 0) && (Param1 != dlg_data->cancel_ctrl_id)) {
-    FarStr prefix;
+    UnicodeString prefix;
     unsigned len = (unsigned) g_far.SendDlgMessage(hDlg, DM_GETTEXTLENGTH, dlg_data->prefix_ctrl_id, 0);
-    g_far.SendDlgMessage(hDlg, DM_GETTEXTPTR, dlg_data->prefix_ctrl_id, (LONG_PTR) prefix.buf(len));
+    g_far.SendDlgMessage(hDlg, DM_GETTEXTPTR, dlg_data->prefix_ctrl_id, prefix.buf(len));
     prefix.set_size(len);
     if (prefix.size() == 0) {
-      far_message(far_get_msg(MSG_PLUGIN_NAME) + L"\n" + far_get_msg(MSG_ERR_INVALID_PREFIX), 0, FMSG_WARNING | FMSG_MB_OK);
+      far_message(c_error_dialog_guid, far_get_msg(MSG_PLUGIN_NAME) + L"\n" + far_get_msg(MSG_ERR_INVALID_PREFIX), 0, FMSG_WARNING | FMSG_MB_OK);
       return FALSE;
     }
-    options->prefix = FARSTR_TO_UNICODE(prefix);
+    options->prefix = prefix;
 
     options->add_to_plugin_menu = DlgItem_GetCheck(g_far, hDlg, dlg_data->add_to_plugin_menu_ctrl_id) == BSTATE_CHECKED;
     options->add_to_disk_menu = DlgItem_GetCheck(g_far, hDlg, dlg_data->add_to_disk_menu_ctrl_id) == BSTATE_CHECKED;
-
-    FarStr disk_menu_number;
-    len = (unsigned) g_far.SendDlgMessage(hDlg, DM_GETTEXTLENGTH, dlg_data->disk_menu_number_ctrl_id, 0);
-    g_far.SendDlgMessage(hDlg, DM_GETTEXTPTR, dlg_data->disk_menu_number_ctrl_id, (LONG_PTR) disk_menu_number.buf(len));
-    disk_menu_number.set_size(len);
-    if (disk_menu_number == ' ') options->disk_menu_number = -1;
-    else options->disk_menu_number = _wtoi(FARSTR_TO_UNICODE(disk_menu_number).data());
 
     options->hide_copy_dlg = DlgItem_GetCheck(g_far, hDlg, dlg_data->hide_copy_dlg_ctrl_id) == BSTATE_CHECKED;
     options->save_last_dir = DlgItem_GetCheck(g_far, hDlg, dlg_data->save_last_dir_ctrl_id) == BSTATE_CHECKED;
@@ -899,11 +897,11 @@ LONG_PTR WINAPI plugin_options_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_P
 
     if (auto_buf_size) options->copy_buf_size = -1;
     else {
-      FarStr bs;
+      UnicodeString bs;
       unsigned len = (unsigned) g_far.SendDlgMessage(hDlg, DM_GETTEXTLENGTH, dlg_data->copy_buf_size_ctrl_id, 0);
-      g_far.SendDlgMessage(hDlg, DM_GETTEXTPTR, dlg_data->copy_buf_size_ctrl_id, (LONG_PTR) bs.buf(len));
+      g_far.SendDlgMessage(hDlg, DM_GETTEXTPTR, dlg_data->copy_buf_size_ctrl_id, bs.buf(len));
       bs.set_size(len);
-      options->copy_buf_size = _wtoi(FARSTR_TO_UNICODE(bs).data());
+      options->copy_buf_size = _wtoi(bs.data());
       if (options->copy_buf_size == 0) options->copy_buf_size = -1;
     }
 
@@ -915,17 +913,10 @@ LONG_PTR WINAPI plugin_options_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_P
 
 bool show_plugin_options_dlg(PluginOptions& options) {
   PluginOptionsDlgData dlg_data(&options);
-  FarDialog dlg(far_get_msg(MSG_PLUGIN_NAME) + ' ' + far_get_msg(MSG_OPTIONS_DLG_TITLE), 60);
+  FarDialog dlg(c_plugin_options_dialog_guid, far_get_msg(MSG_PLUGIN_NAME) + ' ' + far_get_msg(MSG_OPTIONS_DLG_TITLE), 60);
   dlg_data.add_to_disk_menu_ctrl_id = dlg.check_box(far_get_msg(MSG_OPTIONS_DLG_DISK_MENU), options.add_to_disk_menu);
   dlg.spacer(2);
   dlg_data.add_to_plugin_menu_ctrl_id = dlg.check_box(far_get_msg(MSG_OPTIONS_DLG_PLUGIN_MENU), options.add_to_plugin_menu);
-  dlg.new_line();
-  dlg.spacer(2);
-  dlg.label(far_get_msg(MSG_OPTIONS_DLG_DISK_MENU_NUMBER));
-  dlg.spacer(1);
-  UnicodeString mn;
-  if (options.disk_menu_number != -1) mn.copy_fmt(L"%u", options.disk_menu_number);
-  dlg_data.disk_menu_number_ctrl_id = dlg.mask_edit_box(mn, L"9", 1);
   dlg.new_line();
   dlg_data.hide_copy_dlg_ctrl_id = dlg.check_box(far_get_msg(MSG_OPTIONS_DLG_HIDE_COPY_DLG), options.hide_copy_dlg);
   dlg.new_line();
@@ -949,7 +940,7 @@ bool show_plugin_options_dlg(PluginOptions& options) {
   dlg.new_line();
   dlg.label(far_get_msg(MSG_OPTIONS_DLG_PREFIX));
   dlg.spacer(1);
-  dlg_data.prefix_ctrl_id = dlg.var_edit_box(options.prefix, 15, 15);
+  dlg_data.prefix_ctrl_id = dlg.var_edit_box(options.prefix, 15);
   dlg.new_line();
 
   dlg.separator();
@@ -975,7 +966,7 @@ bool show_plugin_options_dlg(PluginOptions& options) {
   dlg_data.cancel_ctrl_id = dlg.button(far_get_msg(MSG_BUTTON_CANCEL), DIF_CENTERGROUP);
   dlg.new_line();
 
-  int item = dlg.show(plugin_options_dlg_proc, &dlg_data, FAR_T("Config"));
+  int item = dlg.show(plugin_options_dlg_proc, &dlg_data, L"Config");
 
   return (item != -1) && (item != dlg_data.cancel_ctrl_id);
 }
@@ -999,7 +990,7 @@ struct FileAttrDlgData {
   }
 };
 
-LONG_PTR WINAPI file_attr_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2) {
+INT_PTR WINAPI file_attr_dlg_proc(HANDLE hDlg, int Msg, int Param1, void* Param2) {
   FileAttrDlgData* dlg_data = (FileAttrDlgData*) Dlg_GetDlgData(g_far, hDlg);
   if ((Msg == DN_CLOSE) && (Param1 >= 0) && (Param1 != dlg_data->cancel_ctrl_id)) {
     FileAttrOptions* options = dlg_data->options;
@@ -1021,7 +1012,7 @@ LONG_PTR WINAPI file_attr_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Pa
 bool show_file_attr_dlg(FileAttrOptions& options) {
   FileAttrDlgData dlg_data(&options);
   const unsigned c_client_xs = 45;
-  FarDialog dlg(far_get_msg(MSG_ATTR_DLG_TITLE), c_client_xs);
+  FarDialog dlg(c_attr_dialog_guid, far_get_msg(MSG_ATTR_DLG_TITLE), c_client_xs);
   DWORD flag = options.single_file ? 0 : DIF_3STATE;
 
   // attributes
@@ -1076,16 +1067,16 @@ struct RunDlgData {
   }
 };
 
-LONG_PTR WINAPI run_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2) {
+INT_PTR WINAPI run_dlg_proc(HANDLE hDlg, int Msg, int Param1, void* Param2) {
   RunDlgData* dlg_data = (RunDlgData*) Dlg_GetDlgData(g_far, hDlg);
   if ((Msg == DN_CLOSE) && (Param1 >= 0) && (Param1 != dlg_data->cancel_ctrl_id)) {
     RunOptions* options = dlg_data->options;
 
-    FarStr cmd_line;
+    UnicodeString cmd_line;
     unsigned len = (unsigned) g_far.SendDlgMessage(hDlg, DM_GETTEXTLENGTH, dlg_data->cmd_line_ctrl_id, 0);
-    g_far.SendDlgMessage(hDlg, DM_GETTEXTPTR, dlg_data->cmd_line_ctrl_id, (LONG_PTR) cmd_line.buf(len));
+    g_far.SendDlgMessage(hDlg, DM_GETTEXTPTR, dlg_data->cmd_line_ctrl_id, cmd_line.buf(len));
     cmd_line.set_size(len);
-    options->cmd_line = FARSTR_TO_UNICODE(cmd_line);
+    options->cmd_line = cmd_line;
     options->cmd_line.strip();
   }
   return g_far.DefDlgProc(hDlg, Msg, Param1, Param2);
@@ -1094,12 +1085,12 @@ LONG_PTR WINAPI run_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2) 
 bool show_run_dlg(RunOptions& options) {
   RunDlgData dlg_data(&options);
   const unsigned c_client_xs = 60;
-  FarDialog dlg(far_get_msg(MSG_RUN_DLG_TITLE), c_client_xs);
+  FarDialog dlg(c_run_dialog_guid, far_get_msg(MSG_RUN_DLG_TITLE), c_client_xs);
   // command line
   dlg.label(far_get_msg(MSG_RUN_DLG_CMD_LINE));
   dlg.new_line();
-  dlg_data.cmd_line_ctrl_id = dlg.var_edit_box(options.cmd_line, 32767, c_client_xs, DIF_HISTORY);
-  dlg.item().History = FAR_T("WMExplorerRun");
+  dlg_data.cmd_line_ctrl_id = dlg.var_edit_box(options.cmd_line, c_client_xs, DIF_HISTORY);
+  dlg.item().History = L"WMExplorerRun";
   dlg.new_line();
   // separator
   dlg.separator();
@@ -1124,7 +1115,7 @@ struct FilterDlgData {
   }
 };
 
-LONG_PTR WINAPI filter_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2) {
+INT_PTR WINAPI filter_dlg_proc(HANDLE hDlg, int Msg, int Param1, void* Param2) {
   FilterDlgData* dlg_data = (FilterDlgData*) Dlg_GetDlgData(g_far, hDlg);
   if ((Msg == DN_CLOSE) && (Param1 >= 0) && (Param1 != dlg_data->cancel_ctrl_id)) {
     dlg_data->selection->clear();
@@ -1142,7 +1133,7 @@ LONG_PTR WINAPI filter_dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param
 
 bool show_filters_dlg(const ObjectArray<FileFilters>& filter_list, Array<FilterSelection>& filter_selection) {
   FilterDlgData dlg_data(&filter_selection);
-  FarDialog dlg(far_get_msg(MSG_FILTER_DLG_TITLE), 60);
+  FarDialog dlg(c_filter_dialog_guid, far_get_msg(MSG_FILTER_DLG_TITLE), 60);
   dlg.label(far_get_msg(MSG_FILTER_DLG_SELECT_FILES));
   dlg.new_line();
   Array<wchar_t> hot_keys;
@@ -1165,7 +1156,7 @@ bool show_filters_dlg(const ObjectArray<FileFilters>& filter_list, Array<FilterS
     for (unsigned j = 0; j < filter_list[i].size(); j++) {
       items += filter_list[i][j].description + L" (" + filter_list[i][j].dst_ext + L")";
     }
-    dlg_data.filter_idx_ctrl_id += dlg.combo_box(items, 0, 256, AUTO_SIZE, DIF_DROPDOWNLIST);
+    dlg_data.filter_idx_ctrl_id += dlg.combo_box(items, 0, AUTO_SIZE, DIF_DROPDOWNLIST);
     dlg.new_line();
   }
   // separator

@@ -1,10 +1,8 @@
-#include "farapi_config.h"
-
 #define _ERROR_WINDOWS
 #include "error.h"
 
 #include "msg.h"
-
+#include "guids.h"
 #include "util.h"
 #include "options.h"
 #include "dlgapi.h"
@@ -57,7 +55,7 @@ int error_dlg(Error& e, const UnicodeString& message) {
   msg.add(far_get_msg(MSG_BUTTON_IGNORE)).add('\n');
   msg.add(far_get_msg(MSG_BUTTON_IGNORE_ALL)).add('\n');
   msg.add(far_get_msg(MSG_BUTTON_CANCEL)).add('\n');
-  return far_message(msg, 4, FMSG_WARNING);
+  return far_message(c_error_dialog_guid, msg, 4, FMSG_WARNING);
 }
 
 UnicodeString long_path(const UnicodeString& path) {
@@ -315,31 +313,17 @@ void gen_file_list(const UnicodeString& directory, IRAPISession* session, Plugin
   try {
     file_list.extend(file_count);
     PluginPanelItem pi;
-#ifdef FARAPI17
-    UnicodeString enc_fn;
-    AnsiString oem_fn;
-#endif // FARAPI17
     for (unsigned i = 0; i < file_count; i++) {
       memset(&pi, 0, sizeof(pi));
       if (!options.hide_rom_files || ((find_data[i].dwFileAttributes & FILE_ATTRIBUTE_INROM) == 0)) {
-        pi.FindData.dwFileAttributes = find_data[i].dwFileAttributes;
-        pi.FindData.ftCreationTime = find_data[i].ftCreationTime;
-        pi.FindData.ftLastAccessTime = find_data[i].ftLastAccessTime;
-        pi.FindData.ftLastWriteTime = find_data[i].ftLastWriteTime;
-#ifdef FARAPI18
-        pi.FindData.nFileSize = FILE_SIZE(find_data[i]);
+        pi.FileAttributes = find_data[i].dwFileAttributes;
+        pi.CreationTime = find_data[i].ftCreationTime;
+        pi.LastAccessTime = find_data[i].ftLastAccessTime;
+        pi.LastWriteTime = find_data[i].ftLastWriteTime;
+        pi.FileSize = FILE_SIZE(find_data[i]);
         file_list.names += find_data[i].cFileName;
-        pi.FindData.lpwszFileName = (wchar_t*) file_list.names.last().data();
-        pi.FindData.lpwszAlternateFileName = L"";
-#endif // FARAPI18
-#ifdef FARAPI17
-        pi.FindData.nFileSizeHigh = find_data[i].nFileSizeHigh;
-        pi.FindData.nFileSizeLow = find_data[i].nFileSizeLow;
-        encode_fn(enc_fn, find_data[i].cFileName);
-        if (enc_fn.size() < MAX_PATH) unicode_to_oem(oem_fn, enc_fn);
-        else unicode_to_oem(oem_fn, find_data[i].cFileName);
-        strcpy(pi.FindData.cFileName, oem_fn.data());
-#endif // FARAPI17
+        pi.FileName = (wchar_t*) file_list.names.last().data();
+        pi.AlternateFileName = L"";
         file_list += pi;
       }
     }
@@ -719,7 +703,7 @@ void copy_files(bool src_remote, const UnicodeString& src_dir, const FileList& s
                 tmp_path = make_temp_file();
                 // perform conversion
                 if (!src_remote) {
-                  far_message(far_get_msg(options.move_files ? MSG_MOVE_FILES_PROGRESS_TITLE : MSG_COPY_FILES_PROGRESS_TITLE) + '\n' + far_get_msg(MSG_PROGRESS_FILTER));
+                  far_message(c_progress_dialog_guid, far_get_msg(options.move_files ? MSG_MOVE_FILES_PROGRESS_TITLE : MSG_COPY_FILES_PROGRESS_TITLE) + '\n' + far_get_msg(MSG_PROGRESS_FILTER));
                   convert_file(filters[filter_idx].itf, src_path, tmp_path, true);
                 }
               }
@@ -1058,21 +1042,14 @@ bool dir_exists(const UnicodeString& path, IRAPISession* session) {
 
 void InfoPanel::clear() {
   Array<InfoPanelLine>::clear();
-#ifdef FARAPI18
   info_lines.clear();
-#endif
 }
 
 void InfoPanel::add_separator(const UnicodeString& text) {
   InfoPanelLine ipl;
   memset(&ipl, 0, sizeof(ipl));
-#ifdef FARAPI17
-  FAR_STRCPY(ipl.Text, UNICODE_TO_FARSTR(text).data());
-#endif
-#ifdef FARAPI18
   info_lines += text;
   ipl.Text = info_lines.last().data();
-#endif
   ipl.Separator = 1;
   add(ipl);
 }
@@ -1080,16 +1057,10 @@ void InfoPanel::add_separator(const UnicodeString& text) {
 void InfoPanel::add_info(const UnicodeString& name, const UnicodeString& value) {
   InfoPanelLine ipl;
   memset(&ipl, 0, sizeof(ipl));
-#ifdef FARAPI17
-  FAR_STRCPY(ipl.Text, UNICODE_TO_FARSTR(name).data());
-  FAR_STRCPY(ipl.Data, UNICODE_TO_FARSTR(value).data());
-#endif
-#ifdef FARAPI18
   info_lines += name;
   ipl.Text = info_lines.last().data();
   info_lines += value;
   ipl.Data = info_lines.last().data();
-#endif
   add(ipl);
 }
 
@@ -1243,7 +1214,7 @@ void create_process(const UnicodeString& app_name, const UnicodeString& params, 
 void panel_items_to_file_list(PluginPanelItem *PanelItem, int ItemsNumber, FileList& panel_file_list) {
   panel_file_list.extend(ItemsNumber);
   for (int i = 0; i < ItemsNumber; i++) {
-    panel_file_list += FileInfo(PanelItem[i].FindData);
+    panel_file_list += FileInfo(PanelItem[i]);
   }
 }
 
@@ -1256,7 +1227,7 @@ void file_panel_items_to_file_list(const UnicodeString& panel_path, PluginPanelI
     if (ui.update_needed()) {
       draw_progress_msg(far_get_msg(MSG_PROGRESS_PREPARE));
     }
-    FilePath fp(FARSTR_TO_UNICODE(FAR_FILE_NAME(PanelItem[i].FindData)));
+    FilePath fp(PanelItem[i].FileName);
     fi.file_dir = fp.get_dir_path();
     file_name = fp.get_file_name();
     if (!fp.is_absolute) {
@@ -1265,21 +1236,7 @@ void file_panel_items_to_file_list(const UnicodeString& panel_path, PluginPanelI
     }
     COMPOSE_PATH2(file_path, fi.file_dir, file_name);
     plugin->last_object = file_path;
-#ifdef FARAPI17
-    bool fn_invalid = file_name.search(L'?') != -1; // Far uses '?' instead of unmappable characters
-    HANDLE h_find = fn_invalid ? INVALID_HANDLE_VALUE : FindFirstFileW(long_path(file_path).data(), &find_data);
-    if (h_find == INVALID_HANDLE_VALUE) {
-      // try using short file name if present
-      if (*PanelItem[i].FindData.cAlternateFileName != NULL) {
-        oem_to_unicode(file_name, PanelItem[i].FindData.cAlternateFileName);
-        COMPOSE_PATH2(file_path, fi.file_dir, file_name);
-        h_find = FindFirstFileW(long_path(file_path).data(), &find_data);
-      }
-    }
-#endif FARAPI17
-#ifdef FARAPI18
     HANDLE h_find = FindFirstFileW(long_path(file_path).data(), &find_data);
-#endif FARAPI18
     if (h_find != INVALID_HANDLE_VALUE) {
       VERIFY(FindClose(h_find) != 0);
       fi.file_name = find_data.cFileName;
@@ -1291,11 +1248,11 @@ void file_panel_items_to_file_list(const UnicodeString& panel_path, PluginPanelI
     }
     else {
       fi.file_name = file_name;
-      fi.attr = PanelItem[i].FindData.dwFileAttributes;
-      fi.creation_time = PanelItem[i].FindData.ftCreationTime;
-      fi.access_time = PanelItem[i].FindData.ftLastAccessTime;
-      fi.write_time = PanelItem[i].FindData.ftLastWriteTime;
-      fi.size = FAR_FILE_SIZE(PanelItem[i].FindData);
+      fi.attr = PanelItem[i].FileAttributes;
+      fi.creation_time = PanelItem[i].CreationTime;
+      fi.access_time = PanelItem[i].LastAccessTime;
+      fi.write_time = PanelItem[i].LastWriteTime;
+      fi.size = PanelItem[i].FileSize;
     }
     fi.child_cnt = 0;
     panel_file_list += fi;

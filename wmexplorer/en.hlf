@@ -7,19 +7,8 @@ $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
     This plugin is designed for file management of Windows Mobile
 based PDA/SmartPhones connected through ActiveSync.
     Plugin version can be found in DLL module properties.
-    ~Track new plugin versions~@http://forum.farmanager.com/viewtopic.php?t=2826@
-    ~Discussion, propositions and bug reports~@http://forum.farmanager.com/viewtopic.php?t=2827@
-m4_ifdef(`__FARAPI17__', `
-    #Unicode file name support#
-    Plugin supports Unicode file names inside its panel.
-In case file name cannot be converted into OEM code page
-without losing information special encoding is applied.
-Every unconvertable character is encoded in the following way:
-(asterisk) (character code), *AB for example. This encoding
-is used for display only, original file name is left unchanged.
-Looks ugly but better than nothing.
-    Also when copying files from disk plugin tries to
-find out correct Unicode file name using its short name.', `m4_dnl')
+    ~Track new plugin versions~@<(UPDATE_URL)>@
+    ~Discussion, propositions and bug reports~@<(SUPPORT_URL)>@
 
     #Special keys#
     These key combinations are destined for functions that cannot be

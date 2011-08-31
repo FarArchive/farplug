@@ -12,7 +12,7 @@ disk.menu.smartphone = смартфон
 
 # Create file list
 create.list.progress.title = Обработка каталогов...
-create.list.progress.objects = Файлы: %u; Каталоги: %u; Ошибки: %c%c%u
+create.list.progress.objects = Файлы: %u; Каталоги: %u; Ошибки: %u
 create.list.progress.size = Общий размер данных: %S
 
 # Copy files
@@ -34,7 +34,7 @@ copy.files.progress.size = Обработано %7S из %7S [%3u%%] на ско
 copy.files.progress.file.size = Обработано %7S из %7S [%3u%%] на скорости %9S
 copy.files.progress.time = Прошло: %8S  Осталось: %8S  Всего: %8S
 move.remote.files.progress.time = Прошло: %8S
-copy.files.progress.stats = Файлы: %u(%u/%u); Каталоги: %u; Ошибки: %c%c%u
+copy.files.progress.stats = Файлы: %u(%u/%u); Каталоги: %u; Ошибки: %u
 move.remote.files.progress.stats = Файлы: %u; Каталоги: %u
 
 overwrite.dlg.title = Перезапись файла
@@ -60,7 +60,7 @@ delete.files.dlg.label = Удалить выделенные файлы
 
 delete.files.progress.title = Идет удаление...
 delete.files.progress.time = Прошло: %8S  Осталось: %8S  Всего: %8S
-delete.files.progress.stats = Файлы: %u; Каталоги: %u; Ошибки: %c%c%u
+delete.files.progress.stats = Файлы: %u; Каталоги: %u; Ошибки: %u
 
 delete.files.stats.title = Удаление завершено
 delete.files.stats.errors = Ошибок при удалении: %u

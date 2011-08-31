@@ -14,6 +14,6 @@ struct FileInfo {
   }
   FileInfo(const WIN32_FIND_DATAW& find_data);
   FileInfo(const CE_FIND_DATA& find_data);
-  FileInfo(const FAR_FIND_DATA& find_data);
+  FileInfo(const PluginPanelItem& find_data);
   bool is_dir() const;
 };

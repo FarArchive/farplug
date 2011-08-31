@@ -1,5 +1,3 @@
-#include "farapi_config.h"
-
 #include "util.h"
 #include "file_info.h"
 
@@ -23,13 +21,13 @@ FileInfo::FileInfo(const CE_FIND_DATA& find_data) {
   child_cnt = 0;
 }
 
-FileInfo::FileInfo(const FAR_FIND_DATA& find_data) {
-  file_name = FAR_DECODE_PATH(FAR_FILE_NAME(find_data));
-  attr = find_data.dwFileAttributes;
-  creation_time = find_data.ftCreationTime;
-  access_time = find_data.ftLastAccessTime;
-  write_time = find_data.ftLastWriteTime;
-  size = FAR_FILE_SIZE(find_data);
+FileInfo::FileInfo(const PluginPanelItem& find_data) {
+  file_name = find_data.FileName;
+  attr = find_data.FileAttributes;
+  creation_time = find_data.CreationTime;
+  access_time = find_data.LastAccessTime;
+  write_time = find_data.LastWriteTime;
+  size = find_data.FileSize;
   child_cnt = 0;
 }
 

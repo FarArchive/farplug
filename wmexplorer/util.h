@@ -27,19 +27,10 @@ UnicodeString fit_str(const UnicodeString& path, unsigned size);
 UnicodeString center(const UnicodeString& str, unsigned width);
 unsigned __int64 mul_div(unsigned __int64 a, unsigned __int64 b, unsigned __int64 c);
 
-#ifdef FARAPI17
-#  ifdef _WIN64
-#    define PLUGIN_TYPE L" x64"
-#  else
-#    define PLUGIN_TYPE L""
-#  endif
-#endif
-#ifdef FARAPI18
-#  ifdef _WIN64
-#    define PLUGIN_TYPE L" uni x64"
-#  else
-#    define PLUGIN_TYPE L" uni"
-#  endif
+#ifdef _WIN64
+#  define PLUGIN_TYPE L" uni x64"
+#else
+#  define PLUGIN_TYPE L" uni"
 #endif
 
 struct ModuleVersion {
@@ -52,21 +43,14 @@ ModuleVersion get_module_version(HINSTANCE module);
 const UnicodeString extract_file_name(const UnicodeString& file_path);
 void unquote(UnicodeString& str);
 
-#ifdef FARAPI17
-void encode_fn(UnicodeString& dst, const UnicodeString& src);
-UnicodeString encode_fn(const UnicodeString& src);
-void decode_fn(UnicodeString& dst, const UnicodeString& src);
-UnicodeString decode_fn(const UnicodeString& src);
-#endif
-
 UnicodeString make_temp_file();
 UnicodeString format_file_time(const FILETIME& file_time);
 
 UnicodeString add_trailing_slash(const UnicodeString& file_path);
 UnicodeString del_trailing_slash(const UnicodeString& file_path);
 
-int far_control_int(HANDLE h_panel, int command, int param);
-int far_control_ptr(HANDLE h_panel, int command, const void* param);
+int far_control_int(HANDLE h_panel, FILE_CONTROL_COMMANDS command, int param);
+int far_control_ptr(HANDLE h_panel, FILE_CONTROL_COMMANDS command, const void* param);
 PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
 PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
 UnicodeString far_get_current_dir();

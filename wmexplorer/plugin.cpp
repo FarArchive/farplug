@@ -1,10 +1,10 @@
-#include "farapi_config.h"
-
 #define _ERROR_WINDOWS
 #include "error.h"
 
 #include "msg.h"
-
+#include "pinfo.h"
+#include <InitGuid.h>
+#include "guids.h"
 #include "util.h"
 #include "options.h"
 #include "dlgapi.h"
@@ -19,12 +19,12 @@ extern "C" HINSTANCE g_h_module;
 HINSTANCE g_h_module;
 struct PluginStartupInfo g_far;
 struct FarStandardFunctions g_fsf;
-Array<unsigned char> g_colors;
+Array<FarColor> g_colors;
 PluginOptions g_plugin_options;
 ModuleVersion g_version;
 unsigned __int64 g_time_freq; // system timer resolution
 Array<PluginInstance*> g_plugin_objects; // list of all open plugin instances
-FarStr g_plugin_format;
+UnicodeString g_plugin_format;
 
 UnicodeString DeviceInfo::strid() {
   const unsigned size = 64;
@@ -41,7 +41,7 @@ void error_dlg(Error& e, const UnicodeString& message) {
   UnicodeString err_msg = word_wrap(e.message(), get_msg_width());
   if (err_msg.size() != 0) msg.add(err_msg).add('\n');
   msg.add_fmt(L"%S:%u v.%u.%u.%u.%u"PLUGIN_TYPE, &extract_file_name(oem_to_unicode(e.file)), e.line, g_version.major, g_version.minor, g_version.patch, g_version.revision);
-  far_message(msg, 0, FMSG_WARNING | FMSG_MB_OK);
+  far_message(c_error_dialog_guid, msg, 0, FMSG_WARNING | FMSG_MB_OK);
 }
 
 void error_dlg(CustomError& e) {
@@ -50,7 +50,7 @@ void error_dlg(CustomError& e) {
   if (e.object().size() != 0) msg.add(fit_str(e.object(), get_msg_width())).add('\n');
   if (e.message().size() != 0) msg.add(word_wrap(e.message(), get_msg_width())).add('\n');
   msg.add_fmt(L"%S:%u v.%u.%u.%u.%u"PLUGIN_TYPE, &extract_file_name(oem_to_unicode(e.file)), e.line, g_version.major, g_version.minor, g_version.patch, g_version.revision);
-  far_message(msg, 0, FMSG_WARNING | FMSG_MB_OK);
+  far_message(c_error_dialog_guid, msg, 0, FMSG_WARNING | FMSG_MB_OK);
 }
 
 void error_dlg(const std::exception& e) {
@@ -59,44 +59,35 @@ void error_dlg(const std::exception& e) {
   UnicodeString err_msg = word_wrap(oem_to_unicode(e.what()), get_msg_width());
   if (err_msg.size() != 0) msg.add(err_msg).add('\n');
   msg.add_fmt(L"v.%u.%u.%u.%u"PLUGIN_TYPE, g_version.major, g_version.minor, g_version.patch, g_version.revision);
-  far_message(msg, 0, FMSG_WARNING | FMSG_MB_OK);
+  far_message(c_error_dialog_guid, msg, 0, FMSG_WARNING | FMSG_MB_OK);
 }
 
 void msg_dlg(const UnicodeString& message) {
   UnicodeString msg;
   msg.add(far_get_msg(MSG_PLUGIN_NAME)).add('\n');
   if (message.size() != 0) msg.add(word_wrap(message, get_msg_width())).add('\n');
-  far_message(msg, 0, FMSG_MB_OK);
+  far_message(c_error_dialog_guid, msg, 0, FMSG_MB_OK);
 }
 
 void fatal_error_dlg(bool dump_saved) {
-  const FarCh* msg[3];
+  const wchar_t* msg[3];
   msg[0] = far_msg_ptr(MSG_PLUGIN_NAME);
   msg[1] = far_msg_ptr(MSG_ERR_FATAL);
   msg[2] = far_msg_ptr(dump_saved ? MSG_ERR_FATAL_DUMP : MSG_ERR_FATAL_NO_DUMP);
-  far_message(msg, sizeof(msg) / sizeof(msg[0]), 0, FMSG_MB_OK);
+  far_message(c_error_dialog_guid, msg, sizeof(msg) / sizeof(msg[0]), 0, FMSG_MB_OK);
 }
 
-struct SetFileApis {
-  SetFileApis() {
-    SetFileApisToANSI();
-  }
-  ~SetFileApis() {
-    SetFileApisToOEM();
-  }
-};
-
-int WINAPI GetMinFarVersion(void) {
-  return FARMANAGERVERSION;
+void WINAPI GetGlobalInfoW(GlobalInfo* info) {
+  info->StructSize = sizeof(GlobalInfo);
+  info->MinFarVersion = FARMANAGERVERSION;
+  info->Version = PLUGIN_VERSION;
+  info->Guid = c_plugin_guid;
+  info->Title = PLUGIN_NAME;
+  info->Description = PLUGIN_DESCRIPTION;
+  info->Author = PLUGIN_AUTHOR;
 }
-#ifdef FARAPI18
-int WINAPI GetMinFarVersionW(void) {
-  return FARMANAGERVERSION;
-}
-#endif // FARAPI18
 
-void WINAPI FAR_EXPORT(SetStartupInfo)(const struct PluginStartupInfo* info) {
-  SetFileApis set_file_apis;
+void WINAPI SetStartupInfoW(const PluginStartupInfo* info) {
   g_far = *info;
   g_fsf = *info->FSF;
   g_far.FSF = &g_fsf;
@@ -107,17 +98,16 @@ void WINAPI FAR_EXPORT(SetStartupInfo)(const struct PluginStartupInfo* info) {
   // load registry options
   load_plugin_options(g_plugin_options);
   g_rapi2 = g_plugin_options.access_method == amRapi2;
-  g_plugin_format = UNICODE_TO_FARSTR(g_plugin_options.prefix);
+  g_plugin_format = g_plugin_options.prefix;
   // load version info
   g_version = get_module_version(g_h_module);
 }
 
-const FarCh* disk_menu[1];
-const FarCh* plugin_menu[1];
-const FarCh* config_menu[1];
-void WINAPI FAR_EXPORT(GetPluginInfo)(struct PluginInfo *Info) {
-  SetFileApis set_file_apis;
-  Info->StructSize = sizeof(struct PluginInfo);
+const wchar_t* disk_menu[1];
+const wchar_t* plugin_menu[1];
+const wchar_t* config_menu[1];
+void WINAPI GetPluginInfoW(PluginInfo* info) {
+  info->StructSize = sizeof(PluginInfo);
 
   ObjectArray<DeviceInfo> dev_list;
   try {
@@ -149,23 +139,24 @@ void WINAPI FAR_EXPORT(GetPluginInfo)(struct PluginInfo *Info) {
   }
 
   if (g_plugin_options.add_to_disk_menu) {
-    Info->DiskMenuStrings = disk_menu;
-    if (g_plugin_options.disk_menu_number == -1) Info->DiskMenuNumbers = NULL;
-    else Info->DiskMenuNumbers = &g_plugin_options.disk_menu_number;
-    Info->DiskMenuStringsNumber = sizeof(disk_menu) / sizeof(disk_menu[0]);
+    info->DiskMenu.Strings = disk_menu;
+    info->DiskMenu.Guids = &c_disk_menu_guid;
+    info->DiskMenu.Count = ARRAYSIZE(disk_menu);
   }
 
   if (g_plugin_options.add_to_plugin_menu) {
     plugin_menu[0] = far_msg_ptr(MSG_PLUGIN_NAME);
-    Info->PluginMenuStrings = plugin_menu;
-    Info->PluginMenuStringsNumber = sizeof(plugin_menu) / sizeof(plugin_menu[0]);
+    info->PluginMenu.Strings = plugin_menu;
+    info->PluginMenu.Guids = &c_plugin_menu_guid;
+    info->PluginMenu.Count = ARRAYSIZE(plugin_menu);
   }
 
   config_menu[0] = far_msg_ptr(MSG_PLUGIN_NAME);
-  Info->PluginConfigStrings = config_menu;
-  Info->PluginConfigStringsNumber = sizeof(config_menu) / sizeof(config_menu[0]);
+  info->PluginConfig.Strings = config_menu;
+  info->PluginConfig.Guids = &c_config_menu_guid;
+  info->PluginConfig.Count = ARRAYSIZE(config_menu);
 
-  Info->CommandPrefix = g_plugin_format.data();
+  info->CommandPrefix = g_plugin_format.data();
 }
 
 #define HANDLE_ERROR(err_ret, break_ret) \
@@ -182,7 +173,7 @@ void WINAPI FAR_EXPORT(GetPluginInfo)(struct PluginInfo *Info) {
   } \
   catch (ComError& e) { \
     if (e.error() == HRESULT_FROM_WIN32(ERROR_NOT_READY)) { \
-      far_control_ptr(plugin, FCTL_CLOSEPLUGIN, NULL); \
+      far_control_ptr(plugin, FCTL_CLOSEPANEL, nullptr); \
       if (show_error) msg_dlg(far_get_msg(MSG_ERR_DEVICE_DISCONNECTED)); \
     } \
     else { \
@@ -201,23 +192,22 @@ void WINAPI FAR_EXPORT(GetPluginInfo)(struct PluginInfo *Info) {
     return err_ret; \
   } \
   catch (...) { \
-    far_message(L"\nFailure!", 0, FMSG_WARNING | FMSG_MB_OK); \
+    far_message(c_error_dialog_guid, L"\nFailure!", 0, FMSG_WARNING | FMSG_MB_OK); \
     return err_ret; \
   }
 
-int WINAPI FAR_EXPORT(SetDirectory)(HANDLE hPlugin, const FarCh *Dir, int OpMode); // forward
+int set_dir(PluginInstance* plugin, const wchar_t* dir, bool show_error); // forward
 
-HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR Item) {
-  SetFileApis set_file_apis;
+HANDLE WINAPI OpenW(const OpenInfo* info) {
   try {
-    if (OpenFrom == OPEN_COMMANDLINE) {
+    if (info->OpenFrom == OPEN_COMMANDLINE) {
       // test if plugin is already open on active panel
       for (unsigned i = 0; i < g_plugin_objects.size(); i++) {
         PanelInfo pi;
-        if (far_control_ptr(g_plugin_objects[i], FCTL_GETPANELSHORTINFO, &pi)) {
-          if (pi.Focus) {
+        if (far_control_ptr(g_plugin_objects[i], FCTL_GETPANELINFO, &pi)) {
+          if (pi.Flags & PFLAGS_FOCUS) {
             // change current directory of active plugin
-            FAR_EXPORT(SetDirectory)(g_plugin_objects[i], (const FarCh*) Item, 0);
+            set_dir(g_plugin_objects[i], (const wchar_t*) info->Data, true);
             far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 0);
             PanelRedrawInfo pri;
             pri.CurrentItem = 0;
@@ -239,29 +229,26 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR Item) {
       for (unsigned i = 0; i < dev_list.size(); i++) {
         menu_str += UnicodeString::format(L"%S %S (%S)", &dev_list[i].name, &dev_list[i].platform, &dev_list[i].con_type);
       }
-      mi = far_menu(far_get_msg(MSG_DEVICE_LIST_TITLE), menu_str);
+      mi = far_menu(c_device_list_menu_guid, far_get_msg(MSG_DEVICE_LIST_TITLE), menu_str);
       if (mi == -1) BREAK;
     }
     PluginInstance* plugin = new PluginInstance();
     try {
       plugin->device_info = dev_list[mi];
       create_session(plugin->device_info.id, plugin);
-      if (OpenFrom == OPEN_COMMANDLINE) {
+      if (info->OpenFrom == OPEN_COMMANDLINE) {
         // directory is specified on command line
-        plugin->current_dir = FARSTR_TO_UNICODE((const FarCh*) Item);
+        plugin->current_dir = (const wchar_t*) info->Data;
         if (!dir_exists(plugin->current_dir, plugin->session)) plugin->current_dir = L"\\";
       }
       else if (g_plugin_options.save_last_dir) {
         // restore last directory
-        plugin->current_dir = get_str_option((L"last_dir_" + plugin->device_info.strid()).data(), L"\\");
+        plugin->current_dir = load_last_dir(plugin->device_info.strid());
         if (!dir_exists(plugin->current_dir, plugin->session)) plugin->current_dir = L"\\";
       }
       else {
         plugin->current_dir = L"\\";
       }
-#ifdef FARAPI17
-      plugin->current_dir_oem = unicode_to_oem(encode_fn(plugin->current_dir));
-#endif // FARAPI17
       NOFAIL(refresh_system_info(plugin));
       g_plugin_objects += plugin;
     }
@@ -281,79 +268,65 @@ HANDLE WINAPI FAR_EXPORT(OpenPlugin)(int OpenFrom, INT_PTR Item) {
     error_dlg(e, far_get_msg(MSG_ERR_PLUGIN_INIT));
   }
   catch (...) {
-    far_message(L"\nFailure!", 0, FMSG_WARNING | FMSG_MB_OK);
+    far_message(c_error_dialog_guid, L"\nFailure!", 0, FMSG_WARNING | FMSG_MB_OK);
   }
   return INVALID_HANDLE_VALUE;
 }
 
-void WINAPI FAR_EXPORT(GetOpenPluginInfo)(HANDLE hPlugin, struct OpenPluginInfo *Info) {
-  SetFileApis set_file_apis;
-  PluginInstance* plugin = (PluginInstance*) hPlugin;
+void WINAPI GetOpenPanelInfoW(OpenPanelInfo* info) {
+  PluginInstance* plugin = (PluginInstance*) info->hPanel;
 
-  Info->StructSize = sizeof(struct OpenPluginInfo);
+  info->StructSize = sizeof(OpenPanelInfo);
 
-  Info->Flags = OPIF_USEFILTER | OPIF_USESORTGROUPS | OPIF_USEHIGHLIGHTING | OPIF_ADDDOTS;
-#ifdef FARAPI17
-  Info->CurDir = plugin->current_dir_oem.data();
-#endif // FARAPI17
-#ifdef FARAPI18
-  Info->CurDir = plugin->current_dir.data();
-#endif // FARAPI18
-  Info->Format = g_plugin_format.data();
+  info->Flags = OPIF_ADDDOTS;
+  info->CurDir = plugin->current_dir.data();
+  info->Format = g_plugin_format.data();
 
   if (g_plugin_options.last_dev_type == dtPDA) plugin->panel_title = far_msg_ptr(MSG_DISK_MENU_PDA);
   else if (g_plugin_options.last_dev_type == dtSmartPhone) plugin->panel_title = far_msg_ptr(MSG_DISK_MENU_SMARTPHONE);
   else plugin->panel_title = far_msg_ptr(MSG_DISK_MENU_PDA);
-#ifdef FARAPI17
-  plugin->panel_title.add(":").add(plugin->current_dir_oem);
-#endif // FARAPI17
-#ifdef FARAPI18
   plugin->panel_title.add(L":").add(plugin->current_dir);
-#endif // FARAPI18
 
-  if (g_plugin_options.show_free_space) plugin->panel_title.add(UNICODE_TO_FARSTR(L":" + format_data_size(plugin->free_space, get_size_suffixes())));
-  Info->PanelTitle = plugin->panel_title.data();
-  Info->InfoLines = plugin->sys_info.data();
-  Info->InfoLinesNumber = plugin->sys_info.size();
+  if (g_plugin_options.show_free_space) plugin->panel_title.add(L":" + format_data_size(plugin->free_space, get_size_suffixes()));
+  info->PanelTitle = plugin->panel_title.data();
+  info->InfoLines = plugin->sys_info.data();
+  info->InfoLinesNumber = plugin->sys_info.size();
 }
 
-void WINAPI FAR_EXPORT(ClosePlugin)(HANDLE hPlugin) {
-  SetFileApis set_file_apis;
-  PluginInstance* plugin = (PluginInstance*) hPlugin;
+void WINAPI ClosePanelW(const ClosePanelInfo* info) {
+  PluginInstance* plugin = (PluginInstance*) info->hPanel;
   end_session(plugin);
   // save last directory
   if (g_plugin_options.save_last_dir) {
-    set_str_option((L"last_dir_" + plugin->device_info.strid()).data(), plugin->current_dir);
+    save_last_dir(plugin->device_info.strid(), plugin->current_dir);
   }
   g_plugin_objects.remove(g_plugin_objects.search(plugin));
   delete plugin;
 }
 
-int WINAPI FAR_EXPORT(GetFindData)(HANDLE hPlugin, struct PluginPanelItem **pPanelItem, int *pItemsNumber, int OpMode) {
-  SetFileApis set_file_apis;
-  PluginInstance* plugin = (PluginInstance*) hPlugin;
-  bool show_error = (OpMode & (OPM_SILENT | OPM_FIND | OPM_QUICKVIEW)) == 0;
+int WINAPI GetFindDataW(GetFindDataInfo* info) {
+  PluginInstance* plugin = (PluginInstance*) info->hPanel;
+  bool show_error = (info->OpMode & (OPM_SILENT | OPM_FIND | OPM_QUICKVIEW)) == 0;
   try {
-    UiLink ui((OpMode & OPM_SILENT) != 0);
+    UiLink ui((info->OpMode & OPM_SILENT) != 0);
     PluginItemList file_list;
     plugin->last_object = plugin->current_dir;
     FileListOptions options;
     options.hide_rom_files = g_plugin_options.hide_rom_files;
     gen_file_list(plugin->current_dir, plugin->session, file_list, options, ui);
     plugin->file_lists += file_list;
-    *pPanelItem = (PluginPanelItem*) plugin->file_lists.last().data();
-    *pItemsNumber = plugin->file_lists.last().size();
-    if (!(OpMode & OPM_FIND)) NOFAIL(refresh_system_info(plugin));
+    info->PanelItem = (PluginPanelItem*) plugin->file_lists.last().data();
+    info->ItemsNumber = plugin->file_lists.last().size();
+    if (!(info->OpMode & OPM_FIND)) NOFAIL(refresh_system_info(plugin));
     return TRUE;
   }
   HANDLE_ERROR(FALSE, TRUE);
 }
 
-void WINAPI FAR_EXPORT(FreeFindData)(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber) {
-  SetFileApis set_file_apis;
-  PluginInstance* plugin = (PluginInstance*) hPlugin;
+void WINAPI FreeFindDataW(const FreeFindDataInfo* info) {
+  PluginInstance* plugin = (PluginInstance*) info->hPanel;
   for (unsigned i = 0; i < plugin->file_lists.size(); i++) {
-    if (plugin->file_lists[i].data() == PanelItem) {
+    if (plugin->file_lists[i].data() == info->PanelItem) {
       plugin->file_lists.remove(i);
       return;
     }
@@ -361,40 +334,40 @@ void WINAPI FAR_EXPORT(FreeFindData)(HANDLE hPlugin, struct PluginPanelItem *Pan
   assert(false);
 }
 
-int WINAPI FAR_EXPORT(SetDirectory)(HANDLE hPlugin, const FarCh *Dir, int OpMode) {
-  SetFileApis set_file_apis;
-  PluginInstance* plugin = (PluginInstance*) hPlugin;
-  bool show_error = (OpMode & (OPM_SILENT | OPM_FIND | OPM_QUICKVIEW)) == 0;
+int WINAPI SetDirectoryW(const SetDirectoryInfo* info) {
+  PluginInstance* plugin = (PluginInstance*) info->hPanel;
+  bool show_error = (info->OpMode & (OPM_SILENT | OPM_FIND | OPM_QUICKVIEW)) == 0;
   try {
-    FilePath fp_dir(FAR_DECODE_PATH(Dir));
-    FilePath current_dir(plugin->current_dir);
-    bool parent_dir = FAR_STRCMP(Dir, FAR_T("..")) == 0;
-    if (current_dir.is_root_path() && parent_dir) {
-      if (g_plugin_options.exit_on_dot_dot) far_control_ptr(plugin, FCTL_CLOSEPLUGIN, NULL);
-      return TRUE;
-    }
-    else if (parent_dir) {
-      current_dir = current_dir.get_partial_path(current_dir.size() - 1);
-    }
-    else {
-      current_dir.combine(fp_dir);
-    }
-    UnicodeString cd = current_dir.get_full_path();
-    if (!current_dir.is_root_path()) {
-      plugin->last_object = cd;
-      if (!dir_exists(cd, plugin->session)) FAIL(SystemError(ERROR_PATH_NOT_FOUND));
-    }
-    plugin->current_dir = cd;
-#ifdef FARAPI17
-    plugin->current_dir_oem = unicode_to_oem(encode_fn(plugin->current_dir));
-#endif // FARAPI17
-    return TRUE;
+    return set_dir(plugin, info->Dir, show_error);
   }
   HANDLE_ERROR(FALSE, TRUE);
 }
 
-int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int Move, UnicodeString& DestPath, int OpMode) {
-  if ((ItemsNumber == 0) || (FAR_STRCMP(FAR_FILE_NAME(PanelItem[0].FindData), FAR_T("..")) == 0)) return 1;
+int set_dir(PluginInstance* plugin, const wchar_t* dir, bool show_error) {
+  FilePath fp_dir(dir);
+  FilePath current_dir(plugin->current_dir);
+  bool parent_dir = wcscmp(dir, L"..") == 0;
+  if (current_dir.is_root_path() && parent_dir) {
+    if (g_plugin_options.exit_on_dot_dot) far_control_ptr(plugin, FCTL_CLOSEPANEL, nullptr);
+    return TRUE;
+  }
+  else if (parent_dir) {
+    current_dir = current_dir.get_partial_path(current_dir.size() - 1);
+  }
+  else {
+    current_dir.combine(fp_dir);
+  }
+  UnicodeString cd = current_dir.get_full_path();
+  if (!current_dir.is_root_path()) {
+    plugin->last_object = cd;
+    if (!dir_exists(cd, plugin->session)) FAIL(SystemError(ERROR_PATH_NOT_FOUND));
+  }
+  plugin->current_dir = cd;
+  return TRUE;
+}
+
+int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int Move, UnicodeString& DestPath, OPERATION_MODES OpMode) {
+  if ((ItemsNumber == 0) || (wcscmp(PanelItem[0].FileName, L"..") == 0)) return 1;
   PluginInstance* plugin = (PluginInstance*) hPlugin;
   bool show_dialog = (OpMode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
   bool show_error = (OpMode & (OPM_FIND | OPM_QUICKVIEW)) == 0;
@@ -404,7 +377,7 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
     options.show_error = show_error;
     options.dst_dir = DestPath;
     options.move_files = Move != 0;
-    INT_PTR far_system_settings = g_far.AdvControl(g_far.ModuleNumber, ACTL_GETSYSTEMSETTINGS, NULL);
+    INT_PTR far_system_settings = g_far.AdvControl(&c_plugin_guid, ACTL_GETSYSTEMSETTINGS, 0, nullptr);
     options.copy_shared = (far_system_settings & FSS_COPYFILESOPENEDFORWRITING) != 0;
     options.use_file_filters = false;
     options.use_tmp_files = (OpMode & (OPM_FIND | OPM_VIEW | OPM_QUICKVIEW)) != 0;
@@ -591,9 +564,9 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
         PanelRedrawInfo redraw_info;
         redraw_info.TopPanelItem = panel_info.TopPanelItem;
         redraw_info.CurrentItem = panel_info.CurrentItem;
-        for (int i = 0; i < panel_info.ItemsNumber; i++) {
+        for (size_t i = 0; i < panel_info.ItemsNumber; i++) {
           PluginPanelItem* ppi = far_get_panel_item(plugin, i, panel_info);
-          UnicodeString file_name = FAR_DECODE_PATH(FAR_FILE_NAME(ppi->FindData));
+          UnicodeString file_name = ppi->FileName;
           if (file_name == dst_new_name) {
             redraw_info.CurrentItem = i;
             break;
@@ -609,32 +582,27 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
   HANDLE_ERROR(0, -1);
 }
 
-int WINAPI FAR_EXPORT(GetFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int Move, FarBuf DestPath, int OpMode) {
-  SetFileApis set_file_apis;
-  PluginInstance* plugin = (PluginInstance*) hPlugin;
-  UnicodeString dest_path = FAR_GET_BUF(DestPath);
-  int res = get_files(hPlugin, PanelItem, ItemsNumber, Move, dest_path, OpMode);
-  FAR_SET_BUF(DestPath, dest_path, plugin->dest_path_buf);
+int WINAPI GetFilesW(GetFilesInfo* info) {
+  PluginInstance* plugin = (PluginInstance*) info->hPanel;
+  UnicodeString dest_path = info->DestPath;
+  int res = get_files(info->hPanel, info->PanelItem, info->ItemsNumber, info->Move, dest_path, info->OpMode);
+  plugin->dest_path_buf = dest_path;
+  info->DestPath = plugin->dest_path_buf.data();
   return res;
 }
 
-int WINAPI FAR_EXPORT(PutFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int Move,
-#ifdef FARAPI18
-    const wchar_t *SrcPath,
-#endif
-    int OpMode) {
-  SetFileApis set_file_apis;
-  if ((ItemsNumber == 0) || (FAR_STRCMP(FAR_FILE_NAME(PanelItem[0].FindData), FAR_T("..")) == 0)) return 1;
-  PluginInstance* plugin = (PluginInstance*) hPlugin;
-  bool show_dialog = (OpMode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
-  bool show_error = (OpMode & (OPM_FIND | OPM_QUICKVIEW)) == 0;
+int WINAPI PutFilesW(const PutFilesInfo* info) {
+  if ((info->ItemsNumber == 0) || (wcscmp(info->PanelItem[0].FileName, L"..") == 0)) return 1;
+  PluginInstance* plugin = (PluginInstance*) info->hPanel;
+  bool show_dialog = (info->OpMode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
+  bool show_error = (info->OpMode & (OPM_FIND | OPM_QUICKVIEW)) == 0;
   try {
     CopyFilesOptions options;
     options.show_dialog = show_dialog;
     options.show_error = show_error;
     options.dst_dir = plugin->current_dir;
-    options.move_files = Move != 0;
-    INT_PTR far_system_settings = g_far.AdvControl(g_far.ModuleNumber, ACTL_GETSYSTEMSETTINGS, NULL);
+    options.move_files = info->Move != 0;
+    INT_PTR far_system_settings = g_far.AdvControl(&c_plugin_guid, ACTL_GETSYSTEMSETTINGS, 0, nullptr);
     options.copy_shared = (far_system_settings & FSS_COPYFILESOPENEDFORWRITING) != 0;
     options.use_tmp_files = false;
     if (show_dialog) {
@@ -662,7 +630,7 @@ int WINAPI FAR_EXPORT(PutFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelIte
     CopyFilesStats stats;
     Log log;
     {
-      UiLink ui((OpMode & OPM_SILENT) != 0);
+      UiLink ui((info->OpMode & OPM_SILENT) != 0);
       if (ui.update_needed()) {
         draw_progress_msg(far_get_msg(MSG_PROGRESS_PREPARE));
       }
@@ -670,14 +638,14 @@ int WINAPI FAR_EXPORT(PutFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelIte
       // distination directory and file name (if renaming)
       UnicodeString dst_dir_path, dst_new_name;
       FilePath dst_fp(plugin->current_dir);
-      if (UNICODE_TO_FARSTR(plugin->current_dir) != UNICODE_TO_FARSTR(options.dst_dir)) {
+      if (plugin->current_dir != options.dst_dir) {
         dst_fp.combine(options.dst_dir);
       }
       if (dir_exists(dst_fp.get_full_path(), plugin->session)) {
         dst_dir_path = dst_fp.get_full_path();
       }
       else {
-        if (ItemsNumber != 1) {
+        if (info->ItemsNumber != 1) {
           dst_dir_path = dst_fp.get_full_path();
         }
         else {
@@ -688,16 +656,9 @@ int WINAPI FAR_EXPORT(PutFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelIte
         prepare_target_path(dst_dir_path, plugin->session, plugin);
       }
 
-#ifdef FARAPI17
-      UnicodeString SrcPath;
-      DWORD size = GetCurrentDirectoryW(MAX_PATH, SrcPath.buf(MAX_PATH));
-      CHECK_API(size != 0);
-      SrcPath.set_size();
-#endif
-
       // list of selected files
       PanelFileList panel_file_list;
-      file_panel_items_to_file_list(del_trailing_slash(SrcPath), PanelItem, ItemsNumber, panel_file_list, ui, plugin);
+      file_panel_items_to_file_list(del_trailing_slash(info->SrcPath), info->PanelItem, info->ItemsNumber, panel_file_list, ui, plugin);
 
       // scan source directories and prepare lists of files to process
       ObjectArray<FileList> file_lists;
@@ -707,7 +668,7 @@ int WINAPI FAR_EXPORT(PutFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelIte
       list_options.ignore_errors = options.ignore_errors;
       list_options.show_error = options.show_error;
       try {
-        for (int i = 0; i < ItemsNumber; i++) {
+        for (size_t i = 0; i < info->ItemsNumber; i++) {
           file_lists += create_file_list(panel_file_list[i].file_dir, panel_file_list[i].file_name, list_stats, list_options, ui, log, plugin);
         }
       }
@@ -733,9 +694,9 @@ int WINAPI FAR_EXPORT(PutFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelIte
       QueryPerformanceCounter((PLARGE_INTEGER) &progress.start_time);
       ui.force_update();
       AutoBuffer buffer(g_plugin_options.copy_buf_size);
-      for (int i = 0; i < ItemsNumber; i++) {
+      for (size_t i = 0; i < info->ItemsNumber; i++) {
         copy_files(false, panel_file_list[i].file_dir, file_lists[i], true, dst_dir_path, dst_new_name, stats, progress, options, ui, buffer, log, filters, plugin->session, plugin);
-        PanelItem[i].Flags &= ~PPIF_SELECTED;
+        info->PanelItem[i].Flags &= ~PPIF_SELECTED;
       }
 
       // delete source files if moving (only if no errors or skipped files to prevent data loss)
@@ -752,7 +713,7 @@ int WINAPI FAR_EXPORT(PutFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelIte
         QueryPerformanceCounter((PLARGE_INTEGER) &del_progress.start_time);
         ui.force_update();
         try {
-          for (int i = 0; i < ItemsNumber; i++) {
+          for (size_t i = 0; i < info->ItemsNumber; i++) {
             delete_files(false, panel_file_list[i].file_dir, file_lists[i], del_stats, del_progress, del_options, ui, log, plugin->session, plugin);
           }
         }
@@ -766,12 +727,11 @@ int WINAPI FAR_EXPORT(PutFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelIte
   HANDLE_ERROR(0, -1);
 }
 
-int WINAPI FAR_EXPORT(DeleteFiles)(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int OpMode) {
-  SetFileApis set_file_apis;
-  if ((ItemsNumber == 0) || (FAR_STRCMP(FAR_FILE_NAME(PanelItem[0].FindData), FAR_T("..")) == 0)) return TRUE;
-  PluginInstance* plugin = (PluginInstance*) hPlugin;
-  bool show_dialog = (OpMode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
-  bool show_error = (OpMode & (OPM_FIND | OPM_QUICKVIEW)) == 0;
+int WINAPI DeleteFilesW(const DeleteFilesInfo* info) {
+  if ((info->ItemsNumber == 0) || (wcscmp(info->PanelItem[0].FileName, L"..") == 0)) return TRUE;
+  PluginInstance* plugin = (PluginInstance*) info->hPanel;
+  bool show_dialog = (info->OpMode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
+  bool show_error = (info->OpMode & (OPM_FIND | OPM_QUICKVIEW)) == 0;
   try {
     DeleteFilesOptions options;
     options.show_dialog = show_dialog;
@@ -793,7 +753,7 @@ int WINAPI FAR_EXPORT(DeleteFiles)(HANDLE hPlugin, struct PluginPanelItem *Panel
     DeleteFilesStats stats;
     Log log;
     {
-      UiLink ui((OpMode & OPM_SILENT) != 0);
+      UiLink ui((info->OpMode & OPM_SILENT) != 0);
       if (ui.update_needed()) {
         draw_progress_msg(far_get_msg(MSG_PROGRESS_PREPARE));
       }
@@ -802,7 +762,7 @@ int WINAPI FAR_EXPORT(DeleteFiles)(HANDLE hPlugin, struct PluginPanelItem *Panel
 
       // list of selected files
       FileList panel_file_list;
-      panel_items_to_file_list(PanelItem, ItemsNumber, panel_file_list);
+      panel_items_to_file_list(info->PanelItem, info->ItemsNumber, panel_file_list);
 
       // scan source directories and prepare lists of files to process
       ObjectArray<FileList> file_lists;
@@ -812,7 +772,7 @@ int WINAPI FAR_EXPORT(DeleteFiles)(HANDLE hPlugin, struct PluginPanelItem *Panel
       list_options.ignore_errors = options.ignore_errors;
       list_options.show_error = options.show_error;
       try {
-        for (int i = 0; i < ItemsNumber; i++) {
+        for (size_t i = 0; i < info->ItemsNumber; i++) {
           file_lists += create_file_list(dst_dir_path, panel_file_list[i].file_name, list_stats, list_options, ui, log, plugin->session, plugin);
         }
       }
@@ -825,9 +785,9 @@ int WINAPI FAR_EXPORT(DeleteFiles)(HANDLE hPlugin, struct PluginPanelItem *Panel
       QueryPerformanceCounter((PLARGE_INTEGER) &progress.start_time);
       ui.force_update();
       // delete files
-      for (int i = 0; i < ItemsNumber; i++) {
+      for (size_t i = 0; i < info->ItemsNumber; i++) {
         delete_files(true, dst_dir_path, file_lists[i], stats, progress, options, ui, log, plugin->session, plugin);
-        PanelItem[i].Flags &= ~PPIF_SELECTED;
+        info->PanelItem[i].Flags &= ~PPIF_SELECTED;
       }
     }
     if (show_dialog && ((options.show_stats == ssoAlways) || ((options.show_stats == ssoIfError) && (stats.errors != 0)))) show_delete_files_results_dlg(stats, log);
@@ -836,11 +796,10 @@ int WINAPI FAR_EXPORT(DeleteFiles)(HANDLE hPlugin, struct PluginPanelItem *Panel
   HANDLE_ERROR(FALSE, TRUE);
 }
 
-int WINAPI FAR_EXPORT(MakeDirectory)(HANDLE hPlugin, FarBuf Name, int OpMode) {
-  SetFileApis set_file_apis;
-  PluginInstance* plugin = (PluginInstance*) hPlugin;
-  bool show_dialog = (OpMode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
-  bool show_error = (OpMode & (OPM_FIND | OPM_QUICKVIEW)) == 0;
+int WINAPI MakeDirectoryW(MakeDirectoryInfo* info) {
+  PluginInstance* plugin = (PluginInstance*) info->hPanel;
+  bool show_dialog = (info->OpMode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
+  bool show_error = (info->OpMode & (OPM_FIND | OPM_QUICKVIEW)) == 0;
   try {
     CreateDirOptions options;
     if (show_dialog) {
@@ -854,7 +813,8 @@ int WINAPI FAR_EXPORT(MakeDirectory)(HANDLE hPlugin, FarBuf Name, int OpMode) {
       else {
         dir = fp_dir[0];
       }
-      FAR_SET_BUF(Name, dir, plugin->directory_name_buf);
+      plugin->directory_name_buf = dir;
+      info->Name = plugin->directory_name_buf.data();
     }
     create_dir(plugin->current_dir, options.file_name, plugin->session, plugin);
     return 1;
@@ -862,8 +822,7 @@ int WINAPI FAR_EXPORT(MakeDirectory)(HANDLE hPlugin, FarBuf Name, int OpMode) {
   HANDLE_ERROR(0, -1);
 }
 
-int WINAPI FAR_EXPORT(Configure)(int ItemNumber) {
-  SetFileApis set_file_apis;
+int WINAPI ConfigureW(const ConfigureInfo* info) {
   if (show_plugin_options_dlg(g_plugin_options)) {
     save_plugin_options(g_plugin_options);
     return TRUE;
@@ -871,89 +830,81 @@ int WINAPI FAR_EXPORT(Configure)(int ItemNumber) {
   else return FALSE;
 }
 
-int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlState) {
-  SetFileApis set_file_apis;
-  PluginInstance* plugin = (PluginInstance*) hPlugin;
+int WINAPI ProcessPanelInputW(const ProcessPanelInputInfo* info) {
+  PluginInstance* plugin = (PluginInstance*) info->hPanel;
   bool show_error = true;
   try {
-    if ((Key == g_plugin_options.key_attr.vcode) && (ControlState == g_plugin_options.key_attr.state)) {
+    if (info->Rec.EventType != KEY_EVENT)
+      return FALSE;
+    const KEY_EVENT_RECORD& key_event = info->Rec.Event.KeyEvent;
+    UnicodeString key_name;
+    size_t sz = g_fsf.FarInputRecordToName(&info->Rec, nullptr, 0);
+    if (sz != 0) {
+      sz = g_fsf.FarInputRecordToName(&info->Rec, key_name.buf(sz), sz);
+      key_name.set_size(sz - 1);
+    }
+    if (key_name == g_plugin_options.key_attr) {
       PanelInfo panel_info;
-      if (far_control_ptr(hPlugin, FCTL_GETPANELINFO, &panel_info)) {
+      if (far_control_ptr(info->hPanel, FCTL_GETPANELINFO, &panel_info)) {
         if (panel_info.SelectedItemsNumber != 0) {
           FileAttrOptions options;
           options.single_file = panel_info.SelectedItemsNumber == 1;
           options.attr_and = 0xFFFFFFFF;
           options.attr_or = 0;
-          for (int i = 0; i < panel_info.SelectedItemsNumber; i++) {
-            PluginPanelItem* ppi = far_get_selected_panel_item(hPlugin, i, panel_info);
-            options.attr_and &= ppi->FindData.dwFileAttributes;
-            options.attr_or |= ppi->FindData.dwFileAttributes;
+          for (size_t i = 0; i < panel_info.SelectedItemsNumber; i++) {
+            PluginPanelItem* ppi = far_get_selected_panel_item(info->hPanel, i, panel_info);
+            options.attr_and &= ppi->FileAttributes;
+            options.attr_or |= ppi->FileAttributes;
           }
           if (show_file_attr_dlg(options)) {
             if ((options.attr_and != 0xFFFFFFFF) || (options.attr_or != 0)) {
               UnicodeString file_name;
               UnicodeString path;
-#ifdef FARAPI18
-              g_far.Control(hPlugin, FCTL_BEGINSELECTION, 0, 0);
-#endif
+              g_far.PanelControl(info->hPanel, FCTL_BEGINSELECTION, 0, 0);
               try {
-                PluginPanelItem* ppi = far_get_selected_panel_item(hPlugin, 0, panel_info);
+                PluginPanelItem* ppi = far_get_selected_panel_item(info->hPanel, 0, panel_info);
                 bool sel_flag = (ppi->Flags & PPIF_SELECTED) != 0;
-                for (int i = 0; i < panel_info.ItemsNumber; i++) {
-                  PluginPanelItem* ppi = far_get_panel_item(hPlugin, i, panel_info);
+                for (size_t i = 0; i < panel_info.ItemsNumber; i++) {
+                  PluginPanelItem* ppi = far_get_panel_item(info->hPanel, i, panel_info);
                   if ((sel_flag && ((ppi->Flags & PPIF_SELECTED) != 0)) || (!sel_flag && (i == panel_info.CurrentItem))) {
-                    file_name = FAR_DECODE_PATH(FAR_FILE_NAME(ppi->FindData));
-                    DWORD attr = ppi->FindData.dwFileAttributes & options.attr_and | options.attr_or;
+                    file_name = ppi->FileName;
+                    DWORD attr = ppi->FileAttributes & options.attr_and | options.attr_or;
                     COMPOSE_PATH2(path, plugin->current_dir, file_name);
                     set_file_attr(path, attr, plugin->session, plugin);
-#ifdef FARAPI17
-                    ppi->Flags &= ~PPIF_SELECTED;
-#endif
-#ifdef FARAPI18
-                    g_far.Control(hPlugin, FCTL_SETSELECTION, i, FALSE);
-#endif
+                    g_far.PanelControl(info->hPanel, FCTL_SETSELECTION, i, FALSE);
                   }
                 }
               }
-#ifdef FARAPI17
               finally (
-                g_far.Control(hPlugin, FCTL_SETSELECTION, &panel_info);
-                g_far.Control(hPlugin, FCTL_UPDATEPANEL, (void*) 1);
-                g_far.Control(hPlugin, FCTL_REDRAWPANEL, NULL);
+                g_far.PanelControl(info->hPanel, FCTL_ENDSELECTION, 0, nullptr);
+                far_control_int(info->hPanel, FCTL_UPDATEPANEL, 1);
+                far_control_ptr(info->hPanel, FCTL_REDRAWPANEL, nullptr);
               );
-#endif
-#ifdef FARAPI18
-              finally (
-                g_far.Control(hPlugin, FCTL_ENDSELECTION, 0, 0);
-                far_control_int(hPlugin, FCTL_UPDATEPANEL, 1);
-                far_control_ptr(hPlugin, FCTL_REDRAWPANEL, NULL);
-              );
-#endif
             }
           }
         }
       }
       return TRUE;
     }
-    if (((Key == VK_F5) || (Key == VK_F6)) && (ControlState == PKF_SHIFT)) {
+    if (((key_event.wVirtualKeyCode == VK_F5) || (key_event.wVirtualKeyCode == VK_F6)) && (key_event.dwControlKeyState & SHIFT_PRESSED)) {
       PanelInfo panel_info;
-      if (far_control_ptr(hPlugin, FCTL_GETPANELINFO, &panel_info)) {
+      if (far_control_ptr(info->hPanel, FCTL_GETPANELINFO, &panel_info)) {
         if (panel_info.SelectedItemsNumber != 0) {
-          PluginPanelItem* ppi = far_get_panel_item(hPlugin, panel_info.CurrentItem, panel_info);
-          UnicodeString file_name = FAR_DECODE_PATH(FAR_FILE_NAME(ppi->FindData));
-          get_files(hPlugin, ppi, 1, Key == VK_F6, file_name, 0);
-          far_control_int(hPlugin, FCTL_UPDATEPANEL, 1);
-          far_control_ptr(hPlugin, FCTL_REDRAWPANEL, NULL);
+          PluginPanelItem* ppi = far_get_panel_item(info->hPanel, panel_info.CurrentItem, panel_info);
+          UnicodeString file_name = ppi->FileName;
+          get_files(info->hPanel, ppi, 1, key_event.wVirtualKeyCode == VK_F6, file_name, 0);
+          far_control_int(info->hPanel, FCTL_UPDATEPANEL, 1);
+          far_control_ptr(info->hPanel, FCTL_REDRAWPANEL, nullptr);
         }
       }
       return TRUE;
     }
-    if ((Key == g_plugin_options.key_execute.vcode) && (ControlState == g_plugin_options.key_execute.state)) {
+    if (key_name == g_plugin_options.key_execute) {
       PanelInfo panel_info;
-      if (far_control_ptr(hPlugin, FCTL_GETPANELINFO, &panel_info)) {
+      if (far_control_ptr(info->hPanel, FCTL_GETPANELINFO, &panel_info)) {
         if (panel_info.SelectedItemsNumber != 0) {
-          PluginPanelItem* ppi = far_get_panel_item(hPlugin, panel_info.CurrentItem, panel_info);
-          UnicodeString file_name = FAR_DECODE_PATH(FAR_FILE_NAME(ppi->FindData));
+          PluginPanelItem* ppi = far_get_panel_item(info->hPanel, panel_info.CurrentItem, panel_info);
+          UnicodeString file_name = ppi->FileName;
           UnicodeString cmd_line;
           try {
             cmd_line = get_open_command(plugin->current_dir, file_name, plugin->session);
@@ -966,7 +917,7 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
           options.cmd_line = cmd_line;
           if (!show_run_dlg(options)) BREAK;
           if (options.cmd_line.size() == 0) FAIL(CustomError(far_get_msg(MSG_ERR_INVALID_CMD_LINE)));
-          if (UNICODE_TO_FARSTR(options.cmd_line) != UNICODE_TO_FARSTR(cmd_line)) {
+          if (options.cmd_line != cmd_line) {
             cmd_line = options.cmd_line;
           }
 
@@ -988,31 +939,30 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
           plugin->last_object = app_name;
           create_process(app_name, params, plugin->session);
 
-          far_control_int(hPlugin, FCTL_UPDATEPANEL, 1);
+          far_control_int(info->hPanel, FCTL_UPDATEPANEL, 1);
         }
       }
       return TRUE;
     }
     // toggle 'hide_rom_files' option
-    if ((Key == g_plugin_options.key_hide_rom_files.vcode) && (ControlState == g_plugin_options.key_hide_rom_files.state)) {
+    if (key_name == g_plugin_options.key_hide_rom_files) {
       g_plugin_options.hide_rom_files = !g_plugin_options.hide_rom_files;
-      far_control_int(hPlugin, FCTL_UPDATEPANEL, 1);
-      far_control_ptr(hPlugin, FCTL_REDRAWPANEL, NULL);
+      far_control_int(info->hPanel, FCTL_UPDATEPANEL, 1);
+      far_control_ptr(info->hPanel, FCTL_REDRAWPANEL, nullptr);
       return TRUE;
     }
     // open selected directory in Windows Explorer
-    if ((Key == VK_RETURN) && (ControlState == PKF_SHIFT)) {
+    if ((key_event.wVirtualKeyCode == VK_RETURN) && (key_event.dwControlKeyState & SHIFT_PRESSED)) {
       PanelInfo panel_info;
-      if (far_control_ptr(hPlugin, FCTL_GETPANELINFO, &panel_info)) {
+      if (far_control_ptr(info->hPanel, FCTL_GETPANELINFO, &panel_info)) {
         UnicodeString path;
         if (panel_info.SelectedItemsNumber == 0) {
           path = plugin->current_dir;
         }
         else {
-          PluginPanelItem* ppi = far_get_panel_item(hPlugin, panel_info.CurrentItem, panel_info);
-          const FAR_FIND_DATA& find_data = ppi->FindData;
-          if ((find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) {
-            path = COMPOSE_PATH(plugin->current_dir, FAR_DECODE_PATH(FAR_FILE_NAME(find_data)));
+          PluginPanelItem* ppi = far_get_panel_item(info->hPanel, panel_info.CurrentItem, panel_info);
+          if ((ppi->FileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) {
+            path = COMPOSE_PATH(plugin->current_dir, ppi->FileName);
           }
           else {
             path = plugin->current_dir;
@@ -1034,8 +984,7 @@ int WINAPI FAR_EXPORT(ProcessKey)(HANDLE hPlugin, int Key, unsigned int ControlS
   HANDLE_ERROR(TRUE, TRUE);
 }
 
-void WINAPI FAR_EXPORT(ExitFAR)() {
-  SetFileApis set_file_apis;
+void WINAPI ExitFARW(const ExitInfo* info) {
   cleanup();
 }
 

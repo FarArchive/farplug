@@ -1,18 +1,18 @@
 LIBRARY <(MODULE)> BASE=0x74000000
 EXPORTS
-  GetMinFarVersion
-  SetStartupInfo
-  GetPluginInfo
-  OpenPlugin
-  GetOpenPluginInfo
-  ClosePlugin
-  GetFindData
-  FreeFindData
-  SetDirectory
-  GetFiles
-  PutFiles
-  DeleteFiles
-  MakeDirectory
-  Configure
-  ProcessKey
-  ExitFAR
+  GetGlobalInfoW
+  SetStartupInfoW
+  GetPluginInfoW
+  OpenW
+  GetOpenPanelInfoW
+  ClosePanelW
+  GetFindDataW
+  FreeFindDataW
+  SetDirectoryW
+  GetFilesW
+  PutFilesW
+  DeleteFilesW
+  MakeDirectoryW
+  ConfigureW
+  ProcessPanelInputW
+  ExitFARW

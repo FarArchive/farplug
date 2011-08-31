@@ -1,9 +1,10 @@
 !include project.ini
 
 TOOLSDIR = ..\tools
+FARSDK = farsdk
 
 CPPFLAGS = -nologo -Zi -W3 -Gy -GS -GR -EHsc -MP -c
-DEFINES = -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_WIN32_WINNT=0x0501 -D__A_IDXSZ_TYPE__=unsigned -D_FAR_USE_FARFINDDATA -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS
+DEFINES = -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_WIN32_WINNT=0x0501 -D__A_IDXSZ_TYPE__=unsigned -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS
 LINKFLAGS = -nologo -debug -incremental:no -map -manifest:no -dynamicbase -nxcompat -largeaddressaware -dll
 RCFLAGS = -nologo
 
@@ -30,19 +31,7 @@ LINKFLAGS = $(LINKFLAGS) -fixed:no
 LIBSUFFIX=$(LIBSUFFIX)d
 !endif
 
-!ifdef OLDFAR
-FARSDK = farsdk\ansi
-DEFFILE = plugin.def
-DEFINES = $(DEFINES) -DFARAPI17
-FARBRANCH = 1
-!else
-FARSDK = farsdk\unicode
-DEFFILE = plugin_uni.def
-DEFINES = $(DEFINES) -DFARAPI18
-FARBRANCH = 2
-!endif
-
-OUTDIR = $(OUTDIR).$(PLATFORM).$(FARBRANCH)
+OUTDIR = $(OUTDIR).$(PLATFORM)
 INCLUDES = -I$(FARSDK) -Irapi -I.. -I$(OUTDIR)
 CPPFLAGS = $(CPPFLAGS) -Fo$(OUTDIR)\ -Fd$(OUTDIR)\ $(INCLUDES) $(DEFINES)
 RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
@@ -74,11 +63,11 @@ $(OBJS): $(OUTDIR)\headers.pch
 $(OUTDIR)\headers.pch: headers.cpp headers.hpp
   $(CPP) $(CPPFLAGS) headers.cpp -Ycheaders.hpp -Fp$(OUTDIR)\headers.pch
 
-depfile: $(OUTDIR) $(OUTDIR)\msg.h
+depfile: $(OUTDIR) $(OUTDIR)\msg.h $(OUTDIR)\pinfo.h
   $(TOOLSDIR)\gendep.exe $(INCLUDES) > $(OUTDIR)\dep.mak
 
-$(OUTDIR)\msg.h $(OUTDIR)\en.lng.1 $(OUTDIR)\ru.lng.1: $(OUTDIR) $(OUTDIR)\en.msg $(OUTDIR)\ru.msg
-  $(TOOLSDIR)\msgc -in $(OUTDIR)\en.msg $(OUTDIR)\ru.msg -out $(OUTDIR)\msg.h $(OUTDIR)\en.lng.1 $(OUTDIR)\ru.lng.1
+$(OUTDIR)\msg.h $(OUTDIR)\$(MODULE)_en.lng $(OUTDIR)\$(MODULE)_ru.lng: $(OUTDIR) $(OUTDIR)\en.msg $(OUTDIR)\ru.msg
+  $(TOOLSDIR)\msgc -in $(OUTDIR)\en.msg $(OUTDIR)\ru.msg -out $(OUTDIR)\msg.h $(OUTDIR)\$(MODULE)_en.lng $(OUTDIR)\$(MODULE)_ru.lng
 
 $(OUTDIR)\version.res: $(OUTDIR)\version.rc
   $(RC) $(RCFLAGS) -fo$@ $**
@@ -88,7 +77,7 @@ PREPROC = $(TOOLSDIR)\preproc $** $@
 $(OUTDIR)\version.rc: project.ini version.rc
   $(PREPROC)
 
-$(OUTDIR)\plugin.def: project.ini $(DEFFILE)
+$(OUTDIR)\plugin.def: project.ini plugin.def
   $(PREPROC)
 
 $(OUTDIR)\en.msg: project.ini en.msg
@@ -97,44 +86,25 @@ $(OUTDIR)\en.msg: project.ini en.msg
 $(OUTDIR)\ru.msg: project.ini ru.msg
   $(PREPROC)
 
-$(OUTDIR)\en.hlf.1: project.ini en.hlf
+$(OUTDIR)\$(MODULE)_en.hlf: project.ini en.hlf
   $(PREPROC)
 
-$(OUTDIR)\ru.hlf.1: project.ini ru.hlf
+$(OUTDIR)\$(MODULE)_ru.hlf: project.ini ru.hlf
   $(PREPROC)
 
-$(OUTDIR)\file_id.diz.1: project.ini file_id.diz
+$(OUTDIR)\file_id.diz: project.ini $(OUTDIR)\far.ini file_id.diz
   $(PREPROC)
 
-$(OUTDIR)\file_id.diz.2: $(OUTDIR)\far.ini $(OUTDIR)\file_id.diz.1
+$(OUTDIR)\pinfo.h: project.ini $(OUTDIR)\far.ini pinfo.h.h
   $(PREPROC)
 
-!ifdef OLDFAR
-CONVCP = $(TOOLSDIR)\convcp $** $@ 866
-!else
-CONVCP = copy $** $@
-!endif
-
-$(OUTDIR)\$(MODULE)_en.lng: $(OUTDIR)\en.lng.1
-  $(CONVCP)
-
-$(OUTDIR)\$(MODULE)_ru.lng: $(OUTDIR)\ru.lng.1
-  $(CONVCP)
-
-$(OUTDIR)\$(MODULE)_en.hlf: $(OUTDIR)\en.hlf.1
-  $(CONVCP)
-
-$(OUTDIR)\$(MODULE)_ru.hlf: $(OUTDIR)\ru.hlf.1
-  $(CONVCP)
-
-$(OUTDIR)\file_id.diz: $(OUTDIR)\file_id.diz.2
-  $(CONVCP)
+COPY = copy $** $@
 
 $(OUTDIR)\history_en.txt: history_en.txt
-  $(CONVCP)
+  $(COPY)
 
 $(OUTDIR)\history_ru.txt: history_ru.txt
-  $(CONVCP)
+  $(COPY)
 
 $(OUTDIR)\far.ini: $(FARSDK)\plugin.hpp
   $(TOOLSDIR)\farver $** $@
@@ -147,10 +117,7 @@ $(OUTDIR):
 !endif
 
 
-DISTRIB = $(OUTDIR)\$(MODULE)_$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
-!ifndef OLDFAR
-DISTRIB = $(DISTRIB)_uni
-!endif
+DISTRIB = $(OUTDIR)\$(MODULE)_$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)_uni
 DISTRIB_FILES = .\$(OUTDIR)\$(MODULE).dll .\$(OUTDIR)\$(MODULE).map .\$(OUTDIR)\$(MODULE)_en.lng .\$(OUTDIR)\$(MODULE)_ru.lng .\$(OUTDIR)\$(MODULE)_en.hlf .\$(OUTDIR)\$(MODULE)_ru.hlf .\$(OUTDIR)\file_id.diz .\$(OUTDIR)\history_en.txt .\$(OUTDIR)\history_ru.txt
 !if "$(PLATFORM)" != "x86"
 DISTRIB = $(DISTRIB)_$(PLATFORM)

@@ -1,197 +1,238 @@
-#include "farapi_config.h"
-
 #define _ERROR_WINDOWS
 #include "error.h"
-
+#include "guids.h"
 #include "util.h"
 #include "options.h"
 
 extern struct PluginStartupInfo g_far;
 extern struct FarStandardFunctions g_fsf;
 
-const wchar_t* c_plugin_key_name = L"WMExplorer";
+class Options {
+private:
+  HANDLE handle;
 
-UnicodeString get_root_key_name() {
-  return FARSTR_TO_UNICODE(g_far.RootKey);
-}
+private:
+  INT_PTR control(FAR_SETTINGS_CONTROL_COMMANDS command, void* param = nullptr) {
+    return g_far.SettingsControl(handle, command, 0, param);
+  }
 
-int get_int_option(const wchar_t* name, int def_value) {
-  int value = def_value;
-  HKEY h_root_key, h_plugin_key;
-  LONG res = RegOpenKeyExW(HKEY_CURRENT_USER, get_root_key_name().data(), 0, KEY_QUERY_VALUE, &h_root_key);
-  if (res == ERROR_SUCCESS) {
-    res = RegOpenKeyExW(h_root_key, c_plugin_key_name, 0, KEY_QUERY_VALUE, &h_plugin_key);
-    if (res == ERROR_SUCCESS) {
-      DWORD type = REG_DWORD;
-      DWORD data;
-      DWORD data_size = sizeof(data);
-      res = RegQueryValueExW(h_plugin_key, name, NULL, &type, (LPBYTE) &data, &data_size);
-      if (res == ERROR_SUCCESS) value = data;
-      RegCloseKey(h_plugin_key);
+  void clean() {
+    if (handle != INVALID_HANDLE_VALUE) {
+      control(SCTL_FREE);
+      handle = INVALID_HANDLE_VALUE;
     }
-    RegCloseKey(h_root_key);
   }
-  return value;
-}
 
-bool get_bool_option(const wchar_t* name, bool def_value) {
-  bool value = def_value;
-  HKEY h_root_key, h_plugin_key;
-  LONG res = RegOpenKeyExW(HKEY_CURRENT_USER, get_root_key_name().data(), 0, KEY_QUERY_VALUE, &h_root_key);
-  if (res == ERROR_SUCCESS) {
-    res = RegOpenKeyExW(h_root_key, c_plugin_key_name, 0, KEY_QUERY_VALUE, &h_plugin_key);
-    if (res == ERROR_SUCCESS) {
-      DWORD type = REG_DWORD;
-      DWORD data;
-      DWORD data_size = sizeof(data);
-      res = RegQueryValueExW(h_plugin_key, name, NULL, &type, (LPBYTE) &data, &data_size);
-      if (res == ERROR_SUCCESS) value = data != 0;
-      RegCloseKey(h_plugin_key);
-    }
-    RegCloseKey(h_root_key);
+protected:
+  bool set(const wchar_t* name, unsigned __int64 value) {
+    FarSettingsItem fsi;
+    fsi.Root = 0;
+    fsi.Name = name;
+    fsi.Type = FST_QWORD;
+    fsi.Number = value;
+    return control(SCTL_SET, &fsi) != 0;
   }
-  return value;
-}
 
-UnicodeString get_str_option(const wchar_t* name, const UnicodeString& def_value) {
-  UnicodeString value = def_value;
-  HKEY h_root_key, h_plugin_key;
-  LONG res = RegOpenKeyExW(HKEY_CURRENT_USER, get_root_key_name().data(), 0, KEY_QUERY_VALUE, &h_root_key);
-  if (res == ERROR_SUCCESS) {
-    res = RegOpenKeyExW(h_root_key, c_plugin_key_name, 0, KEY_QUERY_VALUE, &h_plugin_key);
-    if (res == ERROR_SUCCESS) {
-      DWORD type = REG_SZ;
-      DWORD data_size;
-      // get string size
-      res = RegQueryValueExW(h_plugin_key, name, NULL, &type, NULL, &data_size);
-      if (res == ERROR_SUCCESS) {
-        UnicodeString data;
-        // get string value
-        res = RegQueryValueExW(h_plugin_key, name, NULL, &type, (LPBYTE) data.buf(data_size / sizeof(wchar_t)), &data_size);
-        if (res == ERROR_SUCCESS) {
-          data.set_size(data_size / sizeof(wchar_t) - 1); // throw away terminating NULL
-          value = data;
-        }
-      }
-      RegCloseKey(h_plugin_key);
-    }
-    RegCloseKey(h_root_key);
+  bool set(const wchar_t* name, const UnicodeString& value) {
+    FarSettingsItem fsi;
+    fsi.Root = 0;
+    fsi.Name = name;
+    fsi.Type = FST_STRING;
+    fsi.String = value.data();
+    return control(SCTL_SET, &fsi) != 0;
   }
-  return value;
-}
 
-bool virt_key_from_name(const UnicodeString& name, unsigned& key, unsigned& state) {
-  state = 0;
-  unsigned far_key = g_fsf.FarNameToKey(UNICODE_TO_FARSTR(name).data());
-  if (far_key == -1) return false;
-  if ((far_key & (KEY_CTRL | KEY_RCTRL)) != 0) state |= PKF_CONTROL;
-  if ((far_key & (KEY_ALT | KEY_RALT)) != 0) state |= PKF_ALT;
-  if ((far_key & KEY_SHIFT) != 0) state |= PKF_SHIFT;
-  key = far_key & ~KEY_CTRLMASK;
-  if (key > KEY_FKEY_BEGIN) {
-    key -= KEY_FKEY_BEGIN;
-    if (key > 0xFF) return false;
+  bool get(const wchar_t* name, unsigned __int64& value) {
+    FarSettingsItem fsi;
+    fsi.Root = 0;
+    fsi.Name = name;
+    fsi.Type = FST_QWORD;
+    if (!control(SCTL_GET, &fsi))
+      return false;
+    value = fsi.Number;
+    return true;
   }
-  return true;
-}
 
-KeyOption get_key_option(const wchar_t* name, const KeyOption& def_key) {
-  KeyOption value;
-  UnicodeString key_name = get_str_option(name, UnicodeString());
-  if ((key_name.size() == 0) || (!virt_key_from_name(key_name, value.vcode, value.state))) {
-    value = def_key;
+  bool get(const wchar_t* name, UnicodeString& value) {
+    FarSettingsItem fsi;
+    fsi.Root = 0;
+    fsi.Name = name;
+    fsi.Type = FST_STRING;
+    if (!control(SCTL_GET, &fsi))
+      return false;
+    value = fsi.String;
+    return true;
   }
-  return value;
-}
 
-void set_int_option(const wchar_t* name, int value) {
-  HKEY h_root_key, h_plugin_key;
-  LONG res = RegCreateKeyExW(HKEY_CURRENT_USER, get_root_key_name().data(), 0, NULL, 0, KEY_SET_VALUE, NULL, &h_root_key, NULL);
-  if (res == ERROR_SUCCESS) {
-    res = RegCreateKeyExW(h_root_key, c_plugin_key_name, 0, NULL, 0, KEY_SET_VALUE, NULL, &h_plugin_key, NULL);
-    if (res == ERROR_SUCCESS) {
-      DWORD data = value;
-      RegSetValueExW(h_plugin_key, name, 0, REG_DWORD, (LPBYTE) &data, sizeof(data));
-      RegCloseKey(h_plugin_key);
-    }
-    RegCloseKey(h_root_key);
+  bool del(const wchar_t* name) {
+    FarSettingsValue fsv;
+    fsv.Root = 0;
+    fsv.Value = name;
+    return control(SCTL_DELETE, &fsv) != 0;
   }
-}
 
-void set_bool_option(const wchar_t* name, bool value) {
-  HKEY h_root_key, h_plugin_key;
-  LONG res = RegCreateKeyExW(HKEY_CURRENT_USER, get_root_key_name().data(), 0, NULL, 0, KEY_SET_VALUE, NULL, &h_root_key, NULL);
-  if (res == ERROR_SUCCESS) {
-    res = RegCreateKeyExW(h_root_key, c_plugin_key_name, 0, NULL, 0, KEY_SET_VALUE, NULL, &h_plugin_key, NULL);
-    if (res == ERROR_SUCCESS) {
-      DWORD data = value ? 1 : 0;
-      RegSetValueExW(h_plugin_key, name, 0, REG_DWORD, (LPBYTE) &data, sizeof(data));
-      RegCloseKey(h_plugin_key);
-    }
-    RegCloseKey(h_root_key);
+public:
+  Options(): handle(INVALID_HANDLE_VALUE) {
   }
-}
 
-void set_str_option(const wchar_t* name, const UnicodeString& value) {
-  HKEY h_root_key, h_plugin_key;
-  LONG res = RegCreateKeyExW(HKEY_CURRENT_USER, get_root_key_name().data(), 0, NULL, 0, KEY_SET_VALUE, NULL, &h_root_key, NULL);
-  if (res == ERROR_SUCCESS) {
-    res = RegCreateKeyExW(h_root_key, c_plugin_key_name, 0, NULL, 0, KEY_SET_VALUE, NULL, &h_plugin_key, NULL);
-    if (res == ERROR_SUCCESS) {
-      // size should include terminating NULL
-      RegSetValueExW(h_plugin_key, name, 0, REG_SZ, (LPBYTE) value.data(), (value.size() + 1) * sizeof(wchar_t));
-      RegCloseKey(h_plugin_key);
-    }
-    RegCloseKey(h_root_key);
+  ~Options() {
+    clean();
   }
+
+  bool create() {
+    clean();
+    FarSettingsCreate fsc = { sizeof(FarSettingsCreate) };
+    fsc.Guid = c_plugin_guid;
+    if (!control(SCTL_CREATE, &fsc))
+      return false;
+    handle = fsc.Handle;
+    return true;
+  }
+
+  template<class Integer>
+  Integer get_int(const wchar_t* name, Integer def_value) {
+    unsigned __int64 value;
+    if (get(name, value))
+      return static_cast<Integer>(value);
+    else
+      return def_value;
+  }
+
+  bool get_bool(const wchar_t* name, bool def_value) {
+    unsigned __int64 value;
+    if (get(name, value))
+      return value != 0;
+    else
+      return def_value;
+  }
+
+  UnicodeString get_str(const wchar_t* name, const UnicodeString& def_value) {
+    UnicodeString value;
+    if (get(name, value))
+      return value;
+    else
+      return def_value;
+  }
+
+  void set_int(const wchar_t* name, unsigned value, unsigned def_value) {
+    if (value == def_value)
+      del(name);
+    else
+      set(name, value);
+  }
+
+  void set_bool(const wchar_t* name, bool value, bool def_value) {
+    if (value == def_value)
+      del(name);
+    else
+      set(name, value ? 1 : 0);
+  }
+
+  void set_str(const wchar_t* name, const UnicodeString& value, const UnicodeString& def_value) {
+    if (value == def_value)
+      del(name);
+    else
+      set(name, value);
+  }
+};
+
+PluginOptions::PluginOptions():
+  add_to_plugin_menu(true),
+  add_to_disk_menu(true),
+  access_method(amRapi2),
+  hide_copy_dlg(false),
+  save_last_dir(false),
+  copy_buf_size(-1),
+  hide_rom_files(false),
+  exit_on_dot_dot(true),
+  prefix(L"WMExplorer"),
+  show_free_space(true),
+  ignore_errors(false),
+  overwrite(ooAsk),
+  show_stats(ssoIfError),
+  use_file_filters(false),
+  save_def_values(true),
+  last_dev_type(dtPDA),
+  key_attr(L"CtrlA"),
+  key_execute(L"CtrlAltS"),
+  key_hide_rom_files(L"CtrlAltI") {
 }
 
-void load_plugin_options(PluginOptions& options) {
-  options.add_to_plugin_menu = get_bool_option(L"add_to_plugin_menu", true);
-  options.add_to_disk_menu = get_bool_option(L"add_to_disk_menu", true);
-  options.disk_menu_number = get_int_option(L"disk_menu_number", -1);
-  options.access_method = (AccessMethod) get_int_option(L"access_method", amRapi2);
-  options.hide_copy_dlg = get_bool_option(L"hide_copy_dlg", false);
-  options.ignore_errors = get_bool_option(L"ignore_errors", false);
-  options.overwrite = (OverwriteOption) get_int_option(L"overwrite", ooAsk);
-  options.show_stats = (ShowStatsOption) get_int_option(L"show_op_stats", ssoIfError);
-  options.last_dev_type = (DevType) get_int_option(L"last_dev_type", dtPDA);
-  options.copy_buf_size = get_int_option(L"copy_buf_size", -1);
-  options.hide_rom_files = get_bool_option(L"hide_rom_files", false);
-  options.save_def_values = get_bool_option(L"save_def_values", true);
-  options.key_attr = get_key_option(L"key_attr", KeyOption('A', PKF_CONTROL));
-  options.key_execute = get_key_option(L"key_execute", KeyOption('S', PKF_CONTROL | PKF_ALT));
-  options.key_hide_rom_files = get_key_option(L"key_hide_rom_files", KeyOption('I', PKF_CONTROL | PKF_ALT));
-  options.save_last_dir = get_bool_option(L"save_last_dir", false);
-  options.use_file_filters = get_bool_option(L"use_file_filters", false);
-  options.exit_on_dot_dot = get_bool_option(L"exit_on_dot_dot", true);
-  options.prefix = get_str_option(L"prefix", L"WMExplorer");
-  options.show_free_space = get_bool_option(L"show_free_space", true);
+void load_plugin_options(PluginOptions& plugin_options) {
+  Options options;
+  if (!options.create())
+    return;
+  PluginOptions defaults;
+  plugin_options.add_to_plugin_menu = options.get_bool(L"add_to_plugin_menu", defaults.add_to_plugin_menu);
+  plugin_options.add_to_disk_menu = options.get_bool(L"add_to_disk_menu", defaults.add_to_disk_menu);
+  plugin_options.access_method = (AccessMethod) options.get_int(L"access_method", defaults.access_method);
+  plugin_options.hide_copy_dlg = options.get_bool(L"hide_copy_dlg", defaults.hide_copy_dlg);
+  plugin_options.save_last_dir = options.get_bool(L"save_last_dir", defaults.save_last_dir);
+  plugin_options.copy_buf_size = options.get_int(L"copy_buf_size", defaults.copy_buf_size);
+  plugin_options.hide_rom_files = options.get_bool(L"hide_rom_files", defaults.hide_rom_files);
+  plugin_options.exit_on_dot_dot = options.get_bool(L"exit_on_dot_dot", defaults.exit_on_dot_dot);
+  plugin_options.prefix = options.get_str(L"prefix", defaults.prefix);
+  plugin_options.show_free_space = options.get_bool(L"show_free_space", defaults.show_free_space);
+  plugin_options.ignore_errors = options.get_bool(L"ignore_errors", defaults.ignore_errors);
+  plugin_options.overwrite = (OverwriteOption) options.get_int(L"overwrite", defaults.overwrite);
+  plugin_options.show_stats = (ShowStatsOption) options.get_int(L"show_op_stats", defaults.show_stats);
+  plugin_options.use_file_filters = options.get_bool(L"use_file_filters", defaults.use_file_filters);
+  plugin_options.save_def_values = options.get_bool(L"save_def_values", defaults.save_def_values);
+  plugin_options.last_dev_type = (DevType) options.get_int(L"last_dev_type", defaults.last_dev_type);
+  plugin_options.key_attr = options.get_str(L"key_attr", defaults.key_attr);
+  plugin_options.key_execute = options.get_str(L"key_execute", defaults.key_execute);
+  plugin_options.key_hide_rom_files = options.get_str(L"key_hide_rom_files", defaults.key_hide_rom_files);
 }
 
-void save_plugin_options(const PluginOptions& options) {
-  set_bool_option(L"add_to_plugin_menu", options.add_to_plugin_menu);
-  set_bool_option(L"add_to_disk_menu", options.add_to_disk_menu);
-  set_int_option(L"disk_menu_number", options.disk_menu_number);
-  set_int_option(L"access_method", options.access_method);
-  set_int_option(L"hide_copy_dlg", options.hide_copy_dlg);
-  set_int_option(L"copy_buf_size", options.copy_buf_size);
-  set_bool_option(L"hide_rom_files", options.hide_rom_files);
-  set_bool_option(L"ignore_errors", options.ignore_errors);
-  set_int_option(L"overwrite", options.overwrite);
-  set_int_option(L"show_op_stats", options.show_stats);
-  set_bool_option(L"use_file_filters", options.use_file_filters);
-  set_bool_option(L"save_def_values", options.save_def_values);
-  set_int_option(L"last_dev_type", options.last_dev_type);
-  set_bool_option(L"save_last_dir", options.save_last_dir);
-  set_bool_option(L"exit_on_dot_dot", options.exit_on_dot_dot);
-  set_str_option(L"prefix", options.prefix);
-  set_bool_option(L"show_free_space", options.show_free_space);
+void save_plugin_options(const PluginOptions& plugin_options) {
+  Options options;
+  if (!options.create())
+    return;
+  PluginOptions defaults;
+  options.set_bool(L"add_to_plugin_menu", plugin_options.add_to_plugin_menu, defaults.add_to_plugin_menu);
+  options.set_bool(L"add_to_disk_menu", plugin_options.add_to_disk_menu, defaults.add_to_disk_menu);
+  options.set_int(L"access_method", plugin_options.access_method, defaults.access_method);
+  options.set_int(L"hide_copy_dlg", plugin_options.hide_copy_dlg, defaults.hide_copy_dlg);
+  options.set_bool(L"save_last_dir", plugin_options.save_last_dir, defaults.save_last_dir);
+  options.set_int(L"copy_buf_size", plugin_options.copy_buf_size, defaults.copy_buf_size);
+  options.set_bool(L"hide_rom_files", plugin_options.hide_rom_files, defaults.hide_rom_files);
+  options.set_bool(L"exit_on_dot_dot", plugin_options.exit_on_dot_dot, defaults.exit_on_dot_dot);
+  options.set_str(L"prefix", plugin_options.prefix, defaults.prefix);
+  options.set_bool(L"show_free_space", plugin_options.show_free_space, defaults.show_free_space);
+  options.set_bool(L"ignore_errors", plugin_options.ignore_errors, defaults.ignore_errors);
+  options.set_int(L"overwrite", plugin_options.overwrite, defaults.overwrite);
+  options.set_int(L"show_op_stats", plugin_options.show_stats, defaults.show_stats);
+  options.set_bool(L"use_file_filters", plugin_options.use_file_filters, defaults.use_file_filters);
+  options.set_bool(L"save_def_values", plugin_options.save_def_values, defaults.save_def_values);
+  options.set_int(L"last_dev_type", plugin_options.last_dev_type, defaults.last_dev_type);
+  options.set_str(L"key_attr", plugin_options.key_attr, defaults.key_attr);
+  options.set_str(L"key_execute", plugin_options.key_execute, defaults.key_execute);
+  options.set_str(L"key_hide_rom_files", plugin_options.key_hide_rom_files, defaults.key_hide_rom_files);
 }
 
-void save_def_option_values(const PluginOptions& options) {
-  set_bool_option(L"ignore_errors", options.ignore_errors);
-  set_int_option(L"overwrite", options.overwrite);
-  set_int_option(L"show_op_stats", options.show_stats);
-  set_bool_option(L"use_file_filters", options.use_file_filters);
+void save_def_option_values(const PluginOptions& plugin_options) {
+  Options options;
+  if (!options.create())
+    return;
+  PluginOptions defaults;
+  options.set_bool(L"ignore_errors", plugin_options.ignore_errors, defaults.ignore_errors);
+  options.set_int(L"overwrite", plugin_options.overwrite, defaults.overwrite);
+  options.set_int(L"show_op_stats", plugin_options.show_stats, defaults.show_stats);
+  options.set_bool(L"use_file_filters", plugin_options.use_file_filters, defaults.use_file_filters);
+}
+
+const wchar_t* c_root_dir = L"\\";
+
+UnicodeString load_last_dir(const UnicodeString& id) {
+  Options options;
+  if (!options.create())
+    return UnicodeString(c_root_dir);
+  return options.get_str((L"last_dir_" + id).data(), c_root_dir);
+}
+
+void save_last_dir(const UnicodeString& id, const UnicodeString& dir) {
+  Options options;
+  if (!options.create())
+    return;
+  options.set_str((L"last_dir_" + id).data(), dir, c_root_dir);
 }

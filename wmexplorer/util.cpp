@@ -1,8 +1,6 @@
-#include "farapi_config.h"
-
 #define _ERROR_WINDOWS
 #include "error.h"
-
+#include "guids.h"
 #include "util.h"
 
 extern struct PluginStartupInfo g_far;
@@ -176,74 +174,6 @@ void unquote(UnicodeString& str) {
   }
 }
 
-#ifdef FARAPI17
-// special encoding for file names that cannot be converted into OEM codepage
-void encode_fn(UnicodeString& dst, const UnicodeString& src) {
-  AnsiString str;
-  unicode_to_oem(str, src);
-  oem_to_unicode(dst, str);
-  for (unsigned i = 0, j = 0; (i < src.size()) && (j < dst.size()); i++, j++) {
-    if (dst[j] != src[i]) {
-      if (src[i] > 0xFF) {
-        dst.replace_fmt(j, 1, L"**%.4x", src[i]);
-        j += 5;
-      }
-      else {
-        dst.replace_fmt(j, 1, L"*%.2x", src[i]);
-        j += 2;
-      }
-    }
-  }
-}
-
-UnicodeString encode_fn(const UnicodeString& src) {
-  UnicodeString dst;
-  encode_fn(dst, src);
-  return dst;
-}
-
-void decode_fn(UnicodeString& dst, const UnicodeString& src) {
-  dst.clear();
-  dst.extend(src.size());
-  unsigned i = 0;
-  while (i < src.size()) {
-    if (src[i] == L'*') {
-      i++;
-      if (i < src.size()) {
-        unsigned l = 2;
-        if (src[i] == L'*') {
-          l = 4;
-          i++;
-        }
-        if (i + l <= src.size()) {
-          wchar_t ch = 0;
-          for (unsigned j = i; j < i + l; j++) {
-            if ((src[j] >= '0') && (src[j] <= '9')) {
-              ch = ch * 16 + (src[j] - '0');
-            }
-            else if ((src[j] >= 'A') && (src[j] <= 'F')) {
-              ch = ch * 16 + (src[j] - 'A' + 10);
-            }
-          }
-          dst += ch;
-          i += l;
-        }
-      }
-    }
-    else {
-      dst += src[i];
-      i++;
-    }
-  }
-}
-
-UnicodeString decode_fn(const UnicodeString& src) {
-  UnicodeString dst;
-  decode_fn(dst, src);
-  return dst;
-}
-#endif // FARAPI17
-
 UnicodeString make_temp_file() {
   UnicodeString temp_path;
   CHECK_API(GetTempPathW(MAX_PATH, temp_path.buf(MAX_PATH)) != 0);
@@ -279,96 +209,60 @@ UnicodeString del_trailing_slash(const UnicodeString& file_path) {
   else return file_path.left(file_path.size() - 1);
 }
 
-int far_control_int(HANDLE h_panel, int command, int param) {
-#ifdef FARAPI17
-  return g_far.Control(h_panel, command, reinterpret_cast<void*>(param));
-#endif
-#ifdef FARAPI18
-  return g_far.Control(h_panel, command, param, 0);
-#endif
+int far_control_int(HANDLE h_panel, FILE_CONTROL_COMMANDS command, int param) {
+  return g_far.PanelControl(h_panel, command, param, nullptr);
 }
 
-int far_control_ptr(HANDLE h_panel, int command, const void* param) {
-#ifdef FARAPI17
-  return g_far.Control(h_panel, command, const_cast<void*>(param));
-#endif
-#ifdef FARAPI18
-  return g_far.Control(h_panel, command, 0, reinterpret_cast<LONG_PTR>(param));
-#endif
+int far_control_ptr(HANDLE h_panel, FILE_CONTROL_COMMANDS command, const void* param) {
+  return g_far.PanelControl(h_panel, command, 0, const_cast<void*>(param));
 }
 
 PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi) {
-#ifdef FARAPI17
-  return pi.PanelItems + index;
-#endif
-#ifdef FARAPI18
   static Array<unsigned char> ppi;
-  unsigned size = g_far.Control(h_panel, FCTL_GETPANELITEM, index, NULL);
-  ppi.extend(size);
-  g_far.Control(h_panel, FCTL_GETPANELITEM, index, reinterpret_cast<LONG_PTR>(ppi.buf()));
+  unsigned size = g_far.PanelControl(h_panel, FCTL_GETPANELITEM, index, nullptr);
+  FarGetPluginPanelItem gpi;
+  gpi.Size = size;
+  gpi.Item = reinterpret_cast<PluginPanelItem*>(ppi.buf(size));
+  g_far.PanelControl(h_panel, FCTL_GETPANELITEM, index, &gpi);
   ppi.set_size(size);
   return reinterpret_cast<PluginPanelItem*>(ppi.buf());
-#endif
 }
 
 PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi) {
-#ifdef FARAPI17
-  return pi.SelectedItems + index;
-#endif
-#ifdef FARAPI18
   static Array<unsigned char> ppi;
-  unsigned size = g_far.Control(h_panel, FCTL_GETSELECTEDPANELITEM, index, NULL);
-  ppi.extend(size);
-  g_far.Control(h_panel, FCTL_GETSELECTEDPANELITEM, index, reinterpret_cast<LONG_PTR>(ppi.buf()));
+  unsigned size = g_far.PanelControl(h_panel, FCTL_GETSELECTEDPANELITEM, index, nullptr);
+  FarGetPluginPanelItem gpi;
+  gpi.Size = size;
+  gpi.Item = reinterpret_cast<PluginPanelItem*>(ppi.buf(size));
+  g_far.PanelControl(h_panel, FCTL_GETSELECTEDPANELITEM, index, &gpi);
   ppi.set_size(size);
   return reinterpret_cast<PluginPanelItem*>(ppi.buf());
-#endif
 }
 
 UnicodeString far_get_current_dir() {
   UnicodeString curr_dir;
-#ifdef FARAPI17
-  DWORD size = GetCurrentDirectoryW(0, NULL);
-  CHECK_API(size != 0);
-  CHECK_API(GetCurrentDirectoryW(size, curr_dir.buf(size)) != 0);
-  curr_dir.set_size();
-#endif
-#ifdef FARAPI18
   DWORD size = g_fsf.GetCurrentDirectory(0, NULL);
   g_fsf.GetCurrentDirectory(size, curr_dir.buf(size));
   curr_dir.set_size();
-#endif
   return del_trailing_slash(curr_dir);
 }
 
 UnicodeString far_get_full_path(const UnicodeString& file_path) {
   const unsigned c_buf_size = 0x10000;
   UnicodeString full_path;
-#ifdef FARAPI18
   int size = g_fsf.ConvertPath(CPM_FULL, file_path.data(), full_path.buf(c_buf_size), c_buf_size);
   if (size > c_buf_size) g_fsf.ConvertPath(CPM_FULL, file_path.data(), full_path.buf(size), size);
-#endif
-#ifdef FARAPI17
-  LPWSTR file_part;
-  DWORD size = GetFullPathNameW(file_path.data(), c_buf_size, full_path.buf(c_buf_size), &file_part);
-  if (size > c_buf_size) size = GetFullPathNameW(file_path.data(), size, full_path.buf(size), &file_part);
-  CHECK_API(size != 0);
-#endif
   full_path.set_size();
   return full_path;
 }
 
 void far_set_progress_state(TBPFLAG state) {
-#ifdef FARAPI18
-  g_far.AdvControl(g_far.ModuleNumber, ACTL_SETPROGRESSSTATE, reinterpret_cast<void*>(state));
-#endif
+  g_far.AdvControl(&c_plugin_guid, ACTL_SETPROGRESSSTATE, state, nullptr);
 }
 
 void far_set_progress_value(unsigned __int64 completed, unsigned __int64 total) {
-#ifdef FARAPI18
-  PROGRESSVALUE pv;
+  ProgressValue pv;
   pv.Completed = completed;
   pv.Total = total;
-  g_far.AdvControl(g_far.ModuleNumber, ACTL_SETPROGRESSVALUE, &pv);
-#endif
+  g_far.AdvControl(&c_plugin_guid, ACTL_SETPROGRESSVALUE, 0, &pv);
 }

@@ -18,8 +18,8 @@ System requirements:
 - Запуск программ на устройстве.
 - Информация об объеме свободной памяти и свободном месте на подключенных картах памяти.
 
-Новые версии: http://forum.farmanager.com/viewtopic.php?t=2826
-Обсуждение: http://forum.farmanager.com/viewtopic.php?t=2827
+Новые версии: <(UPDATE_URL)>
+Обсуждение: <(SUPPORT_URL)>
 
 ---------------------------------------------------------------
 
@@ -34,9 +34,9 @@ Features:
 - Free memory and card space information.
 
 Track new plugin versions:
-http://forum.farmanager.com/viewtopic.php?t=2826
+<(UPDATE_URL)>
 
 Discussion, propositions and bug reports:
-http://forum.farmanager.com/viewtopic.php?t=2827
+<(SUPPORT_URL)>
 
 ---------------------------------------------------------------

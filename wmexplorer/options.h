@@ -23,20 +23,10 @@ enum DevType {
   dtSmartPhone = 1,
 };
 
-struct KeyOption {
-  unsigned vcode;
-  unsigned state;
-  KeyOption() {
-  }
-  KeyOption(unsigned vcode, unsigned state): vcode(vcode), state(state) {
-  }
-};
-
 struct PluginOptions {
   // plugin configuration
   bool add_to_plugin_menu;
   bool add_to_disk_menu;
-  int disk_menu_number;
   AccessMethod access_method;
   bool hide_copy_dlg;
   bool save_last_dir;
@@ -54,22 +44,17 @@ struct PluginOptions {
   // hidden options
   DevType last_dev_type;
   // plugin keys
-  KeyOption key_attr;
-  KeyOption key_execute;
-  KeyOption key_hide_rom_files;
+  UnicodeString key_attr;
+  UnicodeString key_execute;
+  UnicodeString key_hide_rom_files;
+  PluginOptions();
 };
-
-int get_int_option(const wchar_t* name, int def_value);
-bool get_bool_option(const wchar_t* name, bool def_value);
-UnicodeString get_str_option(const wchar_t* name, const UnicodeString& def_value);
-KeyOption get_key_option(const wchar_t* name, const KeyOption& def_key);
-void set_int_option(const wchar_t* name, int value);
-void set_bool_option(const wchar_t* name, bool value);
-void set_str_option(const wchar_t* name, const UnicodeString& value);
 
 void load_plugin_options(PluginOptions& options);
 void save_plugin_options(const PluginOptions& options);
 void save_def_option_values(const PluginOptions& options);
+UnicodeString load_last_dir(const UnicodeString& id);
+void save_last_dir(const UnicodeString& id, const UnicodeString& dir);
 
 bool virt_key_from_name(const UnicodeString& name, unsigned& key, unsigned& state);
 

@@ -2,12 +2,13 @@
 #define _UI_H
 
 UnicodeString far_get_msg(int id);
-const FarCh* far_msg_ptr(int id);
-int far_message(const UnicodeString& msg, int button_cnt = 0, DWORD flags = 0);
-int far_message(const FarCh* const* msg, int msg_cnt, int button_cnt = 0, DWORD flags = 0);
+const wchar_t* far_msg_ptr(int id);
+int far_message(const GUID& guid, const UnicodeString& msg, int button_cnt = 0, FARMESSAGEFLAGS flags = 0);
+int far_message(const GUID& guid, const wchar_t* const* msg, int msg_cnt, int button_cnt = 0, FARMESSAGEFLAGS flags = 0);
 void far_load_colors();
-int far_menu(const UnicodeString& title, const ObjectArray<UnicodeString>& items);
+int far_menu(const GUID& guid, const UnicodeString& title, const ObjectArray<UnicodeString>& items);
 int far_viewer(const UnicodeString& file_name, const UnicodeString& title);
+void draw_text_box(const UnicodeString& title, const ObjectArray<UnicodeString>& lines, unsigned client_xs);
 
 class UiLink {
 private:
