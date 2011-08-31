@@ -50,6 +50,9 @@ project: depfile $(OUTDIR)\far.ini
 distrib: depfile $(OUTDIR)\far.ini
   $(MAKE) -nologo -$(MAKEFLAGS) build_distrib BUILD=1
 
+installer: depfile $(OUTDIR)\far.ini
+  $(MAKE) -nologo -$(MAKEFLAGS) build_installer BUILD=1
+
 build_project: $(OUTDIR)\$(MODULE).dll $(OUTDIR)\$(MODULE)_en.lng $(OUTDIR)\$(MODULE)_ru.lng $(OUTDIR)\$(MODULE)_en.hlf $(OUTDIR)\$(MODULE)_ru.hlf
 
 $(OUTDIR)\$(MODULE).dll: $(OUTDIR)\plugin.def $(OBJS) $(OUTDIR)\headers.pch $(OUTDIR)\version.res project.ini
@@ -131,6 +134,29 @@ build_distrib: $(DISTRIB).7z
 
 $(DISTRIB).7z: $(DISTRIB_FILES) project.ini
   7z a -mx=9 $@ $(DISTRIB_FILES)
+
+
+build_installer: $(DISTRIB).msi
+
+LIGHTFLAGS = -nologo -cultures:en-us -spdb -sval -b installer
+CANDLEFLAGS = -nologo -Iinstaller -I$(OUTDIR) -dSourceDir=$(OUTDIR) -dPlatform=$(PLATFORM) -dProduct="$(NAME)" -dVersion=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) -dMinFarVersion=$(FAR_VER_MAJOR).$(FAR_VER_MINOR).$(FAR_VER_BUILD)
+!ifdef RELEASE
+LIGHTFLAGS = $(LIGHTFLAGS) -dcl:high
+!else
+LIGHTFLAGS = $(LIGHTFLAGS) -sh -cc $(OUTDIR) -reusecab
+!endif
+WIXOBJ = $(OUTDIR)\installer.wixobj $(OUTDIR)\ui.wixobj $(OUTDIR)\plugin.wixobj
+
+$(DISTRIB).msi: $(DISTRIB_FILES) project.ini $(WIXOBJ) installer\ui_en-us.wxl installer\banner.jpg installer\dialog.jpg installer\exclam.ico installer\info.ico
+  light $(LIGHTFLAGS) -loc installer\ui_en-us.wxl -out $@ $(WIXOBJ)
+
+{installer}.wxs{$(OUTDIR)}.wixobj::
+  candle $(CANDLEFLAGS) -out $(OUTDIR)\ $<
+
+installer\installer.wxs installer\plugin.wxs: installer\installer.wxi $(OUTDIR)\plugin.wxi
+
+$(OUTDIR)\plugin.wxi: project.ini installer\plugin.wxi.wxi
+  $(PREPROC)
 
 
 clean:
