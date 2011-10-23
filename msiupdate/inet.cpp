@@ -1,5 +1,5 @@
 #include "msg.h"
-
+#include "guids.hpp"
 #include "utils.hpp"
 #include "sysutils.hpp"
 #include "farutils.hpp"
@@ -244,7 +244,7 @@ void LoadUrlProgress::do_update_ui() {
   msg.append(1, L'\n');
   if (total)
     msg.append(Far::get_progress_bar_str(60, completed, total));
-  Far::message(msg, 0, FMSG_LEFTALIGN);
+  Far::message(c_progress_dialog_guid, msg, 0, FMSG_LEFTALIGN);
   msg.clear();
   msg.append(Far::get_msg(MSG_DOWNLOAD_TITLE));
   if (total && completed <= total) {

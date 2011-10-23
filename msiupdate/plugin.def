@@ -1,10 +1,9 @@
 LIBRARY <(MODULE)> BASE=0x64800000
 EXPORTS
-  GetMinFarVersion
-  GetMinFarVersionW
+  GetGlobalInfoW
   SetStartupInfoW
   GetPluginInfoW
-  OpenPluginW
-  ProcessSynchroEventW
+  OpenW
   ConfigureW
   ExitFARW
+  ProcessSynchroEventW

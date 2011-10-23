@@ -1,5 +1,5 @@
 #include "msg.h"
-
+#include "guids.hpp"
 #include "utils.hpp"
 #include "farutils.hpp"
 #include "sysutils.hpp"
@@ -8,8 +8,8 @@
 #include "options.hpp"
 #include "ui.hpp"
 #include "inet.hpp"
-#include "transact.hpp"
 #include "trayicon.hpp"
+#include "options.hpp"
 #include "update.hpp"
 
 namespace Update {
@@ -17,12 +17,12 @@ namespace Update {
 const wchar_t* c_param_last_check_time = L"last_check_time";
 const wchar_t* c_param_last_check_version = L"last_check_version";
 #ifdef _M_IX86
-const char* c_upgrade_code = "{67A59013-488F-4388-81F3-828A1DCEDA32}";
+const wchar_t* c_upgrade_code = L"{67A59013-488F-4388-81F3-828A1DCEDA32}";
 const char* c_platform = "x86";
 const wchar_t* c_update_script = L"update2.php?p=32";
 #endif
 #ifdef _M_X64
-const char* c_upgrade_code = "{83140F3F-1457-42EB-8053-233293664714}";
+const wchar_t* c_upgrade_code = L"{83140F3F-1457-42EB-8053-233293664714}";
 const char* c_platform = "x64";
 const wchar_t* c_update_script = L"update2.php?p=64";
 #endif
@@ -31,10 +31,10 @@ const unsigned c_exit_wait = 6;
 const unsigned c_update_period = 12 * 60 * 60;
 const wchar_t* c_param_changelog_path = L"changelog_path";
 
-unsigned current_version;
+VersionInfo current_version;
 
 struct UpdateInfo {
-  unsigned version;
+  VersionInfo version;
   wstring package_name;
 };
 
@@ -45,13 +45,16 @@ UpdateInfo parse_update_info(const wstring& text) {
   wstring ver_minor = update_ini.get(L"far", L"minor");
   wstring ver_build = update_ini.get(L"far", L"build");
   UpdateInfo update_info;
-  update_info.version = MAKE_VERSION(str_to_int(ver_major), str_to_int(ver_minor), str_to_int(ver_build));
+  update_info.version = current_version;
+  update_info.version.Major = str_to_int(ver_major);
+  update_info.version.Minor = str_to_int(ver_minor);
+  update_info.version.Build = str_to_int(ver_build);
   update_info.package_name = update_ini.get(L"far", L"msi");
   return update_info;
 }
 
 void check_product_installed() {
-  char product_guid[39];
+  wchar_t product_guid[39];
   if (MsiEnumRelatedProducts(c_upgrade_code, 0, 0, product_guid) != ERROR_SUCCESS)
     FAIL_MSG(Far::get_msg(MSG_ERROR_NO_MSI));
 }
@@ -67,47 +70,42 @@ wstring get_update_url() {
 
 wstring save_changelog(unsigned build1, unsigned build2) {
   wstring file_path;
-  Transaction transaction;
-  {
-    TransactedKey plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, true, transaction.handle());
-    if (!plugin_key.query_str_nt(file_path, c_param_changelog_path))
-      file_path = add_trailing_slash(get_temp_path()) + create_guid() + L".txt";
+  Far::Settings plugin_key;
+  if (!plugin_key.create())
+    return file_path;
+  if (!plugin_key.get(c_param_changelog_path, file_path))
+    file_path = add_trailing_slash(get_temp_path()) + create_guid() + L".txt";
 
-    wstring text = ansi_to_unicode(load_url(c_changelog_url, g_options.http), 1251);
-    const wchar_t* c_expr_prefix = L"[^\\s]+\\s+\\d+\\.\\d+\\.\\d+\\s+\\d+:\\d+:\\d+\\s+[+-]?\\d+\\s+-\\s+build\\s+";
-    const wchar_t* c_expr_suffix = L"\\s*";
-    Far::Regex regex;
-    size_t pos1 = regex.search(c_expr_prefix + int_to_str(build1) + c_expr_suffix, text);
-    if (pos1 == -1)
-      pos1 = text.size();
-    size_t pos2 = regex.search(c_expr_prefix + int_to_str(build2) + c_expr_suffix, text);
-    if (pos2 == -1)
-      pos2 = 0;
-    CHECK(pos1 > pos2);
+  wstring text = ansi_to_unicode(load_url(c_changelog_url, g_options.http), 1251);
+  const wchar_t* c_expr_prefix = L"[^\\s]+\\s+\\d+\\.\\d+\\.\\d+\\s+\\d+:\\d+:\\d+\\s+[+-]?\\d+\\s+-\\s+build\\s+";
+  const wchar_t* c_expr_suffix = L"\\s*";
+  Far::Regex regex;
+  size_t pos1 = regex.search(c_expr_prefix + int_to_str(build1) + c_expr_suffix, text);
+  if (pos1 == -1)
+    pos1 = text.size();
+  size_t pos2 = regex.search(c_expr_prefix + int_to_str(build2) + c_expr_suffix, text);
+  if (pos2 == -1)
+    pos2 = 0;
+  CHECK(pos1 > pos2);
 
-    TransactedFile file(file_path, FILE_WRITE_DATA, FILE_SHARE_READ, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, transaction.handle());
-    const wchar_t sig = 0xFEFF;
-    file.write(&sig, sizeof(sig));
-    file.write(text.data() + pos2, static_cast<unsigned>((pos1 - pos2) * sizeof(wchar_t)));
+  File file(file_path, FILE_WRITE_DATA, FILE_SHARE_READ, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL);
+  const wchar_t sig = 0xFEFF;
+  file.write(&sig, sizeof(sig));
+  file.write(text.data() + pos2, static_cast<unsigned>((pos1 - pos2) * sizeof(wchar_t)));
 
-    plugin_key.set_str(c_param_changelog_path, file_path);
-  }
-  transaction.commit();
+  plugin_key.set(c_param_changelog_path, file_path);
+
   return file_path;
 }
 
 void delete_changelog() {
-  Transaction transaction;
-  {
-    wstring file_path;
-    TransactedKey plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, true, transaction.handle());
-    if (plugin_key.query_str_nt(file_path, c_param_changelog_path)) {
-      if (File::exists(file_path))
-        delete_file_transacted(file_path, transaction.handle());
-      plugin_key.delete_value(c_param_changelog_path);
-    }
+  wstring file_path;
+  Far::Settings plugin_key;
+  if (plugin_key.get(c_param_changelog_path, file_path)) {
+    if (File::exists(file_path))
+      File::delete_file(file_path);
+    plugin_key.del(c_param_changelog_path);
   }
-  transaction.commit();
 }
 
 const GUID c_update_dialog_guid = { /* BBE496E8-B5A8-48AC-B0D1-2141951B2C80 */
@@ -136,13 +134,13 @@ private:
   int no_ctrl_id;
   int cancel_ctrl_id;
 
-  LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
+  INT_PTR dialog_proc(int msg, int param1, void* param2) {
     if (msg == DN_INITDIALOG) {
       set_focus(yes_ctrl_id);
       return TRUE;
     }
     else if ((msg == DN_BTNCLICK) && (param1 == changelog_ctrl_id)) {
-      wstring changelog_path = save_changelog(VER_BUILD(current_version), VER_BUILD(update_info.version));
+      wstring changelog_path = save_changelog(current_version.Build, update_info.version.Build);
       Far::viewer(changelog_path, L"Changelog", VF_DISABLEHISTORY | VF_ENABLE_F6 | VF_DELETEONLYFILEONCLOSE);
       Far::flush_screen();
     }
@@ -155,7 +153,7 @@ public:
 
   UpdateDialogResult show() {
     wostringstream st;
-    st << Far::get_msg(MSG_UPDATE_NEW_VERSION) << L' ' << VER_MAJOR(update_info.version) << L'.' << VER_MINOR(update_info.version) << L'.' << VER_BUILD(update_info.version);
+    st << Far::get_msg(MSG_UPDATE_NEW_VERSION) << L' ' << update_info.version.Major << L'.' << update_info.version.Minor << L'.' << update_info.version.Build;
     label(st.str());
     new_line();
     label(Far::get_msg(MSG_UPDATE_QUESTION));
@@ -187,43 +185,39 @@ void prepare_directory(const wstring& dir) {
 
 void save_to_cache(const string& package, const wstring& cache_dir, const wstring& package_name) {
   prepare_directory(cache_dir);
-  Transaction transaction;
-  {
-    const wchar_t* c_param_cache_index = L"cache_index";
-    TransactedKey plugin_key(HKEY_CURRENT_USER, get_plugin_key_name().c_str(), KEY_QUERY_VALUE | KEY_SET_VALUE, true, transaction.handle());
+  const wchar_t* c_param_cache_index = L"cache_index";
+  Far::Settings plugin_key;
 
-    list<wstring> cache_index;
-    wstring cache_index_str;
-    if (plugin_key.query_str_nt(cache_index_str, c_param_cache_index))
-      cache_index = split(cache_index_str, L'\n');
+  list<wstring> cache_index;
+  wstring cache_index_str;
+  if (plugin_key.get(c_param_cache_index, cache_index_str))
+    cache_index = split(cache_index_str, L'\n');
 
-    while (cache_index.size() && cache_index.size() >= g_options.cache_max_size) {
-      delete_file_transacted(add_trailing_slash(cache_dir) + cache_index.front(), transaction.handle());
-      cache_index.erase(cache_index.begin());
-    }
-
-    TransactedFile package_file((add_trailing_slash(cache_dir) + package_name).c_str(), GENERIC_WRITE, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, transaction.handle());
-    package_file.write(package.data(), static_cast<unsigned>(package.size()));
-
-    cache_index.push_back(package_name);
-    plugin_key.set_str(c_param_cache_index, combine(cache_index, L'\n'));
+  while (cache_index.size() && cache_index.size() >= g_options.cache_max_size) {
+    File::delete_file(add_trailing_slash(cache_dir) + cache_index.front());
+    cache_index.erase(cache_index.begin());
   }
-  transaction.commit();
+
+  File package_file((add_trailing_slash(cache_dir) + package_name).c_str(), GENERIC_WRITE, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL);
+  package_file.write(package.data(), static_cast<unsigned>(package.size()));
+
+  cache_index.push_back(package_name);
+  plugin_key.set(c_param_cache_index, combine(cache_index, L'\n'));
 }
 
 void execute(bool ask) {
   check_product_installed();
   string update_url_text = load_url(get_update_url() + c_update_script, g_options.http);
   UpdateInfo update_info = parse_update_info(ansi_to_unicode(update_url_text, CP_ACP));
-  if (update_info.version <= current_version) {
-    Far::info_dlg(Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_UPDATE_NO_NEW_VERSION));
+  if (Far::compare_versions(update_info.version, current_version) <= 0) {
+    Far::info_dlg(c_no_new_version_dialog_guid, Far::get_msg(MSG_PLUGIN_NAME), Far::get_msg(MSG_UPDATE_NO_NEW_VERSION));
     return;
   }
   UpdateDialogResult res = ask ? UpdateDialog(update_info).show() : udrYes;
   if (res == udrYes) {
     if (!ask && g_options.open_changelog) {
       wstring changelog_path;
-      IGNORE_ERRORS(changelog_path = save_changelog(VER_BUILD(current_version), VER_BUILD(update_info.version)))
+      IGNORE_ERRORS(changelog_path = save_changelog(current_version.Build, update_info.version.Build))
       if (!changelog_path.empty()) {
         SHELLEXECUTEINFOW sei = { sizeof(SHELLEXECUTEINFO) };
         sei.fMask = SEE_MASK_FLAG_NO_UI | SEE_MASK_NO_CONSOLE | SEE_MASK_ASYNCOK;
@@ -248,7 +242,7 @@ void execute(bool ask) {
     if (g_options.logged_install) {
       wchar_t temp_path[MAX_PATH];
       CHECK_SYS(GetTempPathW(ARRAYSIZE(temp_path), temp_path));
-      st << L"/log \"" << add_trailing_slash(temp_path) << L"MsiUpdate_" << VER_MAJOR(current_version) << L"_" << widen(c_platform) << L".log\" ";
+      st << L"/log \"" << add_trailing_slash(temp_path) << L"MsiUpdate_" << current_version.Major << L"_" << widen(c_platform) << L".log\" ";
     }
     if (g_options.cache_enabled)
       st << "/i \"" << add_trailing_slash(cache_dir) + update_info.package_name + L"\"";
@@ -269,7 +263,9 @@ void execute(bool ask) {
     Far::quit();
   }
   else if (res == udrNo) {
-    Options::set_int(c_param_last_check_version, update_info.version);
+    Far::Settings settings;
+    if (settings.create())
+      settings.set(c_param_last_check_version, Far::version_to_string(update_info.version));
   }
 }
 
@@ -290,10 +286,12 @@ private:
     Clean clean;
     string update_url_text = load_url(update_url, http_options, h_event);
     UpdateInfo update_info = parse_update_info(ansi_to_unicode(update_url_text, CP_ACP));
-    unsigned last_check_version = Options::get_int(c_param_last_check_version);
-    if ((update_info.version > current_version) && (update_info.version > last_check_version)) {
+    wstring last_check_version;
+    Far::Settings settings;
+    if (settings.create() && settings.get(c_param_last_check_version, last_check_version))
+    if ((Far::compare_versions(update_info.version, current_version) > 0) && (Far::compare_versions(update_info.version, Far::string_to_version(last_check_version)) > 0)) {
       wostringstream st;
-      st << msg_tray_version << L' ' << VER_MAJOR(update_info.version) << L'.' << VER_MINOR(update_info.version) << L'.' << VER_BUILD(update_info.version) << L'\n' << msg_tray_update;
+      st << msg_tray_version << L' ' << update_info.version.Major << L'.' << update_info.version.Minor << L'.' << update_info.version.Build << L'\n' << msg_tray_update;
       TrayIcon tray_icon(window_name, msg_tray_title, st.str());
       if (tray_icon.message_loop(h_event))
         Far::call_user_apc(reinterpret_cast<void*>(cmdExecute));
@@ -318,11 +316,12 @@ void init() {
 
   time_t curr_time = time(NULL);
   CHECK(curr_time != -1);
-  curr_time /= c_update_period;
-  unsigned last_check_time = Options::get_int(c_param_last_check_time);
-  if (curr_time == last_check_time)
+  unsigned __int64 last_check_time;
+  Far::Settings settings;
+  CHECK(settings.create() && settings.get(c_param_last_check_time, last_check_time));
+  if (curr_time < last_check_time + c_update_period)
     return;
-  Options::set_int(c_param_last_check_time, static_cast<unsigned>(curr_time));
+  settings.set(c_param_last_check_time, curr_time);
 
   g_auto_update = new AutoUpdate(get_update_url() + c_update_script, g_options.http);
   try {

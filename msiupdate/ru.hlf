@@ -5,8 +5,8 @@
 $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 
     Плагин оповещает о новых версиях Far Manager и позволяет выполнять автоматическое обновление используя официальные MSI инсталляторы.
-    ~Новые версии~@http://forum.farmanager.com/viewtopic.php?t=4843@
-    ~Обсуждение~@http://forum.farmanager.com/viewtopic.php?t=4844@
+    ~Новые версии~@<(UPDATE_URL)>@
+    ~Обсуждение~@<(SUPPORT_URL)>@
 
 @config
 $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#

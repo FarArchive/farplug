@@ -1,5 +1,7 @@
 #include "msg.h"
-
+#include "plugin.h"
+#include <initguid.h>
+#include "guids.hpp"
 #include "utils.hpp"
 #include "sysutils.hpp"
 #include "farutils.hpp"
@@ -7,45 +9,49 @@
 #include "ui.hpp"
 #include "update.hpp"
 
-int WINAPI GetMinFarVersion(void) {
-  return FARMANAGERVERSION;
+void WINAPI GetGlobalInfoW(GlobalInfo* info) {
+  info->StructSize = sizeof(GlobalInfo);
+  info->MinFarVersion = FARMANAGERVERSION;
+  info->Version = PLUGIN_VERSION;
+  info->Guid = c_plugin_guid;
+  info->Title = PLUGIN_NAME;
+  info->Description = PLUGIN_DESCRIPTION;
+  info->Author = PLUGIN_AUTHOR;
 }
 
-int WINAPI GetMinFarVersionW(void) {
-  return FARMANAGERVERSION;
-}
-
-void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info) {
-  Far::init(Info);
+void WINAPI SetStartupInfoW(const PluginStartupInfo* info) {
+  Far::init(info);
   FAR_ERROR_HANDLER_BEGIN;
   g_options.load();
   Update::init();
   FAR_ERROR_HANDLER_END(return, return, false);
 }
 
-void WINAPI GetPluginInfoW(struct PluginInfo *Info) {
+void WINAPI GetPluginInfoW(PluginInfo* info) {
   FAR_ERROR_HANDLER_BEGIN;
   static const wchar_t* plugin_menu[1];
   static const wchar_t* config_menu[1];
-  Info->StructSize = sizeof(PluginInfo);
-  Info->Flags = PF_PRELOAD;
+  info->StructSize = sizeof(PluginInfo);
+  info->Flags = PF_PRELOAD;
   plugin_menu[0] = Far::msg_ptr(MSG_PLUGIN_NAME);
-  Info->PluginMenuStrings = plugin_menu;
-  Info->PluginMenuStringsNumber = ARRAYSIZE(plugin_menu);
+  info->PluginMenu.Strings = plugin_menu;
+  info->PluginMenu.Guids = &c_plugin_menu_guid;
+  info->PluginMenu.Count = ARRAYSIZE(plugin_menu);
   config_menu[0] = Far::msg_ptr(MSG_PLUGIN_NAME);
-  Info->PluginConfigStrings = config_menu;
-  Info->PluginConfigStringsNumber = ARRAYSIZE(config_menu);
+  info->PluginConfig.Strings = config_menu;
+  info->PluginConfig.Guids = &c_plugin_config_guid;
+  info->PluginConfig.Count = ARRAYSIZE(config_menu);
   FAR_ERROR_HANDLER_END(return, return, false);
 }
 
-HANDLE WINAPI OpenPluginW(int OpenFrom,INT_PTR Item) {
+HANDLE WINAPI OpenW(const OpenInfo* info) {
   FAR_ERROR_HANDLER_BEGIN;
   Update::execute(true);
   return INVALID_HANDLE_VALUE;
   FAR_ERROR_HANDLER_END(return INVALID_HANDLE_VALUE, return INVALID_HANDLE_VALUE, false);
 }
 
-int WINAPI ConfigureW(int ItemNumber) {
+int WINAPI ConfigureW(const ConfigureInfo* info) {
   FAR_ERROR_HANDLER_BEGIN;
   if (config_dialog(g_options)) {
     g_options.save();
@@ -55,16 +61,16 @@ int WINAPI ConfigureW(int ItemNumber) {
   FAR_ERROR_HANDLER_END(return FALSE, return FALSE, false);
 }
 
-void WINAPI ExitFARW(void) {
+void WINAPI ExitFARW(const ExitInfo* info) {
   FAR_ERROR_HANDLER_BEGIN;
   Update::clean();
   FAR_ERROR_HANDLER_END(return, return, true);
 }
 
-int WINAPI ProcessSynchroEventW(int Event, void *Param) {
+int WINAPI ProcessSynchroEventW(const ProcessSynchroEventInfo* info) {
   FAR_ERROR_HANDLER_BEGIN;
-  if (Event == SE_COMMONSYNCHRO) {
-    switch (static_cast<Update::Command>(reinterpret_cast<int>(Param))) {
+  if (info->Event == SE_COMMONSYNCHRO) {
+    switch (static_cast<Update::Command>(reinterpret_cast<int>(info->Param))) {
     case Update::cmdClean:
       Update::clean();
       break;

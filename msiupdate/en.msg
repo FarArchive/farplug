@@ -1,5 +1,6 @@
 ﻿.Language=English,English
 
+lang = en
 plugin.name = <(NAME)>
 
 # Configuration dialog

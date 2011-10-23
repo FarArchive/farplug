@@ -4,13 +4,13 @@
 /*
   farcolor.hpp
 
-  Colors Index for FAR Manager 2.0 build 1666
-  HKCU\Software\Far\Colors\CurrentPalette
+  Colors Index for FAR Manager 3.0 build 2181
+  HKCU\Software\Far Manager\Colors\CurrentPalette
 */
 
 /*
-Copyright (c) 1996 Eugene Roshal
-Copyright (c) 2000 Far Group
+Copyright © 1996 Eugene Roshal
+Copyright © 2000 Far Group
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -126,8 +126,6 @@ enum PaletteColors
 	COL_DIALOGEDITSELECTED,
 	COL_COMMANDLINESELECTED,
 	COL_VIEWERARROWS,
-
-	COL_RESERVED0,
 
 	COL_DIALOGLISTSCROLLBAR,
 	COL_MENUSCROLLBAR,

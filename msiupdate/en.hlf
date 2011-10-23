@@ -5,8 +5,8 @@
 $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#
 
     Plugin notifies about new versions of Far Manager and performs automatic updates using official MSI packages.
-    ~Updates~@http://forum.farmanager.com/viewtopic.php?t=4843@
-    ~Duscussion~@http://forum.farmanager.com/viewtopic.php?t=4844@
+    ~Updates~@<(UPDATE_URL)>@
+    ~Duscussion~@<(SUPPORT_URL)>@
 
 @config
 $^#<(NAME)> <(VER_MAJOR)>.<(VER_MINOR)>.<(VER_PATCH)>#

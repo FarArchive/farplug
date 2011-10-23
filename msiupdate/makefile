@@ -5,7 +5,7 @@ TOOLSDIR = ..\tools
 FARSDK = farsdk
 
 CPPFLAGS = -nologo -Zi -W3 -Gy -GS -GR -EHsc -MP -c
-DEFINES = -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_WIN32_WINNT=0x0500
+DEFINES = -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_WIN32_WINNT=0x0500 -DUNICODE
 LINKFLAGS = -nologo -debug -incremental:no -map -manifest:no -dynamicbase -nxcompat -largeaddressaware -dll
 RCFLAGS = -nologo
 
@@ -29,7 +29,7 @@ CPPFLAGS = $(CPPFLAGS) -Od -RTC1 -MTd
 LINKFLAGS = $(LINKFLAGS) -fixed:no
 !endif
 OUTDIR = $(OUTDIR).$(PLATFORM)
-INCLUDES = -I$(FARSDK) -I$(OUTDIR) -I$(COMMONDIR)
+INCLUDES = -I$(FARSDK) -I. -I$(OUTDIR) -I$(COMMONDIR)
 CPPFLAGS = $(CPPFLAGS) -Fo$(OUTDIR)\ -Fd$(OUTDIR)\ $(INCLUDES) $(DEFINES)
 RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
 
@@ -37,7 +37,7 @@ RCFLAGS = $(RCFLAGS) $(INCLUDES) $(DEFINES)
 !include $(OUTDIR)\far.ini
 !endif
 
-OBJS = $(OUTDIR)\farutils.obj $(OUTDIR)\inet.obj $(OUTDIR)\iniparse.obj $(OUTDIR)\options.obj $(OUTDIR)\pathutils.obj $(OUTDIR)\plugin.obj $(OUTDIR)\strutils.obj $(OUTDIR)\sysutils.obj $(OUTDIR)\transact.obj $(OUTDIR)\trayicon.obj $(OUTDIR)\ui.obj $(OUTDIR)\update.obj
+OBJS = $(OUTDIR)\farutils.obj $(OUTDIR)\inet.obj $(OUTDIR)\iniparse.obj $(OUTDIR)\options.obj $(OUTDIR)\pathutils.obj $(OUTDIR)\plugin.obj $(OUTDIR)\strutils.obj $(OUTDIR)\sysutils.obj $(OUTDIR)\trayicon.obj $(OUTDIR)\ui.obj $(OUTDIR)\update.obj
 
 LIBS = user32.lib advapi32.lib shell32.lib winhttp.lib msi.lib ole32.lib
 
@@ -66,7 +66,7 @@ $(OBJS): $(OUTDIR)\headers.pch
 $(OUTDIR)\headers.pch: headers.cpp headers.hpp
   $(CPP) $(CPPFLAGS) headers.cpp -Ycheaders.hpp -Fp$(OUTDIR)\headers.pch
 
-depfile: $(OUTDIR) $(OUTDIR)\msg.h
+depfile: $(OUTDIR) $(OUTDIR)\msg.h $(OUTDIR)\plugin.h
   $(TOOLSDIR)\gendep.exe $(INCLUDES) $(COMMONDIR) > $(OUTDIR)\dep.mak
 
 $(OUTDIR)\msg.h $(OUTDIR)\en.lng $(OUTDIR)\ru.lng: $(OUTDIR) $(OUTDIR)\en.msg $(OUTDIR)\ru.msg
@@ -100,6 +100,9 @@ $(OUTDIR)\en.hlf: project.ini en.hlf
 $(OUTDIR)\ru.hlf: project.ini ru.hlf
   $(PREPROC)
 
+$(OUTDIR)\plugin.h: project.ini $(OUTDIR)\far.ini plugin.h.h
+  $(PREPROC)
+
 $(OUTDIR)\far.ini: $(FARSDK)\plugin.hpp
   $(TOOLSDIR)\farver $** $@
 
@@ -129,7 +132,7 @@ $(DISTRIB).7z: $(DISTRIB_FILES) project.ini
 build_installer: $(DISTRIB).msi
 
 LIGHTFLAGS = -nologo -cultures:en-us -spdb -sval -b installer
-CANDLEFLAGS = -nologo -Iinstaller -dSourceDir=$(OUTDIR) -dPlatform=$(PLATFORM) -dProduct=$(NAME) -dVersion=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) -dMinFarVersion=$(FAR_VER_MAJOR).$(FAR_VER_MINOR).$(FAR_VER_BUILD)
+CANDLEFLAGS = -nologo -Iinstaller -I$(OUTDIR) -dSourceDir=$(OUTDIR) -dPlatform=$(PLATFORM) -dProduct=$(NAME) -dVersion=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) -dMinFarVersion=$(FAR_VER_MAJOR).$(FAR_VER_MINOR).$(FAR_VER_BUILD)
 !ifdef RELEASE
 LIGHTFLAGS = $(LIGHTFLAGS) -dcl:high
 !else
@@ -143,7 +146,10 @@ $(DISTRIB).msi: $(DISTRIB_FILES) project.ini $(WIXOBJ) installer\ui_en-us.wxl in
 {installer}.wxs{$(OUTDIR)}.wixobj::
   candle $(CANDLEFLAGS) -out $(OUTDIR)\ $<
 
-installer\installer.wxs installer\plugin.wxs: installer\installer.wxi installer\plugin.wxi
+installer\installer.wxs installer\plugin.wxs: installer\installer.wxi $(OUTDIR)\plugin.wxi
+
+$(OUTDIR)\plugin.wxi: project.ini installer\plugin.wxi.wxi
+  $(PREPROC)
 
 
 clean:

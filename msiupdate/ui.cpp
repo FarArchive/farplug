@@ -83,7 +83,7 @@ private:
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
-  LONG_PTR dialog_proc(int msg, int param1, LONG_PTR param2) {
+  INT_PTR dialog_proc(int msg, int param1, void* param2) {
     if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != cancel_ctrl_id)) {
       options.use_full_install_ui = get_check(use_full_install_ui_ctrl_id);
       options.update_stable_builds = get_check(update_stable_builds_ctrl_id);
