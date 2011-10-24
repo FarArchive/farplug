@@ -86,7 +86,9 @@ void draw_text_box(const UnicodeString& title, const ObjectArray<UnicodeString>&
     size += min(lines[i].size(), client_xs) + 1;
   }
   UnicodeString text;
-  text.extend(size);
+  text.extend(title.size() + 1 + size);
+  text += title;
+  text += L'\n';
   for (unsigned i = 0; i < lines.size(); i++) {
     if (lines[i].size() <= client_xs)
       text += lines[i];
