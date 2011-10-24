@@ -538,7 +538,7 @@ void far_set_progress_value(unsigned __int64 completed, unsigned __int64 total) 
   g_far.AdvControl(&c_plugin_guid, ACTL_SETPROGRESSVALUE, 0, &pv);
 }
 
-#ifdef _WIN64
+#ifdef _M_X64
 #  define PLUGIN_TYPE L"uni x64"
 #else
 #  define PLUGIN_TYPE L"uni"

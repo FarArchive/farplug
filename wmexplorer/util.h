@@ -27,7 +27,7 @@ UnicodeString fit_str(const UnicodeString& path, unsigned size);
 UnicodeString center(const UnicodeString& str, unsigned width);
 unsigned __int64 mul_div(unsigned __int64 a, unsigned __int64 b, unsigned __int64 c);
 
-#ifdef _WIN64
+#ifdef _M_X64
 #  define PLUGIN_TYPE L" uni x64"
 #else
 #  define PLUGIN_TYPE L" uni"
