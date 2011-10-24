@@ -5,7 +5,7 @@
 /*
   plugin.hpp
 
-  Plugin API for Far Manager 3.0 build 2181
+  Plugin API for Far Manager 3.0 build 2246
 */
 
 /*
@@ -43,7 +43,7 @@ other possible license with no implications from the above license on them.
 #define FARMANAGERVERSION_MAJOR 3
 #define FARMANAGERVERSION_MINOR 0
 #define FARMANAGERVERSION_REVISION 0
-#define FARMANAGERVERSION_BUILD 2181
+#define FARMANAGERVERSION_BUILD 2246
 #define FARMANAGERVERSION_STAGE VS_RELEASE
 
 #ifndef RC_INVOKED
@@ -315,6 +315,7 @@ enum FARMESSAGE
 	DN_INPUT                        = 4115,
 	DN_CONTROLINPUT                 = 4116,
 	DN_CLOSE                        = 4117,
+	DN_GETVALUE                     = 4118,
 
 	DM_USER                         = 0x4000,
 
@@ -344,6 +345,8 @@ static const LISTITEMFLAGS
 	LIF_GRAYED             = 0x0000000000100000ULL,
 	LIF_HIDDEN             = 0x0000000000200000ULL,
 	LIF_DELETEUSERDATA     = 0x0000000080000000ULL;
+
+
 
 struct FarListItem
 {
@@ -432,9 +435,9 @@ struct FarList
 
 struct FarListTitles
 {
-	size_t   TitleLen;
+	size_t TitleSize;
 	const wchar_t *Title;
-	size_t   BottomLen;
+	size_t BottomSize;
 	const wchar_t *Bottom;
 };
 
@@ -612,7 +615,7 @@ struct FarMenuItem
 {
 	MENUITEMFLAGS Flags;
 	const wchar_t *Text;
-	DWORD AccelKey;
+	struct FarKey AccelKey;
 	DWORD_PTR Reserved;
 	DWORD_PTR UserData;
 };
@@ -734,8 +737,8 @@ struct PanelInfo
 	size_t ItemsNumber;
 	size_t SelectedItemsNumber;
 	RECT PanelRect;
-	int CurrentItem;
-	int TopPanelItem;
+	size_t CurrentItem;
+	size_t TopPanelItem;
 	int ViewMode;
 	enum PANELINFOTYPE PanelType;
 	enum OPENPANELINFO_SORTMODES SortMode;
@@ -745,8 +748,8 @@ struct PanelInfo
 
 struct PanelRedrawInfo
 {
-	int CurrentItem;
-	int TopPanelItem;
+	size_t CurrentItem;
+	size_t TopPanelItem;
 };
 
 struct CmdLineSelect
@@ -795,6 +798,7 @@ enum FILE_CONTROL_COMMANDS
 	FCTL_GETPANELFORMAT             = 31,
 	FCTL_GETPANELHOSTFILE           = 32,
 	FCTL_SETCASESENSITIVESORT       = 33,
+	FCTL_GETPANELPREFIX             = 34,
 };
 
 typedef void (WINAPI *FARAPITEXT)(
@@ -1147,7 +1151,35 @@ struct MacroAddMacro
 	FARMACROCALLBACK Callback;
 };
 
+enum FARMACROVARTYPE
+{
+	FMVT_UNKNOWN                = 0,
+	FMVT_INTEGER                = 1,
+	FMVT_STRING                 = 2,
+	FMVT_DOUBLE                 = 3,
+};
 
+struct FarMacroValue
+{
+	enum FARMACROVARTYPE Type;
+	union
+	{
+		__int64  Integer;
+		double   Double;
+		const wchar_t *String;
+	}
+#ifndef __cplusplus
+	Value
+#endif
+	;
+};
+
+
+struct FarGetValue
+{
+	int Type;
+	struct FarMacroValue Value;
+};
 
 typedef unsigned __int64 FARSETCOLORFLAGS;
 static const FARSETCOLORFLAGS
@@ -1360,7 +1392,7 @@ enum EDITOR_CONTROL_COMMANDS
 	ECTL_SAVEFILE                   = 18,
 	ECTL_QUIT                       = 19,
 	ECTL_SETKEYBAR                  = 20,
-	ECTL_PROCESSKEY                 = 21,
+
 	ECTL_SETPARAM                   = 22,
 	ECTL_GETBOOKMARKS               = 23,
 	ECTL_TURNOFFMARKINGBLOCK        = 24,
@@ -1546,7 +1578,8 @@ struct EditorConvertPos
 
 typedef unsigned __int64 EDITORCOLORFLAGS;
 static const EDITORCOLORFLAGS
-	ECF_TAB1 = 0x0000000000000001ULL;
+	ECF_TABMARKFIRST   = 0x0000000000000001ULL,
+	ECF_TABMARKCURRENT = 0x0000000000000002ULL;
 
 struct EditorColor
 {
@@ -1679,6 +1712,26 @@ enum FARSETTINGSTYPES
 	FST_DATA                        = 4,
 };
 
+enum FARSETTINGS_SUBFOLDERS
+{
+	FSSF_ROOT                       =  0,
+	FSSF_HISTORY_CMD                =  1,
+	FSSF_HISTORY_FOLDER             =  2,
+	FSSF_HISTORY_VIEW               =  3,
+	FSSF_HISTORY_EDIT               =  4,
+	FSSF_HISTORY_EXTERNAL           =  5,
+	FSSF_FOLDERSHORTCUT_0           =  6,
+	FSSF_FOLDERSHORTCUT_1           =  7,
+	FSSF_FOLDERSHORTCUT_2           =  8,
+	FSSF_FOLDERSHORTCUT_3           =  9,
+	FSSF_FOLDERSHORTCUT_4           = 10,
+	FSSF_FOLDERSHORTCUT_5           = 11,
+	FSSF_FOLDERSHORTCUT_6           = 12,
+	FSSF_FOLDERSHORTCUT_7           = 13,
+	FSSF_FOLDERSHORTCUT_8           = 14,
+	FSSF_FOLDERSHORTCUT_9           = 15,
+};
+
 struct FarSettingsCreate
 {
 	size_t StructSize;
@@ -1713,11 +1766,29 @@ struct FarSettingsName
 	enum FARSETTINGSTYPES Type;
 };
 
+struct FarSettingsHistory
+{
+	const wchar_t* Name;
+	const wchar_t* Param;
+	GUID PluginId;
+	const wchar_t* File;
+	FILETIME Time;
+	BOOL Lock;
+};
+
 struct FarSettingsEnum
 {
 	size_t Root;
 	size_t Count;
-	const struct FarSettingsName* Items;
+	union
+	{
+		const struct FarSettingsName* Items;
+		const struct FarSettingsHistory* Histories;
+	}
+#ifndef __cplusplus
+	Value
+#endif
+	;
 };
 
 struct FarSettingsValue
