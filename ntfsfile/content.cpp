@@ -516,9 +516,6 @@ protected:
     unsigned percent_done;
     if (file_size == 0) percent_done = 100;
     else percent_done = (unsigned) (data_size * 100 / file_size);
-    SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_CONTENT_PROGRESS_CONSOLE_TITLE).data(), percent_done).data());
-    far_set_progress_state(TBPF_NORMAL);
-    far_set_progress_value(percent_done, 100);
 
     // if too little time to estimate speed
     if (time != 0) {
@@ -554,6 +551,9 @@ protected:
     }
 
     draw_text_box(far_get_msg(MSG_CONTENT_PROGRESS_TITLE), lines, c_client_xs);
+    SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_CONTENT_PROGRESS_CONSOLE_TITLE).data(), percent_done).data());
+    far_set_progress_state(TBPF_NORMAL);
+    far_set_progress_value(percent_done, 100);
   }
 public:
   SharedData& sd;
@@ -888,9 +888,6 @@ protected:
     if (est_size == 0) percent_done = 100;
     else percent_done = (unsigned) (data_size * 100 / est_size);
     if (percent_done > 100) percent_done = 100;
-    SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_CONSOLE_TITLE).data(), percent_done).data());
-    far_set_progress_state(TBPF_NORMAL);
-    far_set_progress_value(percent_done, 100);
 
     lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_PROCESSED).data(),
       &format_inf_amount_short(data_size),
@@ -929,7 +926,11 @@ protected:
     if (dir_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_DIRS).data(), dir_cnt, est_dir_cnt);
     if (reparse_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_REPARSE).data(), reparse_cnt);
     if (err_cnt != 0) lines += UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_ERRORS).data(), err_cnt);
+
     draw_text_box(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_TITLE), lines, c_client_xs);
+    SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_CONTENT_MULTI_PROGRESS_CONSOLE_TITLE).data(), percent_done).data());
+    far_set_progress_state(TBPF_NORMAL);
+    far_set_progress_value(percent_done, 100);
   }
 public:
   CompressionState& st;

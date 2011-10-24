@@ -331,9 +331,6 @@ void CompressFiles::do_update_ui() {
       total_percent_done = round(static_cast<double>(local_total_proc_size) / total_size * 100);
     if (total_percent_done > 100)
       total_percent_done = 100;
-    SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_CONSOLE_TITLE).data(), total_percent_done).data());
-    far_set_progress_state(TBPF_NORMAL);
-    far_set_progress_value(total_percent_done, 100);
 
     // number of files processed
     lines += UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_FILES).data(), file_cnt, total_file_cnt);
@@ -352,6 +349,9 @@ void CompressFiles::do_update_ui() {
     }
 
     draw_text_box(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_TITLE), lines, c_client_xs);
+    SetConsoleTitleW(UnicodeString::format(far_get_msg(MSG_COMPRESS_FILES_PROGRESS_CONSOLE_TITLE).data(), total_percent_done).data());
+    far_set_progress_state(TBPF_NORMAL);
+    far_set_progress_value(total_percent_done, 100);
   }
 }
 
