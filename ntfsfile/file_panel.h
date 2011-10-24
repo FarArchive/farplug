@@ -84,22 +84,20 @@ private:
     void set_flags(bool ntfs_attr, bool resident) { flags = (ntfs_attr ? 1 : 0) | (resident ? 2 : 0); }
   };
   struct FileRecordCompare;
-  struct JournalInfo {
-    DWORDLONG usn_journal_id;
-    USN next_usn;
-    JournalInfo(): usn_journal_id(0) {
-    }
-  };
-  struct MftIndex: public ObjectArray<FileRecord>, public JournalInfo {
-    void invalidate() {
-      clear();
-      usn_journal_id = 0;
-    }
-  };
-  MftIndex mft_index;
+  DWORDLONG usn_journal_id;
+  USN next_usn;
+  bool is_journal_created;
+  bool is_journal_used() const {
+    return usn_journal_id != 0;
+  }
+  ObjectArray<FileRecord> mft_index;
+  void invalidate_mft_index() {
+    mft_index.clear();
+    usn_journal_id = 0;
+  }
   u64 root_dir_ref_num;
   void add_file_records(std::list<FileRecord>& file_list, const FileInfo& file_info);
-  JournalInfo prepare_usn_journal();
+  void prepare_usn_journal();
   void delete_usn_journal();
   void create_mft_index();
   void update_mft_index_from_usn();
@@ -109,7 +107,7 @@ private:
   void store_mft_index();
   void load_mft_index();
   UnicodeString get_mft_index_cache_name();
-  FilePanel(){}
+  FilePanel(): usn_journal_id(0), is_journal_created(false) {}
 public:
   bool flat_mode;
   bool mft_mode;

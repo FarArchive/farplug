@@ -119,7 +119,7 @@ void FilePanel::close() {
 }
 
 void FilePanel::on_close() {
-  if (g_file_panel_mode.use_usn_journal && g_file_panel_mode.use_cache) {
+  if (g_file_panel_mode.use_usn_journal && is_journal_used() && g_file_panel_mode.use_cache) {
     try {
       store_mft_index();
     }
@@ -524,7 +524,7 @@ void FilePanel::new_file_list(PluginPanelItem*& panel_items, size_t& item_num, b
   FileListProgress progress;
   std::list<PanelItemData> pid_list;
   if (mft_mode) {
-    if (g_file_panel_mode.use_usn_journal && !search_mode) {
+    if (g_file_panel_mode.use_usn_journal && is_journal_used() && !search_mode) {
       try {
         update_mft_index_from_usn();
       }
@@ -567,7 +567,7 @@ void FilePanel::change_directory(const UnicodeString& target_dir, bool search_mo
   }
   if (new_cur_dir.equal(new_cur_dir.size() - 1, L':')) new_cur_dir = add_trailing_slash(new_cur_dir);
   if (mft_mode) {
-    if (g_file_panel_mode.use_usn_journal && !search_mode) {
+    if (g_file_panel_mode.use_usn_journal &&  is_journal_used() && !search_mode) {
       try {
         update_mft_index_from_usn();
       }
@@ -596,12 +596,14 @@ void FilePanel::fill_plugin_info(OpenPanelInfo* info) {
   if (flat_mode && !g_file_panel_mode.use_highlighting)
     info->Flags |=  OPIF_USEATTRHIGHLIGHTING;
   panel_title = far_msg_ptr(MSG_FILE_PANEL_TITLE_PREFIX);
-  if (flat_mode || mft_mode) {
-    panel_title += L'(';
-    if (flat_mode) panel_title += L'*';
-    if (mft_mode) panel_title += L'$';
-    panel_title += L')';
+  UnicodeString flags;
+  if (flat_mode) flags += L'*';
+  if (mft_mode) {
+    if (is_journal_used()) flags += L'J';
+    else flags += L'M';
   }
+  if (flags.size())
+    panel_title += L'(' + flags + L')';
   panel_title += L':';
   info->CurDir = current_dir.data();
   panel_title += current_dir;
@@ -643,7 +645,9 @@ private:
   int use_mft_index_ctrl_id;
   int use_highlighting_ctrl_id;
   int use_usn_journal_ctrl_id;
+  int use_existing_usn_journal_ctrl_id;
   int delete_usn_journal_ctrl_id;
+  int delete_own_usn_journal_ctrl_id;
   int use_cache_ctrl_id;
   int default_mft_mode_ctrl_id;
   int backward_mft_scan_ctrl_id;
@@ -667,7 +671,9 @@ private:
       dlg->mode.show_main_stream = dlg->get_check(dlg->show_main_stream_ctrl_id);
       dlg->mode.use_highlighting = dlg->get_check(dlg->use_highlighting_ctrl_id);
       dlg->mode.use_usn_journal = dlg->get_check(dlg->use_usn_journal_ctrl_id);
+      dlg->mode.use_existing_usn_journal = dlg->get_check(dlg->use_existing_usn_journal_ctrl_id);
       dlg->mode.delete_usn_journal = dlg->get_check(dlg->delete_usn_journal_ctrl_id);
+      dlg->mode.delete_own_usn_journal = dlg->get_check(dlg->delete_own_usn_journal_ctrl_id);
       dlg->mode.use_cache = dlg->get_check(dlg->use_cache_ctrl_id);
       dlg->mode.default_mft_mode = dlg->get_check(dlg->default_mft_mode_ctrl_id);
       dlg->mode.backward_mft_scan = dlg->get_check(dlg->backward_mft_scan_ctrl_id);
@@ -678,7 +684,9 @@ private:
       dlg->enable(dlg->show_main_stream_ctrl_id, param2 != 0);
     }
     else if ((msg == DN_BTNCLICK) && (param1 == dlg->use_usn_journal_ctrl_id)) {
+      dlg->enable(dlg->use_existing_usn_journal_ctrl_id, param2 != 0);
       dlg->enable(dlg->delete_usn_journal_ctrl_id, param2 != 0);
+      dlg->enable(dlg->delete_own_usn_journal_ctrl_id, param2 != 0 && dlg->get_check(dlg->delete_usn_journal_ctrl_id));
       dlg->enable(dlg->use_cache_ctrl_id, param2 != 0);
       dlg->enable(dlg->cache_dir_lbl_id, param2 != 0 && dlg->get_check(dlg->use_cache_ctrl_id));
       dlg->enable(dlg->cache_dir_ctrl_id, param2 != 0 && dlg->get_check(dlg->use_cache_ctrl_id));
@@ -686,6 +694,9 @@ private:
     else if ((msg == DN_BTNCLICK) && (param1 == dlg->use_cache_ctrl_id)) {
       dlg->enable(dlg->cache_dir_lbl_id, param2 != 0);
       dlg->enable(dlg->cache_dir_ctrl_id, param2 != 0);
+    }
+    else if ((msg == DN_BTNCLICK) && (param1 == dlg->delete_usn_journal_ctrl_id)) {
+      dlg->enable(dlg->delete_own_usn_journal_ctrl_id, dlg->get_check(dlg->use_usn_journal_ctrl_id) && param2 != 0);
     }
     END_ERROR_HANDLER(;,;);
     return g_far.DefDlgProc(h_dlg, msg, param1, param2);
@@ -763,7 +774,11 @@ public:
     new_line();
     use_usn_journal_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_USN_JOURNAL), mode.use_usn_journal);
     spacer(2);
+    use_existing_usn_journal_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_EXISTING_USN_JOURNAL), mode.use_existing_usn_journal, mode.use_usn_journal ? 0 : DIF_DISABLE);
+    new_line();
     delete_usn_journal_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_DELETE_USN_JOURNAL), mode.delete_usn_journal, mode.use_usn_journal ? 0 : DIF_DISABLE);
+    spacer(2);
+    delete_own_usn_journal_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_DELETE_OWN_USN_JOURNAL), mode.delete_own_usn_journal, mode.use_usn_journal && mode.delete_usn_journal ? 0 : DIF_DISABLE);
     new_line();
     use_cache_ctrl_id = check_box(far_get_msg(MSG_FILE_PANEL_USE_CACHE), mode.use_cache, mode.use_usn_journal ? 0 : DIF_DISABLE);
     spacer(2);

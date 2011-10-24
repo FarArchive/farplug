@@ -158,16 +158,18 @@ FilePanelMode::FilePanelMode():
   reverse_sort(0),
   numeric_sort(0),
   sort_dirs_first(0),
-  custom_sort_mode(0),
-  show_streams(false),
+  custom_sort_mode(3),
+  show_streams(true),
   show_main_stream(false),
   use_highlighting(true),
   use_usn_journal(true),
-  delete_usn_journal(false),
-  use_cache(true),
+  use_existing_usn_journal(false),
+  delete_usn_journal(true),
+  delete_own_usn_journal(true),
+  use_cache(false),
   default_mft_mode(true),
   backward_mft_scan(true),
-  flat_mode_auto_off(false),
+  flat_mode_auto_off(true),
   cache_dir(L"%TEMP%") {
 }
 
@@ -203,7 +205,9 @@ void load_plugin_options() {
   g_file_panel_mode.show_main_stream = options.get_bool(L"FilePanelShowMainStream", def_file_panel_mode.show_main_stream);
   g_file_panel_mode.use_highlighting = options.get_bool(L"FilePanelUseHighlighting", def_file_panel_mode.use_highlighting);
   g_file_panel_mode.use_usn_journal = options.get_bool(L"FilePanelUseUsnJournal", def_file_panel_mode.use_usn_journal);
+  g_file_panel_mode.use_existing_usn_journal = options.get_bool(L"FilePanelUseExistingUsnJournal", def_file_panel_mode.use_existing_usn_journal);
   g_file_panel_mode.delete_usn_journal = options.get_bool(L"FilePanelDeleteUsnJournal", def_file_panel_mode.delete_usn_journal);
+  g_file_panel_mode.delete_own_usn_journal = options.get_bool(L"FilePanelDeleteOwnUsnJournal", def_file_panel_mode.delete_own_usn_journal);
   g_file_panel_mode.use_cache = options.get_bool(L"FilePanelUseCache", def_file_panel_mode.use_cache);
   g_file_panel_mode.default_mft_mode = options.get_bool(L"FilePanelDefaultMftMode", def_file_panel_mode.default_mft_mode);
   g_file_panel_mode.backward_mft_scan = options.get_bool(L"FilePanelBackwardMftScan", def_file_panel_mode.backward_mft_scan);
@@ -240,7 +244,9 @@ void store_plugin_options() {
   options.set_bool(L"FilePanelShowMainStream", g_file_panel_mode.show_main_stream, def_file_panel_mode.show_main_stream);
   options.set_bool(L"FilePanelUseHighlighting", g_file_panel_mode.use_highlighting, def_file_panel_mode.use_highlighting);
   options.set_bool(L"FilePanelUseUsnJournal", g_file_panel_mode.use_usn_journal, def_file_panel_mode.use_usn_journal);
+  options.set_bool(L"FilePanelUseExistingUsnJournal", g_file_panel_mode.use_existing_usn_journal, def_file_panel_mode.use_existing_usn_journal);
   options.set_bool(L"FilePanelDeleteUsnJournal", g_file_panel_mode.delete_usn_journal, def_file_panel_mode.delete_usn_journal);
+  options.set_bool(L"FilePanelDeleteOwnUsnJournal", g_file_panel_mode.delete_own_usn_journal, def_file_panel_mode.delete_own_usn_journal);
   options.set_bool(L"FilePanelUseCache", g_file_panel_mode.use_cache, def_file_panel_mode.use_cache);
   options.set_bool(L"FilePanelDefaultMftMode", g_file_panel_mode.default_mft_mode, def_file_panel_mode.default_mft_mode);
   options.set_bool(L"FilePanelBackwardMftScan", g_file_panel_mode.backward_mft_scan, def_file_panel_mode.backward_mft_scan);

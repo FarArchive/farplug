@@ -26,7 +26,9 @@ struct FilePanelMode {
   bool show_main_stream;
   bool use_highlighting;
   bool use_usn_journal;
+  bool use_existing_usn_journal;
   bool delete_usn_journal;
+  bool delete_own_usn_journal;
   bool use_cache;
   bool default_mft_mode;
   bool backward_mft_scan;
