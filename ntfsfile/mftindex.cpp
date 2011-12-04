@@ -409,23 +409,29 @@ u64 FilePanel::mft_find_path(const UnicodeString& path) {
   return file_ref_num;
 }
 
+void FilePanel::open_volume(const UnicodeString& dir) {
+  volume.open(extract_path_root(dir));
+  invalidate_mft_index();
+  prepare_usn_journal();
+  if (g_file_panel_mode.use_usn_journal && is_journal_used() && g_file_panel_mode.use_cache) {
+    try {
+      load_mft_index();
+      update_mft_index_from_usn();
+    }
+    catch (...) {
+      invalidate_mft_index();
+    }
+  }
+  if (mft_index.size() == 0)
+    create_mft_index();
+}
+
 void FilePanel::toggle_mft_mode() {
   if (!mft_mode) {
     current_dir = get_real_path(current_dir);
-    if (current_dir.equal(current_dir.size() - 1, L':')) current_dir = add_trailing_slash(current_dir);
-    volume.open(extract_path_root(current_dir));
-    invalidate_mft_index();
-    prepare_usn_journal();
-    if (g_file_panel_mode.use_usn_journal && is_journal_used() && g_file_panel_mode.use_cache) {
-      try {
-        load_mft_index();
-        update_mft_index_from_usn();
-      }
-      catch (...) {
-        invalidate_mft_index();
-      }
-    }
-    if (mft_index.size() == 0) create_mft_index();
+    if (is_root_path(current_dir))
+      current_dir = add_trailing_slash(current_dir);
+    open_volume(current_dir);
     mft_find_path(current_dir);
     mft_mode = true;
   }

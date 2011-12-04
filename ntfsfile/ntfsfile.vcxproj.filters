@@ -51,6 +51,9 @@
     <ClCompile Include="volume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="volume_list.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="compress_files.h">

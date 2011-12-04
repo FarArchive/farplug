@@ -352,6 +352,24 @@ UnicodeString del_trailing_slash(const UnicodeString& file_path) {
   else return file_path.left(file_path.size() - 1);
 }
 
+wstring add_trailing_slash(const wstring& path) {
+  if ((path.size() == 0) || (path[path.size() - 1] == L'\\')) {
+    return path;
+  }
+  else {
+    return path + L'\\';
+  }
+}
+
+wstring del_trailing_slash(const wstring& path) {
+  if ((path.size() < 2) || (path[path.size() - 1] != L'\\')) {
+    return path;
+  }
+  else {
+    return path.substr(0, path.size() - 1);
+  }
+}
+
 int str_to_int(const UnicodeString& str) {
   return _wtoi(str.data());
 }

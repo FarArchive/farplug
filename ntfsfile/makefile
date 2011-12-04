@@ -4,7 +4,7 @@ TOOLSDIR = ..\tools
 FARSDK = farsdk
 
 CPPFLAGS = -nologo -Zi -W3 -Gy -GS -GR -EHsc -MP -c
-DEFINES = -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_WIN32_WINNT=0x0500 -D__A_IDXSZ_TYPE__=unsigned -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS
+DEFINES = -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_WIN32_WINNT=0x0501 -D__A_IDXSZ_TYPE__=unsigned -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS
 LINKFLAGS = -nologo -debug -incremental:no -map -manifest:no -dynamicbase -nxcompat -largeaddressaware -dll
 RCFLAGS = -nologo
 
@@ -41,7 +41,7 @@ LINKFLAGS = $(LINKFLAGS) -libpath:lzo\lib -libpath:openssl\lib
 !include $(OUTDIR)\far.ini
 !endif
 
-OBJS = $(OUTDIR)\main.obj $(OUTDIR)\content.obj $(OUTDIR)\file_panel.obj $(OUTDIR)\ntfs_file.obj $(OUTDIR)\options.obj $(OUTDIR)\utils.obj $(OUTDIR)\volume.obj $(OUTDIR)\dlgapi.obj $(OUTDIR)\defragment.obj $(OUTDIR)\mftindex.obj $(OUTDIR)\filever.obj $(OUTDIR)\compress_files.obj
+OBJS = $(OUTDIR)\main.obj $(OUTDIR)\content.obj $(OUTDIR)\file_panel.obj $(OUTDIR)\ntfs_file.obj $(OUTDIR)\options.obj $(OUTDIR)\utils.obj $(OUTDIR)\volume.obj $(OUTDIR)\dlgapi.obj $(OUTDIR)\defragment.obj $(OUTDIR)\mftindex.obj $(OUTDIR)\filever.obj $(OUTDIR)\compress_files.obj $(OUTDIR)\volume_list.obj
 
 LIBS = lzo2_$(LIBSUFFIX).lib libeay$(LIBSUFFIX).lib advapi32.lib mpr.lib version.lib imagehlp.lib crypt32.lib wintrust.lib
 

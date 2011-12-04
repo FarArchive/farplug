@@ -1138,29 +1138,45 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
     /* display plugin menu */
     ObjectArray<UnicodeString> menu_items;
     menu_items += far_get_msg(MSG_MENU_METADATA);
+    unsigned metadata_menu_id = menu_items.size() - 1;
     menu_items += far_get_msg(MSG_MENU_CONTENT);
+    unsigned content_menu_id = menu_items.size() - 1;
     menu_items += far_get_msg(active_panel == NULL ? MSG_MENU_PANEL_ON : MSG_MENU_PANEL_OFF);
+    unsigned toggle_panel_menu_id = menu_items.size() - 1;
     menu_items += far_get_msg(MSG_MENU_DEFRAGMENT);
+    unsigned defragment_menu_id = menu_items.size() - 1;
     menu_items += far_get_msg(MSG_MENU_FILE_VERSION);
+    unsigned version_menu_id = menu_items.size() - 1;
     menu_items += far_get_msg(MSG_MENU_COMPRESS_FILES);
-    if (active_panel) {
+    unsigned compress_files_menu_id = menu_items.size() - 1;
+    unsigned flat_mode_menu_id = -1;
+    unsigned mft_mode_menu_id = -1;
+    unsigned show_totals_menu_id = -1;
+    if (active_panel && active_panel->current_dir.size()) {
       menu_items += far_get_msg(active_panel->flat_mode ? MSG_MENU_FLAT_MODE_OFF : MSG_MENU_FLAT_MODE_ON);
+      flat_mode_menu_id = menu_items.size() - 1;
       menu_items += far_get_msg(active_panel->mft_mode ? MSG_MENU_MFT_MODE_OFF : MSG_MENU_MFT_MODE_ON);
-      if (active_panel->mft_mode) menu_items += far_get_msg(MSG_MENU_SHOW_TOTALS);
+      mft_mode_menu_id = menu_items.size() - 1;
+      if (active_panel->mft_mode) {
+        menu_items += far_get_msg(MSG_MENU_SHOW_TOTALS);
+        show_totals_menu_id = menu_items.size() - 1;
+      }
     }
     int item_idx = far_menu(c_main_menu_guid, far_get_msg(MSG_PLUGIN_NAME), menu_items, L"plugin_menu");
+    if (item_idx == -1)
+      BREAK;
 
-    if (item_idx == 0) {
+    if (item_idx == metadata_menu_id) {
       if (file_list_from_panel(file_list, active_panel != NULL)) {
         plugin_show_metadata(file_list);
       }
     }
-    else if (item_idx == 1) {
+    else if (item_idx == content_menu_id) {
       if (file_list_from_panel(file_list, active_panel != NULL)) {
         plugin_process_contents(file_list);
       }
     }
-    else if (item_idx == 2) {
+    else if (item_idx == toggle_panel_menu_id) {
       if (active_panel == NULL) {
         handle = FilePanel::open();
       }
@@ -1168,7 +1184,7 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
         active_panel->close();
       }
     }
-    else if (item_idx == 3) {
+    else if (item_idx == defragment_menu_id) {
       if (file_list_from_panel(file_list, active_panel != NULL)) {
         Log log;
         defragment(file_list, log);
@@ -1179,12 +1195,12 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
         far_control_int(PANEL_PASSIVE, FCTL_UPDATEPANEL, 1);
       }
     }
-    else if (item_idx == 4) {
+    else if (item_idx == version_menu_id) {
       if (file_list_from_panel(file_list, active_panel != NULL)) {
         plugin_show_file_version(file_list[0]);
       }
     }
-    else if (item_idx == 5) {
+    else if (item_idx == compress_files_menu_id) {
       if (file_list_from_panel(file_list, active_panel != NULL)) {
         if (show_compress_files_dialog(g_compress_files_params)) {
           store_plugin_options();
@@ -1199,22 +1215,23 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
         }
       }
     }
-    else if (item_idx == 6) {
+    else if (item_idx == flat_mode_menu_id) {
       active_panel->flat_mode = !active_panel->flat_mode;
       far_control_int(active_panel, FCTL_UPDATEPANEL, 1);
     }
-    else if (item_idx == 7) {
+    else if (item_idx == mft_mode_menu_id) {
       active_panel->toggle_mft_mode();
       far_control_int(active_panel, FCTL_UPDATEPANEL, 1);
     }
-    else if (item_idx == 8) {
+    else if (item_idx == show_totals_menu_id) {
       if (file_list_from_panel(file_list, true)) {
         FilePanel::Totals totals = active_panel->mft_get_totals(file_list);
         UnicodeString msg;
         msg.add(far_get_msg(MSG_SHOW_TOTALS_TITLE)).add(L"\n");
         msg.add_fmt(far_get_msg(MSG_SHOW_TOTALS_DATA_SIZE).data(), &format_data_size(totals.data_size, size_suffixes), totals.data_size).add(L"\n");
         msg.add_fmt(far_get_msg(MSG_SHOW_TOTALS_DISK_SIZE).data(), &format_data_size(totals.disk_size, size_suffixes), totals.disk_size).add(L"\n");
-        msg.add_fmt(far_get_msg(MSG_SHOW_TOTALS_FRAGMENTS).data(), totals.fragment_cnt, totals.fragment_cnt / (totals.file_cnt + totals.dir_cnt)).add(L"\n");
+        if (totals.file_cnt + totals.dir_cnt != 0)
+          msg.add_fmt(far_get_msg(MSG_SHOW_TOTALS_FRAGMENTS).data(), totals.fragment_cnt, totals.fragment_cnt / (totals.file_cnt + totals.dir_cnt)).add(L"\n");
         msg.add_fmt(far_get_msg(MSG_SHOW_TOTALS_FILES).data(), totals.file_cnt, totals.hl_cnt, totals.file_rp_cnt).add(L"\n");
         msg.add_fmt(far_get_msg(MSG_SHOW_TOTALS_DIRS).data(), totals.dir_cnt, totals.dir_rp_cnt).add(L"\n");
         msg.add(far_get_msg(MSG_BUTTON_OK));

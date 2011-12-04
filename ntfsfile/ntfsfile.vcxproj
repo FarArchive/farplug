@@ -24,6 +24,7 @@
     <ClCompile Include="options.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="volume.cpp" />
+    <ClCompile Include="volume_list.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="compress_files.h" />
@@ -82,7 +83,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <NMakeOutput>
     </NMakeOutput>
-    <NMakePreprocessorDefinitions>WIN32;_DEBUG;DEBUG;WIN32_LEAN_AND_MEAN;_WIN32_WINNT=0x0500;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_NO_WARNINGS;_CRT_NON_CONFORMING_SWPRINTFS;__A_IDXSZ_TYPE__=unsigned;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;DEBUG;WIN32_LEAN_AND_MEAN;_WIN32_WINNT=0x0501;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_NO_WARNINGS;_CRT_NON_CONFORMING_SWPRINTFS;__A_IDXSZ_TYPE__=unsigned;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeBuildCommandLine>nmake -nologo</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>nmake -nologo clean</NMakeCleanCommandLine>
     <NMakeIncludeSearchPath>farsdk;..;$(OutDir);lzo\include;openssl\include</NMakeIncludeSearchPath>

@@ -45,7 +45,6 @@ private:
     bool ntfs_attr;
     bool resident;
   };
-  UnicodeString current_dir;
   NtfsVolume volume;
   ObjectArray<PluginItemList> file_lists;
   PanelMode panel_mode;
@@ -61,6 +60,7 @@ private:
   static Array<FilePanel*> g_file_panels;
   void parse_column_spec(const UnicodeString& src_col_types, const UnicodeString& src_col_widths, UnicodeString& col_types, UnicodeString& col_widths, bool title);
   PluginItemList create_panel_items(const std::list<PanelItemData>& pid_list, bool search_mode);
+  PluginItemList create_volume_items();
   void scan_dir(const UnicodeString& root_path, const UnicodeString& rel_path, std::list<PanelItemData>& pid_list, FileListProgress& progress);
   void sort_file_list(std::list<PanelItemData>& pid_list);
   struct FileRecord {
@@ -107,17 +107,16 @@ private:
   void store_mft_index();
   void load_mft_index();
   UnicodeString get_mft_index_cache_name();
+  void open_volume(const UnicodeString& dir);
   FilePanel(): usn_journal_id(0), is_journal_created(false) {}
 public:
+  UnicodeString current_dir;
   bool flat_mode;
   bool mft_mode;
   static FilePanel* open();
   void apply_saved_state();
   void close();
   void on_close();
-  UnicodeString get_current_dir() const {
-    return current_dir;
-  }
   static FilePanel* FilePanel::get_active_panel();
   void new_file_list(PluginPanelItem*& panel_items, size_t& item_num, bool search_mode);
   void clear_file_list(void* file_list_ptr);

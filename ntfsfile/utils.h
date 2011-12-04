@@ -54,6 +54,8 @@ bool is_unc_path(const UnicodeString& path);
 UnicodeString long_path(const UnicodeString& path);
 UnicodeString add_trailing_slash(const UnicodeString& file_path);
 UnicodeString del_trailing_slash(const UnicodeString& file_path);
+wstring add_trailing_slash(const wstring& path);
+wstring del_trailing_slash(const wstring& path);
 int str_to_int(const UnicodeString& str);
 UnicodeString int_to_str(int val);
 UnicodeString center(const UnicodeString& str, unsigned width);
@@ -218,3 +220,9 @@ public:
 FindData get_find_data(const UnicodeString& path);
 FILETIME time_t_to_FILETIME(time_t t);
 void enable_lfh();
+
+template<typename T> void memzero(T& v) {
+  memset(&v, 0, sizeof(T));
+}
+
+#define NT_MAX_PATH 32768

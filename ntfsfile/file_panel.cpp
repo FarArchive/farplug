@@ -523,20 +523,26 @@ void FilePanel::sort_file_list(std::list<PanelItemData>& pid_list) {
 void FilePanel::new_file_list(PluginPanelItem*& panel_items, size_t& item_num, bool search_mode) {
   FileListProgress progress;
   std::list<PanelItemData> pid_list;
-  if (mft_mode) {
-    if (g_file_panel_mode.use_usn_journal && is_journal_used() && !search_mode) {
-      try {
-        update_mft_index_from_usn();
-      }
-      catch (...) {
-        create_mft_index();
-      }
-    }
-    mft_scan_dir(mft_find_path(current_dir), L"", pid_list, progress);
+  if (current_dir.size() == 0) {
+    file_lists += create_volume_items();
   }
-  else scan_dir(current_dir, L"", pid_list, progress);
-  if (!search_mode) sort_file_list(pid_list);
-  file_lists += create_panel_items(pid_list, search_mode);
+  else {
+    if (mft_mode) {
+      if (g_file_panel_mode.use_usn_journal && is_journal_used() && !search_mode) {
+        try {
+          update_mft_index_from_usn();
+        }
+        catch (...) {
+          create_mft_index();
+        }
+      }
+      mft_scan_dir(mft_find_path(current_dir), L"", pid_list, progress);
+    }
+    else
+      scan_dir(current_dir, L"", pid_list, progress);
+    if (!search_mode) sort_file_list(pid_list);
+    file_lists += create_panel_items(pid_list, search_mode);
+  }
   panel_items = (PluginPanelItem*) file_lists.last().data();
   item_num = file_lists.last().size();
 }
@@ -557,7 +563,10 @@ void FilePanel::change_directory(const UnicodeString& target_dir, bool search_mo
     new_cur_dir = extract_path_root(current_dir);
   }
   else if (target_dir == L"..") { // parent directory
-    new_cur_dir = extract_file_path(current_dir);
+    if (is_root_path(current_dir))
+      new_cur_dir.clear();
+    else
+      new_cur_dir = extract_file_path(current_dir);
   }
   else if (extract_path_root(target_dir).size() != 0) { // absolute path
     new_cur_dir = del_trailing_slash(target_dir);
@@ -565,26 +574,36 @@ void FilePanel::change_directory(const UnicodeString& target_dir, bool search_mo
   else { // subdirectory name
     new_cur_dir = add_trailing_slash(current_dir) + target_dir;
   }
-  if (new_cur_dir.equal(new_cur_dir.size() - 1, L':')) new_cur_dir = add_trailing_slash(new_cur_dir);
-  if (mft_mode) {
-    if (g_file_panel_mode.use_usn_journal &&  is_journal_used() && !search_mode) {
-      try {
-        update_mft_index_from_usn();
-      }
-      catch (...) {
-        create_mft_index();
-      }
-    }
-    mft_find_path(new_cur_dir);
-    if (!search_mode) SetCurrentDirectoryW(new_cur_dir.data());
+  if (new_cur_dir.size() == 0) {
+    invalidate_mft_index();
+    delete_usn_journal();
   }
   else {
-    WIN32_FIND_DATAW find_data;
-    HANDLE h_find = FindFirstFileW(long_path(add_trailing_slash(new_cur_dir) + L"*").data(), &find_data);
-    CHECK_SYS(h_find != INVALID_HANDLE_VALUE);
-    FindClose(h_find);
-    volume.open(extract_path_root(get_real_path(new_cur_dir)));
-    SetCurrentDirectoryW(new_cur_dir.data());
+    if (is_root_path(new_cur_dir))
+      new_cur_dir = add_trailing_slash(new_cur_dir);
+    if (mft_mode) {
+      if (current_dir.size() == 0) {
+        open_volume(new_cur_dir);
+      }
+      if (g_file_panel_mode.use_usn_journal && is_journal_used() && !search_mode) {
+        try {
+          update_mft_index_from_usn();
+        }
+        catch (...) {
+          create_mft_index();
+        }
+      }
+      mft_find_path(new_cur_dir);
+      if (!search_mode) SetCurrentDirectoryW(new_cur_dir.data());
+    }
+    else {
+      WIN32_FIND_DATAW find_data;
+      HANDLE h_find = FindFirstFileW(long_path(add_trailing_slash(new_cur_dir) + L"*").data(), &find_data);
+      CHECK_SYS(h_find != INVALID_HANDLE_VALUE);
+      FindClose(h_find);
+      volume.open(extract_path_root(get_real_path(new_cur_dir)));
+      SetCurrentDirectoryW(new_cur_dir.data());
+    }
   }
   current_dir = new_cur_dir;
   if (g_file_panel_mode.flat_mode_auto_off) flat_mode = false;
@@ -611,15 +630,21 @@ void FilePanel::fill_plugin_info(OpenPanelInfo* info) {
 
   col_indices.clear();
   col_sizes.clear();
-  parse_column_spec(g_file_panel_mode.col_types, g_file_panel_mode.col_widths, col_types, col_widths, true);
-  parse_column_spec(g_file_panel_mode.status_col_types, g_file_panel_mode.status_col_widths, status_col_types, status_col_widths, false);
-  memset(&panel_mode, 0, sizeof(panel_mode));
+  memzero(panel_mode);
   panel_mode.StructSize = sizeof(PanelMode);
-  panel_mode.ColumnTypes = const_cast<wchar_t*>(col_types.data());
-  panel_mode.ColumnWidths = const_cast<wchar_t*>(col_widths.data());
-  panel_mode.ColumnTitles = const_cast<wchar_t**>(col_titles.data());
-  panel_mode.StatusColumnTypes = const_cast<wchar_t*>(status_col_types.data());
-  panel_mode.StatusColumnWidths = const_cast<wchar_t*>(status_col_widths.data());
+  if (current_dir.size()) {
+    parse_column_spec(g_file_panel_mode.col_types, g_file_panel_mode.col_widths, col_types, col_widths, true);
+    parse_column_spec(g_file_panel_mode.status_col_types, g_file_panel_mode.status_col_widths, status_col_types, status_col_widths, false);
+    panel_mode.ColumnTypes = const_cast<wchar_t*>(col_types.data());
+    panel_mode.ColumnWidths = const_cast<wchar_t*>(col_widths.data());
+    panel_mode.ColumnTitles = const_cast<wchar_t**>(col_titles.data());
+    panel_mode.StatusColumnTypes = const_cast<wchar_t*>(status_col_types.data());
+    panel_mode.StatusColumnWidths = const_cast<wchar_t*>(status_col_widths.data());
+  }
+  else {
+    panel_mode.ColumnTypes = L"N,C0,C1";
+    panel_mode.ColumnWidths = const_cast<wchar_t*>(col_widths.data());
+  }
   panel_mode.Flags = g_file_panel_mode.wide ? PMFLAGS_FULLSCREEN : 0;
   info->PanelModesArray = &panel_mode;
   info->PanelModesNumber = 1;
