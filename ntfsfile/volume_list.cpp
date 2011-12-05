@@ -97,24 +97,27 @@ list<wstring> get_volume_mount_points(const wstring& volume_guid_path) {
   return result;
 }
 
-wstring get_dos_device_path(const wstring& volume_guid_path) {
+bool get_device_path(const wstring& volume_guid_path, wstring& volume_dev_path) {
   const wstring c_prefix(L"\\\\?\\");
-  if (volume_guid_path.size() < c_prefix.size() || volume_guid_path.substr(0, c_prefix.size()) != c_prefix) {
-    FAIL(SystemError(ERROR_BAD_PATHNAME));
-  }
+  if (volume_guid_path.size() < c_prefix.size() || volume_guid_path.substr(0, c_prefix.size()) != c_prefix)
+    return false;
   unsigned buf_size = MAX_PATH;
   unique_ptr<wchar_t[]> buffer(new wchar_t[buf_size]);
   SetLastError(NO_ERROR);
   DWORD len = QueryDosDeviceW(del_trailing_slash(volume_guid_path).substr(4).c_str(), buffer.get(), buf_size);
-  CHECK_SYS(len && GetLastError() == NO_ERROR);
-  return buffer.get();
+  if (len == 0 || GetLastError() != NO_ERROR)
+    return false;
+  volume_dev_path.assign(buffer.get());
+  return true;
 }
 
-wstring get_volume_guid_path(const wstring& volume_mount_point) {
+bool get_volume_guid_path(const wstring& volume_mount_point, wstring& volume_guid_path) {
   unsigned buf_size = MAX_PATH;
   unique_ptr<wchar_t[]> buffer(new wchar_t[buf_size]);
-  CHECK_SYS(::GetVolumeNameForVolumeMountPointW(add_trailing_slash(volume_mount_point).c_str(), buffer.get(), buf_size));
-  return buffer.get();
+  if (!::GetVolumeNameForVolumeMountPointW(add_trailing_slash(volume_mount_point).c_str(), buffer.get(), buf_size))
+    return false;
+  volume_guid_path.assign(buffer.get());
+  return true;
 }
 
 struct VolumeItem {
@@ -130,8 +133,9 @@ list<VolumeItem> enum_volumes() {
   map<wstring, wstring> vol_guid_to_drive_map;
   while (drive_enum.next()) {
     wstring drive = drive_enum.get_drive();
-    wstring vol_guid_path = get_volume_guid_path(drive);
-    vol_guid_to_drive_map[vol_guid_path] = drive;
+    wstring vol_guid_path;
+    if (get_volume_guid_path(drive, vol_guid_path))
+      vol_guid_to_drive_map[vol_guid_path] = drive;
   }
 
   VolumeEnum vol_enum;
@@ -143,7 +147,7 @@ list<VolumeItem> enum_volumes() {
       vol_item.drive_path = vol_iter->second;
     }
 
-    NOFAIL(vol_item.dev_path = get_dos_device_path(vol_item.guid_path));
+    get_device_path(vol_item.guid_path, vol_item.dev_path);
 
     vol_item.mount_points = get_volume_mount_points(vol_item.guid_path);
     auto mp_iter = vol_item.mount_points.begin();
@@ -201,6 +205,8 @@ PluginItemList FilePanel::create_volume_items() {
     pi.CustomColumnNumber = pi_list.col_data.last().size();
     pi_list += pi;
   }
+  if (col_N_width < 7)
+    col_N_width = 7;
   col_widths.copy_fmt(L"%u,%u,%u", col_N_width, col_C0_width, col_C1_width);
   return pi_list;
 }
