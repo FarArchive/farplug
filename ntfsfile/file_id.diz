@@ -19,7 +19,7 @@ FAR Manager plugin
 
 Системные требования:
   - Far Manager <(FAR_VER_MAJOR)>.<(FAR_VER_MINOR)>.<(FAR_VER_BUILD)>
-  - Windows 2000+
+  - Windows XP SP2
 
 Новые версии: <(UPDATE_URL)>
 Обсуждение: <(SUPPORT_URL)>
@@ -44,7 +44,7 @@ This plugin provides various information about files on NTFS file system. Featur
 
 System requirements:
   - Far Manager <(FAR_VER_MAJOR)>.<(FAR_VER_MINOR)>.<(FAR_VER_BUILD)>
-  - Windows 2000+
+  - Windows XP SP2
 
 New versions: <(UPDATE_URL)>
 Discussion: <(SUPPORT_URL)>

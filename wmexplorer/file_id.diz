@@ -3,7 +3,7 @@ FAR Manager plugin
 
 System requirements:
 - Far Manager <(FAR_VER_MAJOR)>.<(FAR_VER_MINOR)>.<(FAR_VER_BUILD)>
-- Windows 2000+
+- Windows XP SP2
 - ActiveSync 4.x / WMDC 6.1
 
 ---------------------------------------------------------------
