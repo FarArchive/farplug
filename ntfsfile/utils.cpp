@@ -506,12 +506,24 @@ int far_control_ptr(HANDLE h_panel, FILE_CONTROL_COMMANDS command, const void* p
   return g_far.PanelControl(h_panel, command, 0, const_cast<void*>(param));
 }
 
-UnicodeString far_get_panel_dir(HANDLE h_panel, const PanelInfo& pi) {
-  UnicodeString cur_dir;
-  unsigned cur_dir_size = g_far.PanelControl(h_panel, FCTL_GETPANELDIR, 0, 0) - 1;
-  g_far.PanelControl(h_panel, FCTL_GETPANELDIR, cur_dir_size + 1, cur_dir.buf(cur_dir_size));
-  cur_dir.set_size(cur_dir_size);
-  return cur_dir;
+UnicodeString far_get_panel_dir(HANDLE h_panel) {
+  unsigned buf_size = 512;
+  Array<unsigned char> buffer;
+  unsigned size = g_far.PanelControl(h_panel, FCTL_GETPANELDIRECTORY, buf_size, buffer.buf(buf_size));
+  if (size > buf_size) {
+    buf_size = size;
+    size = g_far.PanelControl(h_panel, FCTL_GETPANELDIRECTORY, buf_size, buffer.buf(buf_size));
+  }
+  CHECK(size >= sizeof(FarPanelDirectory) && size <= buf_size);
+  return reinterpret_cast<FarPanelDirectory*>(buffer.buf())->Name;
+}
+
+bool far_set_panel_dir(HANDLE h_panel, const UnicodeString& dir) {
+  FarPanelDirectory fpd;
+  memzero(fpd);
+  fpd.StructSize = sizeof(FarPanelDirectory);
+  fpd.Name = dir.data();
+  return g_far.PanelControl(h_panel, FCTL_SETPANELDIRECTORY, 0, &fpd) != 0;
 }
 
 UnicodeString far_get_full_path(const UnicodeString& file_name) {
@@ -523,7 +535,7 @@ UnicodeString far_get_full_path(const UnicodeString& file_name) {
   return full_file_name;
 }
 
-PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi) {
+PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index) {
   static Array<unsigned char> ppi;
   unsigned size = g_far.PanelControl(h_panel, FCTL_GETPANELITEM, index, nullptr);
   FarGetPluginPanelItem gpi;
@@ -534,7 +546,7 @@ PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& 
   return reinterpret_cast<PluginPanelItem*>(ppi.buf());
 }
 
-PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi) {
+PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index) {
   static Array<unsigned char> ppi;
   unsigned size = g_far.PanelControl(h_panel, FCTL_GETSELECTEDPANELITEM, index, nullptr);
   FarGetPluginPanelItem gpi;

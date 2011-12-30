@@ -63,7 +63,7 @@ void NtfsVolume::open(const UnicodeString& volume_name) {
     name = volume_name;
     synced = false;
 
-    CHECK(!is_unc_path(name), L"Network shares are not supported");
+    CHECK_MSG(!is_unc_path(name), L"Network shares are not supported");
 
     /* get volume information */
     wchar_t vlm_label[MAX_PATH];
@@ -72,7 +72,7 @@ void NtfsVolume::open(const UnicodeString& volume_name) {
     wchar_t vlm_fs[MAX_PATH];
     CHECK_SYS(GetVolumeInformationW(add_trailing_slash(name).data(), vlm_label, ARRAYSIZE(vlm_label), &serial, &vlm_comp_len, &flags, vlm_fs, ARRAYSIZE(vlm_fs)));
 
-    CHECK(_wcsicmp(vlm_fs, L"NTFS") == 0, L"Only NTFS volumes are supported");
+    CHECK_MSG(_wcsicmp(vlm_fs, L"NTFS") == 0, L"Only NTFS volumes are supported");
 
     /* allocate volume handle */
     handle = CreateFileW(get_volume_path(name).data(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);

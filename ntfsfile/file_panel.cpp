@@ -25,22 +25,22 @@ PanelState save_state(HANDLE h_panel) {
   PanelState state;
   PanelInfo pi;
   if (far_control_ptr(h_panel, FCTL_GETPANELINFO, &pi)) {
-    state.directory = far_get_panel_dir(h_panel, pi);
+    state.directory = far_get_panel_dir(h_panel);
     if (pi.CurrentItem < pi.ItemsNumber) {
-      PluginPanelItem* ppi = far_get_panel_item(h_panel, pi.CurrentItem, pi);
+      PluginPanelItem* ppi = far_get_panel_item(h_panel, pi.CurrentItem);
       if (ppi) {
         state.current_file = ppi->FileName;
       }
     }
     if (pi.TopPanelItem < pi.ItemsNumber) {
-      PluginPanelItem* ppi = far_get_panel_item(h_panel, pi.TopPanelItem, pi);
+      PluginPanelItem* ppi = far_get_panel_item(h_panel, pi.TopPanelItem);
       if (ppi) {
         state.top_panel_file = ppi->FileName;
       }
     }
     state.selected_files.extend(pi.SelectedItemsNumber);
     for (size_t i = 0; i < pi.SelectedItemsNumber; i++) {
-      PluginPanelItem* ppi = far_get_selected_panel_item(h_panel, i, pi);
+      PluginPanelItem* ppi = far_get_selected_panel_item(h_panel, i);
       if (ppi) {
         if (ppi->Flags & PPIF_SELECTED) state.selected_files += ppi->FileName;
       }
@@ -57,7 +57,7 @@ void restore_state(HANDLE h_panel, const PanelState& state) {
       g_far.PanelControl(h_panel, FCTL_BEGINSELECTION, 0, nullptr);
       CLEAN(HANDLE, h_panel, g_far.PanelControl(h_panel, FCTL_ENDSELECTION, 0, nullptr));
       for (size_t i = 0; i < pi.ItemsNumber; i++) {
-        PluginPanelItem* ppi = far_get_panel_item(h_panel, i, pi);
+        PluginPanelItem* ppi = far_get_panel_item(h_panel, i);
         if (ppi) {
           if (state.selected_files.bsearch(ppi->FileName) != -1) {
             g_far.PanelControl(h_panel, FCTL_SETSELECTION, i, reinterpret_cast<void*>(true));
@@ -70,7 +70,7 @@ void restore_state(HANDLE h_panel, const PanelState& state) {
     PanelRedrawInfo pri;
     memset(&pri, 0, sizeof(pri));
     for (size_t i = 0; i < pi.ItemsNumber; i++) {
-      PluginPanelItem* ppi = far_get_panel_item(h_panel, i, pi);
+      PluginPanelItem* ppi = far_get_panel_item(h_panel, i);
       if (ppi) {
         if (state.current_file == ppi->FileName) pri.CurrentItem = i;
         if (state.top_panel_file == ppi->FileName) pri.TopPanelItem = i;
@@ -114,7 +114,7 @@ void FilePanel::apply_saved_state() {
 
 void FilePanel::close() {
   PanelState state = save_state(this);
-  far_control_ptr(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, state.directory.data());
+  far_set_panel_dir(INVALID_HANDLE_VALUE, state.directory);
   restore_state(INVALID_HANDLE_VALUE, state);
 }
 
@@ -199,7 +199,7 @@ PluginItemList FilePanel::create_panel_items(const std::list<PanelItemData>& pid
     pi.LastAccessTime = pid->last_access_time;
     pi.LastWriteTime = pid->last_write_time;
     pi.FileSize = pid->data_size;
-    pi.PackSize = pid->disk_size;
+    pi.AllocationSize = pid->disk_size;
     pi.NumberOfLinks = pid->hard_link_cnt;
     // custom columns
     col_data.clear();

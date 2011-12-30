@@ -129,12 +129,10 @@ void FileAnalyzer::display_file_info(bool partial) {
   if (h_dlg != NULL) g_far.SendDlgMessage(h_dlg, DM_ENABLEREDRAW, FALSE, nullptr);
 
   /* FAR window size */
-  HANDLE con = GetStdHandle(STD_OUTPUT_HANDLE);
-  if (con == INVALID_HANDLE_VALUE) FAIL(SystemError());
-  CONSOLE_SCREEN_BUFFER_INFO con_info;
-  if (GetConsoleScreenBufferInfo(con, &con_info) == 0) FAIL(SystemError());
-  unsigned con_width = con_info.srWindow.Right - con_info.srWindow.Left + 1;
-  unsigned con_height = con_info.srWindow.Bottom - con_info.srWindow.Top + 1;
+  SMALL_RECT console_rect;
+  CHECK(g_far.AdvControl(&c_plugin_guid, ACTL_GETFARRECT, 0, &console_rect));
+  unsigned con_width = console_rect.Right - console_rect.Left + 1;
+  unsigned con_height = console_rect.Bottom - console_rect.Top + 1;
 
   /* fixed width columns */
   const unsigned c_col_type_len = 21;
@@ -823,13 +821,13 @@ bool panel_go_to_file(const UnicodeString& file_name) {
   UnicodeString file = dir.slice(pos + 1, dir.size() - pos - 1);
   dir.remove(pos, dir.size() - pos);
   if (dir.size() == 2) dir += '\\';
-  if (!far_control_ptr(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, dir.data())) return false;
+  if (!far_set_panel_dir(INVALID_HANDLE_VALUE, dir)) return false;
   PanelInfo panel_info;
   if (!far_control_ptr(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, &panel_info)) return false;
   PanelRedrawInfo panel_ri;
   size_t i;
   for (i = 0; i < panel_info.ItemsNumber; i++) {
-    PluginPanelItem* ppi = far_get_panel_item(INVALID_HANDLE_VALUE, i, panel_info);
+    PluginPanelItem* ppi = far_get_panel_item(INVALID_HANDLE_VALUE, i);
     if (!ppi) return false;
     if (file == ppi->FileName) {
       panel_ri.CurrentItem = i;
@@ -1019,19 +1017,19 @@ bool file_list_from_panel(ObjectArray<UnicodeString>& file_list, bool own_panel)
   unsigned sel_file_cnt = 0;
   if (file_panel) {
     for (size_t i = 0; i < p_info.SelectedItemsNumber; i++) {
-      PluginPanelItem* ppi = far_get_selected_panel_item(INVALID_HANDLE_VALUE, i, p_info);
+      PluginPanelItem* ppi = far_get_selected_panel_item(INVALID_HANDLE_VALUE, i);
       if (!ppi) return false;
       if ((ppi->Flags & PPIF_SELECTED) == PPIF_SELECTED) sel_file_cnt++;
     }
   }
 
   file_list.clear();
-  UnicodeString cur_dir = far_get_panel_dir(INVALID_HANDLE_VALUE, p_info);
+  UnicodeString cur_dir = far_get_panel_dir(INVALID_HANDLE_VALUE);
   if (sel_file_cnt != 0) {
     file_list.extend(sel_file_cnt);
     cur_dir = add_trailing_slash(cur_dir);
     for (size_t i = 0; i < p_info.SelectedItemsNumber; i++) {
-      PluginPanelItem* ppi = far_get_selected_panel_item(INVALID_HANDLE_VALUE, i, p_info);
+      PluginPanelItem* ppi = far_get_selected_panel_item(INVALID_HANDLE_VALUE, i);
       if (!ppi) return false;
       if ((ppi->Flags & PPIF_SELECTED) == PPIF_SELECTED) {
         file_list += get_unicode_file_path(*ppi, cur_dir, own_panel);
@@ -1041,7 +1039,7 @@ bool file_list_from_panel(ObjectArray<UnicodeString>& file_list, bool own_panel)
   else {
     if (file_panel) {
       if ((p_info.CurrentItem < 0) || (p_info.CurrentItem >= p_info.ItemsNumber)) return false;
-      PluginPanelItem* ppi = far_get_panel_item(INVALID_HANDLE_VALUE, p_info.CurrentItem, p_info);
+      PluginPanelItem* ppi = far_get_panel_item(INVALID_HANDLE_VALUE, p_info.CurrentItem);
       if (!ppi) return false;
       if (wcscmp(ppi->FileName, L"..") == 0) { // current directory selected
         if (cur_dir.size() == 0) return false; // directory is invalid (plugin panel)

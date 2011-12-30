@@ -99,10 +99,11 @@ public:
 
 int far_control_int(HANDLE h_panel, FILE_CONTROL_COMMANDS command, int param);
 int far_control_ptr(HANDLE h_panel, FILE_CONTROL_COMMANDS command, const void* param);
-UnicodeString far_get_panel_dir(HANDLE h_panel, const PanelInfo& pi);
+UnicodeString far_get_panel_dir(HANDLE h_panel);
+bool far_set_panel_dir(HANDLE h_panel, const UnicodeString& dir);
 UnicodeString far_get_full_path(const UnicodeString& file_name);
-PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
-PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
+PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index);
+PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index);
 void far_set_progress_state(TBPFLAG state);
 void far_set_progress_value(unsigned __int64 completed, unsigned __int64 total);
 

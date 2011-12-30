@@ -643,7 +643,7 @@ void process_file_content(const UnicodeString& file_name, const ContentOptions& 
       if (sd.num_th != 0) {
         DWORD w = WaitForMultipleObjects(h.size(), h.data(), FALSE, INFINITE);
         CHECK_SYS(w != WAIT_FAILED);
-        CHECK(w == WAIT_OBJECT_0, L"Unexpected thread death");
+        CHECK_MSG(w == WAIT_OBJECT_0, L"Unexpected thread death");
       }
 
       // find buffer ready for I/O
@@ -1037,7 +1037,7 @@ void compress_file(const UnicodeString& file_name, CompressionState& st, Compres
       if (st.num_th != 0) {
         DWORD w = WaitForMultipleObjects(h.size(), h.data(), FALSE, INFINITE);
         CHECK_SYS(w != WAIT_FAILED);
-        CHECK(w == WAIT_OBJECT_0, L"Unexpected thread death");
+        CHECK_MSG(w == WAIT_OBJECT_0, L"Unexpected thread death");
       }
 
       // find buffer ready for I/O

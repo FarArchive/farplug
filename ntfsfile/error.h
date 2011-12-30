@@ -15,7 +15,8 @@
 
 #define NOFAIL(code) try { code; } catch (...) { }
 
-#define CHECK(code, msg) { if (!(code)) FAIL(MsgError(msg)); }
+#define CHECK(code) { if (!(code)) FAIL(MsgError(L#code)); }
+#define CHECK_MSG(code, msg) { if (!(code)) FAIL(MsgError(msg)); }
 #define CHECK_STD(code) { if (!(code)) FAIL(StdIoError()); }
 #define CHECK_SYS(code) { if (!(code)) FAIL(SystemError()); }
 #define CHECK_ADVSYS(code) { DWORD __ret; if ((__ret = (code)) != ERROR_SUCCESS) FAIL(SystemError(__ret)); }

@@ -42,13 +42,11 @@ const wchar_t* far_msg_ptr(int id) {
 
 // optimum client area width of message dialogs
 unsigned get_msg_width() {
-  HANDLE con = GetStdHandle(STD_OUTPUT_HANDLE);
-  if (con != INVALID_HANDLE_VALUE) {
-    CONSOLE_SCREEN_BUFFER_INFO con_info;
-    if (GetConsoleScreenBufferInfo(con, &con_info) != 0) {
-      unsigned con_width = con_info.srWindow.Right - con_info.srWindow.Left + 1;
-      if (con_width >= 80) return con_width - 20;
-    }
+  SMALL_RECT console_rect;
+  if (g_far.AdvControl(&c_plugin_guid, ACTL_GETFARRECT, 0, &console_rect)) {
+    unsigned con_width = console_rect.Right - console_rect.Left + 1;
+    if (con_width >= 80)
+      return con_width - 20;
   }
   return 60;
 }
