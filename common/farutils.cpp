@@ -1,8 +1,8 @@
 #include "utils.hpp"
 #include "sysutils.hpp"
 #include "farutils.hpp"
-#include "msg.h"
 #include "guids.hpp"
+#include "msg.h"
 
 namespace Far {
 
@@ -27,14 +27,11 @@ wstring get_msg(int id) {
 }
 
 unsigned get_optimal_msg_width() {
-  HANDLE con = GetStdHandle(STD_OUTPUT_HANDLE);
-  if (con != INVALID_HANDLE_VALUE) {
-    CONSOLE_SCREEN_BUFFER_INFO con_info;
-    if (GetConsoleScreenBufferInfo(con, &con_info)) {
-      unsigned con_width = con_info.srWindow.Right - con_info.srWindow.Left + 1;
-      if (con_width >= 80)
-        return con_width - 20;
-    }
+  SMALL_RECT console_rect;
+  if (adv_control(ACTL_GETFARRECT, 0, &console_rect)) {
+    unsigned con_width = console_rect.Right - console_rect.Left + 1;
+    if (con_width >= 80)
+      return con_width - 20;
   }
   return 60;
 }
@@ -161,14 +158,16 @@ bool is_real_file_panel(const PanelInfo& panel_info) {
 }
 
 wstring get_panel_dir(HANDLE h_panel) {
-  Buffer<wchar_t> buf(MAX_PATH);
-  unsigned size = g_far.PanelControl(h_panel, FCTL_GETPANELDIR, static_cast<int>(buf.size()), buf.data());
-  if (size > buf.size()) {
-    buf.resize(size);
-    size = g_far.PanelControl(h_panel, FCTL_GETPANELDIR, static_cast<int>(buf.size()), buf.data());
+  unsigned buf_size = 512;
+  std::unique_ptr<unsigned char> buf(new unsigned char[buf_size]);
+  unsigned size = g_far.PanelControl(h_panel, FCTL_GETPANELDIRECTORY, buf_size, buf.get());
+  if (size > buf_size) {
+    buf_size = size;
+    buf.reset(new unsigned char[buf_size]);
+    size = g_far.PanelControl(h_panel, FCTL_GETPANELDIRECTORY, buf_size, buf.get());
   }
-  CHECK(size)
-  return wstring(buf.data(), size - 1);
+  CHECK(size >= sizeof(FarPanelDirectory) && size <= buf_size);
+  return reinterpret_cast<FarPanelDirectory*>(buf.get())->Name;
 }
 
 void get_panel_item(HANDLE h_panel, FILE_CONTROL_COMMANDS command, size_t index, Buffer<unsigned char>& buf) {
@@ -195,7 +194,7 @@ PanelItem get_panel_item(HANDLE h_panel, FILE_CONTROL_COMMANDS command, size_t i
   pi.last_access_time = panel_item->LastAccessTime;
   pi.last_write_time = panel_item->LastWriteTime;
   pi.file_size = panel_item->FileSize;
-  pi.pack_size = panel_item->PackSize;
+  pi.pack_size = panel_item->AllocationSize;
   pi.file_name = panel_item->FileName;
   pi.alt_file_name = panel_item->AlternateFileName;
   pi.user_data = panel_item->UserData;
@@ -729,13 +728,21 @@ bool get_color(PaletteColors color_id, FarColor& color) {
 }
 
 bool panel_go_to_dir(HANDLE h_panel, const wstring& dir) {
-  return g_far.PanelControl(h_panel, FCTL_SETPANELDIR, 0, const_cast<wchar_t*>(dir.c_str())) != 0;
+  FarPanelDirectory fpd;
+  memzero(fpd);
+  fpd.StructSize = sizeof(FarPanelDirectory);
+  fpd.Name = dir.c_str();
+  return g_far.PanelControl(h_panel, FCTL_SETPANELDIRECTORY, 0, &fpd) != 0;
 }
 
 // set current file on panel to file_path
 bool panel_go_to_file(HANDLE h_panel, const wstring& file_path) {
   wstring dir = extract_file_path(file_path);
-  if (!g_far.PanelControl(h_panel, FCTL_SETPANELDIR, 0, const_cast<wchar_t*>(dir.c_str())))
+  FarPanelDirectory fpd;
+  memzero(fpd);
+  fpd.StructSize = sizeof(FarPanelDirectory);
+  fpd.Name = dir.c_str();
+  if (!g_far.PanelControl(h_panel, FCTL_SETPANELDIRECTORY, 0, &fpd))
     return false;
   PanelInfo panel_info;
   if (!g_far.PanelControl(h_panel, FCTL_GETPANELINFO, 0, &panel_info))

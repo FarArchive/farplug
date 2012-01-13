@@ -17,14 +17,14 @@ namespace Update {
 const wchar_t* c_param_last_check_time = L"last_check_time";
 const wchar_t* c_param_last_check_version = L"last_check_version";
 #ifdef _M_IX86
-const wchar_t* c_upgrade_code = L"{67A59013-488F-4388-81F3-828A1DCEDA32}";
+const wchar_t* c_upgrade_code = L"{795A974D-CE83-476D-9C1F-FC59F8C60709}";
 const char* c_platform = "x86";
-const wchar_t* c_update_script = L"update2.php?p=32";
+const wchar_t* c_update_script = L"update3.php?p=32";
 #endif
 #ifdef _M_X64
-const wchar_t* c_upgrade_code = L"{83140F3F-1457-42EB-8053-233293664714}";
+const wchar_t* c_upgrade_code = L"{A37EC11A-94EE-41FC-B116-E6FF79545B70}";
 const char* c_platform = "x64";
-const wchar_t* c_update_script = L"update2.php?p=64";
+const wchar_t* c_update_script = L"update3.php?p=64";
 #endif
 const wchar_t* c_changelog_url = L"http://farmanager.com/svn/trunk/unicode_far/changelog";
 const unsigned c_exit_wait = 6;
@@ -318,8 +318,10 @@ void init() {
   CHECK(curr_time != -1);
   unsigned __int64 last_check_time;
   Far::Settings settings;
-  CHECK(settings.create() && settings.get(c_param_last_check_time, last_check_time));
-  if (curr_time < last_check_time + c_update_period)
+  CHECK(settings.create());
+  if (!settings.get(c_param_last_check_time, last_check_time))
+      last_check_time = 0;
+  if (fabs(static_cast<double>(curr_time) - last_check_time) < c_update_period)
     return;
   settings.set(c_param_last_check_time, curr_time);
 
