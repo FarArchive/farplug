@@ -288,7 +288,9 @@ private:
     UpdateInfo update_info = parse_update_info(ansi_to_unicode(update_url_text, CP_ACP));
     wstring last_check_version;
     Far::Settings settings;
-    if (settings.create() && settings.get(c_param_last_check_version, last_check_version))
+    CHECK(settings.create())
+    if (!settings.get(c_param_last_check_version, last_check_version))
+      last_check_version = L"0.0.0";
     if ((Far::compare_versions(update_info.version, current_version) > 0) && (Far::compare_versions(update_info.version, Far::string_to_version(last_check_version)) > 0)) {
       wostringstream st;
       st << msg_tray_version << L' ' << update_info.version.Major << L'.' << update_info.version.Minor << L'.' << update_info.version.Build << L'\n' << msg_tray_update;
