@@ -508,14 +508,17 @@ int far_control_ptr(HANDLE h_panel, FILE_CONTROL_COMMANDS command, const void* p
 
 UnicodeString far_get_panel_dir(HANDLE h_panel) {
   unsigned buf_size = 512;
-  Array<unsigned char> buffer;
-  unsigned size = g_far.PanelControl(h_panel, FCTL_GETPANELDIRECTORY, buf_size, buffer.buf(buf_size));
+  std::unique_ptr<unsigned char> buf(new unsigned char[buf_size]);
+  reinterpret_cast<FarPanelDirectory*>(buf.get())->StructSize = sizeof(FarPanelDirectory);
+  unsigned size = g_far.PanelControl(h_panel, FCTL_GETPANELDIRECTORY, buf_size, buf.get());
   if (size > buf_size) {
     buf_size = size;
-    size = g_far.PanelControl(h_panel, FCTL_GETPANELDIRECTORY, buf_size, buffer.buf(buf_size));
+    buf.reset(new unsigned char[buf_size]);
+    reinterpret_cast<FarPanelDirectory*>(buf.get())->StructSize = sizeof(FarPanelDirectory);
+    size = g_far.PanelControl(h_panel, FCTL_GETPANELDIRECTORY, buf_size, buf.get());
   }
   CHECK(size >= sizeof(FarPanelDirectory) && size <= buf_size);
-  return reinterpret_cast<FarPanelDirectory*>(buffer.buf())->Name;
+  return reinterpret_cast<FarPanelDirectory*>(buf.get())->Name;
 }
 
 bool far_set_panel_dir(HANDLE h_panel, const UnicodeString& dir) {

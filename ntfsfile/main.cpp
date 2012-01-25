@@ -822,7 +822,7 @@ bool panel_go_to_file(const UnicodeString& file_name) {
   dir.remove(pos, dir.size() - pos);
   if (dir.size() == 2) dir += '\\';
   if (!far_set_panel_dir(INVALID_HANDLE_VALUE, dir)) return false;
-  PanelInfo panel_info;
+  PanelInfo panel_info = { sizeof(PanelInfo) };
   if (!far_control_ptr(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, &panel_info)) return false;
   PanelRedrawInfo panel_ri;
   size_t i;
@@ -1008,7 +1008,7 @@ UnicodeString get_unicode_file_path(const PluginPanelItem& panel_item, const Uni
 // get list of the select files from panel and place it into global file list
 bool file_list_from_panel(ObjectArray<UnicodeString>& file_list, bool own_panel) {
   if (!far_control_int(INVALID_HANDLE_VALUE, FCTL_CHECKPANELSEXIST, 0)) return false;
-  PanelInfo p_info;
+  PanelInfo p_info = { sizeof(PanelInfo) };
   if (!far_control_ptr(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, &p_info)) return false;
   bool file_panel = (p_info.PanelType == PTYPE_FILEPANEL) && ((p_info.Flags & PFLAGS_REALNAMES) == PFLAGS_REALNAMES);
   bool tree_panel = (p_info.PanelType == PTYPE_TREEPANEL) && ((p_info.Flags & PFLAGS_REALNAMES) == PFLAGS_REALNAMES);

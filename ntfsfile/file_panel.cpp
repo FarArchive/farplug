@@ -23,7 +23,7 @@ Array<FilePanel*> FilePanel::g_file_panels;
 
 PanelState save_state(HANDLE h_panel) {
   PanelState state;
-  PanelInfo pi;
+  PanelInfo pi = { sizeof(PanelInfo) };
   if (far_control_ptr(h_panel, FCTL_GETPANELINFO, &pi)) {
     state.directory = far_get_panel_dir(h_panel);
     if (pi.CurrentItem < pi.ItemsNumber) {
@@ -51,9 +51,9 @@ PanelState save_state(HANDLE h_panel) {
 }
 
 void restore_state(HANDLE h_panel, const PanelState& state) {
-  PanelInfo pi;
-  if (state.selected_files.size()) {
-    if (far_control_ptr(h_panel, FCTL_GETPANELINFO, &pi)) {
+  PanelInfo pi = { sizeof(PanelInfo) };
+  if (far_control_ptr(h_panel, FCTL_GETPANELINFO, &pi)) {
+    if (state.selected_files.size()) {
       g_far.PanelControl(h_panel, FCTL_BEGINSELECTION, 0, nullptr);
       CLEAN(HANDLE, h_panel, g_far.PanelControl(h_panel, FCTL_ENDSELECTION, 0, nullptr));
       for (size_t i = 0; i < pi.ItemsNumber; i++) {
@@ -65,8 +65,6 @@ void restore_state(HANDLE h_panel, const PanelState& state) {
         }
       }
     }
-  }
-  if (far_control_ptr(h_panel, FCTL_GETPANELINFO, &pi)) {
     PanelRedrawInfo pri;
     memset(&pri, 0, sizeof(pri));
     for (size_t i = 0; i < pi.ItemsNumber; i++) {
@@ -127,7 +125,7 @@ void FilePanel::on_close() {
     }
   }
   delete_usn_journal();
-  PanelInfo pi;
+  PanelInfo pi = { sizeof(PanelInfo) };
   if (far_control_ptr(this, FCTL_GETPANELINFO, &pi)) {
     g_file_panel_mode.sort_mode = pi.SortMode;
     g_file_panel_mode.reverse_sort = pi.Flags & PFLAGS_REVERSESORTORDER ? 1 : 0;
@@ -141,7 +139,7 @@ void FilePanel::on_close() {
 
 FilePanel* FilePanel::get_active_panel() {
   for (unsigned i = 0; i < g_file_panels.size(); i++) {
-    PanelInfo pi;
+    PanelInfo pi = { sizeof(PanelInfo) };
     if (far_control_ptr(g_file_panels[i], FCTL_GETPANELINFO, &pi)) {
       if (pi.Flags & PFLAGS_FOCUS) {
         return g_file_panels[i];
