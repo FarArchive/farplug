@@ -863,7 +863,7 @@ void WINAPI GetPluginInfoW(PluginInfo* info) {
   static const wchar_t* plugin_menu[1];
 
   info->StructSize = sizeof(struct PluginInfo);
-  info->Flags = PF_FULLCMDLINE;
+  info->Flags = PF_FULLCMDLINE | PF_VIEWER;
   plugin_menu[0] = far_msg_ptr(MSG_PLUGIN_NAME);
   info->PluginMenu.Guids = &c_plugin_menu_guid;
   info->PluginMenu.Strings = plugin_menu;
@@ -1129,24 +1129,39 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
       else if (prefix == L"nfv") plugin_show_file_version(file_list[0]);
     }
   }
-  else { // OPEN_PLUGINSMENU
+  else { // OPEN_PLUGINSMENU or OPEN_VIEWER
+    bool from_viewer = info->OpenFrom == OPEN_VIEWER;
+
     // check if current panel belongs to our plugin
-    FilePanel* active_panel = FilePanel::get_active_panel();
+    FilePanel* active_panel = nullptr;
+    if (!from_viewer) {
+      active_panel = FilePanel::get_active_panel();
+    }
 
     /* display plugin menu */
     ObjectArray<UnicodeString> menu_items;
-    menu_items += far_get_msg(MSG_MENU_METADATA);
-    unsigned metadata_menu_id = menu_items.size() - 1;
+    unsigned metadata_menu_id = -1;
+    if (!from_viewer) {
+      menu_items += far_get_msg(MSG_MENU_METADATA);
+      metadata_menu_id = menu_items.size() - 1;
+    }
     menu_items += far_get_msg(MSG_MENU_CONTENT);
     unsigned content_menu_id = menu_items.size() - 1;
-    menu_items += far_get_msg(active_panel == NULL ? MSG_MENU_PANEL_ON : MSG_MENU_PANEL_OFF);
-    unsigned toggle_panel_menu_id = menu_items.size() - 1;
-    menu_items += far_get_msg(MSG_MENU_DEFRAGMENT);
-    unsigned defragment_menu_id = menu_items.size() - 1;
+    unsigned toggle_panel_menu_id = -1;
+    unsigned defragment_menu_id = -1;
+    if (!from_viewer) {
+      menu_items += far_get_msg(active_panel == NULL ? MSG_MENU_PANEL_ON : MSG_MENU_PANEL_OFF);
+      toggle_panel_menu_id = menu_items.size() - 1;
+      menu_items += far_get_msg(MSG_MENU_DEFRAGMENT);
+      defragment_menu_id = menu_items.size() - 1;
+    }
     menu_items += far_get_msg(MSG_MENU_FILE_VERSION);
     unsigned version_menu_id = menu_items.size() - 1;
-    menu_items += far_get_msg(MSG_MENU_COMPRESS_FILES);
-    unsigned compress_files_menu_id = menu_items.size() - 1;
+    unsigned compress_files_menu_id = -1;
+    if (!from_viewer) {
+      menu_items += far_get_msg(MSG_MENU_COMPRESS_FILES);
+      unsigned compress_files_menu_id = menu_items.size() - 1;
+    }
     unsigned flat_mode_menu_id = -1;
     unsigned mft_mode_menu_id = -1;
     unsigned show_totals_menu_id = -1;
@@ -1164,15 +1179,26 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
     if (item_idx == -1)
       BREAK;
 
+    if (item_idx == content_menu_id || item_idx == version_menu_id) {
+      if (from_viewer) {
+        ViewerInfo vi = { sizeof(ViewerInfo) };
+        if (!g_far.ViewerControl(-1, VCTL_GETINFO, 0, &vi))
+          return INVALID_HANDLE_VALUE;
+        file_list = vi.FileName;
+      }
+      else {
+        if (!file_list_from_panel(file_list, active_panel != NULL))
+          return INVALID_HANDLE_VALUE;
+      }
+    }
+
     if (item_idx == metadata_menu_id) {
       if (file_list_from_panel(file_list, active_panel != NULL)) {
         plugin_show_metadata(file_list);
       }
     }
     else if (item_idx == content_menu_id) {
-      if (file_list_from_panel(file_list, active_panel != NULL)) {
-        plugin_process_contents(file_list);
-      }
+      plugin_process_contents(file_list);
     }
     else if (item_idx == toggle_panel_menu_id) {
       if (active_panel == NULL) {
@@ -1194,9 +1220,7 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
       }
     }
     else if (item_idx == version_menu_id) {
-      if (file_list_from_panel(file_list, active_panel != NULL)) {
-        plugin_show_file_version(file_list[0]);
-      }
+      plugin_show_file_version(file_list[0]);
     }
     else if (item_idx == compress_files_menu_id) {
       if (file_list_from_panel(file_list, active_panel != NULL)) {
