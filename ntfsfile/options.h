@@ -8,6 +8,7 @@ struct ContentOptions {
   bool sha1;
   bool sha256;
   bool ed2k;
+  bool crc16;
   ContentOptions();
 };
 

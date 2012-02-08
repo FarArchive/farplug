@@ -11,6 +11,7 @@ struct ContentInfo {
   Array<u8> sha1;
   Array<u8> sha256;
   Array<u8> ed2k;
+  Array<u8> crc16;
 };
 
 struct CompressionStats {

@@ -100,6 +100,7 @@ content.settings.md5 = MD&5 hash
 content.settings.sha1 = SHA&1 hash
 content.settings.sha256 = SHA25&6 hash
 content.settings.ed2k = ED&2K hash
+content.settings.crc16 = CRC16 checksum
 content.settings.set_all = &Set all
 content.settings.reset_all = &Reset all
 
@@ -113,6 +114,7 @@ content.result.md5 = MD&5 hash:
 content.result.sha1 = SHA&1 hash:
 content.result.sha256 = SHA25&6 hash:
 content.result.ed2k = ED&2K hash:
+content.result.crc16 = CRC16 checksum:
 content.result.verify = &Verify hash:
 content.result.result = Result:
 content.result.close = Close

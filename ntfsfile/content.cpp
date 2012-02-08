@@ -8,6 +8,8 @@
 #include "dlgapi.h"
 #include "content.h"
 
+#include "crc16.cpp"
+
 extern struct PluginStartupInfo g_far;
 extern Array<FarColor> g_colors;
 
@@ -45,6 +47,7 @@ struct OptionsDlgData {
   int sha1_ctrl_id;
   int sha256_ctrl_id;
   int ed2k_ctrl_id;
+  int crc16_ctrl_id;
   int set_all_ctrl_id;
   int reset_all_ctrl_id;
   int ok_ctrl_id;
@@ -66,6 +69,7 @@ INT_PTR WINAPI options_dlg_proc(HANDLE h_dlg, int msg, int param1, void* param2)
         dlg->set_check(dlg_data->sha1_ctrl_id, true);
         dlg->set_check(dlg_data->sha256_ctrl_id, true);
         dlg->set_check(dlg_data->ed2k_ctrl_id, true);
+        dlg->set_check(dlg_data->crc16_ctrl_id, true);
         dlg->set_focus(dlg_data->ok_ctrl_id);
         return TRUE;
       }
@@ -76,6 +80,7 @@ INT_PTR WINAPI options_dlg_proc(HANDLE h_dlg, int msg, int param1, void* param2)
         dlg->set_check(dlg_data->sha1_ctrl_id, false);
         dlg->set_check(dlg_data->sha256_ctrl_id, false);
         dlg->set_check(dlg_data->ed2k_ctrl_id, false);
+        dlg->set_check(dlg_data->crc16_ctrl_id, false);
         dlg->set_focus(dlg_data->ok_ctrl_id);
         return TRUE;
       }
@@ -88,6 +93,7 @@ INT_PTR WINAPI options_dlg_proc(HANDLE h_dlg, int msg, int param1, void* param2)
       options->sha1 = dlg->get_check(dlg_data->sha1_ctrl_id);
       options->sha256 = dlg->get_check(dlg_data->sha256_ctrl_id);
       options->ed2k = dlg->get_check(dlg_data->ed2k_ctrl_id);
+      options->crc16 = dlg->get_check(dlg_data->crc16_ctrl_id);
     }
   }
   else {
@@ -123,6 +129,8 @@ bool show_options_dialog(ContentOptions& options, bool single_file) {
     dlg_data.sha256_ctrl_id = dlg.check_box(far_get_msg(MSG_CONTENT_SETTINGS_SHA256), options.sha256);
     dlg.new_line();
     dlg_data.ed2k_ctrl_id = dlg.check_box(far_get_msg(MSG_CONTENT_SETTINGS_ED2K), options.ed2k);
+    dlg.new_line();
+    dlg_data.crc16_ctrl_id = dlg.check_box(far_get_msg(MSG_CONTENT_SETTINGS_CRC16), options.crc16);
     dlg.new_line();
 
     // Set & Reset All buttons
@@ -187,6 +195,10 @@ void save_hashes_to_file(const UnicodeString& file_name, const ContentOptions& o
     AnsiString line = "ED2K: " + unicode_to_oem(format_hex_array(info.ed2k)) + "\n";
     CHECK_SYS(WriteFile(h_file, line.data(), line.size(), &bw, NULL));
   }
+  if (options.crc16) {
+    AnsiString line = "CRC16: " + unicode_to_oem(format_hex_array(info.crc16)) + "\n";
+    CHECK_SYS(WriteFile(h_file, line.data(), line.size(), &bw, NULL));
+  }
   far_message(c_file_saved_dialog_guid, far_get_msg(MSG_CONTENT_RESULT_TITLE) + L"\n" + word_wrap(far_get_msg(MSG_CONTENT_RESULT_FILE_SAVED), get_msg_width()) + L"\n" + far_get_msg(MSG_BUTTON_OK), 1);
 }
 
@@ -214,7 +226,8 @@ INT_PTR WINAPI result_dlg_proc(HANDLE h_dlg, int msg, int param1, void* param2) 
         ((options->sha1) && (format_hex_array(info->sha1).icompare(user_hash) == 0)) ||
         ((options->sha256) && (format_hex_array(info->sha256).icompare(user_hash) == 0)) ||
         ((options->ed2k) && ((format_hex_array(info->ed2k).icompare(user_hash) == 0) ||
-        (format_hex_array(info->ed2k).icompare(ed2k_extract_hash_from_url(user_hash)) == 0)));
+        (format_hex_array(info->ed2k).icompare(ed2k_extract_hash_from_url(user_hash)) == 0)) ||
+        ((options->crc16) && (format_hex_array(info->crc16).icompare(user_hash) == 0)));
       dlg->set_visible(dlg_data->correct_result_label_ctrl_id, result && user_hash.size());
       dlg->set_visible(dlg_data->wrong_result_label_ctrl_id, !result && user_hash.size());
     }
@@ -273,12 +286,12 @@ void show_result_dialog(const UnicodeString& file_name, const ContentOptions& op
     dlg.new_line();
   }
 
-  bool hash_opt = options.crc32 || options.md5 || options.sha1 || options.sha256 || options.ed2k;
+  bool hash_opt = options.crc32 || options.md5 || options.sha1 || options.sha256 || options.ed2k || options.crc16;
   if (hash_opt) {
     dlg.separator();
     dlg.new_line();
 
-    unsigned pad_size = max(max(max(max(max(far_get_msg(MSG_CONTENT_RESULT_CRC32).size(), far_get_msg(MSG_CONTENT_RESULT_MD5).size()), far_get_msg(MSG_CONTENT_RESULT_SHA1).size()), far_get_msg(MSG_CONTENT_RESULT_SHA256).size()), far_get_msg(MSG_CONTENT_RESULT_ED2K).size()), far_get_msg(MSG_CONTENT_RESULT_VERIFY).size()) + 1;
+    unsigned pad_size = max(max(max(max(max(max(far_get_msg(MSG_CONTENT_RESULT_CRC32).size(), far_get_msg(MSG_CONTENT_RESULT_MD5).size()), far_get_msg(MSG_CONTENT_RESULT_SHA1).size()), far_get_msg(MSG_CONTENT_RESULT_SHA256).size()), far_get_msg(MSG_CONTENT_RESULT_ED2K).size()), far_get_msg(MSG_CONTENT_RESULT_VERIFY).size()), far_get_msg(MSG_CONTENT_RESULT_CRC16).size()) + 1;
     unsigned verify_box_size = 0;
 
     if (options.crc32) {
@@ -321,6 +334,15 @@ void show_result_dialog(const UnicodeString& file_name, const ContentOptions& op
       dlg.label(far_get_msg(MSG_CONTENT_RESULT_ED2K));
       dlg.pad(pad_size);
       UnicodeString hash_str = format_hex_array(info.ed2k);
+      dlg.fix_edit_box(hash_str, AUTO_SIZE, DIF_READONLY | DIF_SELECTONENTRY);
+      dlg.new_line();
+      if (verify_box_size < hash_str.size()) verify_box_size = hash_str.size();
+    }
+
+    if (options.crc16) {
+      dlg.label(far_get_msg(MSG_CONTENT_RESULT_CRC16));
+      dlg.pad(pad_size);
+      UnicodeString hash_str = format_hex_array(info.crc16);
       dlg.fix_edit_box(hash_str, AUTO_SIZE, DIF_READONLY | DIF_SELECTONENTRY);
       dlg.new_line();
       if (verify_box_size < hash_str.size()) verify_box_size = hash_str.size();
@@ -609,6 +631,8 @@ void process_file_content(const UnicodeString& file_name, const ContentOptions& 
   Array<u8> ed2k_block_hashes;
   unsigned ed2k_last_block_slack = 0;
   MD4_CTX md4_ctx;
+  // crc16 checksum
+  u16 crc16 = CRC16::init();
 
   ProcessFileProgress progress(sd, result, options);
 
@@ -690,6 +714,7 @@ void process_file_content(const UnicodeString& file_name, const ContentOptions& 
         if (options.sha1) SHA1_Update(&sha1_ctx, buffer, size);
         if (options.sha256) SHA256_Update(&sha256_ctx, buffer, size);
         if (options.ed2k) ed2k_update_block_hashes(buffer, size, ed2k_block_hashes, ed2k_last_block_slack, md4_ctx);
+        if (options.crc16) crc16 = CRC16::update(crc16, buffer, size);
       }
 
       progress.update_ui();
@@ -768,6 +793,10 @@ void process_file_content(const UnicodeString& file_name, const ContentOptions& 
   }
   if (options.ed2k) {
     result.ed2k = ed2k_finalize_block_hashes(ed2k_block_hashes, ed2k_last_block_slack, md4_ctx);
+  }
+  if (options.crc16) {
+    const u8* c = (const u8*) &crc16;
+    result.crc16.copy(c[1]).add(c[0]);
   }
 
   FREE_RSRC(if (options.compression) delete[] sd.comp_work_buffer);

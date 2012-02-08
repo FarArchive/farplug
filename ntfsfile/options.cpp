@@ -145,7 +145,8 @@ ContentOptions::ContentOptions():
   md5(false),
   sha1(false),
   sha256(false),
-  ed2k(false) {
+  ed2k(false),
+  crc16(false) {
 }
   
 FilePanelMode::FilePanelMode():
@@ -190,6 +191,7 @@ void load_plugin_options() {
   g_content_options.sha1 = options.get_bool(L"ContentOptionsSHA1", def_content_options.sha1);
   g_content_options.sha256 = options.get_bool(L"ContentOptionsSHA256", def_content_options.sha256);
   g_content_options.ed2k = options.get_bool(L"ContentOptionsED2K", def_content_options.ed2k);
+  g_content_options.crc16 = options.get_bool(L"ContentOptionsCRC16", def_content_options.crc16);
   FilePanelMode def_file_panel_mode;
   g_file_panel_mode.col_types = options.get_str(L"FilePanelColTypes", def_file_panel_mode.col_types);
   g_file_panel_mode.col_widths = options.get_str(L"FilePanelColWidths", def_file_panel_mode.col_widths);
@@ -229,6 +231,7 @@ void store_plugin_options() {
   options.set_bool(L"ContentOptionsSHA1", g_content_options.sha1, def_content_options.sha1);
   options.set_bool(L"ContentOptionsSHA256", g_content_options.sha256, def_content_options.sha256);
   options.set_bool(L"ContentOptionsED2K", g_content_options.ed2k, def_content_options.ed2k);
+  options.set_bool(L"ContentOptionsCRC16", g_content_options.crc16, def_content_options.crc16);
   FilePanelMode def_file_panel_mode;
   options.set_str(L"FilePanelColTypes", g_file_panel_mode.col_types, def_file_panel_mode.col_types);
   options.set_str(L"FilePanelColWidths", g_file_panel_mode.col_widths, def_file_panel_mode.col_widths);
