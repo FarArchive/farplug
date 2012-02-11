@@ -291,7 +291,7 @@ void show_result_dialog(const UnicodeString& file_name, const ContentOptions& op
     dlg.separator();
     dlg.new_line();
 
-    unsigned pad_size = max(max(max(max(max(max(far_get_msg(MSG_CONTENT_RESULT_CRC32).size(), far_get_msg(MSG_CONTENT_RESULT_MD5).size()), far_get_msg(MSG_CONTENT_RESULT_SHA1).size()), far_get_msg(MSG_CONTENT_RESULT_SHA256).size()), far_get_msg(MSG_CONTENT_RESULT_ED2K).size()), far_get_msg(MSG_CONTENT_RESULT_VERIFY).size()), far_get_msg(MSG_CONTENT_RESULT_CRC16).size()) + 1;
+    unsigned pad_size = max(max(max(max(max(max(get_label_len(far_get_msg(MSG_CONTENT_RESULT_CRC32)), get_label_len(far_get_msg(MSG_CONTENT_RESULT_MD5))), get_label_len(far_get_msg(MSG_CONTENT_RESULT_SHA1))), get_label_len(far_get_msg(MSG_CONTENT_RESULT_SHA256))), get_label_len(far_get_msg(MSG_CONTENT_RESULT_ED2K))), get_label_len(far_get_msg(MSG_CONTENT_RESULT_VERIFY))), get_label_len(far_get_msg(MSG_CONTENT_RESULT_CRC16))) + 1;
     unsigned verify_box_size = 0;
 
     if (options.crc32) {
