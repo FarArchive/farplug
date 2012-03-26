@@ -56,7 +56,10 @@ void save_def_option_values(const PluginOptions& options);
 UnicodeString load_last_dir(const UnicodeString& id);
 void save_last_dir(const UnicodeString& id, const UnicodeString& dir);
 
+extern const wchar_t* c_copy_opened_files_option;
+extern const wchar_t* c_esc_confirmation_option;
+bool get_app_option(size_t category, const wchar_t* name, bool def_value);
+
 bool virt_key_from_name(const UnicodeString& name, unsigned& key, unsigned& state);
 
 #endif // _OPTIONS_H
-

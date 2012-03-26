@@ -214,7 +214,7 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
             pri.TopPanelItem = 0;
             far_control_ptr(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, &pri);
             // do not create new plugin instance
-            return INVALID_HANDLE_VALUE;
+            return nullptr;
           }
         }
       }
@@ -270,7 +270,7 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
   catch (...) {
     far_message(c_error_dialog_guid, L"\nFailure!", 0, FMSG_WARNING | FMSG_MB_OK);
   }
-  return INVALID_HANDLE_VALUE;
+  return nullptr;
 }
 
 void WINAPI GetOpenPanelInfoW(OpenPanelInfo* info) {
@@ -278,7 +278,7 @@ void WINAPI GetOpenPanelInfoW(OpenPanelInfo* info) {
 
   info->StructSize = sizeof(OpenPanelInfo);
 
-  info->Flags = OPIF_ADDDOTS;
+  info->Flags = OPIF_ADDDOTS | OPIF_SHORTCUT;
   info->CurDir = plugin->current_dir.data();
   info->Format = g_plugin_format.data();
 
@@ -377,8 +377,7 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
     options.show_error = show_error;
     options.dst_dir = DestPath;
     options.move_files = Move != 0;
-    INT_PTR far_system_settings = g_far.AdvControl(&c_plugin_guid, ACTL_GETSYSTEMSETTINGS, 0, nullptr);
-    options.copy_shared = (far_system_settings & FSS_COPYFILESOPENEDFORWRITING) != 0;
+    options.copy_shared = get_app_option(FSSF_SYSTEM, c_copy_opened_files_option, true);
     options.use_file_filters = false;
     options.use_tmp_files = (OpMode & (OPM_FIND | OPM_VIEW | OPM_QUICKVIEW)) != 0;
     if (show_dialog) {
@@ -602,8 +601,7 @@ int WINAPI PutFilesW(const PutFilesInfo* info) {
     options.show_error = show_error;
     options.dst_dir = plugin->current_dir;
     options.move_files = info->Move != 0;
-    INT_PTR far_system_settings = g_far.AdvControl(&c_plugin_guid, ACTL_GETSYSTEMSETTINGS, 0, nullptr);
-    options.copy_shared = (far_system_settings & FSS_COPYFILESOPENEDFORWRITING) != 0;
+    options.copy_shared = get_app_option(FSSF_SYSTEM, c_copy_opened_files_option, true);
     options.use_tmp_files = false;
     if (show_dialog) {
       options.ignore_errors = g_plugin_options.ignore_errors;

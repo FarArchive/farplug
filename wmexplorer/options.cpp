@@ -42,9 +42,9 @@ protected:
     return control(SCTL_SET, &fsi) != 0;
   }
 
-  bool get(const wchar_t* name, unsigned __int64& value) {
+  bool get(size_t root, const wchar_t* name, unsigned __int64& value) {
     FarSettingsItem fsi;
-    fsi.Root = 0;
+    fsi.Root = root;
     fsi.Name = name;
     fsi.Type = FST_QWORD;
     if (!control(SCTL_GET, &fsi))
@@ -53,9 +53,9 @@ protected:
     return true;
   }
 
-  bool get(const wchar_t* name, UnicodeString& value) {
+  bool get(size_t root, const wchar_t* name, UnicodeString& value) {
     FarSettingsItem fsi;
-    fsi.Root = 0;
+    fsi.Root = root;
     fsi.Name = name;
     fsi.Type = FST_STRING;
     if (!control(SCTL_GET, &fsi))
@@ -79,10 +79,10 @@ public:
     clean();
   }
 
-  bool create() {
+  bool create(bool app_settings = false) {
     clean();
     FarSettingsCreate fsc = { sizeof(FarSettingsCreate) };
-    fsc.Guid = c_plugin_guid;
+    fsc.Guid = app_settings ? c_far_guid : c_plugin_guid;
     if (!control(SCTL_CREATE, &fsc))
       return false;
     handle = fsc.Handle;
@@ -90,28 +90,41 @@ public:
   }
 
   template<class Integer>
-  Integer get_int(const wchar_t* name, Integer def_value) {
+  Integer get_int(size_t root, const wchar_t* name, Integer def_value) {
     unsigned __int64 value;
-    if (get(name, value))
+    if (get(root, name, value))
       return static_cast<Integer>(value);
     else
       return def_value;
   }
 
-  bool get_bool(const wchar_t* name, bool def_value) {
+  bool get_bool(size_t root, const wchar_t* name, bool def_value) {
     unsigned __int64 value;
-    if (get(name, value))
+    if (get(root, name, value))
       return value != 0;
     else
       return def_value;
   }
 
-  UnicodeString get_str(const wchar_t* name, const UnicodeString& def_value) {
+  UnicodeString get_str(size_t root, const wchar_t* name, const UnicodeString& def_value) {
     UnicodeString value;
-    if (get(name, value))
+    if (get(root, name, value))
       return value;
     else
       return def_value;
+  }
+
+  template<class Integer>
+  Integer get_int(const wchar_t* name, Integer def_value) {
+    return get_int(0, name, def_value);
+  }
+
+  bool get_bool(const wchar_t* name, bool def_value) {
+    return get_bool(0, name, def_value);
+  }
+
+  UnicodeString get_str(const wchar_t* name, const UnicodeString& def_value) {
+    return get_str(0, name, def_value);
   }
 
   void set_int(const wchar_t* name, unsigned value, unsigned def_value) {
@@ -235,4 +248,14 @@ void save_last_dir(const UnicodeString& id, const UnicodeString& dir) {
   if (!options.create())
     return;
   options.set_str((L"last_dir_" + id).data(), dir, c_root_dir);
+}
+
+const wchar_t* c_copy_opened_files_option = L"CopyOpened";
+const wchar_t* c_esc_confirmation_option = L"Esc";
+
+bool get_app_option(size_t category, const wchar_t* name, bool def_value) {
+  Options options;
+  if (!options.create(true))
+    return def_value;
+  return options.get_bool(category, name, def_value);
 }

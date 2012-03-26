@@ -77,3 +77,5 @@ DEFINE_GUID(c_copy_files_stats_dialog_guid,
 // {0C6154F0-9A5C-490C-9F12-06FE042A3AAA}
 DEFINE_GUID(c_delete_files_stats_dialog_guid,
 0xc6154f0, 0x9a5c, 0x490c, 0x9f, 0x12, 0x6, 0xfe, 0x4, 0x2a, 0x3a, 0xaa);
+
+DEFINE_GUID(c_far_guid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);

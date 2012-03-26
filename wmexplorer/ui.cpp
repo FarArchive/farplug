@@ -107,7 +107,8 @@ bool UiLink::update_needed() {
       if ((rec.EventType == KEY_EVENT) && (rec.Event.KeyEvent.wVirtualKeyCode == VK_ESCAPE) && rec.Event.KeyEvent.bKeyDown && ((rec.Event.KeyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | LEFT_CTRL_PRESSED | RIGHT_ALT_PRESSED | RIGHT_CTRL_PRESSED | SHIFT_PRESSED)) == 0)) esc_key = true;
     }
     if (esc_key) {
-      if (g_far.AdvControl(&c_plugin_guid, ACTL_GETCONFIRMATIONS, 0, nullptr) & FCS_INTERRUPTOPERATION) {
+      
+      if (get_app_option(FSSF_CONFIRMATIONS, c_esc_confirmation_option, true)) {
         if (far_message(c_interrupt_dialog_guid, far_get_msg(MSG_PLUGIN_NAME).add('\n').add(far_get_msg(MSG_PROGRESS_INTERRUPT)), 0, FMSG_MB_YESNO) == 0) BREAK;
       }
       else BREAK;
