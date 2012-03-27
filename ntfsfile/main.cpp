@@ -1101,7 +1101,7 @@ void plugin_process_contents(const ObjectArray<UnicodeString>& file_list) {
 }
 
 HANDLE WINAPI OpenW(const OpenInfo* info) {
-  HANDLE handle = INVALID_HANDLE_VALUE;
+  HANDLE handle = nullptr;
   BEGIN_ERROR_HANDLER;
   /* load plugin configuration settings from registry */
   load_suffixes();
@@ -1183,12 +1183,12 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
       if (from_viewer) {
         ViewerInfo vi = { sizeof(ViewerInfo) };
         if (!g_far.ViewerControl(-1, VCTL_GETINFO, 0, &vi))
-          return INVALID_HANDLE_VALUE;
+          return nullptr;
         file_list = vi.FileName;
       }
       else {
         if (!file_list_from_panel(file_list, active_panel != NULL))
-          return INVALID_HANDLE_VALUE;
+          return nullptr;
       }
     }
 
@@ -1261,7 +1261,7 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
       }
     }
   }
-  END_ERROR_HANDLER(return handle, return INVALID_HANDLE_VALUE);
+  END_ERROR_HANDLER(return handle, return nullptr);
 }
 
 void WINAPI ClosePanelW(const ClosePanelInfo* info) {

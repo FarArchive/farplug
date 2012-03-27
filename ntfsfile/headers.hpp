@@ -22,6 +22,7 @@
 #include <set>
 #include <map>
 #include <algorithm>
+#include <memory>
 using namespace std;
 
 #include "lzo/lzo1x.h"
