@@ -77,7 +77,7 @@ $(OUTDIR)\version.res: $(OUTDIR)\version.rc
 
 PREPROC = $(TOOLSDIR)\preproc $** $@
 
-$(OUTDIR)\version.rc: project.ini version.rc
+$(OUTDIR)\version.rc: project.ini $(OUTDIR)\far.ini version.rc
   $(PREPROC)
 
 $(OUTDIR)\plugin.def: project.ini plugin.def

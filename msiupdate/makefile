@@ -82,7 +82,7 @@ icon.rc: update.ico
 
 PREPROC = $(TOOLSDIR)\preproc $** $@
 
-$(OUTDIR)\version.rc: project.ini version.rc
+$(OUTDIR)\version.rc: project.ini $(OUTDIR)\far.ini version.rc
   $(PREPROC)
 
 $(OUTDIR)\plugin.def: project.ini plugin.def
