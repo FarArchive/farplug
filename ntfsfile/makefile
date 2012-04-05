@@ -105,6 +105,9 @@ $(OUTDIR)\far.ini: $(FARSDK)\plugin.hpp
 $(OUTDIR)\history_ru.txt: history_ru.txt
   copy $** $@
 
+$(OUTDIR)\Renewal.xml: Renewal.xml
+  $(COPY)
+
 
 $(OUTDIR):
   if not exist $(OUTDIR) mkdir $(OUTDIR)
@@ -115,7 +118,7 @@ $(OUTDIR):
 
 
 DISTRIB = $(OUTDIR)\$(MODULE)_$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)_uni
-DISTRIB_FILES = .\$(OUTDIR)\$(MODULE).dll .\$(OUTDIR)\$(MODULE).map .\$(OUTDIR)\en.lng .\$(OUTDIR)\en.hlf .\$(OUTDIR)\ru.hlf .\$(OUTDIR)\file_id.diz .\$(OUTDIR)\history_ru.txt
+DISTRIB_FILES = .\$(OUTDIR)\$(MODULE).dll .\$(OUTDIR)\$(MODULE).map .\$(OUTDIR)\en.lng .\$(OUTDIR)\en.hlf .\$(OUTDIR)\ru.hlf .\$(OUTDIR)\file_id.diz .\$(OUTDIR)\history_ru.txt .\$(OUTDIR)\Renewal.xml
 !if "$(PLATFORM)" != "x86"
 DISTRIB = $(DISTRIB)_$(PLATFORM)
 !endif
