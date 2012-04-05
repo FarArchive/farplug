@@ -102,8 +102,10 @@ $(OUTDIR)\plugin.h: project.ini $(OUTDIR)\far.ini plugin.h.h
 $(OUTDIR)\far.ini: $(FARSDK)\plugin.hpp
   $(TOOLSDIR)\farver $** $@
 
+COPY = copy $** $@
+
 $(OUTDIR)\history_ru.txt: history_ru.txt
-  copy $** $@
+  $(COPY)
 
 $(OUTDIR)\Renewal.xml: Renewal.xml
   $(COPY)
