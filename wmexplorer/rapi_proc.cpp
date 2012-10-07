@@ -44,7 +44,7 @@ void AutoBuffer::end_measurement(unsigned __int64 data_size) {
   LOG_MSG(AnsiString::format("buffer size = %u", buffer_size));
 }
 
-int error_dlg(Error& e, const UnicodeString& message) {
+intptr_t error_dlg(Error& e, const UnicodeString& message) {
   UnicodeString msg;
   msg.add(far_get_msg(MSG_PLUGIN_NAME)).add('\n');
   if (message.size() != 0) msg.add(word_wrap(message, get_msg_width())).add('\n');
@@ -79,7 +79,7 @@ UnicodeString long_path(const UnicodeString& path) {
         throw; \
       } \
       else { \
-        int ret = error_dlg(e, fit_str(plugin->last_object, get_msg_width())); \
+        intptr_t ret = error_dlg(e, fit_str(plugin->last_object, get_msg_width())); \
         if((ret == -1) || (ret == 3)) { \
           BREAK; \
         } \
@@ -1050,7 +1050,7 @@ void InfoPanel::add_separator(const UnicodeString& text) {
   memset(&ipl, 0, sizeof(ipl));
   info_lines += text;
   ipl.Text = info_lines.last().data();
-  ipl.Separator = 1;
+  ipl.Flags = IPLFLAGS_SEPARATOR;
   add(ipl);
 }
 
@@ -1211,19 +1211,19 @@ void create_process(const UnicodeString& app_name, const UnicodeString& params, 
   VERIFY(RAPI(CeCloseHandle(pi.hProcess)) != 0);
 }
 
-void panel_items_to_file_list(PluginPanelItem *PanelItem, int ItemsNumber, FileList& panel_file_list) {
+void panel_items_to_file_list(PluginPanelItem *PanelItem, size_t ItemsNumber, FileList& panel_file_list) {
   panel_file_list.extend(ItemsNumber);
-  for (int i = 0; i < ItemsNumber; i++) {
+  for (unsigned i = 0; i < ItemsNumber; i++) {
     panel_file_list += FileInfo(PanelItem[i]);
   }
 }
 
-void file_panel_items_to_file_list(const UnicodeString& panel_path, PluginPanelItem *PanelItem, int ItemsNumber, PanelFileList& panel_file_list, UiLink& ui, PluginInstance* plugin) {
+void file_panel_items_to_file_list(const UnicodeString& panel_path, PluginPanelItem *PanelItem, size_t ItemsNumber, PanelFileList& panel_file_list, UiLink& ui, PluginInstance* plugin) {
   panel_file_list.extend(ItemsNumber);
   PanelFileInfo fi;
   UnicodeString file_name, file_path;
   WIN32_FIND_DATAW find_data;
-  for (int i = 0; i < ItemsNumber; i++) {
+  for (unsigned i = 0; i < ItemsNumber; i++) {
     if (ui.update_needed()) {
       draw_progress_msg(far_get_msg(MSG_PROGRESS_PREPARE));
     }

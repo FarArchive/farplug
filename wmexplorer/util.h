@@ -49,10 +49,10 @@ UnicodeString format_file_time(const FILETIME& file_time);
 UnicodeString add_trailing_slash(const UnicodeString& file_path);
 UnicodeString del_trailing_slash(const UnicodeString& file_path);
 
-int far_control_int(HANDLE h_panel, FILE_CONTROL_COMMANDS command, int param);
-int far_control_ptr(HANDLE h_panel, FILE_CONTROL_COMMANDS command, const void* param);
-PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
-PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi);
+intptr_t far_control_int(HANDLE h_panel, FILE_CONTROL_COMMANDS command, intptr_t param);
+intptr_t far_control_ptr(HANDLE h_panel, FILE_CONTROL_COMMANDS command, const void* param);
+PluginPanelItem* far_get_panel_item(HANDLE h_panel, intptr_t index, const PanelInfo& pi);
+PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, intptr_t index, const PanelInfo& pi);
 UnicodeString far_get_current_dir();
 UnicodeString far_get_full_path(const UnicodeString& file_path);
 void far_set_progress_state(TBPFLAG state);

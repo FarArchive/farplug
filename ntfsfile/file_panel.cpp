@@ -65,8 +65,7 @@ void restore_state(HANDLE h_panel, const PanelState& state) {
         }
       }
     }
-    PanelRedrawInfo pri;
-    memset(&pri, 0, sizeof(pri));
+    PanelRedrawInfo pri = { sizeof(PanelRedrawInfo) };
     for (size_t i = 0; i < pi.ItemsNumber; i++) {
       PluginPanelItem* ppi = far_get_panel_item(h_panel, i);
       if (ppi) {
@@ -629,7 +628,6 @@ void FilePanel::fill_plugin_info(OpenPanelInfo* info) {
   col_indices.clear();
   col_sizes.clear();
   memzero(panel_mode);
-  panel_mode.StructSize = sizeof(PanelMode);
   if (current_dir.size()) {
     parse_column_spec(g_file_panel_mode.col_types, g_file_panel_mode.col_widths, col_types, col_widths, true);
     parse_column_spec(g_file_panel_mode.status_col_types, g_file_panel_mode.status_col_widths, status_col_types, status_col_widths, false);
@@ -680,7 +678,7 @@ private:
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
-  static INT_PTR WINAPI dialog_proc(HANDLE h_dlg, int msg, int param1, void* param2) {
+  static intptr_t WINAPI dialog_proc(HANDLE h_dlg, intptr_t msg, intptr_t param1, void* param2) {
     BEGIN_ERROR_HANDLER;
     FilePanelModeDialog* dlg = (FilePanelModeDialog*) FarDialog::get_dlg(h_dlg);
     if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != dlg->cancel_ctrl_id)) {

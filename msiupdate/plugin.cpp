@@ -51,7 +51,7 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
   FAR_ERROR_HANDLER_END(return INVALID_HANDLE_VALUE, return INVALID_HANDLE_VALUE, false);
 }
 
-int WINAPI ConfigureW(const ConfigureInfo* info) {
+intptr_t WINAPI ConfigureW(const ConfigureInfo* info) {
   FAR_ERROR_HANDLER_BEGIN;
   if (config_dialog(g_options)) {
     g_options.save();
@@ -67,7 +67,7 @@ void WINAPI ExitFARW(const ExitInfo* info) {
   FAR_ERROR_HANDLER_END(return, return, true);
 }
 
-int WINAPI ProcessSynchroEventW(const ProcessSynchroEventInfo* info) {
+intptr_t WINAPI ProcessSynchroEventW(const ProcessSynchroEventInfo* info) {
   FAR_ERROR_HANDLER_BEGIN;
   if (info->Event == SE_COMMONSYNCHRO) {
     switch (static_cast<Update::Command>(reinterpret_cast<int>(info->Param))) {

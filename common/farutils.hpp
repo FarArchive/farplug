@@ -82,7 +82,7 @@ struct PanelItem {
   unsigned __int64 pack_size;
   wstring file_name;
   wstring alt_file_name;
-  DWORD_PTR user_data;
+  void* user_data;
 };
 PanelItem get_current_panel_item(HANDLE h_panel);
 PanelItem get_panel_item(HANDLE h_panel, size_t index);
@@ -131,7 +131,7 @@ private:
   void frame(const wstring& text);
   void calc_frame_size();
   unsigned new_item(const DialogItem& di);
-  static INT_PTR WINAPI internal_dialog_proc(HANDLE h_dlg, int msg, int param1, void* param2);
+  static intptr_t WINAPI internal_dialog_proc(HANDLE h_dlg, intptr_t msg, intptr_t param1, void* param2);
   bool events_enabled;
 protected:
   class DisableEvents {
@@ -149,8 +149,8 @@ protected:
     }
   };
   unsigned get_label_len(const wstring& str, FARDIALOGITEMFLAGS flags);
-  INT_PTR default_dialog_proc(int msg, int param1, void* param2);
-  virtual INT_PTR dialog_proc(int msg, int param1, void* param2) {
+  intptr_t default_dialog_proc(intptr_t msg, intptr_t param1, void* param2);
+  virtual intptr_t dialog_proc(intptr_t msg, intptr_t param1, void* param2) {
     return default_dialog_proc(msg, param1, param2);
   }
   void set_width(unsigned width) {

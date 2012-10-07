@@ -3,11 +3,11 @@
 
 UnicodeString far_get_msg(int id);
 const wchar_t* far_msg_ptr(int id);
-int far_message(const GUID& guid, const UnicodeString& msg, int button_cnt = 0, FARMESSAGEFLAGS flags = 0);
-int far_message(const GUID& guid, const wchar_t* const* msg, int msg_cnt, int button_cnt = 0, FARMESSAGEFLAGS flags = 0);
+intptr_t far_message(const GUID& guid, const UnicodeString& msg, intptr_t button_cnt = 0, FARMESSAGEFLAGS flags = 0);
+intptr_t far_message(const GUID& guid, const wchar_t* const* msg, size_t msg_cnt, intptr_t button_cnt = 0, FARMESSAGEFLAGS flags = 0);
 void far_load_colors();
-int far_menu(const GUID& guid, const UnicodeString& title, const ObjectArray<UnicodeString>& items);
-int far_viewer(const UnicodeString& file_name, const UnicodeString& title);
+intptr_t far_menu(const GUID& guid, const UnicodeString& title, const ObjectArray<UnicodeString>& items);
+intptr_t far_viewer(const UnicodeString& file_name, const UnicodeString& title);
 void draw_text_box(const UnicodeString& title, const ObjectArray<UnicodeString>& lines, unsigned client_xs);
 
 class UiLink {

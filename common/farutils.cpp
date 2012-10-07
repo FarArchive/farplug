@@ -79,7 +79,7 @@ void set_progress_state(TBPFLAG state) {
 }
 
 void set_progress_value(unsigned __int64 completed, unsigned __int64 total) {
-  ProgressValue pv;
+  ProgressValue pv = { sizeof(ProgressValue) };
   pv.Completed = completed;
   pv.Total = total;
   g_far.AdvControl(&c_plugin_guid, ACTL_SETPROGRESSVALUE, 0, &pv);
@@ -117,11 +117,11 @@ void flush_screen() {
 }
 
 int viewer(const wstring& file_name, const wstring& title, VIEWER_FLAGS flags) {
-  return g_far.Viewer(file_name.c_str(), title.c_str(), 0, 0, -1, -1, flags, CP_AUTODETECT);
+  return g_far.Viewer(file_name.c_str(), title.c_str(), 0, 0, -1, -1, flags, CP_DEFAULT);
 }
 
 int editor(const wstring& file_name, const wstring& title, EDITOR_FLAGS flags) {
-  return g_far.Editor(file_name.c_str(), title.c_str(), 0, 0, -1, -1, flags, 1, 1, CP_AUTODETECT);
+  return g_far.Editor(file_name.c_str(), title.c_str(), 0, 0, -1, -1, flags, 1, 1, CP_DEFAULT);
 }
 
 void update_panel(HANDLE h_panel, bool keep_selection) {
@@ -171,7 +171,7 @@ wstring get_panel_dir(HANDLE h_panel) {
 }
 
 void get_panel_item(HANDLE h_panel, FILE_CONTROL_COMMANDS command, size_t index, Buffer<unsigned char>& buf) {
-  FarGetPluginPanelItem gpi;
+  FarGetPluginPanelItem gpi = { sizeof(FarGetPluginPanelItem) };
   gpi.Size = buf.size();
   gpi.Item = reinterpret_cast<PluginPanelItem*>(buf.data());
   size_t size = g_far.PanelControl(h_panel, command, index, &gpi);
@@ -197,7 +197,7 @@ PanelItem get_panel_item(HANDLE h_panel, FILE_CONTROL_COMMANDS command, size_t i
   pi.pack_size = panel_item->AllocationSize;
   pi.file_name = panel_item->FileName;
   pi.alt_file_name = panel_item->AlternateFileName;
-  pi.user_data = panel_item->UserData;
+  pi.user_data = panel_item->UserData.Data;
   return pi;
 }
 
@@ -285,7 +285,7 @@ unsigned Dialog::new_item(const DialogItem& di) {
   return static_cast<unsigned>(items.size()) - 1;
 }
 
-INT_PTR WINAPI Dialog::internal_dialog_proc(HANDLE h_dlg, int msg, int param1, void* param2) {
+intptr_t WINAPI Dialog::internal_dialog_proc(HANDLE h_dlg, intptr_t msg, intptr_t param1, void* param2) {
   Dialog* dlg = reinterpret_cast<Dialog*>(g_far.SendDlgMessage(h_dlg, DM_GETDLGDATA, 0, 0));
   dlg->h_dlg = h_dlg;
   FAR_ERROR_HANDLER_BEGIN
@@ -296,11 +296,11 @@ INT_PTR WINAPI Dialog::internal_dialog_proc(HANDLE h_dlg, int msg, int param1, v
   FAR_ERROR_HANDLER_END(return 0, return 0, false)
 }
 
-INT_PTR Dialog::default_dialog_proc(int msg, int param1, void* param2) {
+intptr_t Dialog::default_dialog_proc(intptr_t msg, intptr_t param1, void* param2) {
   return g_far.DefDlgProc(h_dlg, msg, param1, param2);
 }
 
-INT_PTR Dialog::send_message(int msg, int param1, void* param2) {
+intptr_t Dialog::send_message(int msg, int param1, void* param2) {
   return g_far.SendDlgMessage(h_dlg, msg, param1, param2);
 }
 
@@ -544,6 +544,7 @@ int Dialog::show() {
       dlg_item->Data = get_value(items[i].text_idx);
     if (items[i].list_idx) {
       FarList* fl = far_lists.data() + fl_idx;
+      fl->StructSize = sizeof(FarList);
       fl->Items = far_list_items.data() + fli_idx;
       fl->ItemsNumber = items[i].list_size;
       for (unsigned j = 0; j < items[i].list_size; j++) {
@@ -568,10 +569,12 @@ int Dialog::show() {
 }
 
 wstring Dialog::get_text(unsigned ctrl_id) const {
-  size_t len = g_far.SendDlgMessage(h_dlg, DM_GETTEXTLENGTH, ctrl_id, 0);
-  Buffer<wchar_t> buf(len + 1);
-  g_far.SendDlgMessage(h_dlg, DM_GETTEXTPTR, ctrl_id, buf.data());
-  return wstring(buf.data(), len);
+  FarDialogItemData item = { sizeof(FarDialogItemData) };
+  item.PtrLength = g_far.SendDlgMessage(h_dlg, DM_GETTEXT, ctrl_id, nullptr);
+  Buffer<wchar_t> buffer(item.PtrLength + 1);
+  item.PtrData = buffer.data();
+  g_far.SendDlgMessage(h_dlg, DM_GETTEXT, ctrl_id, &item);
+  return wstring(buffer.data(), item.PtrLength);
 }
 
 void Dialog::set_text(unsigned ctrl_id, const wstring& text) {
@@ -600,7 +603,7 @@ unsigned Dialog::get_list_pos(unsigned ctrl_id) const {
 }
 
 void Dialog::set_list_pos(unsigned ctrl_id, unsigned pos) {
-  FarListPos list_pos;
+  FarListPos list_pos = { sizeof(FarListPos) };
   list_pos.SelectPos = pos;
   list_pos.TopPos = -1;
   g_far.SendDlgMessage(h_dlg, DM_LISTSETCURPOS, ctrl_id, &list_pos);
@@ -748,7 +751,7 @@ bool panel_go_to_file(HANDLE h_panel, const wstring& file_path) {
   if (!g_far.PanelControl(h_panel, FCTL_GETPANELINFO, 0, &panel_info))
     return false;
   wstring file_name = upcase(extract_file_name(file_path));
-  PanelRedrawInfo panel_ri = { 0 };
+  PanelRedrawInfo panel_ri = { sizeof(PanelRedrawInfo) };
   Buffer<unsigned char> buf(0x1000);
   size_t i;
   for (i = 0; i < panel_info.ItemsNumber; i++) {
@@ -812,7 +815,7 @@ bool Settings::create() {
 }
 
 bool Settings::set_dir(const wstring& path) {
-  FarSettingsValue fsv;
+  FarSettingsValue fsv = { sizeof(FarSettingsValue) };
   size_t dir_id = 0;
   list<wstring> dir_list = split(path, L'\\');
   for(list<wstring>::const_iterator dir = dir_list.cbegin(); dir != dir_list.cend(); dir++) {
@@ -827,7 +830,7 @@ bool Settings::set_dir(const wstring& path) {
 }
 
 bool Settings::list_dir(vector<wstring>& result) {
-  FarSettingsEnum fse;
+  FarSettingsEnum fse = { sizeof(FarSettingsEnum) };
   fse.Root = dir_id;
   if (!control(SCTL_ENUM, &fse))
     return false;
@@ -842,7 +845,7 @@ bool Settings::list_dir(vector<wstring>& result) {
 }
 
 bool Settings::set(const wchar_t* name, unsigned __int64 value) {
-  FarSettingsItem fsi;
+  FarSettingsItem fsi = { sizeof(FarSettingsItem) };
   fsi.Root = dir_id;
   fsi.Name = name;
   fsi.Type = FST_QWORD;
@@ -851,7 +854,7 @@ bool Settings::set(const wchar_t* name, unsigned __int64 value) {
 }
 
 bool Settings::set(const wchar_t* name, const wstring& value) {
-  FarSettingsItem fsi;
+  FarSettingsItem fsi = { sizeof(FarSettingsItem) };
   fsi.Root = dir_id;
   fsi.Name = name;
   fsi.Type = FST_STRING;
@@ -860,7 +863,7 @@ bool Settings::set(const wchar_t* name, const wstring& value) {
 }
 
 bool Settings::set(const wchar_t* name, const void* value, size_t value_size) {
-  FarSettingsItem fsi;
+  FarSettingsItem fsi = { sizeof(FarSettingsItem) };
   fsi.Root = dir_id;
   fsi.Name = name;
   fsi.Type = FST_DATA;
@@ -870,7 +873,7 @@ bool Settings::set(const wchar_t* name, const void* value, size_t value_size) {
 }
 
 bool Settings::get(const wchar_t* name, unsigned __int64& value) {
-  FarSettingsItem fsi;
+  FarSettingsItem fsi = { sizeof(FarSettingsItem) };
   fsi.Root = dir_id;
   fsi.Name = name;
   fsi.Type = FST_QWORD;
@@ -881,7 +884,7 @@ bool Settings::get(const wchar_t* name, unsigned __int64& value) {
 }
 
 bool Settings::get(const wchar_t* name, wstring& value) {
-  FarSettingsItem fsi;
+  FarSettingsItem fsi = { sizeof(FarSettingsItem) };
   fsi.Root = dir_id;
   fsi.Name = name;
   fsi.Type = FST_STRING;
@@ -892,7 +895,7 @@ bool Settings::get(const wchar_t* name, wstring& value) {
 }
 
 bool Settings::get(const wchar_t* name, ByteVector& value) {
-  FarSettingsItem fsi;
+  FarSettingsItem fsi = { sizeof(FarSettingsItem) };
   fsi.Root = dir_id;
   fsi.Name = name;
   fsi.Type = FST_DATA;
@@ -904,7 +907,7 @@ bool Settings::get(const wchar_t* name, ByteVector& value) {
 }
 
 bool Settings::del(const wchar_t* name) {
-  FarSettingsValue fsv;
+  FarSettingsValue fsv = { sizeof(FarSettingsValue) };
   fsv.Root = dir_id;
   fsv.Value = name;
   return control(SCTL_DELETE, &fsv) != 0;

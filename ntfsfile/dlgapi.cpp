@@ -312,7 +312,7 @@ unsigned FarDialog::combo_box(const ObjectArray<UnicodeString>& list_items, unsi
     if (i == sel_idx) li.Flags = LIF_SELECTED;
     list_data.items += li;
   }
-  FarList fl;
+  FarList fl = { sizeof(FarList) };
   fl.ItemsNumber = list_data.items.size();
   fl.Items = const_cast<FarListItem*>(list_data.items.data());
   list_data.list = fl;
@@ -340,11 +340,13 @@ FarDialog* FarDialog::get_dlg(HANDLE h_dlg) {
 }
 
 UnicodeString FarDialog::get_text(unsigned ctrl_id) {
-  UnicodeString str;
-  unsigned len = (unsigned) g_far.SendDlgMessage(h_dlg, DM_GETTEXTLENGTH, index[ctrl_id], 0);
-  g_far.SendDlgMessage(h_dlg, DM_GETTEXTPTR, index[ctrl_id], str.buf(len));
-  str.set_size(len);
-  return str;
+  FarDialogItemData item = { sizeof(FarDialogItemData) };
+  item.PtrLength = g_far.SendDlgMessage(h_dlg, DM_GETTEXT, index[ctrl_id], nullptr);
+  UnicodeString text;
+  item.PtrData = text.buf(item.PtrLength + 1);
+  g_far.SendDlgMessage(h_dlg, DM_GETTEXT, index[ctrl_id], &item);
+  text.set_size(item.PtrLength);
+  return text;
 }
 
 void FarDialog::set_text(unsigned ctrl_id, const UnicodeString& text) {

@@ -52,7 +52,7 @@ public:
   }
   unsigned radio_button(const UnicodeString& text, bool value, DWORD flags = 0);
   unsigned combo_box(const ObjectArray<UnicodeString>& items, unsigned sel_idx, unsigned boxsize = AUTO_SIZE, DWORD flags = 0);
-  int show(FARWINDOWPROC dlg_proc = NULL, void* dlg_data = NULL, const wchar_t* help = NULL);
+  intptr_t show(FARWINDOWPROC dlg_proc = NULL, void* dlg_data = NULL, const wchar_t* help = NULL);
 };
 
 #endif // _DLGAPI_H

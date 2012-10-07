@@ -203,7 +203,7 @@ unsigned FarDialog::combo_box(const ObjectArray<UnicodeString>& list_items, unsi
     if (i == sel_idx) li.Flags = LIF_SELECTED;
     list_data.items += li;
   }
-  FarList fl;
+  FarList fl = { sizeof(FarList) };
   fl.ItemsNumber = list_data.items.size();
   fl.Items = const_cast<FarListItem*>(list_data.items.data());
   list_data.list = fl;
@@ -214,9 +214,9 @@ unsigned FarDialog::combo_box(const ObjectArray<UnicodeString>& list_items, unsi
   return items.size() - 1;
 }
 
-int FarDialog::show(FARWINDOWPROC dlg_proc, void* dlg_data, const wchar_t* help) {
+intptr_t FarDialog::show(FARWINDOWPROC dlg_proc, void* dlg_data, const wchar_t* help) {
   calc_frame_size();
-  int res = -1;
+  intptr_t res = -1;
   HANDLE h_dlg = g_far.DialogInit(&c_plugin_guid, &guid, -1, -1, client_xs + 2 * c_x_frame, client_ys + 2 * c_y_frame, help, items.buf(), items.size(), 0, 0, dlg_proc, dlg_data);
   if (h_dlg != INVALID_HANDLE_VALUE) {
     res = g_far.DialogRun(h_dlg);

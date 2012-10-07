@@ -207,9 +207,9 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
         if (far_control_ptr(g_plugin_objects[i], FCTL_GETPANELINFO, &pi)) {
           if (pi.Flags & PFLAGS_FOCUS) {
             // change current directory of active plugin
-            set_dir(g_plugin_objects[i], (const wchar_t*) info->Data, true);
+            set_dir(g_plugin_objects[i], reinterpret_cast<OpenCommandLineInfo*>(info->Data)->CommandLine, true);
             far_control_int(INVALID_HANDLE_VALUE, FCTL_UPDATEPANEL, 0);
-            PanelRedrawInfo pri;
+            PanelRedrawInfo pri = { sizeof(PanelRedrawInfo) };
             pri.CurrentItem = 0;
             pri.TopPanelItem = 0;
             far_control_ptr(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, &pri);
@@ -223,7 +223,7 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
     ObjectArray<DeviceInfo> dev_list;
     get_device_list(dev_list);
     if (dev_list.size() == 0) FAIL(MsgError(far_get_msg(MSG_ERR_NO_DEVICE)));
-    int mi = 0;
+    intptr_t mi = 0;
     if (dev_list.size() > 1) {
       ObjectArray<UnicodeString> menu_str;
       for (unsigned i = 0; i < dev_list.size(); i++) {
@@ -238,7 +238,7 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
       create_session(plugin->device_info.id, plugin);
       if (info->OpenFrom == OPEN_COMMANDLINE) {
         // directory is specified on command line
-        plugin->current_dir = (const wchar_t*) info->Data;
+        plugin->current_dir = reinterpret_cast<OpenCommandLineInfo*>(info->Data)->CommandLine;
         if (!dir_exists(plugin->current_dir, plugin->session)) plugin->current_dir = L"\\";
       }
       else if (g_plugin_options.save_last_dir) {
@@ -304,7 +304,7 @@ void WINAPI ClosePanelW(const ClosePanelInfo* info) {
   delete plugin;
 }
 
-int WINAPI GetFindDataW(GetFindDataInfo* info) {
+intptr_t WINAPI GetFindDataW(GetFindDataInfo* info) {
   PluginInstance* plugin = (PluginInstance*) info->hPanel;
   bool show_error = (info->OpMode & (OPM_SILENT | OPM_FIND | OPM_QUICKVIEW)) == 0;
   try {
@@ -334,7 +334,7 @@ void WINAPI FreeFindDataW(const FreeFindDataInfo* info) {
   assert(false);
 }
 
-int WINAPI SetDirectoryW(const SetDirectoryInfo* info) {
+intptr_t WINAPI SetDirectoryW(const SetDirectoryInfo* info) {
   PluginInstance* plugin = (PluginInstance*) info->hPanel;
   bool show_error = (info->OpMode & (OPM_SILENT | OPM_FIND | OPM_QUICKVIEW)) == 0;
   try {
@@ -366,7 +366,7 @@ int set_dir(PluginInstance* plugin, const wchar_t* dir, bool show_error) {
   return TRUE;
 }
 
-int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int Move, UnicodeString& DestPath, OPERATION_MODES OpMode) {
+intptr_t get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, size_t ItemsNumber, int Move, UnicodeString& DestPath, OPERATION_MODES OpMode) {
   if ((ItemsNumber == 0) || (wcscmp(PanelItem[0].FileName, L"..") == 0)) return 1;
   PluginInstance* plugin = (PluginInstance*) hPlugin;
   bool show_dialog = (OpMode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
@@ -444,7 +444,7 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
 
       // verify that no file is copied into self
       if (dst_is_remote) {
-        for (int i = 0; i < ItemsNumber; i++) {
+        for (unsigned i = 0; i < ItemsNumber; i++) {
           src_file_name = panel_file_list[i].file_name;
           COMPOSE_PATH2(src_path, src_dir_path, src_file_name);
           if (dst_new_name.size() != 0) dst_file_name = dst_new_name; else dst_file_name = src_file_name;
@@ -467,7 +467,7 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
         QueryPerformanceCounter((PLARGE_INTEGER) &progress.start_time);
         ui.force_update();
         // iterate through selected files
-        for (int i = 0; i < ItemsNumber; i++) {
+        for (unsigned i = 0; i < ItemsNumber; i++) {
           src_file_name = panel_file_list[i].file_name; // source file name
           COMPOSE_PATH2(src_path, src_dir_path, src_file_name); // source file path
           if (dst_new_name.size() != 0) dst_file_name = dst_new_name; else dst_file_name = src_file_name; // destination file name
@@ -497,7 +497,7 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
       list_options.ignore_errors = options.ignore_errors;
       list_options.show_error = options.show_error;
       try {
-        for (int i = 0; i < ItemsNumber; i++) {
+        for (unsigned i = 0; i < ItemsNumber; i++) {
           if (finished_idx.bsearch(i) == -1) {
             file_lists += create_file_list(src_dir_path, panel_file_list[i].file_name, list_stats, list_options, ui, log, plugin->session, plugin);
           }
@@ -526,7 +526,7 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
       QueryPerformanceCounter((PLARGE_INTEGER) &progress.start_time);
       ui.force_update();
       AutoBuffer buffer(g_plugin_options.copy_buf_size);
-      for (int i = 0; i < ItemsNumber; i++) {
+      for (unsigned i = 0; i < ItemsNumber; i++) {
         if (finished_idx.bsearch(i) == -1) {
           copy_files(true, src_dir_path, file_lists[i], dst_is_remote, dst_dir_path, dst_new_name, stats, progress, options, ui, buffer, log, filters, plugin->session, plugin);
         }
@@ -547,7 +547,7 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
         QueryPerformanceCounter((PLARGE_INTEGER) &del_progress.start_time);
         ui.force_update();
         try {
-          for (int i = 0; i < ItemsNumber; i++) {
+          for (unsigned i = 0; i < ItemsNumber; i++) {
             delete_files(true, src_dir_path, file_lists[i], del_stats, del_progress, del_options, ui, log, plugin->session, plugin);
           }
         }
@@ -560,7 +560,7 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
         far_control_int(plugin, FCTL_UPDATEPANEL, 1);
         PanelInfo panel_info;
         far_control_ptr(plugin, FCTL_GETPANELINFO, &panel_info);
-        PanelRedrawInfo redraw_info;
+        PanelRedrawInfo redraw_info = { sizeof(PanelRedrawInfo) };
         redraw_info.TopPanelItem = panel_info.TopPanelItem;
         redraw_info.CurrentItem = panel_info.CurrentItem;
         for (size_t i = 0; i < panel_info.ItemsNumber; i++) {
@@ -581,16 +581,16 @@ int get_files(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber
   HANDLE_ERROR(0, -1);
 }
 
-int WINAPI GetFilesW(GetFilesInfo* info) {
+intptr_t WINAPI GetFilesW(GetFilesInfo* info) {
   PluginInstance* plugin = (PluginInstance*) info->hPanel;
   UnicodeString dest_path = info->DestPath;
-  int res = get_files(info->hPanel, info->PanelItem, info->ItemsNumber, info->Move, dest_path, info->OpMode);
+  intptr_t res = get_files(info->hPanel, info->PanelItem, info->ItemsNumber, info->Move, dest_path, info->OpMode);
   plugin->dest_path_buf = dest_path;
   info->DestPath = plugin->dest_path_buf.data();
   return res;
 }
 
-int WINAPI PutFilesW(const PutFilesInfo* info) {
+intptr_t WINAPI PutFilesW(const PutFilesInfo* info) {
   if ((info->ItemsNumber == 0) || (wcscmp(info->PanelItem[0].FileName, L"..") == 0)) return 1;
   PluginInstance* plugin = (PluginInstance*) info->hPanel;
   bool show_dialog = (info->OpMode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
@@ -725,7 +725,7 @@ int WINAPI PutFilesW(const PutFilesInfo* info) {
   HANDLE_ERROR(0, -1);
 }
 
-int WINAPI DeleteFilesW(const DeleteFilesInfo* info) {
+intptr_t WINAPI DeleteFilesW(const DeleteFilesInfo* info) {
   if ((info->ItemsNumber == 0) || (wcscmp(info->PanelItem[0].FileName, L"..") == 0)) return TRUE;
   PluginInstance* plugin = (PluginInstance*) info->hPanel;
   bool show_dialog = (info->OpMode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
@@ -794,7 +794,7 @@ int WINAPI DeleteFilesW(const DeleteFilesInfo* info) {
   HANDLE_ERROR(FALSE, TRUE);
 }
 
-int WINAPI MakeDirectoryW(MakeDirectoryInfo* info) {
+intptr_t WINAPI MakeDirectoryW(MakeDirectoryInfo* info) {
   PluginInstance* plugin = (PluginInstance*) info->hPanel;
   bool show_dialog = (info->OpMode & (OPM_SILENT | OPM_FIND | OPM_VIEW | OPM_EDIT | OPM_QUICKVIEW)) == 0;
   bool show_error = (info->OpMode & (OPM_FIND | OPM_QUICKVIEW)) == 0;
@@ -820,7 +820,7 @@ int WINAPI MakeDirectoryW(MakeDirectoryInfo* info) {
   HANDLE_ERROR(0, -1);
 }
 
-int WINAPI ConfigureW(const ConfigureInfo* info) {
+intptr_t WINAPI ConfigureW(const ConfigureInfo* info) {
   if (show_plugin_options_dlg(g_plugin_options)) {
     save_plugin_options(g_plugin_options);
     return TRUE;
@@ -828,7 +828,7 @@ int WINAPI ConfigureW(const ConfigureInfo* info) {
   else return FALSE;
 }
 
-int WINAPI ProcessPanelInputW(const ProcessPanelInputInfo* info) {
+intptr_t WINAPI ProcessPanelInputW(const ProcessPanelInputInfo* info) {
   PluginInstance* plugin = (PluginInstance*) info->hPanel;
   bool show_error = true;
   try {

@@ -16,6 +16,7 @@
 #include <map>
 #include <sstream>
 #include <iomanip>
+#include <memory>
 using namespace std;
 
 #include "plugin.hpp"

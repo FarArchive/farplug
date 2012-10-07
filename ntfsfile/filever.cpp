@@ -498,7 +498,7 @@ struct FileVersionDialogData {
   int verify_failed_ctrl_id;
 };
 
-INT_PTR WINAPI file_version_dialog_proc(HANDLE h_dlg, int msg, int param1, void* param2) {
+intptr_t WINAPI file_version_dialog_proc(HANDLE h_dlg, intptr_t msg, intptr_t param1, void* param2) {
   BEGIN_ERROR_HANDLER;
   FarDialog* dlg = FarDialog::get_dlg(h_dlg);
   const FileVersionDialogData* dlg_data = reinterpret_cast<const FileVersionDialogData*>(dlg->get_dlg_data(0));

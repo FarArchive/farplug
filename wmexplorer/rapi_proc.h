@@ -76,7 +76,7 @@ void refresh_system_info(PluginInstance* plugin);
 UnicodeString get_open_command(const UnicodeString& file_dir, const UnicodeString& file_name, IRAPISession* session);
 void create_process(const UnicodeString& app_name, const UnicodeString& params, IRAPISession* session);
 
-void panel_items_to_file_list(PluginPanelItem *PanelItem, int ItemsNumber, FileList& panel_file_list);
-void file_panel_items_to_file_list(const UnicodeString& panel_path, PluginPanelItem *PanelItem, int ItemsNumber, PanelFileList& panel_file_list, UiLink& ui, PluginInstance* plugin);
+void panel_items_to_file_list(PluginPanelItem *PanelItem, size_t ItemsNumber, FileList& panel_file_list);
+void file_panel_items_to_file_list(const UnicodeString& panel_path, PluginPanelItem *PanelItem, size_t ItemsNumber, PanelFileList& panel_file_list, UiLink& ui, PluginInstance* plugin);
 
 #endif // _RAPI_PROC_H

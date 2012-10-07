@@ -4,7 +4,7 @@
 
 struct FileInfo {
   UnicodeString file_name;
-  DWORD attr;
+  uintptr_t attr;
   FILETIME creation_time;
   FILETIME access_time;
   FILETIME write_time;

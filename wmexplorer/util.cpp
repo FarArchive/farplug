@@ -209,18 +209,18 @@ UnicodeString del_trailing_slash(const UnicodeString& file_path) {
   else return file_path.left(file_path.size() - 1);
 }
 
-int far_control_int(HANDLE h_panel, FILE_CONTROL_COMMANDS command, int param) {
+intptr_t far_control_int(HANDLE h_panel, FILE_CONTROL_COMMANDS command, intptr_t param) {
   return g_far.PanelControl(h_panel, command, param, nullptr);
 }
 
-int far_control_ptr(HANDLE h_panel, FILE_CONTROL_COMMANDS command, const void* param) {
+intptr_t far_control_ptr(HANDLE h_panel, FILE_CONTROL_COMMANDS command, const void* param) {
   return g_far.PanelControl(h_panel, command, 0, const_cast<void*>(param));
 }
 
-PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& pi) {
+PluginPanelItem* far_get_panel_item(HANDLE h_panel, intptr_t index, const PanelInfo& pi) {
   static Array<unsigned char> ppi;
-  unsigned size = g_far.PanelControl(h_panel, FCTL_GETPANELITEM, index, nullptr);
-  FarGetPluginPanelItem gpi;
+  unsigned size = static_cast<unsigned>(g_far.PanelControl(h_panel, FCTL_GETPANELITEM, index, nullptr));
+  FarGetPluginPanelItem gpi = { sizeof(FarGetPluginPanelItem) };
   gpi.Size = size;
   gpi.Item = reinterpret_cast<PluginPanelItem*>(ppi.buf(size));
   g_far.PanelControl(h_panel, FCTL_GETPANELITEM, index, &gpi);
@@ -228,10 +228,10 @@ PluginPanelItem* far_get_panel_item(HANDLE h_panel, int index, const PanelInfo& 
   return reinterpret_cast<PluginPanelItem*>(ppi.buf());
 }
 
-PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const PanelInfo& pi) {
+PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, intptr_t index, const PanelInfo& pi) {
   static Array<unsigned char> ppi;
-  unsigned size = g_far.PanelControl(h_panel, FCTL_GETSELECTEDPANELITEM, index, nullptr);
-  FarGetPluginPanelItem gpi;
+  unsigned size = static_cast<unsigned>(g_far.PanelControl(h_panel, FCTL_GETSELECTEDPANELITEM, index, nullptr));
+  FarGetPluginPanelItem gpi = { sizeof(FarGetPluginPanelItem) };
   gpi.Size = size;
   gpi.Item = reinterpret_cast<PluginPanelItem*>(ppi.buf(size));
   g_far.PanelControl(h_panel, FCTL_GETSELECTEDPANELITEM, index, &gpi);
@@ -241,7 +241,7 @@ PluginPanelItem* far_get_selected_panel_item(HANDLE h_panel, int index, const Pa
 
 UnicodeString far_get_current_dir() {
   UnicodeString curr_dir;
-  DWORD size = g_fsf.GetCurrentDirectory(0, NULL);
+  int size = static_cast<int>(g_fsf.GetCurrentDirectory(0, NULL));
   g_fsf.GetCurrentDirectory(size, curr_dir.buf(size));
   curr_dir.set_size();
   return del_trailing_slash(curr_dir);
@@ -250,7 +250,7 @@ UnicodeString far_get_current_dir() {
 UnicodeString far_get_full_path(const UnicodeString& file_path) {
   const unsigned c_buf_size = 0x10000;
   UnicodeString full_path;
-  int size = g_fsf.ConvertPath(CPM_FULL, file_path.data(), full_path.buf(c_buf_size), c_buf_size);
+  int size = static_cast<int>(g_fsf.ConvertPath(CPM_FULL, file_path.data(), full_path.buf(c_buf_size), c_buf_size));
   if (size > c_buf_size) g_fsf.ConvertPath(CPM_FULL, file_path.data(), full_path.buf(size), size);
   full_path.set_size();
   return full_path;
@@ -261,7 +261,7 @@ void far_set_progress_state(TBPFLAG state) {
 }
 
 void far_set_progress_value(unsigned __int64 completed, unsigned __int64 total) {
-  ProgressValue pv;
+  ProgressValue pv = { sizeof(ProgressValue) };
   pv.Completed = completed;
   pv.Total = total;
   g_far.AdvControl(&c_plugin_guid, ACTL_SETPROGRESSVALUE, 0, &pv);

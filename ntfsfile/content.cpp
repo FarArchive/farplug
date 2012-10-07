@@ -54,7 +54,7 @@ struct OptionsDlgData {
   int cancel_ctrl_id;
 };
 
-INT_PTR WINAPI options_dlg_proc(HANDLE h_dlg, int msg, int param1, void* param2) {
+intptr_t WINAPI options_dlg_proc(HANDLE h_dlg, intptr_t msg, intptr_t param1, void* param2) {
   BEGIN_ERROR_HANDLER;
   FarDialog* dlg = FarDialog::get_dlg(h_dlg);
   const OptionsDlgData* dlg_data = (const OptionsDlgData*) dlg->get_dlg_data(0);
@@ -209,7 +209,7 @@ struct ResultDlgData {
   int save_file_ctrl_id;
 };
 
-INT_PTR WINAPI result_dlg_proc(HANDLE h_dlg, int msg, int param1, void* param2) {
+intptr_t WINAPI result_dlg_proc(HANDLE h_dlg, intptr_t msg, intptr_t param1, void* param2) {
   BEGIN_ERROR_HANDLER;
   FarDialog* dlg = FarDialog::get_dlg(h_dlg);
   const ResultDlgData* dlg_data = (const ResultDlgData*) dlg->get_dlg_data(0);

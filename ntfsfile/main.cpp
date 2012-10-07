@@ -76,8 +76,8 @@ struct FileAnalyzer {
   void process_recursive(const UnicodeString& dir_name);
   void process();
   static unsigned __stdcall th_proc(void* param);
-  INT_PTR dialog_handler(int msg, int param1, void* param2);
-  static INT_PTR WINAPI dlg_proc(HANDLE h_dlg, int msg, int param1, void* param2);
+  intptr_t dialog_handler(intptr_t msg, intptr_t param1, void* param2);
+  static intptr_t WINAPI dlg_proc(HANDLE h_dlg, intptr_t msg, intptr_t param1, void* param2);
   FileAnalyzer(): h_dlg(NULL), h_thread(NULL), h_stop_event(NULL), update_timer(0) {
   }
   ~FileAnalyzer() {
@@ -110,6 +110,16 @@ unsigned fmt_char_cnt(const UnicodeString& str) {
     if (str[i] == '\1') cnt++;
   }
   return cnt;
+}
+
+UnicodeString far_get_text(HANDLE h_dlg, unsigned ctrl_id) {
+  FarDialogItemData item = { sizeof(FarDialogItemData) };
+  item.PtrLength = g_far.SendDlgMessage(h_dlg, DM_GETTEXT, ctrl_id, nullptr);
+  UnicodeString text;
+  item.PtrData = text.buf(item.PtrLength + 1);
+  g_far.SendDlgMessage(h_dlg, DM_GETTEXT, ctrl_id, &item);
+  text.set_size(item.PtrLength);
+  return text;
 }
 
 void FileAnalyzer::display_file_info(bool partial) {
@@ -620,10 +630,7 @@ void FileAnalyzer::display_file_info(bool partial) {
   di.X2 = di.X1 + dlg_cl_width - 2;
   di.Y1 = di.Y2 = line;
   if ((ctrl.linked != -1) && (h_dlg != NULL)) {
-    UnicodeString str;
-    unsigned len = (unsigned) g_far.SendDlgMessage(h_dlg, DM_GETTEXTLENGTH, ctrl.linked, nullptr);
-    g_far.SendDlgMessage(h_dlg, DM_GETTEXTPTR, ctrl.linked, str.buf(len));
-    str.set_size(len);
+    UnicodeString str = far_get_text(h_dlg, ctrl.linked);
     SET_DATA(str);
   }
   else {
@@ -824,7 +831,7 @@ bool panel_go_to_file(const UnicodeString& file_name) {
   if (!far_set_panel_dir(INVALID_HANDLE_VALUE, dir)) return false;
   PanelInfo panel_info = { sizeof(PanelInfo) };
   if (!far_control_ptr(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, &panel_info)) return false;
-  PanelRedrawInfo panel_ri;
+  PanelRedrawInfo panel_ri = { sizeof(PanelRedrawInfo) };
   size_t i;
   for (i = 0; i < panel_info.ItemsNumber; i++) {
     PluginPanelItem* ppi = far_get_panel_item(INVALID_HANDLE_VALUE, i);
@@ -910,7 +917,7 @@ unsigned __stdcall FileAnalyzer::th_proc(void* param) {
   return TRUE;
 }
 
-INT_PTR FileAnalyzer::dialog_handler(int msg, int param1, void* param2) {
+intptr_t FileAnalyzer::dialog_handler(intptr_t msg, intptr_t param1, void* param2) {
   /* do we need background processing? */
   bool bg_proc = (file_info.directory && !file_info.reparse) || (file_list.size() > 1);
   if (msg == DN_INITDIALOG) {
@@ -959,10 +966,7 @@ INT_PTR FileAnalyzer::dialog_handler(int msg, int param1, void* param2) {
           NOFAIL(display_file_info());
         }
         else if (ctrl_id == ctrl.link) {
-          UnicodeString file_name;
-          unsigned len = (unsigned) g_far.SendDlgMessage(h_dlg, DM_GETTEXTLENGTH, ctrl.link, nullptr);
-          g_far.SendDlgMessage(h_dlg, DM_GETTEXTPTR, ctrl.link, file_name.buf(len));
-          file_name.set_size(len);
+          UnicodeString file_name = far_get_text(h_dlg, ctrl.link);
           if (panel_go_to_file(file_name)) g_far.SendDlgMessage(h_dlg, DM_CLOSE, -1, nullptr);
         }
         else {
@@ -981,7 +985,7 @@ INT_PTR FileAnalyzer::dialog_handler(int msg, int param1, void* param2) {
   else return g_far.DefDlgProc(h_dlg, msg, param1, param2);
 }
 
-INT_PTR WINAPI FileAnalyzer::dlg_proc(HANDLE h_dlg, int msg, int param1, void* param2) {
+intptr_t WINAPI FileAnalyzer::dlg_proc(HANDLE h_dlg, intptr_t msg, intptr_t param1, void* param2) {
   BEGIN_ERROR_HANDLER;
   FileAnalyzer* fa = reinterpret_cast<FileAnalyzer*>(g_far.SendDlgMessage(h_dlg, DM_GETDLGDATA, 0, nullptr));
   fa->h_dlg = h_dlg;
@@ -1116,7 +1120,7 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
 
   if (info->OpenFrom == OPEN_COMMANDLINE) {
     UnicodeString prefix;
-    if (file_list_from_cmdline((const wchar_t*) info->Data, file_list, prefix)) {
+    if (file_list_from_cmdline((const wchar_t*) reinterpret_cast<OpenCommandLineInfo*>(info->Data)->CommandLine, file_list, prefix)) {
       if (prefix == L"nfi") plugin_show_metadata(file_list);
       else if (prefix == L"nfc") plugin_process_contents(file_list);
       else if (prefix == L"defrag") {
@@ -1181,10 +1185,13 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
 
     if (item_idx == content_menu_id || item_idx == version_menu_id) {
       if (from_viewer) {
-        ViewerInfo vi = { sizeof(ViewerInfo) };
-        if (!g_far.ViewerControl(-1, VCTL_GETINFO, 0, &vi))
+        int len = g_far.ViewerControl(-1, VCTL_GETFILENAME, 0, nullptr);
+        if (len == 0)
           return nullptr;
-        file_list = vi.FileName;
+        UnicodeString file_name;
+        g_far.ViewerControl(-1, VCTL_GETFILENAME, len, file_name.buf(len));
+        file_name.set_size(len - 1);
+        file_list = file_name;
       }
       else {
         if (!file_list_from_panel(file_list, active_panel != NULL))
@@ -1278,7 +1285,7 @@ void WINAPI GetOpenPanelInfoW(OpenPanelInfo* info) {
   END_ERROR_HANDLER(;,;);
 }
 
-int WINAPI GetFindDataW(GetFindDataInfo* info) {
+intptr_t WINAPI GetFindDataW(GetFindDataInfo* info) {
   BEGIN_ERROR_HANDLER;
   FilePanel* panel = reinterpret_cast<FilePanel*>(info->hPanel);
   try {
@@ -1298,7 +1305,7 @@ void WINAPI FreeFindDataW(const FreeFindDataInfo* info) {
   END_ERROR_HANDLER(;,;);
 }
 
-int WINAPI SetDirectoryW(const SetDirectoryInfo* info) {
+intptr_t WINAPI SetDirectoryW(const SetDirectoryInfo* info) {
   BEGIN_ERROR_HANDLER;
   FilePanel* panel = reinterpret_cast<FilePanel*>(info->hPanel);
   try {
@@ -1311,7 +1318,7 @@ int WINAPI SetDirectoryW(const SetDirectoryInfo* info) {
   END_ERROR_HANDLER(return TRUE, return FALSE);
 }
 
-int WINAPI ConfigureW(const ConfigureInfo* info) {
+intptr_t WINAPI ConfigureW(const ConfigureInfo* info) {
   BEGIN_ERROR_HANDLER;
   load_plugin_options();
   FilePanelMode file_panel_mode = g_file_panel_mode;
@@ -1325,7 +1332,7 @@ int WINAPI ConfigureW(const ConfigureInfo* info) {
   END_ERROR_HANDLER(return TRUE, return FALSE);
 }
 
-int WINAPI ProcessPanelInputW(const ProcessPanelInputInfo* info) {
+intptr_t WINAPI ProcessPanelInputW(const ProcessPanelInputInfo* info) {
   BEGIN_ERROR_HANDLER;
   FilePanel* panel = reinterpret_cast<FilePanel*>(info->hPanel);
   if (info->Rec.EventType == KEY_EVENT) {
@@ -1339,7 +1346,7 @@ int WINAPI ProcessPanelInputW(const ProcessPanelInputInfo* info) {
   END_ERROR_HANDLER(return TRUE, return TRUE);
 }
 
-int WINAPI ProcessSynchroEventW(const ProcessSynchroEventInfo* info) {
+intptr_t WINAPI ProcessSynchroEventW(const ProcessSynchroEventInfo* info) {
   BEGIN_ERROR_HANDLER;
   if (info->Event == SE_COMMONSYNCHRO) {
     FilePanel* panel = reinterpret_cast<FilePanel*>(info->Param);

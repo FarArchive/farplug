@@ -663,7 +663,7 @@ private:
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
-  static INT_PTR WINAPI dialog_proc(HANDLE h_dlg, int msg, int param1, void* param2) {
+  static intptr_t WINAPI dialog_proc(HANDLE h_dlg, intptr_t msg, intptr_t param1, void* param2) {
     BEGIN_ERROR_HANDLER;
     CompressFilesDialog* dlg = static_cast<CompressFilesDialog*>(FarDialog::get_dlg(h_dlg));
     if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != dlg->cancel_ctrl_id)) {

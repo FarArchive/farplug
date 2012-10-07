@@ -134,7 +134,7 @@ private:
   int no_ctrl_id;
   int cancel_ctrl_id;
 
-  INT_PTR dialog_proc(int msg, int param1, void* param2) {
+  intptr_t dialog_proc(intptr_t msg, intptr_t param1, void* param2) {
     if (msg == DN_INITDIALOG) {
       set_focus(yes_ctrl_id);
       return TRUE;

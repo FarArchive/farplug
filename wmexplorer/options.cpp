@@ -25,7 +25,7 @@ private:
 
 protected:
   bool set(const wchar_t* name, unsigned __int64 value) {
-    FarSettingsItem fsi;
+    FarSettingsItem fsi = { sizeof(FarSettingsItem) };
     fsi.Root = 0;
     fsi.Name = name;
     fsi.Type = FST_QWORD;
@@ -34,7 +34,7 @@ protected:
   }
 
   bool set(const wchar_t* name, const UnicodeString& value) {
-    FarSettingsItem fsi;
+    FarSettingsItem fsi = { sizeof(FarSettingsItem) };
     fsi.Root = 0;
     fsi.Name = name;
     fsi.Type = FST_STRING;
@@ -43,7 +43,7 @@ protected:
   }
 
   bool get(size_t root, const wchar_t* name, unsigned __int64& value) {
-    FarSettingsItem fsi;
+    FarSettingsItem fsi = { sizeof(FarSettingsItem) };
     fsi.Root = root;
     fsi.Name = name;
     fsi.Type = FST_QWORD;
@@ -54,7 +54,7 @@ protected:
   }
 
   bool get(size_t root, const wchar_t* name, UnicodeString& value) {
-    FarSettingsItem fsi;
+    FarSettingsItem fsi = { sizeof(FarSettingsItem) };
     fsi.Root = root;
     fsi.Name = name;
     fsi.Type = FST_STRING;
@@ -65,7 +65,7 @@ protected:
   }
 
   bool del(const wchar_t* name) {
-    FarSettingsValue fsv;
+    FarSettingsValue fsv = { sizeof(FarSettingsValue) };
     fsv.Root = 0;
     fsv.Value = name;
     return control(SCTL_DELETE, &fsv) != 0;
