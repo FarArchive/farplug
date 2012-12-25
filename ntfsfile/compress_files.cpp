@@ -171,6 +171,8 @@ struct CompressFiles: private NonCopyable, private ProgressMonitor, public IDefr
 
   vector<HANDLE> wait_handles; // for compress_file()
 
+  ULONGLONG now; // current system time for file filter
+
   virtual void do_update_ui();
   void update_progress(ProgressPhase phase, bool force = false) {
     progress_phase = phase;
@@ -181,6 +183,7 @@ struct CompressFiles: private NonCopyable, private ProgressMonitor, public IDefr
   }
   u64 clustered_size(u64 size);
   void run_compression_thread();
+  bool is_file_accepted_by_filter(const FindData& find_data) const;
   void estimate_file_size(const FindData& find_data);
   void estimate_directory_size(const UnicodeString& dir_name);
   void compress_file(const UnicodeString& file_name, const FindData& find_data);
@@ -355,10 +358,22 @@ void CompressFiles::do_update_ui() {
   }
 }
 
+
+bool CompressFiles::is_file_accepted_by_filter(const FindData& find_data) const {
+  if (file_size < params.min_file_size * 1024 * 1024)
+    return false;
+  if ((find_data.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED) != 0)
+    return false;
+  ULONGLONG last_write_time = (static_cast<ULONGLONG>(find_data.ftLastWriteTime.dwHighDateTime) << 32) + find_data.ftLastWriteTime.dwLowDateTime;
+  const ULONGLONG one_day = static_cast<ULONGLONG>(10000000) * 60 * 60 * 24;
+  if (last_write_time + params.min_file_age * one_day >= now)
+    return false;
+  return true;
+}
+
 void CompressFiles::estimate_file_size(const FindData& find_data) {
-  unsigned __int64 file_size = find_data.size();
-  if (file_size >= params.min_file_size * 1024 * 1024 && (find_data.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED) == 0) {
-    total_size += clustered_size(file_size);
+  if (is_file_accepted_by_filter(find_data)) {
+    total_size += clustered_size(find_data.size());
     total_file_cnt++;
   }
   update_progress(phase_enum);
@@ -442,12 +457,12 @@ public:
   }
   ~ReadOnlyFileAccess() {
     if (attr & FILE_ATTRIBUTE_READONLY)
-      CHECK_SYS(SetFileAttributesW(long_path(file_name).data(), attr));
+      SetFileAttributesW(long_path(file_name).data(), attr);
   }
 };
 
 void CompressFiles::compress_file(const UnicodeString& file_name, const FindData& find_data) {
-  if (find_data.size() < params.min_file_size * 1024 * 1024 || (find_data.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED) == FILE_ATTRIBUTE_COMPRESSED)
+  if (!is_file_accepted_by_filter(find_data))
     return;
   bool fatal_error = false;
   try {
@@ -543,8 +558,8 @@ void CompressFiles::compress_file(const UnicodeString& file_name, const FindData
       DWORD bytes_ret;
       CHECK_SYS(DeviceIoControl(file.handle(), FSCTL_SET_COMPRESSION, &format, sizeof(format), NULL, 0, &bytes_ret, NULL));
 
-      // defragment file
-      defragment(file_name, *this);
+      if (params.defragment_after_compression)
+        defragment(file_name, *this);
     }
 
     file_cnt++;
@@ -590,6 +605,12 @@ void CompressFiles::process(const ObjectArray<UnicodeString>& file_list) {
     start_time = get_time();
     total_size = 0;
     total_file_cnt = 0;
+
+    SYSTEMTIME system_time;
+    GetSystemTime(&system_time);
+    FILETIME system_time_as_file_time;
+    SystemTimeToFileTime(&system_time, &system_time_as_file_time);
+    now = (static_cast<ULONGLONG>(system_time_as_file_time.dwHighDateTime) << 32) + system_time_as_file_time.dwLowDateTime;
 
     // estimate total file size
     for (unsigned i = 0; i < file_list.size(); i++) {
@@ -660,6 +681,8 @@ private:
 
   int min_file_size_ctrl_id;
   int max_compression_ratio_ctrl_id;
+  int min_file_age_ctrl_id;
+  int defragment_after_compression_ctrl_id;
   int ok_ctrl_id;
   int cancel_ctrl_id;
 
@@ -669,6 +692,8 @@ private:
     if ((msg == DN_CLOSE) && (param1 >= 0) && (param1 != dlg->cancel_ctrl_id)) {
       dlg->params.min_file_size = str_to_int(dlg->get_text(dlg->min_file_size_ctrl_id));
       dlg->params.max_compression_ratio = str_to_int(dlg->get_text(dlg->max_compression_ratio_ctrl_id));
+      dlg->params.min_file_age = str_to_int(dlg->get_text(dlg->min_file_age_ctrl_id));
+      dlg->params.defragment_after_compression = dlg->get_check(dlg->defragment_after_compression_ctrl_id);
     }
     END_ERROR_HANDLER(;,;);
     return g_far.DefDlgProc(h_dlg, msg, param1, param2);
@@ -686,6 +711,12 @@ public:
     label(far_get_msg(MSG_COMPRESS_FILES_MAX_COMPRESSION_RATIO));
     spacer(1);
     max_compression_ratio_ctrl_id = var_edit_box(int_to_str(params.max_compression_ratio), 5);
+    new_line();
+    label(far_get_msg(MSG_COMPRESS_FILES_MIN_FILE_AGE));
+    spacer(1);
+    min_file_age_ctrl_id = var_edit_box(int_to_str(params.min_file_age), 5);
+    new_line();
+    defragment_after_compression_ctrl_id = check_box(far_get_msg(MSG_COMPRESS_FILES_DEFRAGMENT_AFTER_COMPRESSION), params.defragment_after_compression);
     new_line();
     separator();
     new_line();

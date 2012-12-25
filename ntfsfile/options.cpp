@@ -176,7 +176,9 @@ FilePanelMode::FilePanelMode():
 
 CompressFilesParams::CompressFilesParams():
   min_file_size(10),
-  max_compression_ratio(80) {
+  max_compression_ratio(80),
+  min_file_age(30),
+  defragment_after_compression(true) {
 }
 
 void load_plugin_options() {
@@ -218,6 +220,8 @@ void load_plugin_options() {
   CompressFilesParams def_compress_files_params;
   g_compress_files_params.min_file_size = options.get_int(L"CompressFilesMinFileSize", def_compress_files_params.min_file_size);
   g_compress_files_params.max_compression_ratio = options.get_int(L"CompressFilesMaxCompressionRatio", def_compress_files_params.max_compression_ratio);
+  g_compress_files_params.min_file_age = options.get_int(L"CompressFilesMinFileAge", def_compress_files_params.min_file_age);
+  g_compress_files_params.defragment_after_compression = options.get_bool(L"CompressFilesDefragmentAfterCompression", def_compress_files_params.defragment_after_compression);
 };
 
 void store_plugin_options() {
@@ -258,4 +262,6 @@ void store_plugin_options() {
   CompressFilesParams def_compress_files_params;
   options.set_int(L"CompressFilesMinFileSize", g_compress_files_params.min_file_size, def_compress_files_params.min_file_size);
   options.set_int(L"CompressFilesMaxCompressionRatio", g_compress_files_params.max_compression_ratio, def_compress_files_params.max_compression_ratio);
+  options.set_int(L"CompressFilesMinFileAge", g_compress_files_params.min_file_age, def_compress_files_params.min_file_age);
+  options.set_bool(L"CompressFilesDefragmentAfterCompression", g_compress_files_params.defragment_after_compression, def_compress_files_params.defragment_after_compression);
 }

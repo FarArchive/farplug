@@ -41,6 +41,8 @@ struct FilePanelMode {
 struct CompressFilesParams {
   unsigned min_file_size; // MB
   unsigned max_compression_ratio; // 75% = comp_size / file_size
+  unsigned min_file_age; // days
+  bool defragment_after_compression;
   CompressFilesParams();
 };
 
