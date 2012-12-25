@@ -1164,7 +1164,7 @@ HANDLE WINAPI OpenW(const OpenInfo* info) {
     unsigned compress_files_menu_id = -1;
     if (!from_viewer) {
       menu_items += far_get_msg(MSG_MENU_COMPRESS_FILES);
-      unsigned compress_files_menu_id = menu_items.size() - 1;
+      compress_files_menu_id = menu_items.size() - 1;
     }
     unsigned flat_mode_menu_id = -1;
     unsigned mft_mode_menu_id = -1;
