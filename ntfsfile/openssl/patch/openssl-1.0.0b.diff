@@ -36,14 +36,14 @@ diff -ruN openssl-1.0.0b/build.bat openssl-1.0.0b-patched/build.bat
 +call ms\do_win64a
 +nmake -f ms\nt.mak
 +@if errorlevel 1 goto end
-+copy /y out32\*.lib ..\lib
-+copy /y out32\*.pdb ..\lib
-+copy /y out32d\*.lib ..\lib
-+copy /y out32d\*.pdb ..\lib
-+copy /y out64\*.lib ..\lib
-+copy /y out64\*.pdb ..\lib
-+copy /y out64d\*.lib ..\lib
-+copy /y out64d\*.pdb ..\lib
++xcopy /i /y out32\*.lib ..\lib
++xcopy /i /y out32\*.pdb ..\lib
++xcopy /i /y out32d\*.lib ..\lib
++xcopy /i /y out32d\*.pdb ..\lib
++xcopy /i /y out64\*.lib ..\lib
++xcopy /i /y out64\*.pdb ..\lib
++xcopy /i /y out64d\*.lib ..\lib
++xcopy /i /y out64d\*.pdb ..\lib
 +xcopy /e /i /y inc32\*.h ..\include
 +:end
 diff -ruN openssl-1.0.0b/ms/do_nasm.bat openssl-1.0.0b-patched/ms/do_nasm.bat
