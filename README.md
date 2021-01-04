@@ -1,6 +1,7 @@
 
 # farplug-chupakabra-archive
 This is old repository for plugins: NTFS File Information, MsiUpdate, WM Explorer.
+
 Further versions are here: https://sourceforge.net/projects/farplugs/ 
 
 # Common info
